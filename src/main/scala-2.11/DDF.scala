@@ -221,16 +221,22 @@ object DDF {
 
   def PairSndEq[A, B, C, D]: (A, B) === (C, D) => B === D = _ => force[Nothing, Any, B, D]
 
-  implicit def pairLoss[A, B](implicit al : Loss[A], bl : Loss[B]) = new Loss[(A, B)] {
+  implicit def pairLoss[A, B](implicit al: Loss[A], bl: Loss[B]) = new Loss[(A, B)] {
     override type loss = (al.loss, bl.loss)
+
     override def m: Monoid[(al.loss, bl.loss)] = new Monoid[(al.loss, bl.loss)] {
       override def zero: (al.loss, bl.loss) = (al.m.zero, bl.m.zero)
+
       override def append(f1: (al.loss, bl.loss), f2: => (al.loss, bl.loss)): (al.loss, bl.loss) =
         (al.m.append(f1._1, f2._1), bl.m.append(f1._2, f2._2))
     }
+
     override def ArrDom[C, D](implicit ev: ===[(A, B), C => D]): Loss[C] = throw new Exception("not ArrLoss")
+
     override def ArrRng[C, D](implicit ev: ===[(A, B), C => D]): Loss[D] = throw new Exception("not ArrLoss")
+
     override def PairFst[C, D](implicit ev: ===[(A, B), (C, D)]): Loss[C] = PairFstEq(ev).subst[Loss](al)
+
     override def PairSnd[C, D](implicit ev: ===[(A, B), (C, D)]): Loss[D] = PairSndEq(ev).subst[Loss](bl)
   }
 
@@ -244,7 +250,7 @@ object DDF {
     def loss: Loss[X]
   }
 
-  def PairEval[A, B](a : Eval[A], b : Eval[B])(implicit l : Loss[(A, B)]) = new Eval[(A, B)] {
+  def PairEval[A, B](a: Eval[A], b: Eval[B])(implicit l: Loss[(A, B)]) = new Eval[(A, B)] {
     override def aeval[C, D](a: Eval[C])(
       implicit ev: ===[(A, B), C => D], CL: Loss[C], DL: Loss[D]): (Eval[D], DL.loss => CL.loss) = throw new Exception("not ArrEval")
 
