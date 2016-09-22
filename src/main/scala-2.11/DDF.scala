@@ -145,7 +145,7 @@ object DDF {
     override def PairSnd[A, B]: Type[Arg => (A, B)] => Type[Arg => B] = p => base.Arr(base.ArrDom(p))(base.PairSnd(base.ArrRng(p)))
   }
 
-  abstract class Loss[X] {
+  trait Loss[X] {
     type loss
 
     def m: Monoid[loss]
@@ -240,7 +240,7 @@ object DDF {
     override def PairSnd[C, D](implicit ev: ===[(A, B), (C, D)]): Loss[D] = PairSndEq(ev).subst[Loss](bl)
   }
 
-  abstract class Eval[X] {
+  trait Eval[X] {
     def aeval[A, B](a: Eval[A])(implicit ev: X === (A => B), AL: Loss[A], BL: Loss[B]): (Eval[B], BL.loss => AL.loss)
 
     def deval(implicit ev: X === Double): Double
