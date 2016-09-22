@@ -6,40 +6,68 @@ import scala.language.higherKinds
 import scalaz.Leibniz._
 
 object DDF {
-object DeepLearning {
+
   trait Language[Type[_], Repr[_]] {
-    def Arr[A, B] : Type[A] => Type[B] => Type[A => B]
-    def ArrDom[A, B] : Type[A => B] => Type[A]
-    def ArrRng[A, B] : Type[A => B] => Type[B]
-    def ReprType[A] : Repr[A] => Type[A]
-    def app[A, B] : Repr[A => B] => Repr[A] => Repr[B]
-    def S[A, B, C](implicit at : Type[A], bt : Type[B], ct : Type[C]) : Repr[(A => B => C) => (A => B) => A => C]
-    def K[A, B](implicit at : Type[A], bt : Type[B]) : Repr[A => B => A]
-    def I[A](implicit at : Type[A]) : Repr[A => A]
-    def LitD : Double => Repr[Double]
-    def PlusD : Repr[Double => Double => Double]
-    def MultD : Repr[Double => Double => Double]
+    def Arr[A, B]: Type[A] => Type[B] => Type[A => B]
+
+    def ArrDom[A, B]: Type[A => B] => Type[A]
+
+    def ArrRng[A, B]: Type[A => B] => Type[B]
+
+    def ReprType[A]: Repr[A] => Type[A]
+
+    def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
+
+    def S[A, B, C](implicit at: Type[A], bt: Type[B], ct: Type[C]): Repr[(A => B => C) => (A => B) => A => C]
+
+    def K[A, B](implicit at: Type[A], bt: Type[B]): Repr[A => B => A]
+
+    def I[A](implicit at: Type[A]): Repr[A => A]
+
+    def LitD: Double => Repr[Double]
+
+    def PlusD: Repr[Double => Double => Double]
+
+    def MultD: Repr[Double => Double => Double]
+
+    def Y[A, B](implicit at : Type[A], bt : Type[B]) : Repr[((A => B) => (A => B)) => (A => B)]
   }
+
   final case class NoType[X]()
-  implicit def NoTypeGen[X] : NoType[X] = NoType[X]()
+
+  implicit def NoTypeGen[X]: NoType[X] = NoType[X]()
+
   trait SimpleLanguage[Repr[_]] extends Language[NoType, Repr] {
     override def Arr[A, B]: NoType[A] => NoType[B] => NoType[A => B] = _ => _ => NoType()
+
     override def ArrDom[A, B]: NoType[A => B] => NoType[A] = _ => NoType()
+
     override def ArrRng[A, B]: NoType[A => B] => NoType[B] = _ => NoType()
+
     override def ReprType[A]: Repr[A] => NoType[A] = _ => NoType()
   }
 
-  case class Show[X](s : String)
+  case class Show[X](s: String)
+
   class ShowLanguage extends SimpleLanguage[Show] {
     override def app[A, B] = f => x => Show("(" + f.s + " " + x.s + ")")
+
     override def S[A, B, C](implicit at: NoType[A], bt: NoType[B], ct: NoType[C]) = Show("S")
+
     override def K[A, B](implicit at: NoType[A], bt: NoType[B]): Show[A => B => A] = Show("K")
+
     override def I[A](implicit at: NoType[A]): Show[A => A] = Show("I")
+
     override def LitD: Double => Show[Double] = d => Show(d.toString)
+
     override def PlusD: Show[Double => Double => Double] = Show("+")
+
     override def MultD: Show[Double => Double => Double] = Show("*")
+
+    override def Y[A, B](implicit at : NoType[A], bt : NoType[B]): Show[((A => B) => (A => B)) => (A => B)] = Show("Y")
   }
-  class Next[Type[_], Repr[_], Arg](base : Language[Type, Repr])(implicit argt : Type[Arg]) extends
+
+  case class Next[Type[_], Repr[_], Arg](base: Language[Type, Repr])(implicit argt: Type[Arg]) extends
     Language[Lambda[X => Type[Arg => X]], Lambda[X => Repr[Arg => X]]] {
     override def Arr[A, B]: Type[Arg => A] => Type[Arg => B] => Type[Arg => A => B] = l => r =>
       base.Arr(base.ArrDom(l))(base.Arr(base.ArrRng(l))(base.ArrRng(r)))
@@ -69,59 +97,82 @@ object DeepLearning {
 
     override def ReprType[A]: Repr[Arg => A] => Type[Arg => A] = r => base.ReprType(r)
 
-    def conv[X] : Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprType(r), argt))(r)
+    def conv[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprType(r), argt))(r)
+
+    def in : Repr[Arg => Arg] = base.I
+
+    override def Y[A, B](implicit at : Type[Arg => A], bt : Type[Arg => B]):
+    Repr[(Arg) => ((A => B) => A => B) => A => B] = conv(base.Y[A, B](base.ArrRng(at), base.ArrRng(bt)))
   }
 
   abstract class Loss[X] {
     type loss
-    def m : Monoid[loss]
-    def unique[Y](l : Loss[Y])(implicit ev : X === Y) : loss === l.loss = /*enforced by user*/ force[Nothing, Any, loss, l.loss]
-    def ArrDom[A, B](implicit ev : X === (A => B)) : Loss[A]
-    def ArrRng[A, B](implicit ev : X === (A => B)) : Loss[B]
+
+    def m: Monoid[loss]
+
+    def unique[Y](l: Loss[Y])(implicit ev: X === Y): loss === l.loss = /*enforced by user*/ force[Nothing, Any, loss, l.loss]
+
+    def ArrDom[A, B](implicit ev: X === (A => B)): Loss[A]
+
+    def ArrRng[A, B](implicit ev: X === (A => B)): Loss[B]
   }
 
   object Loss {
-    type Aux[X, L] = Loss[X] { type loss = L }
+    type Aux[X, L] = Loss[X] {type loss = L}
   }
 
-  case class DLoss(x : Double)
+  case class DLoss(x: Double)
+
   implicit def dLoss = new Loss[Double] {
     override type loss = DLoss
+
     override def m: Monoid[loss] = new Monoid[DLoss] {
       override def zero: DLoss = DLoss(0.0)
+
       override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.x + f2.x)
     }
+
     override def ArrDom[A, B](implicit ev: ===[Double, A => B]): Loss[A] = throw new Exception("not ArrLoss")
+
     override def ArrRng[A, B](implicit ev: ===[Double, A => B]): Loss[B] = throw new Exception("not ArrLoss")
   }
 
-  case class ArrLoss[A, BL](seq : Seq[(Eval[A], BL)])
-  implicit def arrLoss[A, B](implicit AL : Loss[A], BL : Loss[B]) : Loss.Aux[A => B, ArrLoss[A, BL.loss]] =
+  case class ArrLoss[A, BL](seq: Seq[(Eval[A], BL)])
+
+  implicit def arrLoss[A, B](implicit AL: Loss[A], BL: Loss[B]): Loss.Aux[A => B, ArrLoss[A, BL.loss]] =
     new Loss[A => B] {
       override type loss = ArrLoss[A, BL.loss]
+
       override def m: Monoid[ArrLoss[A, BL.loss]] = new Monoid[ArrLoss[A, BL.loss]] {
         override def zero: ArrLoss[A, BL.loss] = ArrLoss(Seq())
+
         override def append(f1: ArrLoss[A, BL.loss], f2: => ArrLoss[A, BL.loss]): ArrLoss[A, BL.loss] =
           ArrLoss(f1.seq ++ f2.seq)
       }
+
       override def ArrDom[C, D](implicit ev: ===[A => B, C => D]): Loss[C] = ArrDomEq(ev).subst[Loss](AL)
+
       override def ArrRng[C, D](implicit ev: ===[A => B, C => D]): Loss[D] = ArrRngEq(ev).subst[Loss](BL)
     }
 
   abstract class Eval[X] {
-    def aeval[A, B](a : Eval[A])(implicit ev : X === (A => B), AL : Loss[A], BL : Loss[B]) : (Eval[B], BL.loss => AL.loss)
-    def deval(implicit ev : X === Double) : Double
-    def loss : Loss[X]
+    def aeval[A, B](a: Eval[A])(implicit ev: X === (A => B), AL: Loss[A], BL: Loss[B]): (Eval[B], BL.loss => AL.loss)
+
+    def deval(implicit ev: X === Double): Double
+
+    def loss: Loss[X]
   }
 
-  def ArrEq[A, B, C, D] : A === C => B === D => (A => B) === (C => D) = dom => rng =>
+  def ArrEq[A, B, C, D]: A === C => B === D => (A => B) === (C => D) = dom => rng =>
     dom.subst[Lambda[X => (A => B) === (X => D)]](rng.subst[Lambda[X => (A => B) === (A => X)]](refl[A => B]))
-  def ArrDomEq[A, B, C, D] : (A => B) === (C => D) => A === C = _ => force[Nothing, Any, A, C]
-  def ArrRngEq[A, B, C, D] : (A => B) === (C => D) => B === D = _ => force[Nothing, Any, B, D]
 
-  def ArrEval[A, B, AL, BL](forward : Eval[A] => (Eval[B], BL => AL))(implicit al : Loss.Aux[A, AL], bl : Loss.Aux[B, BL]) =
+  def ArrDomEq[A, B, C, D]: (A => B) === (C => D) => A === C = _ => force[Nothing, Any, A, C]
+
+  def ArrRngEq[A, B, C, D]: (A => B) === (C => D) => B === D = _ => force[Nothing, Any, B, D]
+
+  def ArrEval[A, B, AL, BL](forward: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
-      override def aeval[C, D](c : Eval[C])(
+      override def aeval[C, D](c: Eval[C])(
         implicit ev: (A => B) === (C => D), CL: Loss[C], DL: Loss[D]): (Eval[D], DL.loss => CL.loss) = {
         val ac = ArrDomEq(ev)
         val bd = ArrRngEq(ev)
@@ -130,24 +181,33 @@ object DeepLearning {
           witness(symm[Nothing, Any, CL.loss, AL](CL.unique(al)(symm[Nothing, Any, A, C](ac))))(
             f._2(witness(DL.unique(bl)(symm[Nothing, Any, B, D](bd)))(dl))))
       }
+
       override def deval(implicit ev: ===[A => B, Double]): Double = throw new Exception("cannot call deval")
+
       override def loss: Loss[A => B] = arrLoss(al, bl)
     }
 
-  case class DEval(d : Double) extends Eval[Double] {
+  case class DEval(d: Double) extends Eval[Double] {
     val eval = d
+
     override def aeval[A, B](a: Eval[A])(
       implicit ev: ===[Double, A => B], AL: Loss[A], BL: Loss[B]): (Eval[B], BL.loss => AL.loss) =
       throw new Exception("cannot call aeval")
+
     override def deval(implicit ev: ===[Double, Double]): Double = d
+
     override def loss: Loss[Double] = dLoss
   }
 
   class EvalL extends Language[Loss, Eval] {
     override def Arr[A, B]: Loss[A] => Loss[B] => Loss[A => B] = x => y => arrLoss(x, y)
+
     override def ArrDom[A, B]: Loss[A => B] => Loss[A] = _.ArrDom[A, B](refl[A => B])
+
     override def ArrRng[A, B]: Loss[A => B] => Loss[B] = _.ArrRng[A, B](refl[A => B])
+
     override def app[A, B] = f => x => f.aeval(x)(refl[A => B], x.loss, ArrRng(f.loss))._1
+
     override def S[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]): Eval[(A => B => C) => (A => B) => A => C] =
       ArrEval[
         A => B => C,
@@ -167,24 +227,42 @@ object DeepLearning {
             c._2(x._2)
           }))))), l => ArrLoss(l.seq.flatMap(x => x._2.seq.map(y => (
           y._1, ArrLoss(Seq((x._1.aeval(y._1)(refl[A => B], at, bt)._1, y._2)))))))))
+
     override def K[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => B => A] =
       ArrEval[A, B => A, at.loss, ArrLoss[B, at.loss]](a => (
         ArrEval[B, A, bt.loss, at.loss](_ => (a, _ => bt.m.zero))(bt, at),
         l => l.seq.map(_._2).fold(at.m.zero)((l, r) => at.m.append(l, r))))(at, arrLoss(bt, at))
+
     override def I[A](implicit at: Loss[A]): Eval[A => A] = ArrEval[A, A, at.loss, at.loss](x => (x, y => y))(at, at)
+
     override def LitD: Double => Eval[Double] = DEval
+
     override def PlusD: Eval[Double => Double => Double] =
       ArrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
         (ArrEval[Double, Double, DLoss, DLoss](
           r => (DEval(l.deval + r.deval), rl => rl)),
           ll => DLoss(ll.seq.map(_._2.x).sum)))
+
     override def MultD: Eval[Double => Double => Double] =
       ArrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
         (ArrEval[Double, Double, DLoss, DLoss](
           r => (DEval(l.deval * r.deval), rl => DLoss(l.deval * rl.x))),
           ll => DLoss(ll.seq.map(l => l._1.deval * l._2.x).sum)))
-    override def ReprType[A]: Eval[A] => Loss[A] = _.loss
-  }
-}
 
+    override def ReprType[A]: Eval[A] => Loss[A] = _.loss
+
+    override def Y[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A => B) => A => B) => A => B] = {
+      type abt = ArrLoss[A, bt.loss]
+      ArrEval[(A => B) => A => B, A => B, ArrLoss[A => B, abt], abt](abab => {
+        val ab = ArrEval[A, B, at.loss, bt.loss](a => app(abab)(app(Y[A, B])(abab)).aeval(a))(at, bt)
+        (ab, abl => ArrLoss(abl.seq.map(p => (ab, ArrLoss(Seq(p))))))
+      })
+    }
+  }
+
+  def Square[Type[_], Repr[_]](implicit td : Type[Double], lang : Language[Type, Repr]) : Repr[Double => Double] = {
+    val next = Next[Type, Repr, Double](lang)
+    import next._
+    app(app(MultD)(in))(in)
+  }
 }
