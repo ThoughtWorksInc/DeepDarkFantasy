@@ -14,6 +14,12 @@ object DDF {
 
     def ArrRng[A, B]: Type[A => B] => Type[B]
 
+    def Pair[A, B]: Type[A] => Type[B] => Type[(A, B)]
+
+    def PairFst[A, B]: Type[(A, B)] => Type[A]
+
+    def PairSnd[A, B]: Type[(A, B)] => Type[B]
+
     def ReprType[A]: Repr[A] => Type[A]
 
     def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
@@ -30,7 +36,13 @@ object DDF {
 
     def MultD: Repr[Double => Double => Double]
 
-    def Y[A, B](implicit at : Type[A], bt : Type[B]) : Repr[((A => B) => (A => B)) => (A => B)]
+    def Y[A, B](implicit at: Type[A], bt: Type[B]): Repr[((A => B) => (A => B)) => (A => B)]
+
+    def mkPair[A, B](implicit at: Type[A], bt: Type[B]): Repr[A => B => (A, B)]
+
+    def fst[A, B](implicit at: Type[A], bt: Type[B]): Repr[((A, B)) => A]
+
+    def snd[A, B](implicit at: Type[A], bt: Type[B]): Repr[((A, B)) => B]
   }
 
   final case class NoType[X]()
@@ -45,6 +57,12 @@ object DDF {
     override def ArrRng[A, B]: NoType[A => B] => NoType[B] = _ => NoType()
 
     override def ReprType[A]: Repr[A] => NoType[A] = _ => NoType()
+
+    override def Pair[A, B]: (NoType[A]) => (NoType[B]) => NoType[(A, B)] = _ => _ => NoType()
+
+    override def PairFst[A, B]: (NoType[(A, B)]) => NoType[A] = _ => NoType()
+
+    override def PairSnd[A, B]: (NoType[(A, B)]) => NoType[B] = _ => NoType()
   }
 
   case class Show[X](s: String)
@@ -64,7 +82,13 @@ object DDF {
 
     override def MultD: Show[Double => Double => Double] = Show("*")
 
-    override def Y[A, B](implicit at : NoType[A], bt : NoType[B]): Show[((A => B) => (A => B)) => (A => B)] = Show("Y")
+    override def Y[A, B](implicit at: NoType[A], bt: NoType[B]): Show[((A => B) => (A => B)) => (A => B)] = Show("Y")
+
+    override def mkPair[A, B](implicit at: NoType[A], bt: NoType[B]): Show[(A) => (B) => (A, B)] = Show("mkPair")
+
+    override def snd[A, B](implicit at: NoType[A], bt: NoType[B]): Show[((A, B)) => B] = Show("snd")
+
+    override def fst[A, B](implicit at: NoType[A], bt: NoType[B]): Show[((A, B)) => A] = Show("fst")
   }
 
   case class Next[Type[_], Repr[_], Arg](base: Language[Type, Repr])(implicit argt: Type[Arg]) extends
@@ -99,10 +123,26 @@ object DDF {
 
     def conv[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprType(r), argt))(r)
 
-    def in : Repr[Arg => Arg] = base.I
+    def in: Repr[Arg => Arg] = base.I
 
-    override def Y[A, B](implicit at : Type[Arg => A], bt : Type[Arg => B]):
+    override def Y[A, B](implicit at: Type[Arg => A], bt: Type[Arg => B]):
     Repr[(Arg) => ((A => B) => A => B) => A => B] = conv(base.Y[A, B](base.ArrRng(at), base.ArrRng(bt)))
+
+    override def mkPair[A, B](implicit at: Type[Arg => A], bt: Type[Arg => B]): Repr[Arg => A => B => (A, B)] =
+      conv(base.mkPair[A, B](base.ArrRng(at), base.ArrRng(bt)))
+
+    override def fst[A, B](implicit at: Type[(Arg) => A], bt: Type[(Arg) => B]): Repr[(Arg) => ((A, B)) => A] =
+      conv(base.fst(base.ArrRng(at), base.ArrRng(bt)))
+
+    override def snd[A, B](implicit at: Type[(Arg) => A], bt: Type[(Arg) => B]): Repr[(Arg) => ((A, B)) => B] =
+      conv(base.snd(base.ArrRng(at), base.ArrRng(bt)))
+
+    override def Pair[A, B]: (Type[(Arg) => A]) => (Type[(Arg) => B]) => Type[(Arg) => (A, B)] = a => b =>
+      base.Arr(base.ArrDom(a))(base.Pair(base.ArrRng(a))(base.ArrRng(b)))
+
+    override def PairFst[A, B]: Type[Arg => (A, B)] => Type[Arg => A] = p => base.Arr(base.ArrDom(p))(base.PairFst(base.ArrRng(p)))
+
+    override def PairSnd[A, B]: Type[Arg => (A, B)] => Type[Arg => B] = p => base.Arr(base.ArrDom(p))(base.PairSnd(base.ArrRng(p)))
   }
 
   abstract class Loss[X] {
@@ -115,6 +155,10 @@ object DDF {
     def ArrDom[A, B](implicit ev: X === (A => B)): Loss[A]
 
     def ArrRng[A, B](implicit ev: X === (A => B)): Loss[B]
+
+    def PairFst[A, B](implicit ev: X === (A, B)): Loss[A]
+
+    def PairSnd[A, B](implicit ev: X === (A, B)): Loss[B]
   }
 
   object Loss {
@@ -135,9 +179,20 @@ object DDF {
     override def ArrDom[A, B](implicit ev: ===[Double, A => B]): Loss[A] = throw new Exception("not ArrLoss")
 
     override def ArrRng[A, B](implicit ev: ===[Double, A => B]): Loss[B] = throw new Exception("not ArrLoss")
+
+    override def PairFst[A, B](implicit ev: ===[Double, (A, B)]): Loss[A] = throw new Exception("not PairLoss")
+
+    override def PairSnd[A, B](implicit ev: ===[Double, (A, B)]): Loss[B] = throw new Exception("not PairLoss")
   }
 
   case class ArrLoss[A, BL](seq: Seq[(Eval[A], BL)])
+
+  def ArrEq[A, B, C, D]: A === C => B === D => (A => B) === (C => D) = dom => rng =>
+    dom.subst[Lambda[X => (A => B) === (X => D)]](rng.subst[Lambda[X => (A => B) === (A => X)]](refl[A => B]))
+
+  def ArrDomEq[A, B, C, D]: (A => B) === (C => D) => A === C = _ => force[Nothing, Any, A, C]
+
+  def ArrRngEq[A, B, C, D]: (A => B) === (C => D) => B === D = _ => force[Nothing, Any, B, D]
 
   implicit def arrLoss[A, B](implicit AL: Loss[A], BL: Loss[B]): Loss.Aux[A => B, ArrLoss[A, BL.loss]] =
     new Loss[A => B] {
@@ -153,22 +208,53 @@ object DDF {
       override def ArrDom[C, D](implicit ev: ===[A => B, C => D]): Loss[C] = ArrDomEq(ev).subst[Loss](AL)
 
       override def ArrRng[C, D](implicit ev: ===[A => B, C => D]): Loss[D] = ArrRngEq(ev).subst[Loss](BL)
+
+      override def PairFst[C, D](implicit ev: ===[(A) => B, (C, D)]): Loss[C] = throw new Exception("not PairLoss")
+
+      override def PairSnd[C, D](implicit ev: ===[(A) => B, (C, D)]): Loss[D] = throw new Exception("not PairLoss")
     }
+
+  def PairEq[A, B, C, D]: A === C => B === D => (A, B) === (C, D) = ac => bd =>
+    ac.subst[Lambda[C => (A, B) === (C, D)]](bd.subst[Lambda[D => (A, B) === (A, D)]](refl[(A, B)]))
+
+  def PairFstEq[A, B, C, D]: (A, B) === (C, D) => A === C = _ => force[Nothing, Any, A, C]
+
+  def PairSndEq[A, B, C, D]: (A, B) === (C, D) => B === D = _ => force[Nothing, Any, B, D]
+
+  implicit def pairLoss[A, B](implicit al : Loss[A], bl : Loss[B]) = new Loss[(A, B)] {
+    override type loss = (al.loss, bl.loss)
+    override def m: Monoid[(al.loss, bl.loss)] = new Monoid[(al.loss, bl.loss)] {
+      override def zero: (al.loss, bl.loss) = (al.m.zero, bl.m.zero)
+      override def append(f1: (al.loss, bl.loss), f2: => (al.loss, bl.loss)): (al.loss, bl.loss) =
+        (al.m.append(f1._1, f2._1), bl.m.append(f1._2, f2._2))
+    }
+    override def ArrDom[C, D](implicit ev: ===[(A, B), C => D]): Loss[C] = throw new Exception("not ArrLoss")
+    override def ArrRng[C, D](implicit ev: ===[(A, B), C => D]): Loss[D] = throw new Exception("not ArrLoss")
+    override def PairFst[C, D](implicit ev: ===[(A, B), (C, D)]): Loss[C] = PairFstEq(ev).subst[Loss](al)
+    override def PairSnd[C, D](implicit ev: ===[(A, B), (C, D)]): Loss[D] = PairSndEq(ev).subst[Loss](bl)
+  }
 
   abstract class Eval[X] {
     def aeval[A, B](a: Eval[A])(implicit ev: X === (A => B), AL: Loss[A], BL: Loss[B]): (Eval[B], BL.loss => AL.loss)
 
     def deval(implicit ev: X === Double): Double
 
+    def peval[A, B](implicit ev: X === (A, B)): (Eval[A], Eval[B])
+
     def loss: Loss[X]
   }
 
-  def ArrEq[A, B, C, D]: A === C => B === D => (A => B) === (C => D) = dom => rng =>
-    dom.subst[Lambda[X => (A => B) === (X => D)]](rng.subst[Lambda[X => (A => B) === (A => X)]](refl[A => B]))
+  def PairEval[A, B](a : Eval[A], b : Eval[B])(implicit l : Loss[(A, B)]) = new Eval[(A, B)] {
+    override def aeval[C, D](a: Eval[C])(
+      implicit ev: ===[(A, B), C => D], CL: Loss[C], DL: Loss[D]): (Eval[D], DL.loss => CL.loss) = throw new Exception("not ArrEval")
 
-  def ArrDomEq[A, B, C, D]: (A => B) === (C => D) => A === C = _ => force[Nothing, Any, A, C]
+    override def deval(implicit ev: ===[(A, B), Double]): Double = throw new Exception("not DEval")
 
-  def ArrRngEq[A, B, C, D]: (A => B) === (C => D) => B === D = _ => force[Nothing, Any, B, D]
+    override def peval[C, D](implicit ev: ===[(A, B), (C, D)]): (Eval[C], Eval[D]) =
+      (PairFstEq(ev).subst[Eval](a), PairSndEq(ev).subst[Eval](b))
+
+    override def loss: Loss[(A, B)] = l
+  }
 
   def ArrEval[A, B, AL, BL](forward: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
@@ -182,17 +268,20 @@ object DDF {
             f._2(witness(DL.unique(bl)(symm[Nothing, Any, B, D](bd)))(dl))))
       }
 
-      override def deval(implicit ev: ===[A => B, Double]): Double = throw new Exception("cannot call deval")
+      override def deval(implicit ev: ===[A => B, Double]): Double = throw new Exception("not DEval")
 
       override def loss: Loss[A => B] = arrLoss(al, bl)
+
+      override def peval[C, D](implicit ev: ===[(A) => B, (C, D)]): (Eval[C], Eval[D]) = throw new Exception("not PEval")
     }
 
   case class DEval(d: Double) extends Eval[Double] {
     val eval = d
 
-    override def aeval[A, B](a: Eval[A])(
-      implicit ev: ===[Double, A => B], AL: Loss[A], BL: Loss[B]): (Eval[B], BL.loss => AL.loss) =
-      throw new Exception("cannot call aeval")
+    override def aeval[A, B](a: Eval[A])(implicit ev: ===[Double, A => B], AL: Loss[A], BL: Loss[B]):
+    (Eval[B], BL.loss => AL.loss) = throw new Exception("not ArrEval")
+
+    override def peval[A, B](implicit ev: ===[Double, (A, B)]): (Eval[A], Eval[B]) = throw new Exception("not PEval")
 
     override def deval(implicit ev: ===[Double, Double]): Double = d
 
@@ -258,9 +347,26 @@ object DDF {
         (ab, abl => ArrLoss(abl.seq.map(p => (ab, ArrLoss(Seq(p))))))
       })
     }
+
+    override def fst[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
+      ArrEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (p.peval(refl[(A, B)])._1, al => (al, bt.m.zero)))(pairLoss(at, bt), at)
+
+    override def snd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
+      ArrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (p.peval(refl[(A, B)])._2, bl => (at.m.zero, bl)))(pairLoss(at, bt), bt)
+
+    override def mkPair[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
+      ArrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (ArrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
+        (PairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
+        at, arrLoss(bt, pairLoss(at, bt)))
+
+    override def Pair[A, B]: (Loss[A]) => (Loss[B]) => Loss[(A, B)] = a => b => pairLoss(a, b)
+
+    override def PairFst[A, B]: (Loss[(A, B)]) => Loss[A] = _.PairFst(refl[(A, B)])
+
+    override def PairSnd[A, B]: (Loss[(A, B)]) => Loss[B] = _.PairSnd(refl[(A, B)])
   }
 
-  def Square[Type[_], Repr[_]](implicit td : Type[Double], lang : Language[Type, Repr]) : Repr[Double => Double] = {
+  def Square[Type[_], Repr[_]](implicit td: Type[Double], lang: Language[Type, Repr]): Repr[Double => Double] = {
     val next = Next[Type, Repr, Double](lang)
     import next._
     app(app(MultD)(in))(in)
