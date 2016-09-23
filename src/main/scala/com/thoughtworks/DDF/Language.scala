@@ -2,28 +2,28 @@ package com.thoughtworks.DDF
 
 import scala.language.higherKinds
 
-trait Language[TypeInfo[_], Repr[_]] {
-  def Arr[A, B]: TypeInfo[A] => TypeInfo[B] => TypeInfo[A => B]
+trait Language[Info[_], Repr[_]] {
+  def Arr[A, B]: Info[A] => Info[B] => Info[A => B]
 
-  def ArrDom[A, B]: TypeInfo[A => B] => TypeInfo[A]
+  def ArrDom[A, B]: Info[A => B] => Info[A]
 
-  def ArrRng[A, B]: TypeInfo[A => B] => TypeInfo[B]
+  def ArrRng[A, B]: Info[A => B] => Info[B]
 
-  def Pair[A, B]: TypeInfo[A] => TypeInfo[B] => TypeInfo[(A, B)]
+  def Pair[A, B]: Info[A] => Info[B] => Info[(A, B)]
 
-  def PairFst[A, B]: TypeInfo[(A, B)] => TypeInfo[A]
+  def PairFst[A, B]: Info[(A, B)] => Info[A]
 
-  def PairSnd[A, B]: TypeInfo[(A, B)] => TypeInfo[B]
+  def PairSnd[A, B]: Info[(A, B)] => Info[B]
 
-  def ReprType[A]: Repr[A] => TypeInfo[A]
+  def ReprType[A]: Repr[A] => Info[A]
 
   def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
 
-  def S[A, B, C](implicit at: TypeInfo[A], bt: TypeInfo[B], ct: TypeInfo[C]): Repr[(A => B => C) => (A => B) => A => C]
+  def S[A, B, C](implicit at: Info[A], bt: Info[B], ct: Info[C]): Repr[(A => B => C) => (A => B) => A => C]
 
-  def K[A, B](implicit at: TypeInfo[A], bt: TypeInfo[B]): Repr[A => B => A]
+  def K[A, B](implicit at: Info[A], bt: Info[B]): Repr[A => B => A]
 
-  def I[A](implicit at: TypeInfo[A]): Repr[A => A]
+  def I[A](implicit at: Info[A]): Repr[A => A]
 
   def LitD: Double => Repr[Double]
 
@@ -31,11 +31,11 @@ trait Language[TypeInfo[_], Repr[_]] {
 
   def MultD: Repr[Double => Double => Double]
 
-  def Y[A, B](implicit at: TypeInfo[A], bt: TypeInfo[B]): Repr[((A => B) => (A => B)) => (A => B)]
+  def Y[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A => B) => (A => B)) => (A => B)]
 
-  def mkPair[A, B](implicit at: TypeInfo[A], bt: TypeInfo[B]): Repr[A => B => (A, B)]
+  def mkPair[A, B](implicit at: Info[A], bt: Info[B]): Repr[A => B => (A, B)]
 
-  def fst[A, B](implicit at: TypeInfo[A], bt: TypeInfo[B]): Repr[((A, B)) => A]
+  def fst[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => A]
 
-  def snd[A, B](implicit at: TypeInfo[A], bt: TypeInfo[B]): Repr[((A, B)) => B]
+  def snd[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => B]
 }

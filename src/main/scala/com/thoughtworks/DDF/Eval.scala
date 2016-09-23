@@ -9,21 +9,21 @@ import scalaz.Leibniz._
 
 object Eval {
 
-  trait Eval[Self[_], X] {
+  trait Eval[Repr[_], X] {
     def loss: APLoss[X]
 
     def eval: X
   }
 
-  trait WAEval[Self[_], X] {
-    def aeval[A, B](a: Self[A])(implicit ev: X === (A => B), AL: APLoss[A], BL: APLoss[B]): (Self[B], BL.loss => AL.loss)
+  trait WAEval[Repr[_], X] {
+    def aeval[A, B](a: Repr[A])(implicit ev: X === (A => B), AL: APLoss[A], BL: APLoss[B]): (Repr[B], BL.loss => AL.loss)
   }
 
-  trait WDEval[Self[_], X] {
+  trait WDEval[Repr[_], X] {
     def deval(implicit ev: X === Double): Double
   }
 
-  trait WPEval[Self[_], X] {
+  trait WPEval[Repr[_], X] {
     def peval[A, B](implicit ev: X === (A, B)): (ADPEval[A], ADPEval[B])
   }
 

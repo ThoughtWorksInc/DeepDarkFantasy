@@ -3,24 +3,24 @@ package com.thoughtworks.DDF
 import scala.language.higherKinds
 object SimpleLanguage {
 
-  final case class NoTypeInfo[X]()
+  final case class NoInfo[X]()
 
-  implicit def noTypeInfo[X]: NoTypeInfo[X] = NoTypeInfo[X]()
+  implicit def noInfo[X]: NoInfo[X] = NoInfo[X]()
 
-  trait SimpleLanguage[Repr[_]] extends Language[NoTypeInfo, Repr] {
-    override def Arr[A, B]: NoTypeInfo[A] => NoTypeInfo[B] => NoTypeInfo[A => B] = _ => _ => NoTypeInfo()
+  trait SimpleLanguage[Repr[_]] extends Language[NoInfo, Repr] {
+    override def Arr[A, B]: NoInfo[A] => NoInfo[B] => NoInfo[A => B] = _ => _ => noInfo
 
-    override def ArrDom[A, B]: NoTypeInfo[A => B] => NoTypeInfo[A] = _ => NoTypeInfo()
+    override def ArrDom[A, B]: NoInfo[A => B] => NoInfo[A] = _ => noInfo
 
-    override def ArrRng[A, B]: NoTypeInfo[A => B] => NoTypeInfo[B] = _ => NoTypeInfo()
+    override def ArrRng[A, B]: NoInfo[A => B] => NoInfo[B] = _ => noInfo
 
-    override def ReprType[A]: Repr[A] => NoTypeInfo[A] = _ => NoTypeInfo()
+    override def ReprType[A]: Repr[A] => NoInfo[A] = _ => noInfo
 
-    override def Pair[A, B]: (NoTypeInfo[A]) => (NoTypeInfo[B]) => NoTypeInfo[(A, B)] = _ => _ => NoTypeInfo()
+    override def Pair[A, B]: (NoInfo[A]) => (NoInfo[B]) => NoInfo[(A, B)] = _ => _ => noInfo
 
-    override def PairFst[A, B]: (NoTypeInfo[(A, B)]) => NoTypeInfo[A] = _ => NoTypeInfo()
+    override def PairFst[A, B]: (NoInfo[(A, B)]) => NoInfo[A] = _ => noInfo
 
-    override def PairSnd[A, B]: (NoTypeInfo[(A, B)]) => NoTypeInfo[B] = _ => NoTypeInfo()
+    override def PairSnd[A, B]: (NoInfo[(A, B)]) => NoInfo[B] = _ => noInfo
   }
 
 }
