@@ -14,6 +14,8 @@ object Loss {
     def m: Monoid[loss]
 
     def unique[Y](l: Loss[Self, Y])(implicit ev: X === Y): loss === l.loss = /*enforced by user*/ force[Nothing, Any, loss, l.loss]
+
+    def conv : X => Eval[X]
   }
 
   trait ArrInfo[Self[_], X] {
@@ -50,6 +52,8 @@ object Loss {
 
       override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.x + f2.x)
     }
+
+    override def conv: (Double) => Eval[Double] = DEval
   }
 
   case class ArrLoss[A, BL](seq: Seq[(Eval[A], BL)])
@@ -68,6 +72,8 @@ object Loss {
       override def ArrDom[C, D](implicit ev: ===[A => B, C => D]): APLoss[C] = ArrDomEq(ev).subst[APLoss](AL)
 
       override def ArrRng[C, D](implicit ev: ===[A => B, C => D]): APLoss[D] = ArrRngEq(ev).subst[APLoss](BL)
+
+      override def conv: ((A) => B) => Eval[(A) => B] = f => ArrEval[A, B, AL.loss, BL.loss](x => (BL.conv(f(x.eval)), ???))(AL, BL)
     }
 
   implicit def pairLoss[A, B](implicit al: APLoss[A], bl: APLoss[B]) = new APLoss[(A, B)] with NotArr[APLoss, (A, B)] {
@@ -83,6 +89,8 @@ object Loss {
     override def PairFst[C, D](implicit ev: ===[(A, B), (C, D)]): APLoss[C] = PairFstEq(ev).subst[APLoss](al)
 
     override def PairSnd[C, D](implicit ev: ===[(A, B), (C, D)]): APLoss[D] = PairSndEq(ev).subst[APLoss](bl)
+
+    override def conv: ((A, B)) => Eval[(A, B)] = p => PairEval(al.conv(p._1), bl.conv(p._2))(this)
   }
 
   trait APLoss[X] extends Loss[APLoss, X] with ArrInfo[APLoss, X] with PairInfo[APLoss, X]

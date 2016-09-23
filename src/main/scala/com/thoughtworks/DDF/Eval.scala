@@ -15,6 +15,8 @@ object Eval {
     def peval[A, B](implicit ev: X === (A, B)): (Eval[A], Eval[B])
 
     def loss: APLoss[X]
+
+    def eval : X
   }
 
   def PairEval[A, B](a: Eval[A], b: Eval[B])(implicit l: APLoss[(A, B)]) = new Eval[(A, B)] {
@@ -27,6 +29,8 @@ object Eval {
       (PairFstEq(ev).subst[Eval](a), PairSndEq(ev).subst[Eval](b))
 
     override def loss: APLoss[(A, B)] = l
+
+    override def eval: (A, B) = (a.eval, b.eval)
   }
 
   def ArrEval[A, B, AL, BL](forward: Eval[A] => (Eval[B], BL => AL))(implicit al: APLoss.Aux[A, AL], bl: APLoss.Aux[B, BL]) =
@@ -46,6 +50,8 @@ object Eval {
       override def loss: APLoss[A => B] = arrLoss(al, bl)
 
       override def peval[C, D](implicit ev: ===[(A) => B, (C, D)]): (Eval[C], Eval[D]) = throw new Exception("not PEval")
+
+      override def eval: A => B = a => aeval[A, B](al.conv(a))._1.eval
     }
 
   case class DEval(d: Double) extends Eval[Double] {
