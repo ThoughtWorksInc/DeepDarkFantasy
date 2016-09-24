@@ -7,13 +7,13 @@ import com.thoughtworks.DDF.Loss._
 import scalaz.Leibniz._
 
 class EvalLanguage extends Language[APLoss, ADPEval] {
-  override def Arr[A, B]: APLoss[A] => APLoss[B] => APLoss[A => B] = x => y => arrLoss(x, y)
+  override def ArrInfo[A, B]: APLoss[A] => APLoss[B] => APLoss[A => B] = x => y => arrLoss(x, y)
 
-  override def ArrDom[A, B]: APLoss[A => B] => APLoss[A] = _.ArrDom[A, B](refl[A => B])
+  override def ArrDomInfo[A, B]: APLoss[A => B] => APLoss[A] = _.ArrDom[A, B](refl[A => B])
 
-  override def ArrRng[A, B]: APLoss[A => B] => APLoss[B] = _.ArrRng[A, B](refl[A => B])
+  override def ArrRngInfo[A, B]: APLoss[A => B] => APLoss[B] = _.ArrRng[A, B](refl[A => B])
 
-  override def app[A, B] = f => x => f.aeval(x)(refl[A => B], x.loss, ArrRng(f.loss))._1
+  override def app[A, B] = f => x => f.aeval(x)(refl[A => B], x.loss, ArrRngInfo(f.loss))._1
 
   override def S[A, B, C](implicit at: APLoss[A], bt: APLoss[B], ct: APLoss[C]): ADPEval[(A => B => C) => (A => B) => A => C] =
     ArrEval[
@@ -56,7 +56,7 @@ class EvalLanguage extends Language[APLoss, ADPEval] {
         r => (DEval(l.deval * r.deval), rl => DLoss(l.deval * rl.x))),
         ll => DLoss(ll.seq.map(l => l._1.deval * l._2.x).sum)))
 
-  override def ReprType[A]: ADPEval[A] => APLoss[A] = _.loss
+  override def ReprInfo[A]: ADPEval[A] => APLoss[A] = _.loss
 
   override def Y[A, B](implicit at: APLoss[A], bt: APLoss[B]): ADPEval[((A => B) => A => B) => A => B] = {
     type abt = ArrLoss[A, bt.loss]
@@ -77,9 +77,9 @@ class EvalLanguage extends Language[APLoss, ADPEval] {
       (PairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
       at, arrLoss(bt, pairLoss(at, bt)))
 
-  override def Pair[A, B]: (APLoss[A]) => (APLoss[B]) => APLoss[(A, B)] = a => b => pairLoss(a, b)
+  override def PairInfo[A, B]: (APLoss[A]) => (APLoss[B]) => APLoss[(A, B)] = a => b => pairLoss(a, b)
 
-  override def PairFst[A, B]: (APLoss[(A, B)]) => APLoss[A] = _.PairFst(refl[(A, B)])
+  override def PairFstInfo[A, B]: (APLoss[(A, B)]) => APLoss[A] = _.PairFst(refl[(A, B)])
 
-  override def PairSnd[A, B]: (APLoss[(A, B)]) => APLoss[B] = _.PairSnd(refl[(A, B)])
+  override def PairSndInfo[A, B]: (APLoss[(A, B)]) => APLoss[B] = _.PairSnd(refl[(A, B)])
 }

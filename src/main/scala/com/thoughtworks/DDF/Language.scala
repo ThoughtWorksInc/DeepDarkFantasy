@@ -3,19 +3,19 @@ package com.thoughtworks.DDF
 import scala.language.higherKinds
 
 trait Language[Info[_], Repr[_]] {
-  def Arr[A, B]: Info[A] => Info[B] => Info[A => B]
+  def ArrInfo[A, B]: Info[A] => Info[B] => Info[A => B]
 
-  def ArrDom[A, B]: Info[A => B] => Info[A]
+  def ArrDomInfo[A, B]: Info[A => B] => Info[A]
 
-  def ArrRng[A, B]: Info[A => B] => Info[B]
+  def ArrRngInfo[A, B]: Info[A => B] => Info[B]
 
-  def Pair[A, B]: Info[A] => Info[B] => Info[(A, B)]
+  def PairInfo[A, B]: Info[A] => Info[B] => Info[(A, B)]
 
-  def PairFst[A, B]: Info[(A, B)] => Info[A]
+  def PairFstInfo[A, B]: Info[(A, B)] => Info[A]
 
-  def PairSnd[A, B]: Info[(A, B)] => Info[B]
+  def PairSndInfo[A, B]: Info[(A, B)] => Info[B]
 
-  def ReprType[A]: Repr[A] => Info[A]
+  def ReprInfo[A]: Repr[A] => Info[A]
 
   def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
 
