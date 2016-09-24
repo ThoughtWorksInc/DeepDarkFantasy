@@ -82,4 +82,6 @@ class EvalLanguage extends Language[APLoss, ADPEval] {
   override def PairFstInfo[A, B]: (APLoss[(A, B)]) => APLoss[A] = _.PairFst(refl[(A, B)])
 
   override def PairSndInfo[A, B]: (APLoss[(A, B)]) => APLoss[B] = _.PairSnd(refl[(A, B)])
+
+  override def DoubleInfo: APLoss[Double] = dLoss
 }

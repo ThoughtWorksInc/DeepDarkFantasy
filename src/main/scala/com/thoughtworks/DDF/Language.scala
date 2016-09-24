@@ -17,6 +17,8 @@ trait Language[Info[_], Repr[_]] {
 
   def ReprInfo[A]: Repr[A] => Info[A]
 
+  def DoubleInfo : Info[Double]
+
   def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
 
   def S[A, B, C](implicit at: Info[A], bt: Info[B], ct: Info[C]): Repr[(A => B => C) => (A => B) => A => C]

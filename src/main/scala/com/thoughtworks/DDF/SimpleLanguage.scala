@@ -16,11 +16,13 @@ object SimpleLanguage {
 
     override def ReprInfo[A]: Repr[A] => NoInfo[A] = _ => noInfo
 
-    override def PairInfo[A, B]: (NoInfo[A]) => (NoInfo[B]) => NoInfo[(A, B)] = _ => _ => noInfo
+    override def PairInfo[A, B]: NoInfo[A] => NoInfo[B] => NoInfo[(A, B)] = _ => _ => noInfo
 
-    override def PairFstInfo[A, B]: (NoInfo[(A, B)]) => NoInfo[A] = _ => noInfo
+    override def PairFstInfo[A, B]: NoInfo[(A, B)] => NoInfo[A] = _ => noInfo
 
-    override def PairSndInfo[A, B]: (NoInfo[(A, B)]) => NoInfo[B] = _ => noInfo
+    override def PairSndInfo[A, B]: NoInfo[(A, B)] => NoInfo[B] = _ => noInfo
+
+    override def DoubleInfo: NoInfo[Double] = noInfo
   }
 
 }
