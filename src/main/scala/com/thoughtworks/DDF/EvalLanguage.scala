@@ -77,11 +77,11 @@ class EvalLanguage extends Language[APLoss, ADPEval] {
       (PairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
       at, arrLoss(bt, pairLoss(at, bt)))
 
-  override def PairInfo[A, B]: (APLoss[A]) => (APLoss[B]) => APLoss[(A, B)] = a => b => pairLoss(a, b)
+  override def PairInfo[A, B]: APLoss[A] => APLoss[B] => APLoss[(A, B)] = a => b => pairLoss(a, b)
 
-  override def PairFstInfo[A, B]: (APLoss[(A, B)]) => APLoss[A] = _.PairFst(refl[(A, B)])
+  override def PairFstInfo[A, B]: APLoss[(A, B)] => APLoss[A] = _.PairFst(refl[(A, B)])
 
-  override def PairSndInfo[A, B]: (APLoss[(A, B)]) => APLoss[B] = _.PairSnd(refl[(A, B)])
+  override def PairSndInfo[A, B]: APLoss[(A, B)] => APLoss[B] = _.PairSnd(refl[(A, B)])
 
   override def DoubleInfo: APLoss[Double] = dLoss
 }
