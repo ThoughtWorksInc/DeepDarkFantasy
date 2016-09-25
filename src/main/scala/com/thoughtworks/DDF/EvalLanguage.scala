@@ -7,15 +7,27 @@ object EvalLanguage {
 
   trait EvalCase[X] extends TypeCase[EvalCase, X]
 
+  object EvalCase {
+    type Aux[X, Y] = EvalCase[X] {type ret = Y}
+  }
+
   trait ArrEval[A, B] {
-    def forward(ea: Eval[A]): {
-      val eb: Eval[B]
-      def backward: eb.loss.loss => ea.loss.loss
+
+    trait backward[AL, BL] {
+      def eb: Eval[B]
+
+      def backward: BL => AL
     }
+
+    def forward(ea: Eval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
   }
 
   case class ArrEC[A, B]() extends EvalCase[A => B] {
     override type ret = ArrEval[A, B]
+  }
+
+  case class PairEC[A, B]() extends EvalCase[(A, B)] {
+    override type ret = (Eval[A], Eval[B])
   }
 
   def arrEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
@@ -24,22 +36,48 @@ object EvalLanguage {
 
       override def eval: A => B = a => eca.forward(al.conv(a)).eb.eval
 
-      override val ec: EvalCase[A => B] {type ret = ArrEval[A, B]} = ArrEC[A, B]()
+      override val ec: EvalCase.Aux[A => B, ArrEval[A, B]] = ArrEC[A, B]()
 
       override def eca: ec.ret = new ArrEval[A, B] {
-        override def forward(ea: Eval[A]): {def backward: (eb.loss.loss) => ea.loss.loss; val eb: Eval[B]} = new {
-          val fea = f(ea)
-          override def backward: eb.loss.loss => ea.loss.loss = ebl =>
-            witness(al.unique(ea.loss))(fea._2(witness(eb.loss.unique(bl))(ebl)))
-          override val eb: Eval[B] = fea._1
-        }
+        override def forward(ea: Eval[A])(implicit al1: Loss[A], bl1: Loss[B]): backward[al1.loss, bl1.loss] =
+          new backward[al1.loss, bl1.loss] {
+            lazy val fea = f(ea)
+
+            override lazy val eb: Eval[B] = fea._1
+
+            override def backward: bl1.loss => al1.loss = bl2 => witness(al.unique(al1))(fea._2(witness(bl1.unique(bl))(bl2)))
+          }
       }
     }
+
+  def pairEval[A, B](a : Eval[A], b : Eval[B])(implicit al : Loss[A], bl : Loss[B]) = new Eval[(A, B)] {
+    override val loss: Loss[(A, B)] = pairLoss(al, bl)
+
+    override def eval: (A, B) = (a.eval, b.eval)
+
+    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = PairEC()
+
+    override def eca: ec.ret = (a, b)
+  }
+
+  object DEC extends EvalCase[Double] {
+    override type ret = Double
+  }
+
+  case class DEval(d: Double) extends Eval[Double] {
+    override val loss: Loss[Double] = dLoss
+
+    override def eval: Double = d
+
+    override val ec: EvalCase.Aux[Double, Double] = DEC
+
+    override def eca: ec.ret = d
+  }
 
   trait Eval[X] {
     val loss: Loss[X]
 
-    def eval: X
+    def eval: /*should not be used when defining instance of Eval*/ X
 
     val ec: EvalCase[X]
 
@@ -48,31 +86,97 @@ object EvalLanguage {
 
   trait LossCase[X] extends TypeCase[LossCase, X]
 
-  object DoubleLC extends LossCase[Double]
+  object LossCase {
+    type Aux[X, Y] = LossCase[X] {type ret = Y}
+  }
 
-  case class ArrLC[A, B]() extends LossCase[A => B] {
+  object DoubleLC extends LossCase[Double] {
 
-    trait ret {
-      def Dom: Loss[A]
-
-      def Rng: Loss[B]
-    }
+    trait ret
 
   }
 
-  case class PairLC[A, B]() extends LossCase[(A, B)]
+  trait ArrLCRet[A, B] {
+    def Dom: Loss[A]
 
-  case class ArrLoss[A, BL](seq: Seq[(A, BL)])
+    def Rng: Loss[B]
+  }
 
-  implicit def arrLoss[A, B](a: Loss[A], b: Loss[B]) = new Loss[A => B] {
+  case class ArrLC[A, B]() extends LossCase[A => B] {
+    override type ret = ArrLCRet[A, B]
+  }
 
-    override def m: Monoid[loss] = ???
+  trait PairLCRet[A, B] {
+    def Fst: Loss[A]
 
-    override def conv: ((A) => B) => Eval[(A) => B] = ???
+    def Snd: Loss[B]
+  }
 
-    override val lc: LossCase[(A) => B] = ???
+  case class PairLC[A, B]() extends LossCase[(A, B)] {
+    override type ret = PairLCRet[A, B]
+  }
 
-    override def lca: lc.ret = ???
+  implicit def pairLoss[A, B](implicit al: Loss[A], bl : Loss[B]): Loss.Aux[(A, B), (al.loss, bl.loss)] = new Loss[(A, B)] {
+
+    override def conv: ((A, B)) => Eval[(A, B)] = p => pairEval(al.conv(p._1), bl.conv(p._2))
+
+    override val lc: LossCase.Aux[(A, B), PairLCRet[A, B]] = PairLC[A, B]()
+
+    override def lca: lc.ret = new PairLCRet[A, B] {
+      override def Fst: Loss[A] = al
+
+      override def Snd: Loss[B] = bl
+    }
+
+    override type ret = (al.loss, bl.loss)
+
+    override def m: Monoid[(al.loss, bl.loss)] = new Monoid[(al.loss, bl.loss)] {
+      override def zero: (al.loss, bl.loss) = (al.m.zero, bl.m.zero)
+
+      override def append(f1: (al.loss, bl.loss), f2: => (al.loss, bl.loss)): (al.loss, bl.loss) =
+        (al.m.append(f1._1, f2._1), bl.m.append(f1._2, f2._2))
+    }
+  }
+  case class ArrLoss[A, BL](seq: Seq[(Eval[A], BL)])
+
+  implicit def arrLoss[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[A => B, ArrLoss[A, bl.loss]] = new Loss[A => B] {
+
+    override type ret = ArrLoss[A, bl.loss]
+
+    override def m: Monoid[loss] = new Monoid[loss] {
+      override def zero: loss = ArrLoss(Seq())
+
+      override def append(f1: loss, f2: => loss): loss = ArrLoss(f1.seq ++ f2.seq)
+    }
+
+    override def conv: (A => B) => Eval[A => B] = ab => arrEval[A, B, al.loss, bl.loss](a =>
+      (bl.conv(ab(a.eval)), _ => al.m.zero))(al, bl)
+
+    override val lc: LossCase.Aux[A => B, ArrLCRet[A, B]] = ArrLC()
+
+    override def lca: lc.ret = new ArrLCRet[A, B] {
+      override def Dom: Loss[A] = al
+
+      override def Rng: Loss[B] = bl
+    }
+  }
+
+  case class DLoss(d: Double)
+
+  implicit def dLoss: Loss.Aux[Double, DLoss] = new Loss[Double] {
+    override def m: Monoid[DLoss] = new Monoid[DLoss] {
+      override def zero: DLoss = DLoss(0)
+
+      override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.d + f2.d)
+    }
+
+    override def conv: Double => Eval[Double] = DEval
+
+    override val lc: LossCase.Aux[Double, DoubleLC.ret] = DoubleLC
+
+    override def lca: lc.ret = new DoubleLC.ret {}
+
+    override type ret = DLoss
   }
 
   trait Loss[X] extends TypeCase[Loss, X] {
@@ -91,7 +195,12 @@ object EvalLanguage {
     type Aux[X, XL] = Loss[X] {type ret = XL}
   }
 
-  def aeval[A, B](ab : Eval[A => B]) : ArrEval[A, B] = witness(ab.ec.unique(ArrEC[A, B]()))(ab.eca)
+  def aeval[A, B](ab: Eval[A => B]): ArrEval[A, B] = witness(ab.ec.unique(ArrEC[A, B]()))(ab.eca)
+
+  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
+
+  def deval(d: Eval[Double]): Double = witness(d.ec.unique(DEC))(d.eca)
+
   class EvalLanguage extends Language[Loss, Eval] {
     override def ArrInfo[A, B]: Loss[A] => Loss[B] => Loss[A => B] = x => y => arrLoss(x, y)
 
@@ -99,7 +208,7 @@ object EvalLanguage {
 
     override def ArrRngInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrLC[A, B]()))(l.lca).Rng
 
-    override def app[A, B] = f => x => aeval(f).forward(x).eb
+    override def app[A, B] = f => x => aeval(f).forward(x)(ArrDomInfo(ReprInfo(f)), ArrRngInfo(ReprInfo(f))).eb
 
     override def S[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]): Eval[(A => B => C) => (A => B) => A => C] =
       arrEval[
@@ -114,60 +223,63 @@ object EvalLanguage {
             val c = aeval(bc.eb).forward(b.eb)
             (c.eb, l => at.m.append(bc.backward(ArrLoss(Seq((b.eb, l)))), b.backward(c.backward(l))))
           })(at, ct), l => ArrLoss(l.seq.map(x => (x._1, {
-            val bc = abc.aeval[A, B => C](x._1)(refl[A => B => C], at, arrLoss(bt, ct))
-            val b = ab.aeval[A, B](x._1)(refl[A => B], at, bt)
-            val c = bc._1.aeval[B, C](b._1)(refl[B => C], bt, ct)
-            c._2(x._2)
+            val bc = aeval(abc).forward(x._1)
+            val b = aeval(ab).forward(x._1)
+            val c = aeval(bc.eb).forward(b.eb)
+            c.backward(x._2)
           }))))), l => ArrLoss(l.seq.flatMap(x => x._2.seq.map(y => (
-          y._1, ArrLoss(Seq((x._1.aeval(y._1)(refl[A => B], at, bt)._1, y._2)))))))))
+          y._1, ArrLoss(Seq((app(x._1)(y._1), y._2)))))))))
 
     override def K[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => B => A] =
-      ArrEval[A, B => A, at.loss, ArrLoss[B, at.loss]](a => (
-        ArrEval[B, A, bt.loss, at.loss](_ => (a, _ => bt.m.zero))(bt, at),
+      arrEval[A, B => A, at.loss, ArrLoss[B, at.loss]](a => (
+        arrEval[B, A, bt.loss, at.loss](_ => (a, _ => bt.m.zero))(bt, at),
         l => l.seq.map(_._2).fold(at.m.zero)((l, r) => at.m.append(l, r))))(at, arrLoss(bt, at))
 
-    override def I[A](implicit at: Loss[A]): Eval[A => A] = ArrEval[A, A, at.loss, at.loss](x => (x, y => y))(at, at)
+    override def I[A](implicit at: Loss[A]): Eval[A => A] = arrEval[A, A, at.loss, at.loss](x => (x, y => y))(at, at)
 
     override def LitD: Double => Eval[Double] = DEval
 
     override def PlusD: Eval[Double => Double => Double] =
-      ArrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
-        (ArrEval[Double, Double, DLoss, DLoss](
-          r => (DEval(l.deval + r.deval), rl => rl)),
-          ll => DLoss(ll.seq.map(_._2.x).sum)))
+      arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
+        (arrEval[Double, Double, DLoss, DLoss](
+          r => (DEval(deval(l) + deval(r)), rl => rl)),
+          ll => DLoss(ll.seq.map(_._2.d).sum)))
 
     override def MultD: Eval[Double => Double => Double] =
-      ArrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
-        (ArrEval[Double, Double, DLoss, DLoss](
-          r => (DEval(l.deval * r.deval), rl => DLoss(l.deval * rl.x))),
-          ll => DLoss(ll.seq.map(l => l._1.deval * l._2.x).sum)))
+      arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
+        (arrEval[Double, Double, DLoss, DLoss](
+          r => (DEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
+          ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
     override def ReprInfo[A]: Eval[A] => Loss[A] = _.loss
 
     override def Y[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A => B) => A => B) => A => B] = {
       type abt = ArrLoss[A, bt.loss]
-      ArrEval[(A => B) => A => B, A => B, ArrLoss[A => B, abt], abt](abab => {
-        val ab = ArrEval[A, B, at.loss, bt.loss](a => app(abab)(app(Y[A, B])(abab)).aeval(a))(at, bt)
+      arrEval[(A => B) => A => B, A => B, ArrLoss[A => B, abt], abt](abab => {
+        val ab = arrEval[A, B, at.loss, bt.loss](a => {
+          val fa = aeval(app(abab)(app(Y[A, B])(abab))).forward(a)(at, bt)
+          (fa.eb, fa.backward)
+        })(at, bt)
         (ab, abl => ArrLoss(abl.seq.map(p => (ab, ArrLoss(Seq(p))))))
       })
     }
 
     override def fst[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
-      ArrEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (p.peval(refl[(A, B)])._1, al => (al, bt.m.zero)))(pairLoss(at, bt), at)
+      arrEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(pairLoss(at, bt), at)
 
     override def snd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
-      ArrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (p.peval(refl[(A, B)])._2, bl => (at.m.zero, bl)))(pairLoss(at, bt), bt)
+      arrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(pairLoss(at, bt), bt)
 
     override def mkPair[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
-      ArrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (ArrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
-        (PairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
+      arrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (arrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
+        (pairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
         at, arrLoss(bt, pairLoss(at, bt)))
 
     override def PairInfo[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = a => b => pairLoss(a, b)
 
-    override def PairFstInfo[A, B]: Loss[(A, B)] => Loss[A] = _.PairFst(refl[(A, B)])
+    override def PairFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
 
-    override def PairSndInfo[A, B]: Loss[(A, B)] => Loss[B] = _.PairSnd(refl[(A, B)])
+    override def PairSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
 
     override def DoubleInfo: Loss[Double] = dLoss
   }
