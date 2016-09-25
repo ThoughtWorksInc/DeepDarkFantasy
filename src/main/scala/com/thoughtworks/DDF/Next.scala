@@ -62,7 +62,26 @@ object Next {
     override def PairSndInfo[A, B]: Info[Arg => (A, B)] => Info[Arg => B] = p =>
       iconv(base.PairSndInfo(base.ArrRngInfo(p)))
 
-    override def DoubleInfo: Info[(Arg) => Double] = iconv(base.DoubleInfo)
+    override def DoubleInfo: Info[Arg => Double] = iconv(base.DoubleInfo)
+
+    override def left[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]): Repr[Arg => A => Either[A, B]] =
+      rconv(base.left[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
+
+    override def right[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]): Repr[Arg => B => Either[A, B]] =
+      rconv(base.right[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
+
+    override def sumMatch[A, B, C](implicit at: Info[Arg => A], bt: Info[Arg => B], ct: Info[Arg => C]):
+    Repr[Arg => (A => C) => (B => C) => (Either[A, B]) => C] =
+      rconv(base.sumMatch[A, B, C](base.ArrRngInfo(at), base.ArrRngInfo(bt), base.ArrRngInfo(ct)))
+
+    override def SumInfo[A, B]: Info[Arg => A] => Info[Arg => B] => Info[Arg => Either[A, B]] = a => b =>
+      iconv(base.SumInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
+
+    override def SumLeftInfo[A, B]: Info[Arg => Either[A, B]] => Info[Arg => A] = ab =>
+      iconv(base.SumLeftInfo(base.ArrRngInfo(ab)))
+
+    override def SumRightInfo[A, B]: Info[Arg => Either[A, B]] => Info[Arg => B] = ab =>
+      iconv(base.SumRightInfo(base.ArrRngInfo(ab)))
   }
 
 }

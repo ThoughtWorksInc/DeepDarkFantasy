@@ -23,6 +23,13 @@ object SimpleLanguage {
     override def PairSndInfo[A, B]: NoInfo[(A, B)] => NoInfo[B] = _ => noInfo
 
     override def DoubleInfo: NoInfo[Double] = noInfo
+
+    override def SumInfo[A, B]: NoInfo[A] => NoInfo[B] => NoInfo[Either[A, B]] = _ => _ => noInfo
+
+    override def SumLeftInfo[A, B]: NoInfo[Either[A, B]] => NoInfo[A] = _ => noInfo
+
+    override def SumRightInfo[A, B]: NoInfo[Either[A, B]] => NoInfo[B] = _ => noInfo
+
   }
 
 }

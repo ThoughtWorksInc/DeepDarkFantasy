@@ -27,6 +27,13 @@ object ShowLanguage {
     override def snd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[((A, B)) => B] = Show("snd")
 
     override def fst[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[((A, B)) => A] = Show("fst")
+
+    override def left[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[(A) => Either[A, B]] = Show("left")
+
+    override def right[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[(B) => Either[A, B]] = Show("right")
+
+    override def sumMatch[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]):
+    Show[((A) => C) => ((B) => C) => (Either[A, B]) => C] = Show("sumMatch")
   }
 
 }
