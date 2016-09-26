@@ -14,7 +14,7 @@ object EvalLanguage {
   trait ArrEval[A, B] {
 
     trait backward[AL, BL] {
-      def eb: Eval[B]
+      val eb: Eval[B]
 
       def backward: BL => AL
     }
@@ -366,6 +366,27 @@ object EvalLanguage {
               filter(x => x._1.isRight).map(x => (x._1.right.get, x._2))))),
           l => ArrLoss(l.seq.flatMap(x =>
             x._2.seq.map(y => (seval(y._1), y._2)).filter(y => y._1.isLeft).map(y => (y._1.left.get, y._2))))))
+
+    override def B[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(B => C) => (A => B) => A => C] = ???
+
+    override def C[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => B => A => C] =
+      arrEval[A => B => C, B => A => C, ArrLoss[A, ArrLoss[B, ci.loss]], ArrLoss[B, ArrLoss[A, ci.loss]]](abc =>
+        (arrEval[B, A => C, bi.loss, ArrLoss[A, ci.loss]](b =>
+          (arrEval[A, C, ai.loss, ci.loss](a => {
+            val bc = aeval(abc).forward(a)
+            val c = aeval(bc.eb).forward(b)
+            (c.eb, l => bc.backward(ArrLoss(Seq((b, l)))))
+          })(ai, ci), l => l.seq.map(p => aeval(aeval(abc).forward(p._1).eb).forward(b).backward(p._2)).
+            foldRight(bi.m.zero)((l, r) => bi.m.append(l, r))))(bi, arrLoss(ai, ci)), l => ArrLoss(l.seq.flatMap(b => b._2.seq.map(a =>
+          (a._1, ArrLoss(Seq((b._1, a._2)))))))))
+
+    override def W[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => A => B) => A => B] =
+      arrEval[A => A => B, A => B, ArrLoss[A, ArrLoss[A, bi.loss]], ArrLoss[A, bi.loss]](aab =>
+        (arrEval[A, B, ai.loss, bi.loss](a => {
+          val ab = aeval(aab).forward(a)
+          val b = aeval(ab.eb).forward(a)
+          (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrLoss(Seq((a, bl))))))
+        })(ai, bi), l => ArrLoss(l.seq.map(x => (x._1, ArrLoss(Seq((x._1, x._2))))))))
   }
 
 }

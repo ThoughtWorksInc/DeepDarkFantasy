@@ -34,6 +34,12 @@ object ShowLanguage {
 
     override def sumMatch[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]):
     Show[((A) => C) => ((B) => C) => (Either[A, B]) => C] = Show("sumMatch")
+
+    override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): Show[(B => C) => (A => B) => A => C] = Show("B")
+
+    override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): Show[(A => A => B) => A => B] = Show("W")
+
+    override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): Show[(A => B => C) => B => A => C] = Show("C")
   }
 
 }
