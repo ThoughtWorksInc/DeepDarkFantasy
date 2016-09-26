@@ -1,7 +1,5 @@
 package com.thoughtworks.DDF
 
-import scala.language.higherKinds
-
 object Next {
 
   case class NextLanguage[Info[_], Repr[_], Arg](base: Language[Info, Repr])(implicit argt: Info[Arg]) extends

@@ -1,6 +1,5 @@
 package com.thoughtworks.DDF
 
-import scala.language.higherKinds
 object SimpleLanguage {
 
   final case class NoInfo[X]()

@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF
 
-import scala.language.higherKinds
+import com.thoughtworks.DDF.Combinators.{SKILang, YLang}
 
 trait Language[Info[_], Repr[_]] extends
   PairLang[Info, Repr] with

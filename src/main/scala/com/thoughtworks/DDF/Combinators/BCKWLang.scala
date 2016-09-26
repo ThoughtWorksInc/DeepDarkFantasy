@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Combinators
 
 trait BCKWLang[Info[_], Repr[_]] extends
   BLang[Info, Repr] with
