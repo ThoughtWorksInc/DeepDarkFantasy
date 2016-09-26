@@ -367,7 +367,17 @@ object EvalLanguage {
           l => ArrLoss(l.seq.flatMap(x =>
             x._2.seq.map(y => (seval(y._1), y._2)).filter(y => y._1.isLeft).map(y => (y._1.left.get, y._2))))))
 
-    override def B[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(B => C) => (A => B) => A => C] = ???
+    override def B[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(B => C) => (A => B) => A => C] =
+      arrEval[B => C, (A => B) => A => C, ArrLoss[B, ci.loss], ArrLoss[A => B, ArrLoss[A, ci.loss]]](bc =>
+        (arrEval[A => B, A => C, ArrLoss[A, bi.loss], ArrLoss[A, ci.loss]](ab => (arrEval[A, C, ai.loss, ci.loss](a => {
+          val b = aeval(ab).forward(a)
+          val c = aeval(bc).forward(b.eb)
+          (c.eb, l => b.backward(c.backward(l)))
+        })(ai, ci), l => ArrLoss(l.seq.map(x => {
+          val b = aeval(ab).forward(x._1)
+          val c = aeval(bc).forward(b.eb)
+          (x._1, c.backward(x._2))
+        })))), l => ArrLoss(l.seq.flatMap(x => x._2.seq.map(y => (app(x._1)(y._1), y._2))))))
 
     override def C[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => B => A => C] =
       arrEval[A => B => C, B => A => C, ArrLoss[A, ArrLoss[B, ci.loss]], ArrLoss[B, ArrLoss[A, ci.loss]]](abc =>
