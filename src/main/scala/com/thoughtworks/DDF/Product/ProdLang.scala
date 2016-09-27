@@ -14,4 +14,8 @@ trait ProdLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
   def fst[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => A]
 
   def snd[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => B]
+
+  def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(((A, B)) => C) => A => B => C]
+
+  def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(A => B => C) => ((A, B)) => C]
 }

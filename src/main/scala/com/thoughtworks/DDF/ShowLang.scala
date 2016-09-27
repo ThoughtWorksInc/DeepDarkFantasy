@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF
 
-trait ShowLang extends SimpleLang[Show] {
+class ShowLang extends SimpleLang[Show] {
   override def app[A, B] = f => x => Show("(" + f.s + " " + x.s + ")")
 
   override def S[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("S")
@@ -34,4 +34,8 @@ trait ShowLang extends SimpleLang[Show] {
   override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("W")
 
   override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("C")
+
+  override def curry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("curry")
+
+  override def uncurry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("uncurry")
 }

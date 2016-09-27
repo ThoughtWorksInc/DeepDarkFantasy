@@ -5,4 +5,4 @@ import com.thoughtworks.DDF.Double.DEval
 import com.thoughtworks.DDF.Product.ProdEval
 import com.thoughtworks.DDF.Sum.SumEval
 
-class EvalLang extends Lang[Loss, Eval] with CombEval with ProdEval with DEval with SumEval
+class EvalLang extends ProdEval with Lang[Loss, Eval] with CombEval with DEval with SumEval

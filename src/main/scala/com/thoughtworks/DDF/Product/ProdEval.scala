@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait ProdEval extends ProdLang[Loss, Eval] with ArrEval {
+class ProdEval extends ProdLang[Loss, Eval] with ArrEval {
   def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
 
   implicit def pairLoss[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[(A, B), (al.loss, bl.loss)] = new Loss[(A, B)] {
@@ -57,4 +57,8 @@ trait ProdEval extends ProdLang[Loss, Eval] with ArrEval {
   override def ProdFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
 
   override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
+
+  def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(((A, B)) => C) => A => B => C] = ???
+
+  def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => ((A, B)) => C] = ???
 }

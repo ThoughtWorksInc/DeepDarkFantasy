@@ -78,14 +78,24 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
     iconv(base.SumRightInfo(base.ArrRngInfo(ab)))
 
   override def B[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
-  Repr[Arg => (B => C) => (A => B) => A => C] = rconv(base.B[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+  Repr[Arg => (B => C) => (A => B) => A => C] =
+    rconv(base.B[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
 
   override def W[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Repr[Arg => (A => A => B) => A => B] =
     rconv(base.W[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 
   override def C[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
-  Repr[Arg => (A => B => C) => B => A => C] = rconv(base.C[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+  Repr[Arg => (A => B => C) => B => A => C] =
+    rconv(base.C[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
 
   override def ArrInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Info[Arg => A => B] =
     iconv(base.ArrInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+
+  override def curry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
+  Repr[Arg => (((A, B)) => C) => A => B => C] =
+    rconv(base.curry[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+
+  override def uncurry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
+  Repr[Arg => (A => B => C) => ((A, B)) => C] =
+    rconv(base.uncurry[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
 }
