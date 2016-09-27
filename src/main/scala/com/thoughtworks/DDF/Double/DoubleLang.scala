@@ -1,4 +1,6 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Double
+
+import com.thoughtworks.DDF.Arr.ArrLang
 
 trait DoubleLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
   def DoubleInfo: Info[Double]

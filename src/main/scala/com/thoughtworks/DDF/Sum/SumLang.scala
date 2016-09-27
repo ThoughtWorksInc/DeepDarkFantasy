@@ -1,4 +1,6 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Sum
+
+import com.thoughtworks.DDF.Arr.ArrLang
 
 trait SumLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
   def left[A, B](implicit at: Info[A], bt: Info[B]): Repr[A => Either[A, B]]

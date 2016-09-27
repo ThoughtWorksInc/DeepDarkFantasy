@@ -1,4 +1,6 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Pair
+
+import com.thoughtworks.DDF.Arr.ArrLang
 
 trait PairLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
   def PairInfo[A, B]: Info[A] => Info[B] => Info[(A, B)]
