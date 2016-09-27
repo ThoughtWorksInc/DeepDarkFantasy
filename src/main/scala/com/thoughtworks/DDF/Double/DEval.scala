@@ -1,11 +1,12 @@
 package com.thoughtworks.DDF.Double
 
+import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
 import com.thoughtworks.DDF._
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait DEval extends DLang[Loss, Eval] {
+trait DEval extends DLang[Loss, Eval] with ArrEval {
   def dEval(d: Double) = new Eval[Double] {
     override val loss: Loss[Double] = dLoss
 
@@ -33,4 +34,21 @@ trait DEval extends DLang[Loss, Eval] {
   }
 
   def deval(d: Eval[Double]): Double = witness(d.ec.unique(DEC))(d.eca)
+
+  override def LitD: Double => Eval[Double] = dEval
+
+  override def PlusD: Eval[Double => Double => Double] =
+    arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
+      (arrEval[Double, Double, DLoss, DLoss](
+        r => (dEval(deval(l) + deval(r)), rl => rl)),
+        ll => DLoss(ll.seq.map(_._2.d).sum)))
+
+  override def MultD: Eval[Double => Double => Double] =
+    arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
+      (arrEval[Double, Double, DLoss, DLoss](
+        r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
+        ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
+
+  override def DoubleInfo: Loss[Double] = dLoss
+
 }
