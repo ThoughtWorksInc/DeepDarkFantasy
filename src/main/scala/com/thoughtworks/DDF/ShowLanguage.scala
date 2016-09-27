@@ -10,36 +10,35 @@ object ShowLanguage {
 
     override def S[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("S")
 
-    override def K[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[A => B => A] = Show("K")
+    override def K[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("K")
 
-    override def I[A](implicit at: NoInfo[A]): Show[A => A] = Show("I")
+    override def I[A](implicit at: NoInfo[A]) = Show("I")
 
-    override def LitD: Double => Show[Double] = d => Show(d.toString)
+    override def LitD = d => Show(d.toString)
 
-    override def PlusD: Show[Double => Double => Double] = Show("+")
+    override def PlusD = Show("+")
 
-    override def MultD: Show[Double => Double => Double] = Show("*")
+    override def MultD = Show("*")
 
-    override def Y[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[((A => B) => (A => B)) => (A => B)] = Show("Y")
+    override def Y[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("Y")
 
-    override def mkPair[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[(A) => (B) => (A, B)] = Show("mkPair")
+    override def mkPair[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
 
-    override def snd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[((A, B)) => B] = Show("snd")
+    override def snd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("snd")
 
-    override def fst[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[((A, B)) => A] = Show("fst")
+    override def fst[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("fst")
 
-    override def left[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[(A) => Either[A, B]] = Show("left")
+    override def left[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("left")
 
-    override def right[A, B](implicit at: NoInfo[A], bt: NoInfo[B]): Show[(B) => Either[A, B]] = Show("right")
+    override def right[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("right")
 
-    override def sumMatch[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]):
-    Show[((A) => C) => ((B) => C) => (Either[A, B]) => C] = Show("sumMatch")
+    override def sumMatch[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("sumMatch")
 
-    override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): Show[(B => C) => (A => B) => A => C] = Show("B")
+    override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("B")
 
-    override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): Show[(A => A => B) => A => B] = Show("W")
+    override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("W")
 
-    override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): Show[(A => B => C) => B => A => C] = Show("C")
+    override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("C")
   }
 
 }
