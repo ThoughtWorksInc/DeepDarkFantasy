@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Arr
 
-import com.thoughtworks.DDF.RILang
+import com.thoughtworks.DDF.RI.RILang
 
 trait ArrLang[Info[_], Repr[_]] extends RILang[Info, Repr] {
   def ArrInfo[A, B]: Info[A] => Info[B] => Info[A => B]

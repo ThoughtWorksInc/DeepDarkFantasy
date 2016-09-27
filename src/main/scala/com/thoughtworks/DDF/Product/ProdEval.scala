@@ -1,33 +1,13 @@
 package com.thoughtworks.DDF.Product
 
+import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
 import com.thoughtworks.DDF.Eval._
+
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-object ProdEval {
-  case class PairEC[A, B]() extends EvalCase[(A, B)] {
-    override type ret = (Eval[A], Eval[B])
-  }
-
-  def pairEval[A, B](a: Eval[A], b: Eval[B])(implicit al: Loss[A], bl: Loss[B]) = new Eval[(A, B)] {
-    override val loss: Loss[(A, B)] = pairLoss(al, bl)
-
-    override def eval: (A, B) = (a.eval, b.eval)
-
-    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = PairEC()
-
-    override def eca: ec.ret = (a, b)
-  }
-
-  trait PairLCRet[A, B] {
-    def Fst: Loss[A]
-
-    def Snd: Loss[B]
-  }
-
-  case class PairLC[A, B]() extends LossCase[(A, B)] {
-    override type ret = PairLCRet[A, B]
-  }
+trait ProdEval extends ProdLang[Loss, Eval] with ArrEval {
+  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
 
   implicit def pairLoss[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[(A, B), (al.loss, bl.loss)] = new Loss[(A, B)] {
 
@@ -51,5 +31,30 @@ object ProdEval {
     }
   }
 
-  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
+  def pairEval[A, B](a: Eval[A], b: Eval[B])(implicit al: Loss[A], bl: Loss[B]) = new Eval[(A, B)] {
+    override val loss: Loss[(A, B)] = pairLoss(al, bl)
+
+    override def eval: (A, B) = (a.eval, b.eval)
+
+    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = PairEC()
+
+    override def eca: ec.ret = (a, b)
+  }
+
+  override def fst[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
+    arrEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(pairLoss(at, bt), at)
+
+  override def snd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
+    arrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(pairLoss(at, bt), bt)
+
+  override def mkProd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
+    arrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (arrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
+      (pairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
+      at, arrLoss(bt, pairLoss(at, bt)))
+
+  override def ProdInfo[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = a => b => pairLoss(a, b)
+
+  override def ProdFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
+
+  override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
 }

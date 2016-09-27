@@ -2,8 +2,8 @@ package com.thoughtworks.DDF
 
 object Next {
 
-  case class NextLanguage[Info[_], Repr[_], Arg](base: Language[Info, Repr])(implicit argt: Info[Arg]) extends
-    Language[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] {
+  case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
+    Lang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] {
     override def ArrInfo[A, B]: Info[Arg => A] => Info[Arg => B] => Info[Arg => A => B] = l => r =>
       iconv(base.ArrInfo(base.ArrRngInfo(l))(base.ArrRngInfo(r)))
 

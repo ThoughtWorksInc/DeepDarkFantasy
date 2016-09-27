@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.RI
 
 trait RILang[Info[_], Repr[_]] {
   def ReprInfo[A]: Repr[A] => Info[A]

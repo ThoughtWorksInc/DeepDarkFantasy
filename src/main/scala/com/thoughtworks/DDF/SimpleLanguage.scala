@@ -6,7 +6,7 @@ object SimpleLanguage {
 
   implicit def noInfo[X]: NoInfo[X] = NoInfo[X]()
 
-  trait SimpleLanguage[Repr[_]] extends Language[NoInfo, Repr] {
+  trait SimpleLang[Repr[_]] extends Lang[NoInfo, Repr] {
     override def ArrInfo[A, B]: NoInfo[A] => NoInfo[B] => NoInfo[A => B] = _ => _ => noInfo
 
     override def ArrDomInfo[A, B]: NoInfo[A => B] => NoInfo[A] = _ => noInfo

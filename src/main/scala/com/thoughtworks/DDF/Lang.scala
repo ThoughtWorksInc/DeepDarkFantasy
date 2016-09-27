@@ -6,9 +6,9 @@ import com.thoughtworks.DDF.Double.DLang
 import com.thoughtworks.DDF.Product.ProdLang
 import com.thoughtworks.DDF.Sum.SumLang
 
-trait Language[Info[_], Repr[_]] extends
+trait Lang[Info[_], Repr[_]] extends
   ProdLang[Info, Repr] with
   SumLang[Info, Repr] with
   ArrLang[Info, Repr] with
   DLang[Info, Repr] with
-  Combinators[Info, Repr]
+  Comb[Info, Repr]

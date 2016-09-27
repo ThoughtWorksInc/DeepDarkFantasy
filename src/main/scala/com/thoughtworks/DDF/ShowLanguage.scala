@@ -5,7 +5,7 @@ import SimpleLanguage._
 object ShowLanguage {
   case class Show[X](s: String)
 
-  class ShowLanguage extends SimpleLanguage[Show] {
+  class ShowLang extends SimpleLang[Show] {
     override def app[A, B] = f => x => Show("(" + f.s + " " + x.s + ")")
 
     override def S[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("S")
