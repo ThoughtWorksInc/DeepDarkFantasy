@@ -2,7 +2,7 @@ package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Eval._
 import com.thoughtworks.DDF.Arr.ArrEval._
-import com.thoughtworks.DDF.Pair.PairEval._
+import com.thoughtworks.DDF.Product.ProdEval._
 import com.thoughtworks.DDF.Double.DEval._
 import com.thoughtworks.DDF.Sum.SumEval._
 
@@ -79,16 +79,16 @@ object EvalLanguage {
     override def snd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
       arrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(pairLoss(at, bt), bt)
 
-    override def mkPair[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
+    override def mkProd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
       arrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (arrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
         (pairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
         at, arrLoss(bt, pairLoss(at, bt)))
 
-    override def PairInfo[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = a => b => pairLoss(a, b)
+    override def ProdInfo[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = a => b => pairLoss(a, b)
 
-    override def PairFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
+    override def ProdFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
 
-    override def PairSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
+    override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
 
     override def DoubleInfo: Loss[Double] = dLoss
 

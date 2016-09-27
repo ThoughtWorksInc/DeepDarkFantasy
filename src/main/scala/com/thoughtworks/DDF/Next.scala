@@ -42,8 +42,8 @@ object Next {
     override def Y[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]):
     Repr[(Arg) => ((A => B) => A => B) => A => B] = rconv(base.Y[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
 
-    override def mkPair[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]): Repr[Arg => A => B => (A, B)] =
-      rconv(base.mkPair[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
+    override def mkProd[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]): Repr[Arg => A => B => (A, B)] =
+      rconv(base.mkProd[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
 
     override def fst[A, B](implicit at: Info[(Arg) => A], bt: Info[(Arg) => B]): Repr[(Arg) => ((A, B)) => A] =
       rconv(base.fst(base.ArrRngInfo(at), base.ArrRngInfo(bt)))
@@ -51,14 +51,14 @@ object Next {
     override def snd[A, B](implicit at: Info[(Arg) => A], bt: Info[(Arg) => B]): Repr[(Arg) => ((A, B)) => B] =
       rconv(base.snd(base.ArrRngInfo(at), base.ArrRngInfo(bt)))
 
-    override def PairInfo[A, B]: (Info[(Arg) => A]) => (Info[(Arg) => B]) => Info[(Arg) => (A, B)] = a => b =>
-      iconv(base.PairInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
+    override def ProdInfo[A, B]: (Info[(Arg) => A]) => (Info[(Arg) => B]) => Info[(Arg) => (A, B)] = a => b =>
+      iconv(base.ProdInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
 
-    override def PairFstInfo[A, B]: Info[Arg => (A, B)] => Info[Arg => A] = p =>
-      iconv(base.PairFstInfo(base.ArrRngInfo(p)))
+    override def ProdFstInfo[A, B]: Info[Arg => (A, B)] => Info[Arg => A] = p =>
+      iconv(base.ProdFstInfo(base.ArrRngInfo(p)))
 
-    override def PairSndInfo[A, B]: Info[Arg => (A, B)] => Info[Arg => B] = p =>
-      iconv(base.PairSndInfo(base.ArrRngInfo(p)))
+    override def ProdSndInfo[A, B]: Info[Arg => (A, B)] => Info[Arg => B] = p =>
+      iconv(base.ProdSndInfo(base.ArrRngInfo(p)))
 
     override def DoubleInfo: Info[Arg => Double] = iconv(base.DoubleInfo)
 

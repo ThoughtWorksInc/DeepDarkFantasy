@@ -22,7 +22,7 @@ object ShowLanguage {
 
     override def Y[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("Y")
 
-    override def mkPair[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
+    override def mkProd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
 
     override def snd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("snd")
 

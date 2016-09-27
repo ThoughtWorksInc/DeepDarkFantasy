@@ -1,11 +1,10 @@
-package com.thoughtworks.DDF.Pair
+package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Eval._
-
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-object PairEval {
+object ProdEval {
   case class PairEC[A, B]() extends EvalCase[(A, B)] {
     override type ret = (Eval[A], Eval[B])
   }

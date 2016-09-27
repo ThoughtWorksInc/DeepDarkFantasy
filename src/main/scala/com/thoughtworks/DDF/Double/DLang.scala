@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arr.ArrLang
 
-trait DoubleLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
+trait DLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
   def DoubleInfo: Info[Double]
 
   def LitD: Double => Repr[Double]
