@@ -2,8 +2,6 @@ package com.thoughtworks.DDF
 
 case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
   Lang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] {
-  override def ArrInfo[A, B]: Info[Arg => A] => Info[Arg => B] => Info[Arg => A => B] = l => r =>
-    iconv(base.ArrInfo(base.ArrRngInfo(l))(base.ArrRngInfo(r)))
 
   override def ArrDomInfo[A, B]: Info[Arg => A => B] => Info[Arg => A] = x =>
     iconv(base.ArrDomInfo(base.ArrRngInfo(x)))
@@ -33,7 +31,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
 
   def rconv[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprInfo(r), argt))(r)
 
-  def iconv[X]: Info[X] => Info[Arg => X] = base.ArrInfo[Arg, X](argt)
+  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrInfo[Arg, X](argt, x)
 
   def in: Repr[Arg => Arg] = base.I
 
@@ -87,4 +85,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
 
   override def C[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
   Repr[Arg => (A => B => C) => B => A => C] = rconv(base.C[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+
+  override def ArrInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Info[Arg => A => B] =
+    iconv(base.ArrInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 }

@@ -50,7 +50,7 @@ trait ProdEval extends ProdLang[Loss, Eval] with ArrEval {
   override def mkProd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
     arrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a => (arrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
       (pairEval(a, b), _._2))(bt, pairLoss(at, bt)), _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
-      at, arrLoss(bt, pairLoss(at, bt)))
+      at, ArrInfo(bt, pairLoss(at, bt)))
 
   override def ProdInfo[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = a => b => pairLoss(a, b)
 

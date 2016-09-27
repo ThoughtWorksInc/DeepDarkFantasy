@@ -3,7 +3,7 @@ package com.thoughtworks.DDF
 trait SimpleLang[Repr[_]] extends Lang[NoInfo, Repr] {
   implicit def noInfo[X]: NoInfo[X] = NoInfo[X]()
 
-  override def ArrInfo[A, B]: NoInfo[A] => NoInfo[B] => NoInfo[A => B] = _ => _ => noInfo
+  override def ArrInfo[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) : NoInfo[A => B] = noInfo
 
   override def ArrDomInfo[A, B]: NoInfo[A => B] => NoInfo[A] = _ => noInfo
 

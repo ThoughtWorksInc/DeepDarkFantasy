@@ -6,5 +6,4 @@ object Preclude {
     import next._
     app(app(MultD)(in))(in)
   }
-
 }

@@ -6,7 +6,7 @@ import com.thoughtworks.DDF._
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait DEval extends DLang[Loss, Eval] with ArrEval {
+trait DEval extends ArrEval with DLang[Loss, Eval] {
   def dEval(d: Double) = new Eval[Double] {
     override val loss: Loss[Double] = dLoss
 

@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Arr
 import com.thoughtworks.DDF.RI.RILang
 
 trait ArrLang[Info[_], Repr[_]] extends RILang[Info, Repr] {
-  def ArrInfo[A, B]: Info[A] => Info[B] => Info[A => B]
+  implicit def ArrInfo[A, B](implicit ai : Info[A], bi : Info[B]) : Info[A => B]
 
   def ArrDomInfo[A, B]: Info[A => B] => Info[A]
 

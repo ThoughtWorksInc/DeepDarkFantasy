@@ -9,7 +9,7 @@ import scalaz.Monoid
 trait ArrEval extends ArrLang[Loss, Eval] with RIEval {
   def arrEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
-      override val loss: Loss[A => B] = arrLoss(al, bl)
+      override val loss: Loss[A => B] = ArrInfo
 
       override def eval: A => B = a => eca.forward(al.conv(a)).eb.eval
 
@@ -27,31 +27,29 @@ trait ArrEval extends ArrLang[Loss, Eval] with RIEval {
       }
     }
 
-  implicit def arrLoss[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[A => B, ArrLoss[A, bl.loss]] = new Loss[A => B] {
+  override implicit def ArrInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrLoss[A, bi.loss]] =
+    new Loss[A => B] {
+      override type ret = ArrLoss[A, bi.loss]
 
-    override type ret = ArrLoss[A, bl.loss]
+      override def m: Monoid[loss] = new Monoid[loss] {
+        override def zero: loss = ArrLoss(Seq())
 
-    override def m: Monoid[loss] = new Monoid[loss] {
-      override def zero: loss = ArrLoss(Seq())
+        override def append(f1: loss, f2: => loss): loss = ArrLoss(f1.seq ++ f2.seq)
+      }
 
-      override def append(f1: loss, f2: => loss): loss = ArrLoss(f1.seq ++ f2.seq)
+      override def conv: (A => B) => Eval[A => B] = ab => arrEval[A, B, ai.loss, bi.loss](a =>
+        (bi.conv(ab(a.eval)), _ => ai.m.zero))(ai, bi)
+
+      override val lc: LossCase.Aux[A => B, ArrLCRet[A, B]] = ArrLC()
+
+      override def lca: lc.ret = new ArrLCRet[A, B] {
+        override def Dom: Loss[A] = ai
+
+        override def Rng: Loss[B] = bi
+      }
     }
-
-    override def conv: (A => B) => Eval[A => B] = ab => arrEval[A, B, al.loss, bl.loss](a =>
-      (bl.conv(ab(a.eval)), _ => al.m.zero))(al, bl)
-
-    override val lc: LossCase.Aux[A => B, ArrLCRet[A, B]] = ArrLC()
-
-    override def lca: lc.ret = new ArrLCRet[A, B] {
-      override def Dom: Loss[A] = al
-
-      override def Rng: Loss[B] = bl
-    }
-  }
 
   def aeval[A, B](ab: Eval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrEC[A, B]()))(ab.eca)
-
-  override def ArrInfo[A, B]: Loss[A] => Loss[B] => Loss[A => B] = x => y => arrLoss(x, y)
 
   override def ArrDomInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrLC[A, B]()))(l.lca).Dom
 
