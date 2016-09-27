@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arr._
-import com.thoughtworks.DDF.Eval._
+import com.thoughtworks.DDF.{Eval, Loss}
 
 trait CombEval extends Comb[Loss, Eval] with ArrEval {
   override def S[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]): Eval[(A => B => C) => (A => B) => A => C] =

@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
-import com.thoughtworks.DDF.Eval._
+import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid

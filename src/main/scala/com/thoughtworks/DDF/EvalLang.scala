@@ -1,27 +1,26 @@
 package com.thoughtworks.DDF
 
-import com.thoughtworks.DDF.Eval._
 import com.thoughtworks.DDF.Arr._
 import com.thoughtworks.DDF.Combinators._
-import com.thoughtworks.DDF.Double.DEval._
+import com.thoughtworks.DDF.Double.{DEval, DLoss}
 import com.thoughtworks.DDF.Product.ProdEval
 import com.thoughtworks.DDF.Sum.SumEval._
 
 import scalaz.Leibniz._
 
-class EvalLang extends Lang[Loss, Eval] with ArrEval with CombEval with ProdEval {
-  override def LitD: Double => Eval[Double] = DEval
+class EvalLang extends Lang[Loss, Eval] with ArrEval with CombEval with ProdEval with DEval {
+  override def LitD: Double => Eval[Double] = dEval
 
   override def PlusD: Eval[Double => Double => Double] =
     arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
       (arrEval[Double, Double, DLoss, DLoss](
-        r => (DEval(deval(l) + deval(r)), rl => rl)),
+        r => (dEval(deval(l) + deval(r)), rl => rl)),
         ll => DLoss(ll.seq.map(_._2.d).sum)))
 
   override def MultD: Eval[Double => Double => Double] =
     arrEval[Double, Double => Double, DLoss, ArrLoss[Double, DLoss]](l =>
       (arrEval[Double, Double, DLoss, DLoss](
-        r => (DEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
+        r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
         ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
   override def DoubleInfo: Loss[Double] = dLoss

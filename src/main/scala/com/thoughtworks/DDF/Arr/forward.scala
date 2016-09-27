@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Arr
 
-import com.thoughtworks.DDF.Eval.{Eval, Loss}
+import com.thoughtworks.DDF.{Eval, Loss}
 
 trait forward[A, B] {
 

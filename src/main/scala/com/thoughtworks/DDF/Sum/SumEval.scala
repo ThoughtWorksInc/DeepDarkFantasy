@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Eval._
+import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid

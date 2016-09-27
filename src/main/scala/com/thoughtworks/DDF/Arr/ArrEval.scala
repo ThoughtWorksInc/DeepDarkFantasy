@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Arr
 
-import com.thoughtworks.DDF.Eval._
+import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 import com.thoughtworks.DDF.RI.RIEval
 
 import scalaz.Leibniz._

@@ -1,7 +1,6 @@
 package com.thoughtworks.DDF
 
 import Next.NextLang
-import scala.language.higherKinds
 
 object Preclude {
   def Square[Info[_], Repr[_]](implicit td: Info[Double], lang: Lang[Info, Repr]): Repr[Double => Double] = {
