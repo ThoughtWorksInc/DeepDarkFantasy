@@ -2,7 +2,6 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
 import com.thoughtworks.DDF._
-
 import scalaz.Leibniz._
 import scalaz.Monoid
 
@@ -50,5 +49,4 @@ trait DEval extends ArrEval with DLang[Loss, Eval] {
         ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
   override def DoubleInfo: Loss[Double] = dLoss
-
 }
