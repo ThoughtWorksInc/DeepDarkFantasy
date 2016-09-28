@@ -25,4 +25,9 @@ trait SimpleLang[Repr[_]] extends Lang[NoInfo, Repr] {
 
   override def SumRightInfo[A, B]: NoInfo[Either[A, B]] => NoInfo[B] = _ => noInfo
 
+  override implicit def ListInfo[A](implicit ai: NoInfo[A]): NoInfo[List[A]] = noInfo
+
+  override def ListElmInfo[A](implicit lai: NoInfo[List[A]]): NoInfo[A] = noInfo
+
+  override implicit def UnitInfo: NoInfo[Unit] = noInfo
 }

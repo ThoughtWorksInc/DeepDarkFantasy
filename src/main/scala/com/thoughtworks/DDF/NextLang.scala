@@ -98,4 +98,23 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
   override def uncurry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
   Repr[Arg => (A => B => C) => ((A, B)) => C] =
     rconv(base.uncurry[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+
+  override implicit def ListInfo[A](implicit ai: Info[Arg => A]): Info[Arg => List[A]] =
+    iconv(base.ListInfo(base.ArrRngInfo(ai)))
+
+  override def ListElmInfo[A](implicit lai: Info[Arg => List[A]]): Info[Arg => A] =
+    iconv(base.ListElmInfo(base.ArrRngInfo(lai)))
+
+  override def Nil[A](implicit ai: Info[Arg => A]): Repr[Arg => List[A]] = rconv(base.Nil(base.ArrRngInfo(ai)))
+
+  override def UnitInfo: Info[Arg => Unit] = iconv(base.UnitInfo)
+
+  override def mkUnit: Repr[Arg => Unit] = rconv(base.mkUnit)
+
+  override def Cons[A](implicit ai: Info[Arg => A]): Repr[Arg => A => List[A] => List[A]] =
+    rconv(base.Cons(base.ArrRngInfo(ai)))
+
+  override def listMatch[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]):
+  Repr[Arg => (Unit => B) => (A => List[A] => B) => List[A] => B] =
+    rconv(base.listMatch(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 }
