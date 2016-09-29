@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF
 
-case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
+//Exists only for pedantic purpose. use NextLang instead.
+case class NaiveNextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
   Lang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] {
 
   override def ArrDomInfo[A, B]: Info[Arg => A => B] => Info[Arg => A] = x =>
