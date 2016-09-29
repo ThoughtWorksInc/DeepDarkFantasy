@@ -1,12 +1,13 @@
 package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
+import com.thoughtworks.DDF.Unit.UnitEval
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait ListEval extends ListLang[Loss, Eval] with ArrEval {
+trait ListEval extends ListLang[Loss, Eval] with ArrEval with UnitEval {
   case class ListLC[A]() extends LossCase[List[A]] {
     override type ret = Loss[A]
   }
@@ -16,6 +17,7 @@ trait ListEval extends ListLang[Loss, Eval] with ArrEval {
   }
 
   def leval[A](e : Eval[List[A]]): List[Eval[A]] = witness(e.ec.unique(ListEC[A]()))(e.eca)
+
   def listEval[A](l : List[Eval[A]])(implicit ai: Loss[A]): Eval[List[A]] = new Eval[List[A]] {
     override def eca: ec.ret = l
 
@@ -49,36 +51,6 @@ trait ListEval extends ListLang[Loss, Eval] with ArrEval {
   override def ListElmInfo[A](implicit lai: Loss[List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)
 
   override def Nil[A](implicit ai: Loss[A]): Eval[List[A]] = listEval(scala.List())
-
-  override implicit def UnitInfo: Loss.Aux[Unit, Unit] = new Loss[Unit] {
-    override type ret = Unit
-
-    override def m: Monoid[loss] = new Monoid[loss] {
-      override def zero: loss = ()
-
-      override def append(f1: loss, f2: => loss): loss = ()
-    }
-
-    override def conv: Unit => Eval[Unit] = _ => mkUnit
-
-    override val lc: LossCase.Aux[Unit, Unit] = new LossCase[Unit] {
-      override type ret = Unit
-    }
-
-    override def lca: lc.ret = ()
-  }
-
-  override def mkUnit: Eval[Unit] = new Eval[Unit] {
-    override def eca: ec.ret = ()
-
-    override def eval: Unit = ()
-
-    override val ec: EvalCase.Aux[Unit, Unit] = new EvalCase[Unit] {
-      override type ret = Unit
-    }
-
-    override val loss: Loss[Unit] = UnitInfo
-  }
 
   override def Cons[A](implicit ai: Loss[A]): Eval[A => List[A] => List[A]] =
     arrEval[A, List[A] => List[A], ai.loss, ArrLoss[List[A], List[ai.loss]]](a =>
