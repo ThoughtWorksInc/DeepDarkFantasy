@@ -99,6 +99,11 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
 
   def lift[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprInfo(r), argt))(r)
 
+  def collapse[X]: Either[Repr[X], Repr[Arg => X]] => Repr[Arg => X] = {
+    case Right(x) => x
+    case Left(x) => lift(x)
+  }
+
   override def app[A, B]:
   Either[Repr[A => B], Repr[Arg => A => B]] =>
     Either[Repr[A], Repr[Arg => A]] =>
@@ -117,4 +122,6 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
     case Left(x) => base.ArrInfo(argt, base.ReprInfo(x))
     case Right(x) => base.ReprInfo(x)
   }
+
+  def in = Right(base.I[Arg])
 }
