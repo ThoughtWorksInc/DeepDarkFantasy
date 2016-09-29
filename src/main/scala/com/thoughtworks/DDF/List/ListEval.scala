@@ -104,4 +104,16 @@ trait ListEval extends ListLang[Loss, Eval] with ArrEval {
         })(ListInfo(ai), bi), l => ArrLoss(l.seq.filter(x => leval(x._1).nonEmpty).map(x =>
           (leval(x._1).head, ArrLoss(Seq((listEval(leval(x._1).tail), x._2)))))))),
         l => ArrLoss(l.seq.flatMap(x => x._2.seq.filter(y => leval(y._1).isEmpty).map(z => (mkUnit, z._2))))))
+
+  def zipEqLength[A, B] : List[A] => List[B] => List[(A, B)] = la => lb => {
+    assert(la.length == lb.length)
+    la.zip(lb)
+  }
+
+  override def listMap[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B) => List[A] => List[B]] =
+    arrEval[A => B, List[A] => List[B], ArrLoss[A, bi.loss], ArrLoss[List[A], List[bi.loss]]](ab =>
+      (arrEval[List[A], List[B], List[ai.loss], List[bi.loss]](la => {
+        val lb = leval(la).map(x => aeval(ab).forward(x))
+        (listEval(lb.map(_.eb)), l => zipEqLength(lb)(l).map(x => x._1.backward(x._2)))
+      }), l => ArrLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))
 }

@@ -117,4 +117,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
   override def listMatch[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]):
   Repr[Arg => (Unit => B) => (A => List[A] => B) => List[A] => B] =
     rconv(base.listMatch(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+
+  override def listMap[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Repr[Arg => (A => B) => List[A] => List[B]] =
+    rconv(base.listMap(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 }

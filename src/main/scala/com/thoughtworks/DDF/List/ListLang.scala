@@ -13,4 +13,6 @@ trait ListLang[Info[_], Repr[_]] extends UnitLang[Info, Repr] with ArrLang[Info,
   def Cons[A](implicit ai: Info[A]): Repr[A => List[A] => List[A]]
 
   def listMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(Unit => B) => (A => List[A] => B) => List[A] => B]
+
+  def listMap[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => List[A] => List[B]]
 }

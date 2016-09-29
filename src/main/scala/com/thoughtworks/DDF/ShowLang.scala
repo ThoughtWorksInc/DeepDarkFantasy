@@ -46,4 +46,6 @@ class ShowLang extends SimpleLang[Show] {
   override def Nil[A](implicit ai: NoInfo[A]) = Show("Nil")
 
   override def mkUnit = Show("mkUnit")
+
+  override def listMap[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMap")
 }
