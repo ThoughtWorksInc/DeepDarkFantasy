@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Lang
 
-case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
+case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi: Info[Arg]) extends
   Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {
 
   override def ArrDomInfo[A, B] = x => iconv(base.ArrDomInfo(base.ArrRngInfo(x)))
@@ -9,7 +9,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
 
   def rconv[X]: Repr[X] => Either[Repr[X], Repr[Arg => X]] = x => Left(x)
 
-  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrInfo[Arg, X](argt, x)
+  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrInfo[Arg, X](argi, x)
 
   override def ProdInfo[A, B] = a => b => iconv(base.ProdInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
 
@@ -97,7 +97,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
   override def B[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
     rconv(base.B(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
 
-  def lift[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprInfo(r), argt))(r)
+  def lift[X]: Repr[X] => Repr[Arg => X] = r => base.app(base.K[X, Arg](base.ReprInfo(r), argi))(r)
 
   def collapse[X]: Either[Repr[X], Repr[Arg => X]] => Repr[Arg => X] = {
     case Right(x) => x
@@ -111,7 +111,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
     case (Left(l), Left(r)) => Left(base.app(l)(r))
     case (Right(l), Right(r)) =>
       Right(base.app(base.app(base.S[Arg, A, B](
-        argt,
+        argi,
         base.ArrDomInfo(base.ArrRngInfo(base.ReprInfo(l))),
         base.ArrRngInfo(base.ArrRngInfo(base.ReprInfo(l)))))(l))(r))
     case (Left(l), Right(r)) => app(Right(lift(l)))(Right(r))
@@ -119,7 +119,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt
   }
 
   override def ReprInfo[A]: Either[Repr[A], Repr[Arg => A]] => Info[Arg => A] = {
-    case Left(x) => base.ArrInfo(argt, base.ReprInfo(x))
+    case Left(x) => base.ArrInfo(argi, base.ReprInfo(x))
     case Right(x) => base.ReprInfo(x)
   }
 
