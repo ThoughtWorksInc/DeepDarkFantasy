@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
+import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait SumEval extends SumLang[Loss, Eval] with ArrEval {
+trait EvalSum extends SumLang[Loss, Eval] with EvalArr {
   override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
     arrEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, sumLoss(at, bt))
 

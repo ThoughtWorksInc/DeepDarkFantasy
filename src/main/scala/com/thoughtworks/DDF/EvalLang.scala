@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF
 
-import com.thoughtworks.DDF.Combinators.CombEval
-import com.thoughtworks.DDF.Double.DEval
-import com.thoughtworks.DDF.List.ListEval
-import com.thoughtworks.DDF.Product.ProdEval
-import com.thoughtworks.DDF.Sum.SumEval
+import com.thoughtworks.DDF.Combinators.EvalComb
+import com.thoughtworks.DDF.Double.EvalD
+import com.thoughtworks.DDF.List.EvalList
+import com.thoughtworks.DDF.Product.EvalProd
+import com.thoughtworks.DDF.Sum.EvalSum
 
-class EvalLang extends Lang[Loss, Eval] with ProdEval with CombEval with DEval with SumEval with ListEval
+class EvalLang extends Lang[Loss, Eval] with EvalProd with EvalComb with EvalD with EvalSum with EvalList

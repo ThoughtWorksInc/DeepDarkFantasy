@@ -1,11 +1,11 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
+import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
 import com.thoughtworks.DDF._
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait DEval extends ArrEval with DLang[Loss, Eval] {
+trait EvalD extends EvalArr with DLang[Loss, Eval] {
   def dEval(d: Double) = new Eval[Double] {
     override val loss: Loss[Double] = dLoss
 

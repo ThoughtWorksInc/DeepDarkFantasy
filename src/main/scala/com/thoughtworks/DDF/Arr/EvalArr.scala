@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Arr
 
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
-import com.thoughtworks.DDF.RI.RIEval
+import com.thoughtworks.DDF.RI.EvalRI
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait ArrEval extends ArrLang[Loss, Eval] with RIEval {
+trait EvalArr extends ArrLang[Loss, Eval] with EvalRI {
   def arrEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
       override val loss: Loss[A => B] = ArrInfo

@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
+import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait ProdEval extends ProdLang[Loss, Eval] with ArrEval {
+trait EvalProd extends ProdLang[Loss, Eval] with EvalArr {
   def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
 
   implicit def pairLoss[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[(A, B), (al.loss, bl.loss)] = new Loss[(A, B)] {

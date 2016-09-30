@@ -1,13 +1,13 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arr.{ArrEval, ArrLoss}
-import com.thoughtworks.DDF.Unit.UnitEval
+import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
+import com.thoughtworks.DDF.Unit.EvalUnit
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait ListEval extends ListLang[Loss, Eval] with ArrEval with UnitEval {
+trait EvalList extends ListLang[Loss, Eval] with EvalArr with EvalUnit {
   case class ListLC[A]() extends LossCase[List[A]] {
     override type ret = Loss[A]
   }
