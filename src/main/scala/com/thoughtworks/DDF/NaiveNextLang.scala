@@ -1,9 +1,10 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Combinators.Comb
+import com.thoughtworks.DDF.Lang.Lang
 import com.thoughtworks.DDF.Unit.UnitLang
 
-//Exists only for pedantic purpose. use NextLang instead.
+//Exists only for pedantic purpose. Use NextLang instead.
 case class NaiveNextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
   Comb[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   UnitLang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]]{

@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Lang
 
 case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argt: Info[Arg]) extends
   Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {

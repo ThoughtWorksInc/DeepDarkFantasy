@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF
+package com.thoughtworks.DDF.Lang
 
 import com.thoughtworks.DDF.Arr.ArrLang
 import com.thoughtworks.DDF.Combinators._
