@@ -12,7 +12,7 @@ trait NaiveNextCombUnit[Info[_], Repr[_], Arg] extends
 }
 
 object NaiveNextCombUnit {
-  def apply[Info[_], Repr[_], Arg](implicit cu: CombUnit[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit cu: CombUnit[Info, Repr], arg: Info[Arg]) =
     new NaiveNextCombUnit[Info, Repr, Arg] {
       override implicit def base: CombUnit[Info, Repr] = cu
 

@@ -21,7 +21,7 @@ trait NaiveNextComb[Info[_], Repr[_], Arg] extends
 }
 
 object NaiveNextComb {
-  def apply[Info[_], Repr[_], Arg](implicit cu: Comb[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit cu: Comb[Info, Repr], arg: Info[Arg]) =
     new NaiveNextComb[Info, Repr, Arg] {
       override implicit def base: Comb[Info, Repr] = cu
 
