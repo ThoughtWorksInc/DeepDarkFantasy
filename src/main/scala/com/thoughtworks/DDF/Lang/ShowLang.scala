@@ -8,4 +8,8 @@ import com.thoughtworks.DDF.Sum.ShowSum
 import com.thoughtworks.DDF.Unit.ShowUnit
 import com.thoughtworks.DDF.Show
 
-class ShowLang extends SimpleLang[Show] with ShowComb with ShowD with ShowProd with ShowList with ShowSum with ShowUnit
+trait ShowLang extends SimpleLang[Show] with ShowComb with ShowD with ShowProd with ShowList with ShowSum with ShowUnit
+
+object ShowLang {
+  implicit def apply = new ShowLang {}
+}
