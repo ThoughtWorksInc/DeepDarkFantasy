@@ -11,7 +11,8 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
 
   def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrInfo[Arg, X](argi, x)
 
-  override def ProdInfo[A, B] = a => b => iconv(base.ProdInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
+  override implicit def ProdInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
+    iconv(base.ProdInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 
   override def ProdFstInfo[A, B] = p => iconv(base.ProdFstInfo(base.ArrRngInfo(p)))
 
@@ -19,7 +20,8 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
 
   override def DoubleInfo = iconv(base.DoubleInfo)
 
-  override def SumInfo[A, B] = a => b => iconv(base.SumInfo(base.ArrRngInfo(a))(base.ArrRngInfo(b)))
+  override implicit def SumInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    iconv(base.SumInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 
   override def SumLeftInfo[A, B] = ab => iconv(base.SumLeftInfo(base.ArrRngInfo(ab)))
 

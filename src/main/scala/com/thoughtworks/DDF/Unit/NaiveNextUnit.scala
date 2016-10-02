@@ -2,9 +2,12 @@ package com.thoughtworks.DDF.Unit
 
 import com.thoughtworks.DDF.Combinators.SKILang
 import com.thoughtworks.DDF.NaiveNextBase
+import com.thoughtworks.DDF.RI.NaiveNextRI
 
 trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
-  UnitLang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with NaiveNextBase[Info, Repr, Arg] {
+  UnitLang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
+  NaiveNextBase[Info, Repr, Arg] with
+  NaiveNextRI[Info, Repr, Arg] {
   implicit def base: UnitLang[Info, Repr]
 
   override def mkUnit: Repr[Arg => Unit] = rconv(base.mkUnit)

@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Product
 import com.thoughtworks.DDF.Arr.ArrLang
 
 trait ProdLang[Info[_], Repr[_]] extends ArrLang[Info, Repr] {
-  def ProdInfo[A, B]: Info[A] => Info[B] => Info[(A, B)]
+  implicit def ProdInfo[A, B](implicit ai: Info[A], bi: Info[B]): Info[(A, B)]
 
   def ProdFstInfo[A, B]: Info[(A, B)] => Info[A]
 
