@@ -1,13 +1,13 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.NaiveNextBase
-import com.thoughtworks.DDF.RI.NaiveNextRI
+import com.thoughtworks.DDF.InfoB.NaiveNextInfoB
 
 trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
-  SKILang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
+  SKIRepr[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   NaiveNextBase[Info, Repr, Arg] with
-  NaiveNextRI[Info, Repr, Arg] {
-  implicit def base: SKILang[Info, Repr]
+  NaiveNextInfoB[Info, Repr, Arg] {
+  implicit def base: SKIRepr[Info, Repr]
 
   override def ArrDomInfo[A, B]: Info[Arg => A => B] => Info[Arg => A] = x =>
     iconv(base.ArrDomInfo(base.ArrRngInfo(x)))
@@ -32,12 +32,12 @@ trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
 }
 
 object NaiveNextSKI {
-  implicit def apply[Info[_], Repr[_], Arg](implicit skil: SKILang[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit skil: SKIRepr[Info, Repr], arg: Info[Arg]) =
     new NaiveNextSKI[Info, Repr, Arg] {
-      override implicit def base: SKILang[Info, Repr] = skil
+      override implicit def base: SKIRepr[Info, Repr] = skil
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKILang[Info, Repr] = skil
+      override implicit def ski: SKIRepr[Info, Repr] = skil
     }
 }

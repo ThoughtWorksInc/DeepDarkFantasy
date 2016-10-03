@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Combinators
 
-import com.thoughtworks.DDF.Arr.ShowArr
+import com.thoughtworks.DDF.Arrow.ShowArrow
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowComb extends Comb[NoInfo, Show] with ShowArr {
+trait ShowComb extends Comb[NoInfo, Show] with ShowArrow {
   override def S[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("S")
 
   override def K[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("K")

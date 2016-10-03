@@ -27,6 +27,6 @@ object NaiveNextComb {
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKILang[Info, Repr] = cu
+      override implicit def ski: SKIRepr[Info, Repr] = cu
     }
 }

@@ -1,13 +1,13 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
+import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
 import com.thoughtworks.DDF.Unit.EvalUnit
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait EvalList extends ListLang[Loss, Eval] with EvalArr with EvalUnit {
+trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalUnit {
   case class ListLC[A]() extends LossCase[List[A]] {
     override type ret = Loss[A]
   }
@@ -53,7 +53,7 @@ trait EvalList extends ListLang[Loss, Eval] with EvalArr with EvalUnit {
   override def Nil[A](implicit ai: Loss[A]): Eval[List[A]] = listEval(scala.List())
 
   override def Cons[A](implicit ai: Loss[A]): Eval[A => List[A] => List[A]] =
-    arrEval[A, List[A] => List[A], ai.loss, ArrLoss[List[A], List[ai.loss]]](a =>
+    arrEval[A, List[A] => List[A], ai.loss, ArrowLoss[List[A], List[ai.loss]]](a =>
       (arrEval[List[A], List[A], List[ai.loss], List[ai.loss]](la =>
         (listEval(a :: leval(la)), l => l.tail)), l =>
         l.seq.map(_._2.foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))).
@@ -63,19 +63,19 @@ trait EvalList extends ListLang[Loss, Eval] with EvalArr with EvalUnit {
     arrEval[
       Unit => B,
       (A => List[A] => B) => List[A] => B,
-      ArrLoss[Unit, bi.loss],
-      ArrLoss[A => List[A] => B, ArrLoss[List[A], bi.loss]]](nilc =>
-      (arrEval[A => List[A] => B, List[A] => B, ArrLoss[A, ArrLoss[List[A], bi.loss]], ArrLoss[List[A], bi.loss]](consc =>
+      ArrowLoss[Unit, bi.loss],
+      ArrowLoss[A => List[A] => B, ArrowLoss[List[A], bi.loss]]](nilc =>
+      (arrEval[A => List[A] => B, List[A] => B, ArrowLoss[A, ArrowLoss[List[A], bi.loss]], ArrowLoss[List[A], bi.loss]](consc =>
         (arrEval[List[A], B, List[ai.loss], bi.loss](li => leval(li) match {
           case scala.Nil => (app(nilc)(mkUnit), _ => scala.List(ai.m.zero))
           case h :: t => {
             val lb = aeval(consc).forward(h)
             val b = aeval(lb.eb).forward(listEval(t))
-            (b.eb, l => lb.backward(ArrLoss(Seq((listEval(t), l)))) :: b.backward(l))
+            (b.eb, l => lb.backward(ArrowLoss(Seq((listEval(t), l)))) :: b.backward(l))
           }
-        })(ListInfo(ai), bi), l => ArrLoss(l.seq.filter(x => leval(x._1).nonEmpty).map(x =>
-          (leval(x._1).head, ArrLoss(Seq((listEval(leval(x._1).tail), x._2)))))))),
-        l => ArrLoss(l.seq.flatMap(x => x._2.seq.filter(y => leval(y._1).isEmpty).map(z => (mkUnit, z._2))))))
+        })(ListInfo(ai), bi), l => ArrowLoss(l.seq.filter(x => leval(x._1).nonEmpty).map(x =>
+          (leval(x._1).head, ArrowLoss(Seq((listEval(leval(x._1).tail), x._2)))))))),
+        l => ArrowLoss(l.seq.flatMap(x => x._2.seq.filter(y => leval(y._1).isEmpty).map(z => (mkUnit, z._2))))))
 
   def zipEqLength[A, B] : List[A] => List[B] => List[(A, B)] = la => lb => {
     assert(la.length == lb.length)
@@ -83,9 +83,9 @@ trait EvalList extends ListLang[Loss, Eval] with EvalArr with EvalUnit {
   }
 
   override def listMap[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B) => List[A] => List[B]] =
-    arrEval[A => B, List[A] => List[B], ArrLoss[A, bi.loss], ArrLoss[List[A], List[bi.loss]]](ab =>
+    arrEval[A => B, List[A] => List[B], ArrowLoss[A, bi.loss], ArrowLoss[List[A], List[bi.loss]]](ab =>
       (arrEval[List[A], List[B], List[ai.loss], List[bi.loss]](la => {
         val lb = leval(la).map(x => aeval(ab).forward(x))
         (listEval(lb.map(_.eb)), l => zipEqLength(lb)(l).map(x => x._1.backward(x._2)))
-      }), l => ArrLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))
+      }), l => ArrowLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))
 }

@@ -1,13 +1,13 @@
 package com.thoughtworks.DDF.Unit
 
-import com.thoughtworks.DDF.Combinators.SKILang
+import com.thoughtworks.DDF.Combinators.SKIRepr
 import com.thoughtworks.DDF.NaiveNextBase
-import com.thoughtworks.DDF.RI.NaiveNextRI
+import com.thoughtworks.DDF.InfoB.NaiveNextInfoB
 
 trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
   UnitLang[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   NaiveNextBase[Info, Repr, Arg] with
-  NaiveNextRI[Info, Repr, Arg] {
+  NaiveNextInfoB[Info, Repr, Arg] {
   implicit def base: UnitLang[Info, Repr]
 
   override def mkUnit: Repr[Arg => Unit] = rconv(base.mkUnit)
@@ -17,12 +17,12 @@ trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
 
 object NaiveNextUnit {
   implicit def apply[Info[_], Repr[_], Arg]
-  (implicit unitl: UnitLang[Info, Repr], skil: SKILang[Info, Repr], arg: Info[Arg]) =
+  (implicit unitl: UnitLang[Info, Repr], skil: SKIRepr[Info, Repr], arg: Info[Arg]) =
     new NaiveNextUnit[Info, Repr, Arg] {
       override implicit def base: UnitLang[Info, Repr] = unitl
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKILang[Info, Repr] = skil
+      override implicit def ski: SKIRepr[Info, Repr] = skil
   }
 }

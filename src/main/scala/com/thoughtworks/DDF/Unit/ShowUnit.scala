@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Unit
 
-import com.thoughtworks.DDF.RI.SimpleRI
+import com.thoughtworks.DDF.InfoB.SimpleInfoB
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowUnit extends UnitLang[NoInfo, Show] with SimpleUnit[Show] with SimpleRI[Show] {
+trait ShowUnit extends UnitLang[NoInfo, Show] with SimpleUnit[Show] with SimpleInfoB[Show] {
   override def mkUnit = Show("mkUnit")
 }
 

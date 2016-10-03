@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
+import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait EvalSum extends SumLang[Loss, Eval] with EvalArr {
+trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
   override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
     arrEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, SumInfo(at, bt))
 
@@ -45,8 +45,8 @@ trait EvalSum extends SumLang[Loss, Eval] with EvalArr {
 
   override def sumMatch[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]):
   Eval[(A => C) => (B => C) => Either[A, B] => C] =
-    arrEval[A => C, (B => C) => Either[A, B] => C, ArrLoss[A, ct.loss], ArrLoss[B => C, ArrLoss[Either[A, B], ct.loss]]](ac =>
-      (arrEval[B => C, Either[A, B] => C, ArrLoss[B, ct.loss], ArrLoss[Either[A, B], ct.loss]](bc =>
+    arrEval[A => C, (B => C) => Either[A, B] => C, ArrowLoss[A, ct.loss], ArrowLoss[B => C, ArrowLoss[Either[A, B], ct.loss]]](ac =>
+      (arrEval[B => C, Either[A, B] => C, ArrowLoss[B, ct.loss], ArrowLoss[Either[A, B], ct.loss]](bc =>
         (arrEval[Either[A, B], C, (at.loss, bt.loss), ct.loss](ab => seval(ab) match {
           case Left(a) =>
             val c = aeval(ac).forward(a)
@@ -55,9 +55,9 @@ trait EvalSum extends SumLang[Loss, Eval] with EvalArr {
             val c = aeval(bc).forward(b)
             (c.eb, l => (at.m.zero, c.backward(l)))
         })(SumInfo(at, bt), ct), l =>
-          ArrLoss(l.seq.map(x => (seval[A, B](x._1), x._2)).
+          ArrowLoss(l.seq.map(x => (seval[A, B](x._1), x._2)).
             filter(x => x._1.isRight).map(x => (x._1.right.get, x._2))))),
-        l => ArrLoss(l.seq.flatMap(x =>
+        l => ArrowLoss(l.seq.flatMap(x =>
           x._2.seq.map(y => (seval(y._1), y._2)).filter(y => y._1.isLeft).map(y => (y._1.left.get, y._2))))))
 
   def sumEval[A, B](s: Either[Eval[A], Eval[B]])(implicit al: Loss[A], bl: Loss[B]) = new Eval[Either[A, B]] {

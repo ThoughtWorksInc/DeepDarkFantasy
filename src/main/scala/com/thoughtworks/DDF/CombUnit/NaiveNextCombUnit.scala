@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.CombUnit
 
-import com.thoughtworks.DDF.Combinators.{NaiveNextComb, SKILang}
+import com.thoughtworks.DDF.Combinators.{NaiveNextComb, SKIRepr}
 import com.thoughtworks.DDF.Unit.NaiveNextUnit
 
 //Exists only for pedantic purpose. Use NextLang instead.
@@ -18,6 +18,6 @@ object NaiveNextCombUnit {
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKILang[Info, Repr] = cu
+      override implicit def ski: SKIRepr[Info, Repr] = cu
     }
 }

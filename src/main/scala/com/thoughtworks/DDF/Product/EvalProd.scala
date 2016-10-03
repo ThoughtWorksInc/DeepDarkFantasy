@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arr.{EvalArr, ArrLoss}
+import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait EvalProd extends ProdLang[Loss, Eval] with EvalArr {
+trait EvalProd extends ProdRepr[Loss, Eval] with EvalArrow {
   def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
 
   def pairEval[A, B](a: Eval[A], b: Eval[B])(implicit al: Loss[A], bl: Loss[B]) = new Eval[(A, B)] {
@@ -26,7 +26,7 @@ trait EvalProd extends ProdLang[Loss, Eval] with EvalArr {
     arrEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(ProdInfo(at, bt), bt)
 
   override def mkProd[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
-    arrEval[A, B => (A, B), at.loss, ArrLoss[B, (at.loss, bt.loss)]](a =>
+    arrEval[A, B => (A, B), at.loss, ArrowLoss[B, (at.loss, bt.loss)]](a =>
       (arrEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
         (pairEval(a, b), _._2))(bt, ProdInfo(at, bt)),
         _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
@@ -60,8 +60,8 @@ trait EvalProd extends ProdLang[Loss, Eval] with EvalArr {
   override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
 
   def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(((A, B)) => C) => A => B => C] =
-    arrEval[((A, B)) => C, A => B => C, ArrLoss[(A, B), ci.loss], ArrLoss[A, ArrLoss[B, ci.loss]]](abc =>
-      (arrEval[A, B => C, ai.loss, ArrLoss[B, ci.loss]](a =>
+    arrEval[((A, B)) => C, A => B => C, ArrowLoss[(A, B), ci.loss], ArrowLoss[A, ArrowLoss[B, ci.loss]]](abc =>
+      (arrEval[A, B => C, ai.loss, ArrowLoss[B, ci.loss]](a =>
         (arrEval[B, C, bi.loss, ci.loss](b => {
           val c = aeval(abc).forward(pairEval(a, b))
           (c.eb, l => c.backward(l)._2)
@@ -69,13 +69,13 @@ trait EvalProd extends ProdLang[Loss, Eval] with EvalArr {
           val c = aeval(abc).forward(pairEval(a, x._1))
           c.backward(x._2)._1
         }).foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))
-        (ai, ArrInfo(bi, ci)), l => ArrLoss(l.seq.flatMap(x => x._2.seq.map(y => (pairEval(x._1, y._1), y._2))))))
+        (ai, ArrInfo(bi, ci)), l => ArrowLoss(l.seq.flatMap(x => x._2.seq.map(y => (pairEval(x._1, y._1), y._2))))))
 
   def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => ((A, B)) => C] =
-    arrEval[A => B => C, ((A, B)) => C, ArrLoss[A, ArrLoss[B, ci.loss]], ArrLoss[(A, B), ci.loss]](abc =>
+    arrEval[A => B => C, ((A, B)) => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[(A, B), ci.loss]](abc =>
       (arrEval[(A, B), C, (ai.loss, bi.loss), ci.loss](ab => {
         val bc = aeval(abc).forward(peval(ab)._1)
         val c = aeval(bc.eb).forward(peval(ab)._2)
-        (c.eb, l => (bc.backward(ArrLoss(Seq((peval(ab)._2, l)))), c.backward(l)))
-      })(ProdInfo(ai, bi), ci), l => ArrLoss(l.seq.map(x => (peval(x._1)._1, ArrLoss(Seq((peval(x._1)._2, x._2))))))))
+        (c.eb, l => (bc.backward(ArrowLoss(Seq((peval(ab)._2, l)))), c.backward(l)))
+      })(ProdInfo(ai, bi), ci), l => ArrowLoss(l.seq.map(x => (peval(x._1)._1, ArrowLoss(Seq((peval(x._1)._2, x._2))))))))
 }
