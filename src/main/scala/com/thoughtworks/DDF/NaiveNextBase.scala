@@ -9,7 +9,7 @@ trait NaiveNextBase[Info[_], Repr[_], Arg] {
 
   def rconv[X]: Repr[X] => Repr[Arg => X] = r => ski.app(ski.K[X, Arg](ski.ReprInfo(r), argi))(r)
 
-  def iconv[X]: Info[X] => Info[Arg => X] = x => ski.ArrInfo[Arg, X](argi, x)
+  def iconv[X]: Info[X] => Info[Arg => X] = x => ski.ArrowInfo[Arg, X](argi, x)
 
   def in: Repr[Arg => Arg] = ski.I
 }

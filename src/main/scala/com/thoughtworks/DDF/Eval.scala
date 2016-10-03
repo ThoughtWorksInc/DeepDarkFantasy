@@ -7,7 +7,7 @@ trait Loss[X] extends TypeCase[Loss, X] {
 
   def m: Monoid[loss]
 
-  def conv: /*loss backprop ability*/ X => Eval[X]
+  def convert: /*loss backprop ability*/ X => Eval[X]
 
   val lc: LossCase[X]
 

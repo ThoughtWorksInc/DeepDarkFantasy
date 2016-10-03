@@ -22,17 +22,17 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
   }
 
   override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
-    arrEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, SumInfo(at, bt))
+    arrowEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, SumInfo(at, bt))
 
   override def right[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[B => Either[A, B]] =
-    arrEval[B, Either[A, B], bt.loss, (at.loss, bt.loss)](eb => (sumEval(Right(eb)), _._2))(bt, SumInfo(at, bt))
+    arrowEval[B, Either[A, B], bt.loss, (at.loss, bt.loss)](eb => (sumEval(Right(eb)), _._2))(bt, SumInfo(at, bt))
 
   override implicit def SumInfo[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[Either[A, B], (al.loss, bl.loss)] =
     new Loss[Either[A, B]] {
 
-      override def conv: Either[A, B] => Eval[Either[A, B]] = {
-        case Left(x) => sumEval(Left(al.conv(x)))
-        case Right(x) => sumEval(Right(bl.conv(x)))
+      override def convert: Either[A, B] => Eval[Either[A, B]] = {
+        case Left(x) => sumEval(Left(al.convert(x)))
+        case Right(x) => sumEval(Right(bl.convert(x)))
       }
 
       override val lc: LossCase.Aux[Either[A, B], SumLCRet[A, B]] = SumLC()
@@ -59,9 +59,9 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
 
   override def sumMatch[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]):
   Eval[(A => C) => (B => C) => Either[A, B] => C] =
-    arrEval[A => C, (B => C) => Either[A, B] => C, ArrowLoss[A, ct.loss], ArrowLoss[B => C, ArrowLoss[Either[A, B], ct.loss]]](ac =>
-      (arrEval[B => C, Either[A, B] => C, ArrowLoss[B, ct.loss], ArrowLoss[Either[A, B], ct.loss]](bc =>
-        (arrEval[Either[A, B], C, (at.loss, bt.loss), ct.loss](ab => seval(ab) match {
+    arrowEval[A => C, (B => C) => Either[A, B] => C, ArrowLoss[A, ct.loss], ArrowLoss[B => C, ArrowLoss[Either[A, B], ct.loss]]](ac =>
+      (arrowEval[B => C, Either[A, B] => C, ArrowLoss[B, ct.loss], ArrowLoss[Either[A, B], ct.loss]](bc =>
+        (arrowEval[Either[A, B], C, (at.loss, bt.loss), ct.loss](ab => seval(ab) match {
           case Left(a) =>
             val c = aeval(ac).forward(a)
             (c.eb, l => (c.backward(l), bt.m.zero))

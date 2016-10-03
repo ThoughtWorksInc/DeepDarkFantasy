@@ -34,11 +34,11 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
     def forward(ea: Eval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
   }
 
-  def arrEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
+  def arrowEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
-      override val loss: Loss[A => B] = ArrInfo
+      override val loss: Loss[A => B] = ArrowInfo
 
-      override def eval: A => B = a => eca.forward(al.conv(a)).eb.eval
+      override def eval: A => B = a => eca.forward(al.convert(a)).eb.eval
 
       override val ec: EvalCase.Aux[A => B, forward[A, B]] = ArrowEC[A, B]()
 
@@ -54,7 +54,7 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
       }
     }
 
-  override implicit def ArrInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrowLoss[A, bi.loss]] =
+  override implicit def ArrowInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrowLoss[A, bi.loss]] =
     new Loss[A => B] {
       override type ret = ArrowLoss[A, bi.loss]
 
@@ -64,8 +64,8 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
         override def append(f1: loss, f2: => loss): loss = ArrowLoss(f1.seq ++ f2.seq)
       }
 
-      override def conv: (A => B) => Eval[A => B] = ab => arrEval[A, B, ai.loss, bi.loss](a =>
-        (bi.conv(ab(a.eval)), _ => ai.m.zero))(ai, bi)
+      override def convert: (A => B) => Eval[A => B] = ab => arrowEval[A, B, ai.loss, bi.loss](a =>
+        (bi.convert(ab(a.eval)), _ => ai.m.zero))(ai, bi)
 
       override val lc: LossCase.Aux[A => B, ArrowLCRet[A, B]] = ArrowLC()
 

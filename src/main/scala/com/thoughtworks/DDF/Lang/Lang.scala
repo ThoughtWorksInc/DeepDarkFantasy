@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Lang
 
 import com.thoughtworks.DDF.Arrow.ArrowRepr
+import com.thoughtworks.DDF.Bool.BoolRepr
 import com.thoughtworks.DDF.Combinators._
 import com.thoughtworks.DDF.Double.DoubleRepr
 import com.thoughtworks.DDF.List.ListRepr
@@ -15,4 +16,5 @@ trait Lang[Info[_], Repr[_]] extends
   SumRepr[Info, Repr] with
   ArrowRepr[Info, Repr] with
   DoubleRepr[Info, Repr] with
-  Comb[Info, Repr]
+  Comb[Info, Repr] with
+  BoolRepr[Info, Repr]

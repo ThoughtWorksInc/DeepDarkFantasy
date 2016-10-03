@@ -27,8 +27,8 @@ trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
   override def app[A, B] = f => x => base.app(base.app(
     base.S[Arg, A, B](argi, base.ArrRngInfo(ReprInfo(x)), base.ArrRngInfo(base.ArrRngInfo(ReprInfo(f)))))(f))(x)
 
-  override def ArrInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Info[Arg => A => B] =
-    iconv(base.ArrInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override def ArrowInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Info[Arg => A => B] =
+    iconv(base.ArrowInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 }
 
 object NaiveNextSKI {

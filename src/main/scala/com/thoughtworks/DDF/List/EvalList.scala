@@ -30,7 +30,7 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalUnit {
 
   override implicit def ListInfo[A](implicit ai: Loss[A]): Loss.Aux[List[A], List[ai.loss]] = new Loss[List[A]] {
 
-    override def conv: List[A] => Eval[List[A]] = la => listEval[A](la.map(ai.conv))
+    override def convert: List[A] => Eval[List[A]] = la => listEval[A](la.map(ai.convert))
 
     override val lc: LossCase.Aux[List[A], Loss[A]] = ListLC()
 
@@ -53,20 +53,20 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalUnit {
   override def Nil[A](implicit ai: Loss[A]): Eval[List[A]] = listEval(scala.List())
 
   override def Cons[A](implicit ai: Loss[A]): Eval[A => List[A] => List[A]] =
-    arrEval[A, List[A] => List[A], ai.loss, ArrowLoss[List[A], List[ai.loss]]](a =>
-      (arrEval[List[A], List[A], List[ai.loss], List[ai.loss]](la =>
+    arrowEval[A, List[A] => List[A], ai.loss, ArrowLoss[List[A], List[ai.loss]]](a =>
+      (arrowEval[List[A], List[A], List[ai.loss], List[ai.loss]](la =>
         (listEval(a :: leval(la)), l => l.tail)), l =>
         l.seq.map(_._2.foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))).
-          foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))(ai, ArrInfo(ListInfo(ai), ListInfo(ai)))
+          foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))(ai, ArrowInfo(ListInfo(ai), ListInfo(ai)))
 
   override def listMatch[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(Unit => B) => (A => List[A] => B) => List[A] => B] =
-    arrEval[
+    arrowEval[
       Unit => B,
       (A => List[A] => B) => List[A] => B,
       ArrowLoss[Unit, bi.loss],
       ArrowLoss[A => List[A] => B, ArrowLoss[List[A], bi.loss]]](nilc =>
-      (arrEval[A => List[A] => B, List[A] => B, ArrowLoss[A, ArrowLoss[List[A], bi.loss]], ArrowLoss[List[A], bi.loss]](consc =>
-        (arrEval[List[A], B, List[ai.loss], bi.loss](li => leval(li) match {
+      (arrowEval[A => List[A] => B, List[A] => B, ArrowLoss[A, ArrowLoss[List[A], bi.loss]], ArrowLoss[List[A], bi.loss]](consc =>
+        (arrowEval[List[A], B, List[ai.loss], bi.loss](li => leval(li) match {
           case scala.Nil => (app(nilc)(mkUnit), _ => scala.List(ai.m.zero))
           case h :: t => {
             val lb = aeval(consc).forward(h)
@@ -83,8 +83,8 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalUnit {
   }
 
   override def listMap[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B) => List[A] => List[B]] =
-    arrEval[A => B, List[A] => List[B], ArrowLoss[A, bi.loss], ArrowLoss[List[A], List[bi.loss]]](ab =>
-      (arrEval[List[A], List[B], List[ai.loss], List[bi.loss]](la => {
+    arrowEval[A => B, List[A] => List[B], ArrowLoss[A, bi.loss], ArrowLoss[List[A], List[bi.loss]]](ab =>
+      (arrowEval[List[A], List[B], List[ai.loss], List[bi.loss]](la => {
         val lb = leval(la).map(x => aeval(ab).forward(x))
         (listEval(lb.map(_.eb)), l => zipEqLength(lb)(l).map(x => x._1.backward(x._2)))
       }), l => ArrowLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))

@@ -31,14 +31,14 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
   override def LitD: Double => Eval[Double] = dEval
 
   override def PlusD: Eval[Double => Double => Double] =
-    arrEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
-      (arrEval[Double, Double, DLoss, DLoss](
+    arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
+      (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) + deval(r)), rl => rl)),
         ll => DLoss(ll.seq.map(_._2.d).sum)))
 
   override def MultD: Eval[Double => Double => Double] =
-    arrEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
-      (arrEval[Double, Double, DLoss, DLoss](
+    arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
+      (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
         ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
@@ -49,7 +49,7 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
       override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.d + f2.d)
     }
 
-    override def conv: Double => Eval[Double] = dEval
+    override def convert: Double => Eval[Double] = dEval
 
     override val lc: LossCase.Aux[Double, DLC.ret] = DLC
 

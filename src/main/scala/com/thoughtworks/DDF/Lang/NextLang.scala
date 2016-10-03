@@ -9,7 +9,7 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
 
   def rconv[X]: Repr[X] => Either[Repr[X], Repr[Arg => X]] = x => Left(x)
 
-  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrInfo[Arg, X](argi, x)
+  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrowInfo[Arg, X](argi, x)
 
   override implicit def ProdInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
     iconv(base.ProdInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
@@ -27,14 +27,14 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
 
   override def SumRightInfo[A, B] = ab => iconv(base.SumRightInfo(base.ArrRngInfo(ab)))
 
-  override def ArrInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    iconv(base.ArrInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override def ArrowInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    iconv(base.ArrowInfo[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
 
   override implicit def ListInfo[A](implicit ai: Info[Arg => A]) = iconv(base.ListInfo(base.ArrRngInfo(ai)))
 
   override def ListElmInfo[A](implicit lai: Info[Arg => List[A]]) = iconv(base.ListElmInfo(base.ArrRngInfo(lai)))
 
-  override def UnitInfo = iconv(base.UnitInfo)
+  override implicit def UnitInfo = iconv(base.UnitInfo)
 
   override def mkUnit = rconv(base.mkUnit)
 
@@ -121,9 +121,15 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
   }
 
   override def ReprInfo[A]: Either[Repr[A], Repr[Arg => A]] => Info[Arg => A] = {
-    case Left(x) => base.ArrInfo(argi, base.ReprInfo(x))
+    case Left(x) => base.ArrowInfo(argi, base.ReprInfo(x))
     case Right(x) => base.ReprInfo(x)
   }
 
   def in = Right(base.I[Arg])
+
+  override def litB = b => rconv(base.litB(b))
+
+  override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.ArrRngInfo(ai)))
+
+  override def BoolInfo: Info[Arg => Boolean] = iconv(base.BoolInfo)
 }
