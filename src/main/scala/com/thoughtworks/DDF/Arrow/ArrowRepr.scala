@@ -10,4 +10,6 @@ trait ArrowRepr[Info[_], Repr[_]] extends InfoB[Info, Repr] {
   def ArrRngInfo[A, B]: Info[A => B] => Info[B]
 
   def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
+
+  def let[A, B]: Repr[A] => Repr[A => B] => Repr[B] = x => y => app(y)(x)
 }
