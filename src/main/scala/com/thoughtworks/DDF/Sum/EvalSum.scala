@@ -22,17 +22,17 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
   }
 
   override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
-    arrowEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, SumInfo(at, bt))
+    arrowEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(scala.Left(ea)), _._1))(at, sumInfo(at, bt))
 
   override def right[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[B => Either[A, B]] =
-    arrowEval[B, Either[A, B], bt.loss, (at.loss, bt.loss)](eb => (sumEval(Right(eb)), _._2))(bt, SumInfo(at, bt))
+    arrowEval[B, Either[A, B], bt.loss, (at.loss, bt.loss)](eb => (sumEval(scala.Right(eb)), _._2))(bt, sumInfo(at, bt))
 
-  override implicit def SumInfo[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[Either[A, B], (al.loss, bl.loss)] =
+  override implicit def sumInfo[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[Either[A, B], (al.loss, bl.loss)] =
     new Loss[Either[A, B]] {
 
       override def convert: Either[A, B] => Eval[Either[A, B]] = {
-        case Left(x) => sumEval(Left(al.convert(x)))
-        case Right(x) => sumEval(Right(bl.convert(x)))
+        case Left(x) => sumEval(scala.Left(al.convert(x)))
+        case Right(x) => sumEval(scala.Right(bl.convert(x)))
       }
 
       override val lc: LossCase.Aux[Either[A, B], SumLCRet[A, B]] = SumLC()
@@ -53,9 +53,9 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
       }
     }
 
-  override def SumLeftInfo[A, B]: Loss[Either[A, B]] => Loss[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left
+  override def sumLeftInfo[A, B]: Loss[Either[A, B]] => Loss[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left
 
-  override def SumRightInfo[A, B]: Loss[Either[A, B]] => Loss[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
+  override def sumRightInfo[A, B]: Loss[Either[A, B]] => Loss[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
 
   override def sumMatch[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]):
   Eval[(A => C) => (B => C) => Either[A, B] => C] =
@@ -68,18 +68,18 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
           case Right(b) =>
             val c = aeval(bc).forward(b)
             (c.eb, l => (at.m.zero, c.backward(l)))
-        })(SumInfo(at, bt), ct), l =>
+        })(sumInfo(at, bt), ct), l =>
           ArrowLoss(l.seq.map(x => (seval[A, B](x._1), x._2)).
             filter(x => x._1.isRight).map(x => (x._1.right.get, x._2))))),
         l => ArrowLoss(l.seq.flatMap(x =>
           x._2.seq.map(y => (seval(y._1), y._2)).filter(y => y._1.isLeft).map(y => (y._1.left.get, y._2))))))
 
   def sumEval[A, B](s: Either[Eval[A], Eval[B]])(implicit al: Loss[A], bl: Loss[B]) = new Eval[Either[A, B]] {
-    override val loss: Loss[Either[A, B]] = SumInfo[A, B]
+    override val loss: Loss[Either[A, B]] = sumInfo[A, B]
 
     override def eval: Either[A, B] = s match {
-      case Left(x) => Left(x.eval)
-      case Right(x) => Right(x.eval)
+      case Left(x) => scala.Left(x.eval)
+      case Right(x) => scala.Right(x.eval)
     }
 
     override val ec: EvalCase.Aux[Either[A, B], Either[Eval[A], Eval[B]]] = SumEC()

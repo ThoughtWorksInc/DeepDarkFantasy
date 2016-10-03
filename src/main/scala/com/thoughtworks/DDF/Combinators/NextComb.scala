@@ -10,24 +10,24 @@ trait NextComb[Info[_], Repr[_], Arg] extends
   implicit def base: Comb[Info, Repr]
 
   override def S[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.S(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.S(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def B[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.B(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.B(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def C[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.C(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.C(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def Y[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.Y(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.Y(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def K[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.K(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.K(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def I[A](implicit ai: Info[Arg => A]) = rconv(base.I(base.ArrRngInfo(ai)))
+  override def I[A](implicit ai: Info[Arg => A]) = rconv(base.I(base.arrowRangeInfo(ai)))
 
   override def W[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.W(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.W(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override implicit def ski: SKIRepr[Info, Repr] = base
 }

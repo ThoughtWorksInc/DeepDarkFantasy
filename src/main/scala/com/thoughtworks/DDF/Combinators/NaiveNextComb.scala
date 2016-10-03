@@ -6,18 +6,18 @@ trait NaiveNextComb[Info[_], Repr[_], Arg] extends
   implicit def base: Comb[Info, Repr]
 
   override def Y[A, B](implicit at: Info[Arg => A], bt: Info[Arg => B]):
-  Repr[(Arg) => ((A => B) => A => B) => A => B] = rconv(base.Y[A, B](base.ArrRngInfo(at), base.ArrRngInfo(bt)))
+  Repr[Arg => ((A => B) => A => B) => A => B] = rconv(base.Y[A, B](base.arrowRangeInfo(at), base.arrowRangeInfo(bt)))
 
   override def B[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
   Repr[Arg => (B => C) => (A => B) => A => C] =
-    rconv(base.B[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.B[A, B, C](base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def W[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]): Repr[Arg => (A => A => B) => A => B] =
-    rconv(base.W[A, B](base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.W[A, B](base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def C[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]):
   Repr[Arg => (A => B => C) => B => A => C] =
-    rconv(base.C[A, B, C](base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.C[A, B, C](base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 }
 
 object NaiveNextComb {

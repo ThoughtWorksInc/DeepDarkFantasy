@@ -17,7 +17,7 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
   }
 
   def dEval(d: Double) = new Eval[Double] {
-    override val loss: Loss[Double] = DoubleInfo
+    override val loss: Loss[Double] = doubleInfo
 
     override def eval: Double = d
 
@@ -28,21 +28,21 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
 
   def deval(d: Eval[Double]): Double = witness(d.ec.unique(DEC))(d.eca)
 
-  override def LitD: Double => Eval[Double] = dEval
+  override def litD: Double => Eval[Double] = dEval
 
-  override def PlusD: Eval[Double => Double => Double] =
+  override def plusD: Eval[Double => Double => Double] =
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) + deval(r)), rl => rl)),
         ll => DLoss(ll.seq.map(_._2.d).sum)))
 
-  override def MultD: Eval[Double => Double => Double] =
+  override def multD: Eval[Double => Double => Double] =
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
         ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
-  override implicit def DoubleInfo: Loss.Aux[Double, DLoss] = new Loss[Double] {
+  override implicit def doubleInfo: Loss.Aux[Double, DLoss] = new Loss[Double] {
     override def m: Monoid[DLoss] = new Monoid[DLoss] {
       override def zero: DLoss = DLoss(0)
 

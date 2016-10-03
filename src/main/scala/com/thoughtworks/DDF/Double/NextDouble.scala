@@ -8,13 +8,13 @@ trait NextDouble[Info[_], Repr[_], Arg] extends
   DoubleRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextBase[Info, Repr, Arg] with
   NextArrow[Info, Repr, Arg] {
-  override def LitD = d => rconv(base.LitD(d))
+  override def litD = d => rconv(base.litD(d))
 
-  override def PlusD = rconv(base.PlusD)
+  override def plusD = rconv(base.plusD)
 
-  override def MultD = rconv(base.MultD)
+  override def multD = rconv(base.multD)
 
-  override implicit def DoubleInfo: Info[Arg => Double] = iconv(base.DoubleInfo)
+  override implicit def doubleInfo: Info[Arg => Double] = iconv(base.doubleInfo)
 
   override implicit def base: DoubleRepr[Info, Repr]
 }

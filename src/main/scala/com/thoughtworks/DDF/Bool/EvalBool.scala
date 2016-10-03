@@ -32,7 +32,7 @@ trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
     arrowEval[Boolean, A => A => A, Unit, ArrowLoss[A, ArrowLoss[A, ai.loss]]](b =>
       (if(beval(b))
         K[A, A](ai, ai) else
-        app(C[A, A, A](ai, ai, ai))(K[A, A](ai, ai)), _ => ()))(BoolInfo, ArrowInfo(ai, ArrowInfo(ai, ai)))
+        app(C[A, A, A](ai, ai, ai))(K[A, A](ai, ai)), _ => ()))(BoolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
 
   override implicit def BoolInfo: Loss.Aux[Boolean, Unit] = new Loss[Boolean] {
     override def convert = litB

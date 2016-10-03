@@ -36,7 +36,7 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
 
   def arrowEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
     new Eval[A => B] {
-      override val loss: Loss[A => B] = ArrowInfo
+      override val loss: Loss[A => B] = arrowInfo
 
       override def eval: A => B = a => eca.forward(al.convert(a)).eb.eval
 
@@ -54,7 +54,7 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
       }
     }
 
-  override implicit def ArrowInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrowLoss[A, bi.loss]] =
+  override implicit def arrowInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrowLoss[A, bi.loss]] =
     new Loss[A => B] {
       override type ret = ArrowLoss[A, bi.loss]
 
@@ -78,9 +78,9 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
 
   def aeval[A, B](ab: Eval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowEC[A, B]()))(ab.eca)
 
-  override def ArrDomInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
+  override def arrowDomainInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
 
-  override def ArrRngInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
+  override def arrowRangeInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
 
-  override def app[A, B] = f => x => aeval(f).forward(x)(ArrDomInfo(ReprInfo(f)), ArrRngInfo(ReprInfo(f))).eb
+  override def app[A, B] = f => x => aeval(f).forward(x)(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(reprInfo(f))).eb
 }

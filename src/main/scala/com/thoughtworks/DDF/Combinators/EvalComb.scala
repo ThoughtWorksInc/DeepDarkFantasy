@@ -27,7 +27,7 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
   override def K[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => B => A] =
     arrowEval[A, B => A, at.loss, ArrowLoss[B, at.loss]](a => (
       arrowEval[B, A, bt.loss, at.loss](_ => (a, _ => bt.m.zero))(bt, at),
-      l => l.seq.map(_._2).fold(at.m.zero)((l, r) => at.m.append(l, r))))(at, ArrowInfo(bt, at))
+      l => l.seq.map(_._2).fold(at.m.zero)((l, r) => at.m.append(l, r))))(at, arrowInfo(bt, at))
 
   override def I[A](implicit at: Loss[A]): Eval[A => A] = arrowEval[A, A, at.loss, at.loss](x => (x, y => y))(at, at)
 
@@ -63,7 +63,7 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
           val c = aeval(bc.eb).forward(b)
           (c.eb, l => bc.backward(ArrowLoss(Seq((b, l)))))
         })(ai, ci), l => l.seq.map(p => aeval(aeval(abc).forward(p._1).eb).forward(b).backward(p._2)).
-          foldRight(bi.m.zero)((l, r) => bi.m.append(l, r))))(bi, ArrowInfo(ai, ci)), l =>
+          foldRight(bi.m.zero)((l, r) => bi.m.append(l, r))))(bi, arrowInfo(ai, ci)), l =>
         ArrowLoss(l.seq.flatMap(b => b._2.seq.map(a =>
           (a._1, ArrowLoss(Seq((b._1, a._2)))))))))
 

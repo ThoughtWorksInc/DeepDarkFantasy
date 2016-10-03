@@ -11,66 +11,66 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   NextDouble[Info, Repr, Arg] {
   implicit def base: Lang[Info, Repr]
 
-  override implicit def ProdInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
-    iconv(base.ProdInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override implicit def productInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
+    iconv(base.productInfo(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def ProdFstInfo[A, B] = p => iconv(base.ProdFstInfo(base.ArrRngInfo(p)))
+  override def productFirstInfo[A, B] = p => iconv(base.productFirstInfo(base.arrowRangeInfo(p)))
 
-  override def ProdSndInfo[A, B] = p => iconv(base.ProdSndInfo(base.ArrRngInfo(p)))
+  override def productSecondInfo[A, B] = p => iconv(base.productSecondInfo(base.arrowRangeInfo(p)))
 
-  override implicit def SumInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    iconv(base.SumInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override implicit def sumInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    iconv(base.sumInfo(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def SumLeftInfo[A, B] = ab => iconv(base.SumLeftInfo(base.ArrRngInfo(ab)))
+  override def sumLeftInfo[A, B] = ab => iconv(base.sumLeftInfo(base.arrowRangeInfo(ab)))
 
-  override def SumRightInfo[A, B] = ab => iconv(base.SumRightInfo(base.ArrRngInfo(ab)))
+  override def sumRightInfo[A, B] = ab => iconv(base.sumRightInfo(base.arrowRangeInfo(ab)))
 
-  override implicit def ListInfo[A](implicit ai: Info[Arg => A]) = iconv(base.ListInfo(base.ArrRngInfo(ai)))
+  override implicit def listInfo[A](implicit ai: Info[Arg => A]) = iconv(base.listInfo(base.arrowRangeInfo(ai)))
 
-  override def ListElmInfo[A](implicit lai: Info[Arg => List[A]]) = iconv(base.ListElmInfo(base.ArrRngInfo(lai)))
+  override def listElmInfo[A](implicit lai: Info[Arg => List[A]]) = iconv(base.listElmInfo(base.arrowRangeInfo(lai)))
 
-  override implicit def UnitInfo = iconv(base.UnitInfo)
+  override implicit def unitInfo = iconv(base.unitInfo)
 
   override def mkUnit = rconv(base.mkUnit)
 
   override def left[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.left(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.left(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def right[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.right(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.right(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def sumMatch[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.sumMatch(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.sumMatch(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
-  override def mkProd[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.mkProd(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override def mkProduct[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.mkProduct(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def fst[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.fst(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override def first[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.first(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def snd[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.snd(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+  override def second[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.second(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def curry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.curry(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.curry(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def uncurry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.uncurry(base.ArrRngInfo(ai), base.ArrRngInfo(bi), base.ArrRngInfo(ci)))
+    rconv(base.uncurry(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
-  override def Nil[A](implicit ai: Info[Arg => A]) = rconv(base.Nil(base.ArrRngInfo(ai)))
+  override def nil[A](implicit ai: Info[Arg => A]) = rconv(base.nil(base.arrowRangeInfo(ai)))
 
-  override def Cons[A](implicit ai: Info[Arg => A]) =
-    rconv(base.Cons(base.ArrRngInfo(ai)))
+  override def cons[A](implicit ai: Info[Arg => A]) =
+    rconv(base.cons(base.arrowRangeInfo(ai)))
 
   override def listMatch[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.listMatch(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.listMatch(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def listMap[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.listMap(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
+    rconv(base.listMap(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def litB = b => rconv(base.litB(b))
 
-  override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.ArrRngInfo(ai)))
+  override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.arrowRangeInfo(ai)))
 
   override def BoolInfo: Info[Arg => Boolean] = iconv(base.BoolInfo)
 }

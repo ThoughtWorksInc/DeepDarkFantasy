@@ -9,9 +9,9 @@ trait SumRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
 
   def sumMatch[A, B, C](implicit at: Info[A], bt: Info[B], ct: Info[C]): Repr[(A => C) => (B => C) => (Either[A, B] => C)]
 
-  implicit def SumInfo[A, B](implicit ai: Info[A], bi: Info[B]): Info[Either[A, B]]
+  implicit def sumInfo[A, B](implicit ai: Info[A], bi: Info[B]): Info[Either[A, B]]
 
-  def SumLeftInfo[A, B]: Info[Either[A, B]] => Info[A]
+  def sumLeftInfo[A, B]: Info[Either[A, B]] => Info[A]
 
-  def SumRightInfo[A, B]: Info[Either[A, B]] => Info[B]
+  def sumRightInfo[A, B]: Info[Either[A, B]] => Info[B]
 }

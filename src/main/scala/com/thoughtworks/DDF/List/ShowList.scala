@@ -5,11 +5,11 @@ import com.thoughtworks.DDF.Unit.ShowUnit
 import com.thoughtworks.DDF.{NoInfo, Show}
 
 trait ShowList extends ListRepr[NoInfo, Show] with ShowArrow with ShowUnit with SimpleList[Show] {
-  override def Cons[A](implicit ai: NoInfo[A]) = Show("Cons")
+  override def cons[A](implicit ai: NoInfo[A]) = Show("Cons")
 
   override def listMatch[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMatch")
 
-  override def Nil[A](implicit ai: NoInfo[A]) = Show("Nil")
+  override def nil[A](implicit ai: NoInfo[A]) = Show("Nil")
 
   override def listMap[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMap")
 }

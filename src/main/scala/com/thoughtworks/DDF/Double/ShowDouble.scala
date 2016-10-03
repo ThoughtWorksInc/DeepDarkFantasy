@@ -4,11 +4,11 @@ import com.thoughtworks.DDF.Arrow.ShowArrow
 import com.thoughtworks.DDF.{NoInfo, Show}
 
 trait ShowDouble extends DoubleRepr[NoInfo, Show] with ShowArrow with SimpleDouble[Show] {
-  override def LitD = d => Show(d.toString)
+  override def litD = d => Show(d.toString)
 
-  override def PlusD = Show("+")
+  override def plusD = Show("+")
 
-  override def MultD = Show("*")
+  override def multD = Show("*")
 }
 
 object ShowDouble {

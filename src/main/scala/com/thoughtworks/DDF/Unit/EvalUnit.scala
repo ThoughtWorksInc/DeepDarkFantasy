@@ -4,8 +4,8 @@ import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase, MonoidUnit}
 
 import scalaz.Monoid
 
-trait EvalUnit extends UnitLang[Loss, Eval] {
-  override implicit def UnitInfo: Loss.Aux[Unit, Unit] = new Loss[Unit] {
+trait EvalUnit extends UnitRepr[Loss, Eval] {
+  override implicit def unitInfo: Loss.Aux[Unit, Unit] = new Loss[Unit] {
     override type ret = Unit
 
     override def m: Monoid[Unit] = MonoidUnit.apply
@@ -28,7 +28,7 @@ trait EvalUnit extends UnitLang[Loss, Eval] {
       override type ret = Unit
     }
 
-    override implicit val loss: Loss[Unit] = UnitInfo
+    override implicit val loss: Loss[Unit] = unitInfo
   }
 
 }

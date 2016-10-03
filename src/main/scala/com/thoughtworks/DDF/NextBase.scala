@@ -9,7 +9,7 @@ trait NextBase[Info[_], Repr[_], Arg] {
 
   def rconv[X]: Repr[X] => Either[Repr[X], Repr[Arg => X]] = x => Left(x)
 
-  def iconv[X]: Info[X] => Info[Arg => X] = x => ski.ArrowInfo[Arg, X](argi, x)
+  def iconv[X]: Info[X] => Info[Arg => X] = x => ski.arrowInfo[Arg, X](argi, x)
 
   def in = Right(ski.I)
 
@@ -18,5 +18,5 @@ trait NextBase[Info[_], Repr[_], Arg] {
     case Left(x) => lift(x)
   }
 
-  def lift[X]: Repr[X] => Repr[Arg => X] = r => ski.app(ski.K[X, Arg](ski.ReprInfo(r), argi))(r)
+  def lift[X]: Repr[X] => Repr[Arg => X] = r => ski.app(ski.K[X, Arg](ski.reprInfo(r), argi))(r)
 }

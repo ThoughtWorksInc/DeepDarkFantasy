@@ -5,13 +5,13 @@ import com.thoughtworks.DDF.Bool.BoolRepr
 import com.thoughtworks.DDF.Combinators._
 import com.thoughtworks.DDF.Double.DoubleRepr
 import com.thoughtworks.DDF.List.ListRepr
-import com.thoughtworks.DDF.Product.ProdRepr
+import com.thoughtworks.DDF.Product.ProductRepr
 import com.thoughtworks.DDF.Sum.SumRepr
-import com.thoughtworks.DDF.Unit.UnitLang
+import com.thoughtworks.DDF.Unit.UnitRepr
 
 trait Lang[Info[_], Repr[_]] extends
-  ProdRepr[Info, Repr] with
-  UnitLang[Info, Repr] with
+  ProductRepr[Info, Repr] with
+  UnitRepr[Info, Repr] with
   ListRepr[Info, Repr] with
   SumRepr[Info, Repr] with
   ArrowRepr[Info, Repr] with

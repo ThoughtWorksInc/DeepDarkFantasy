@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.NoInfo
 import com.thoughtworks.DDF.Unit.SimpleUnit
 
 trait SimpleList[Repr[_]] extends ListRepr[NoInfo, Repr] with SimpleUnit[Repr] {
-  override implicit def ListInfo[A](implicit ai: NoInfo[A]) = NoInfo()
+  override implicit def listInfo[A](implicit ai: NoInfo[A]) = NoInfo()
 
-  override def ListElmInfo[A](implicit lai: NoInfo[List[A]]) = NoInfo()
+  override def listElmInfo[A](implicit lai: NoInfo[List[A]]) = NoInfo()
 }
