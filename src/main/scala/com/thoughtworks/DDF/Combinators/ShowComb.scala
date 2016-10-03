@@ -4,13 +4,13 @@ import com.thoughtworks.DDF.Arrow.ShowArrow
 import com.thoughtworks.DDF.{NoInfo, Show}
 
 trait ShowComb extends Comb[NoInfo, Show] with ShowArrow {
-  override def S[A, B, C](implicit at: NoInfo[A], bt: NoInfo[B], ct: NoInfo[C]) = Show("S")
+  override def S[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("S")
 
-  override def K[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("K")
+  override def K[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("K")
 
-  override def I[A](implicit at: NoInfo[A]) = Show("I")
+  override def I[A](implicit ai: NoInfo[A]) = Show("I")
 
-  override def Y[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("Y")
+  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("Y")
 
   override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("B")
 
