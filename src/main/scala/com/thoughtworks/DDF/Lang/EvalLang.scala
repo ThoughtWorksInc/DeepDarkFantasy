@@ -8,7 +8,7 @@ import com.thoughtworks.DDF.Product.EvalProd
 import com.thoughtworks.DDF.Sum.EvalSum
 import com.thoughtworks.DDF.{Eval, Loss}
 
-class EvalLang extends
+trait EvalLang extends
   Lang[Loss, Eval] with
   EvalProd with
   EvalComb with
@@ -16,3 +16,7 @@ class EvalLang extends
   EvalSum with
   EvalList with
   EvalBool
+
+object EvalLang {
+  implicit def apply = new EvalLang {}
+}

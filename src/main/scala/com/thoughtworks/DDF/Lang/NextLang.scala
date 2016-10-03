@@ -1,15 +1,15 @@
 package com.thoughtworks.DDF.Lang
 
-case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi: Info[Arg]) extends
-  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {
+import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.NextBase
+
+case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit arg: Info[Arg]) extends
+  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  NextBase[Info, Repr, Arg] {
 
   override def ArrDomInfo[A, B] = x => iconv(base.ArrDomInfo(base.ArrRngInfo(x)))
 
   override def ArrRngInfo[A, B] = x => iconv(base.ArrRngInfo(base.ArrRngInfo(x)))
-
-  def rconv[X]: Repr[X] => Either[Repr[X], Repr[Arg => X]] = x => Left(x)
-
-  def iconv[X]: Info[X] => Info[Arg => X] = x => base.ArrowInfo[Arg, X](argi, x)
 
   override implicit def ProdInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
     iconv(base.ProdInfo(base.ArrRngInfo(ai), base.ArrRngInfo(bi)))
@@ -125,11 +125,13 @@ case class NextLang[Info[_], Repr[_], Arg](base: Lang[Info, Repr])(implicit argi
     case Right(x) => base.ReprInfo(x)
   }
 
-  def in = Right(base.I[Arg])
-
   override def litB = b => rconv(base.litB(b))
 
   override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.ArrRngInfo(ai)))
 
   override def BoolInfo: Info[Arg => Boolean] = iconv(base.BoolInfo)
+
+  override implicit def argi: Info[Arg] = arg
+
+  override implicit def ski: SKIRepr[Info, Repr] = base
 }
