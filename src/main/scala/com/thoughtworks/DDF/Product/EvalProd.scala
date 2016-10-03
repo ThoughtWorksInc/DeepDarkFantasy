@@ -7,14 +7,28 @@ import scalaz.Leibniz._
 import scalaz.Monoid
 
 trait EvalProd extends ProdRepr[Loss, Eval] with EvalArrow {
-  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(PairEC[A, B]()))(ab.eca)
+  trait ProdLCRet[A, B] {
+    def Fst: Loss[A]
+
+    def Snd: Loss[B]
+  }
+
+  case class ProdEC[A, B]() extends EvalCase[(A, B)] {
+    override type ret = (Eval[A], Eval[B])
+  }
+
+  case class ProdLC[A, B]() extends LossCase[(A, B)] {
+    override type ret = ProdLCRet[A, B]
+  }
+
+  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(ProdEC[A, B]()))(ab.eca)
 
   def pairEval[A, B](a: Eval[A], b: Eval[B])(implicit al: Loss[A], bl: Loss[B]) = new Eval[(A, B)] {
     override val loss: Loss[(A, B)] = ProdInfo(al, bl)
 
     override def eval: (A, B) = (a.eval, b.eval)
 
-    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = PairEC()
+    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = ProdEC()
 
     override def eca: ec.ret = (a, b)
   }
@@ -36,9 +50,9 @@ trait EvalProd extends ProdRepr[Loss, Eval] with EvalArrow {
     new Loss[(A, B)] {
       override def conv: ((A, B)) => Eval[(A, B)] = p => pairEval(al.conv(p._1), bl.conv(p._2))
 
-      override val lc: LossCase.Aux[(A, B), PairLCRet[A, B]] = PairLC[A, B]()
+      override val lc: LossCase.Aux[(A, B), ProdLCRet[A, B]] = ProdLC[A, B]()
 
-      override def lca: lc.ret = new PairLCRet[A, B] {
+      override def lca: lc.ret = new ProdLCRet[A, B] {
         override def Fst: Loss[A] = al
 
         override def Snd: Loss[B] = bl
@@ -55,9 +69,9 @@ trait EvalProd extends ProdRepr[Loss, Eval] with EvalArrow {
       }
     }
 
-  override def ProdFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Fst
+  override def ProdFstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(ProdLC[A, B]()))(p.lca).Fst
 
-  override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(PairLC[A, B]()))(p.lca).Snd
+  override def ProdSndInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(ProdLC[A, B]()))(p.lca).Snd
 
   def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(((A, B)) => C) => A => B => C] =
     arrEval[((A, B)) => C, A => B => C, ArrowLoss[(A, B), ci.loss], ArrowLoss[A, ArrowLoss[B, ci.loss]]](abc =>

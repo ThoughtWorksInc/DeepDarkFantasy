@@ -7,6 +7,20 @@ import scalaz.Leibniz._
 import scalaz.Monoid
 
 trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
+  trait SumLCRet[A, B] {
+    def Left: Loss[A]
+
+    def Right: Loss[B]
+  }
+
+  case class SumEC[A, B]() extends EvalCase[Either[A, B]] {
+    override type ret = Either[Eval[A], Eval[B]]
+  }
+
+  case class SumLC[A, B]() extends LossCase[Either[A, B]] {
+    override type ret = SumLCRet[A, B]
+  }
+
   override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
     arrEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(Left(ea)), _._1))(at, SumInfo(at, bt))
 

@@ -5,17 +5,17 @@ import com.thoughtworks.DDF._
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-case class DLoss(d: Double)
-
-object DEC extends EvalCase[Double] {
-  override type ret = Double
-}
-
-object DLC extends LossCase[Double] {
-  override type ret = Unit
-}
-
 trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
+  case class DLoss(d: Double)
+
+  object DEC extends EvalCase[Double] {
+    override type ret = Double
+  }
+
+  object DLC extends LossCase[Double] {
+    override type ret = Unit
+  }
+
   def dEval(d: Double) = new Eval[Double] {
     override val loss: Loss[Double] = DoubleInfo
 
