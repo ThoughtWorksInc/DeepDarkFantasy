@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.NextBase
 trait NextArrow[Info[_], Repr[_], Arg] extends
   ArrowRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextBase[Info, Repr, Arg] {
-  def base: ArrowRepr[Info, Repr]
+  implicit def base: ArrowRepr[Info, Repr]
 
   override def arrowInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     iconv(base.arrowInfo[A, B](base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))

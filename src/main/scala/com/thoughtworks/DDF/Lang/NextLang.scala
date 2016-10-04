@@ -5,6 +5,7 @@ import com.thoughtworks.DDF.Double.NextDouble
 import com.thoughtworks.DDF.NextBase
 import com.thoughtworks.DDF.Option.NextOption
 import com.thoughtworks.DDF.Product.NextProduct
+import com.thoughtworks.DDF.Sum.NextSum
 
 trait NextLang[Info[_], Repr[_], Arg] extends
   Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
@@ -12,15 +13,9 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   NextComb[Info, Repr, Arg] with
   NextDouble[Info, Repr, Arg] with
   NextProduct[Info, Repr, Arg] with
-  NextOption[Info, Repr, Arg] {
+  NextOption[Info, Repr, Arg] with
+  NextSum[Info, Repr, Arg] {
   implicit def base: Lang[Info, Repr]
-
-  override implicit def sumInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    iconv(base.sumInfo(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
-
-  override def sumLeftInfo[A, B] = ab => iconv(base.sumLeftInfo(base.arrowRangeInfo(ab)))
-
-  override def sumRightInfo[A, B] = ab => iconv(base.sumRightInfo(base.arrowRangeInfo(ab)))
 
   override implicit def listInfo[A](implicit ai: Info[Arg => A]) = iconv(base.listInfo(base.arrowRangeInfo(ai)))
 
@@ -29,15 +24,6 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   override implicit def unitInfo = iconv(base.unitInfo)
 
   override def mkUnit = rconv(base.mkUnit)
-
-  override def left[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.left(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
-
-  override def right[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.right(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
-
-  override def sumMatch[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
-    rconv(base.sumMatch(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
 
   override def nil[A](implicit ai: Info[Arg => A]) = rconv(base.nil(base.arrowRangeInfo(ai)))
 
