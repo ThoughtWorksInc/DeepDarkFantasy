@@ -5,9 +5,9 @@ import com.thoughtworks.DDF.Arrow.ArrowRepr
 trait ProductRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
   implicit def productInfo[A, B](implicit ai: Info[A], bi: Info[B]): Info[(A, B)]
 
-  def productFirstInfo[A, B]: Info[(A, B)] => Info[A]
+  def productZerothInfo[A, B]: Info[(A, B)] => Info[A]
 
-  def productSecondInfo[A, B]: Info[(A, B)] => Info[B]
+  def productFirstInfo[A, B]: Info[(A, B)] => Info[B]
 
   def mkProduct[A, B](implicit at: Info[A], bt: Info[B]): Repr[A => B => (A, B)]
 

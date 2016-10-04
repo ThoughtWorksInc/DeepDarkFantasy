@@ -14,9 +14,9 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   override implicit def productInfo[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
     iconv(base.productInfo(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override def productFirstInfo[A, B] = p => iconv(base.productFirstInfo(base.arrowRangeInfo(p)))
+  override def productZerothInfo[A, B] = p => iconv(base.productZerothInfo(base.arrowRangeInfo(p)))
 
-  override def productSecondInfo[A, B] = p => iconv(base.productSecondInfo(base.arrowRangeInfo(p)))
+  override def productFirstInfo[A, B] = p => iconv(base.productFirstInfo(base.arrowRangeInfo(p)))
 
   override implicit def sumInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     iconv(base.sumInfo(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
