@@ -90,3 +90,7 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
         (listEval(lb.map(_.eb)), l => zipEqLength(lb)(l).map(x => x._1.backward(x._2)))
       }), l => ArrowLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))
 }
+
+object EvalList {
+  implicit def apply = new EvalList {}
+}
