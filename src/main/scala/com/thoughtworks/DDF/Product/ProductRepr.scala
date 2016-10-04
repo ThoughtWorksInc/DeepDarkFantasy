@@ -9,11 +9,11 @@ trait ProductRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
 
   def productFirstInfo[A, B]: Info[(A, B)] => Info[B]
 
-  def mkProduct[A, B](implicit at: Info[A], bt: Info[B]): Repr[A => B => (A, B)]
+  def mkProduct[A, B](implicit ai: Info[A], bi: Info[B]): Repr[A => B => (A, B)]
 
-  def zeroth[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => A]
+  def zeroth[A, B](implicit ai: Info[A], bi: Info[B]): Repr[((A, B)) => A]
 
-  def first[A, B](implicit at: Info[A], bt: Info[B]): Repr[((A, B)) => B]
+  def first[A, B](implicit ai: Info[A], bi: Info[B]): Repr[((A, B)) => B]
 
   def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(((A, B)) => C) => A => B => C]
 
