@@ -8,9 +8,9 @@ import scalaz.Monoid
 
 trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
   trait ProductLCRet[A, B] {
-    def Fst: Loss[A]
+    def zeroth: Loss[A]
 
-    def Snd: Loss[B]
+    def first: Loss[B]
   }
 
   case class ProductEC[A, B]() extends EvalCase[(A, B)] {
@@ -33,10 +33,10 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
     override def eca: ec.ret = (a, b)
   }
 
-  override def first[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
+  override def zeroth[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
     arrowEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(productInfo(at, bt), at)
 
-  override def second[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
+  override def first[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
     arrowEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(productInfo(at, bt), bt)
 
   override def mkProduct[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
@@ -53,9 +53,9 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
       override val lc: LossCase.Aux[(A, B), ProductLCRet[A, B]] = ProductLC[A, B]()
 
       override def lca: lc.ret = new ProductLCRet[A, B] {
-        override def Fst: Loss[A] = al
+        override def zeroth: Loss[A] = al
 
-        override def Snd: Loss[B] = bl
+        override def first: Loss[B] = bl
       }
 
       override type ret = (al.loss, bl.loss)
@@ -69,9 +69,9 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
       }
     }
 
-  override def productFirstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).Fst
+  override def productFirstInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).zeroth
 
-  override def productSecondInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).Snd
+  override def productSecondInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).first
 
   def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(((A, B)) => C) => A => B => C] =
     arrowEval[((A, B)) => C, A => B => C, ArrowLoss[(A, B), ci.loss], ArrowLoss[A, ArrowLoss[B, ci.loss]]](abc =>

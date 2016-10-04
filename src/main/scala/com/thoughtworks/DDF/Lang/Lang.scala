@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Lang
 
 import com.thoughtworks.DDF.Arrow.ArrowRepr
 import com.thoughtworks.DDF.Bool.BoolRepr
-import com.thoughtworks.DDF.Combinators._
+import com.thoughtworks.DDF.Combinators.Comb
 import com.thoughtworks.DDF.Double.DoubleRepr
 import com.thoughtworks.DDF.List.ListRepr
 import com.thoughtworks.DDF.Option.OptionRepr

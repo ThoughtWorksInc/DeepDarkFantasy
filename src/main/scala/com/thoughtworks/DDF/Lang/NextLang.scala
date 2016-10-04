@@ -45,11 +45,11 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   override def mkProduct[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.mkProduct(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
+  override def zeroth[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.zeroth(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
+
   override def first[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.first(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
-
-  override def second[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
-    rconv(base.second(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override def curry[A, B, C](implicit ai: Info[Arg => A], bi: Info[Arg => B], ci: Info[Arg => C]) =
     rconv(base.curry(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi), base.arrowRangeInfo(ci)))
@@ -88,11 +88,12 @@ trait NextLang[Info[_], Repr[_], Arg] extends
 }
 
 object NextLang {
-  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]) = new NextLang[Info, Repr, Arg] {
-    override implicit def base: Lang[Info, Repr] = lang
+  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]) =
+    new NextLang[Info, Repr, Arg] {
+      override implicit def base: Lang[Info, Repr] = lang
 
-    override implicit def argi: Info[Arg] = arg
+      override implicit def argi: Info[Arg] = arg
 
-    override implicit def ski: SKIRepr[Info, Repr] = lang
+      override implicit def ski: SKIRepr[Info, Repr] = lang
   }
 }
