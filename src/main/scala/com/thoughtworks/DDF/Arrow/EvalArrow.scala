@@ -1,14 +1,14 @@
 package com.thoughtworks.DDF.Arrow
 
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
-import com.thoughtworks.DDF.InfoB.EvalInfoB
+import com.thoughtworks.DDF.InfoBase.EvalInfoBase
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
 case class ArrowLoss[A, BL](seq: Seq[(Eval[A], BL)])
 
-trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoB {
+trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
   case class ArrowEC[A, B]() extends EvalCase[A => B] {
     override type ret = forward[A, B]
   }

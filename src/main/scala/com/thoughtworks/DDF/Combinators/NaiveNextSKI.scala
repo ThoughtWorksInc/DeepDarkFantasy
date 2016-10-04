@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.NaiveNextBase
-import com.thoughtworks.DDF.InfoB.NaiveNextInfoB
+import com.thoughtworks.DDF.InfoBase.NaiveNextInfoBase
 
 trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
   SKIRepr[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   NaiveNextBase[Info, Repr, Arg] with
-  NaiveNextInfoB[Info, Repr, Arg] {
+  NaiveNextInfoBase[Info, Repr, Arg] {
   implicit def base: SKIRepr[Info, Repr]
 
   override def arrowDomainInfo[A, B]: Info[Arg => A => B] => Info[Arg => A] = x =>

@@ -73,6 +73,18 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.arrowRangeInfo(ai)))
 
   override def BoolInfo: Info[Arg => Boolean] = iconv(base.BoolInfo)
+
+  override implicit def optionInfo[A](implicit ai: Info[Arg => A]) =
+    iconv(base.optionInfo(base.arrowRangeInfo(ai)))
+
+  override def optionElmInfo[A] = oai => iconv(base.optionElmInfo(base.arrowRangeInfo(oai)))
+
+  override def none[A](implicit ai: Info[Arg => A]) = rconv(base.none(base.arrowRangeInfo(ai)))
+
+  override def some[A](implicit ai: Info[Arg => A]) = rconv(base.some(base.arrowRangeInfo(ai)))
+
+  override def optionMatch[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.optionMatch(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 }
 
 object NextLang {

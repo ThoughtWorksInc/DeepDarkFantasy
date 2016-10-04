@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.InfoB.InfoB
+import com.thoughtworks.DDF.InfoBase.InfoBase
 
-trait BoolInfo[Info[_], Repr[_]] extends InfoB[Info, Repr] {
+trait BoolInfo[Info[_], Repr[_]] extends InfoBase[Info, Repr] {
   implicit def BoolInfo: Info[Boolean]
 }

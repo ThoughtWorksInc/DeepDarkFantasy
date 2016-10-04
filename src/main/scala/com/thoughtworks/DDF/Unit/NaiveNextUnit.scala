@@ -2,12 +2,12 @@ package com.thoughtworks.DDF.Unit
 
 import com.thoughtworks.DDF.Combinators.SKIRepr
 import com.thoughtworks.DDF.NaiveNextBase
-import com.thoughtworks.DDF.InfoB.NaiveNextInfoB
+import com.thoughtworks.DDF.InfoBase.NaiveNextInfoBase
 
 trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
   UnitRepr[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   NaiveNextBase[Info, Repr, Arg] with
-  NaiveNextInfoB[Info, Repr, Arg] {
+  NaiveNextInfoBase[Info, Repr, Arg] {
   implicit def base: UnitRepr[Info, Repr]
 
   override def mkUnit: Repr[Arg => Unit] = rconv(base.mkUnit)

@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.InfoB.InfoB
+import com.thoughtworks.DDF.InfoBase.InfoBase
 
-trait ArrowRepr[Info[_], Repr[_]] extends InfoB[Info, Repr] {
+trait ArrowRepr[Info[_], Repr[_]] extends InfoBase[Info, Repr] {
   implicit def arrowInfo[A, B](implicit ai : Info[A], bi : Info[B]) : Info[A => B]
 
   def arrowDomainInfo[A, B]: Info[A => B] => Info[A]

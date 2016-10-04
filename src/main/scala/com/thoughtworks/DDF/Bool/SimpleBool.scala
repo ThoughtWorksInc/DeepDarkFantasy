@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.InfoB.SimpleInfoB
+import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleBool[Repr[_]] extends BoolInfo[NoInfo, Repr] with SimpleInfoB[Repr] {
+trait SimpleBool[Repr[_]] extends BoolInfo[NoInfo, Repr] with SimpleInfoBase[Repr] {
   override implicit def BoolInfo: NoInfo[Boolean] = NoInfo()
 }
 
