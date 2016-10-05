@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Option
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
+import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Monoid
@@ -46,20 +47,18 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
   override def some[A](implicit ai: Loss[A]): Eval[A => Option[A]] =
     arrowEval[A, Option[A], ai.loss, ai.loss](a => (optionEval(Some(a)), l => l))(ai, optionInfo(ai))
 
-  override def optionMatch[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[B => (A => B) => Option[A] => B] =
-    arrowEval[B, (A => B) => Option[A] => B, bi.loss, ArrowLoss[A => B, ArrowLoss[Option[A], bi.loss]]](ncase =>
-      (arrowEval[A => B, Option[A] => B, ArrowLoss[A, bi.loss], ArrowLoss[Option[A], bi.loss]](scase =>
-        (arrowEval[Option[A], B, ai.loss, bi.loss](oa => oeval(oa) match {
-          case Some(a) => {
-            val b = aeval(scase).forward(a)
-            (b.eb, b.backward)
-          }
-          case None => (ncase, _ => ai.m.zero)
-        })(optionInfo(ai), bi), l =>
-          ArrowLoss(l.seq.filter(x => oeval(x._1).isDefined).map(x => (oeval(x._1).get, x._2))))), l =>
-        l.seq.flatMap(x => x._2.seq.filter(x => oeval(x._1).isEmpty).map(x =>
-          x._2)).foldRight(bi.m.zero)((x, y) => bi.m.append(x, y))))(
-      bi, arrowInfo(arrowInfo(ai, bi), arrowInfo(optionInfo(ai), bi)))
+  private def comb : Comb[Loss, Eval] = EvalComb.apply
+
+  override def optionMatch[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[Option[A] => B => (A => B) => B] =
+    arrowEval[Option[A], B => (A => B) => B, ai.loss, ArrowLoss[B, ArrowLoss[A => B, bi.loss]]](opt => {
+      oeval(opt) match {
+        case None => (comb.K[B, A => B], _ => ai.m.zero)
+        case Some(a) => (app(comb.K[(A => B) => B, B](arrowInfo(arrowInfo(ai, bi), bi), bi))(app(comb.Let[A, B])(a)), l =>
+          l.seq.flatMap(x => x._2.seq.map(y => aeval(y._1).forward(a).backward(y._2))).foldRight(
+            ai.m.zero)((x, y) => ai.m.append(x, y)))
+      }
+    })
+
 }
 
 object EvalOption {

@@ -42,7 +42,6 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
     })
   }
 
-
   override def B[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(B => C) => (A => B) => A => C] =
     arrowEval[B => C, (A => B) => A => C, ArrowLoss[B, ci.loss], ArrowLoss[A => B, ArrowLoss[A, ci.loss]]](bc =>
       (arrowEval[A => B, A => C, ArrowLoss[A, bi.loss], ArrowLoss[A, ci.loss]](ab => (arrowEval[A, C, ai.loss, ci.loss](a => {
@@ -74,6 +73,10 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
         val b = aeval(ab.eb).forward(a)
         (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrowLoss(Seq((a, bl))))))
       })(ai, bi), l => ArrowLoss(l.seq.map(x => (x._1, ArrowLoss(Seq((x._1, x._2))))))))
+
+  override def Let[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[A => (A => B) => B] = app(C[A => B, A, B])(App)
+
+  override def App[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B) => A => B] = I[A => B]
 }
 
 object EvalComb {

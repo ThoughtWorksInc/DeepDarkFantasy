@@ -11,5 +11,5 @@ trait OptionRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
 
   def some[A](implicit ai: Info[A]): Repr[A => Option[A]]
 
-  def optionMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[B => (A => B) => Option[A] => B]
+  def optionMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[Option[A] => B => (A => B) => B]
 }

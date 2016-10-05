@@ -24,15 +24,13 @@ trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
 
   def beval: Eval[Boolean] => Boolean = x => witness(x.ec.unique(BoolEC))(x.eca)
 
-  val comb: Comb[Loss, Eval] = EvalComb.apply
-
-  import comb._
+  private def comb: Comb[Loss, Eval] = EvalComb.apply
 
   override def ite[A](implicit ai: Loss[A]): Eval[Boolean => A => A => A] =
     arrowEval[Boolean, A => A => A, Unit, ArrowLoss[A, ArrowLoss[A, ai.loss]]](b =>
       (if(beval(b))
-        K[A, A](ai, ai) else
-        app(C[A, A, A](ai, ai, ai))(K[A, A](ai, ai)), _ => ()))(BoolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
+        comb.K[A, A](ai, ai) else
+        app(comb.C[A, A, A](ai, ai, ai))(comb.K[A, A](ai, ai)), _ => ()))(BoolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
 
   override implicit def BoolInfo: Loss.Aux[Boolean, Unit] = new Loss[Boolean] {
     override def convert = litB

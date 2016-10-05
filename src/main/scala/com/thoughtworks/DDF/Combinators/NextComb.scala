@@ -30,6 +30,10 @@ trait NextComb[Info[_], Repr[_], Arg] extends
     rconv(base.W(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
   override implicit def ski: SKIRepr[Info, Repr] = base
+
+  override def Let[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) = rconv(base.Let(convi(ai), convi(bi)))
+
+  override def App[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) = rconv(base.App(convi(ai), convi(bi)))
 }
 
 object NextComb {
@@ -38,5 +42,5 @@ object NextComb {
       override implicit def base: Comb[Info, Repr] = comb
 
       override implicit def argi: Info[Arg] = arg
-  }
+    }
 }
