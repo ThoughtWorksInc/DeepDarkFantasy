@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
+import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
@@ -21,11 +22,11 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
     override type ret = SumLCRet[A, B]
   }
 
-  override def left[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => Either[A, B]] =
-    arrowEval[A, Either[A, B], at.loss, (at.loss, bt.loss)](ea => (sumEval(scala.Left(ea)), _._1))(at, sumInfo(at, bt))
+  override def left[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[A => Either[A, B]] =
+    arrowEval[A, Either[A, B], ai.loss, (ai.loss, bi.loss)](ea => (sumEval(scala.Left(ea)), _._1))(ai, sumInfo(ai, bi))
 
-  override def right[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[B => Either[A, B]] =
-    arrowEval[B, Either[A, B], bt.loss, (at.loss, bt.loss)](eb => (sumEval(scala.Right(eb)), _._2))(bt, sumInfo(at, bt))
+  override def right[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[B => Either[A, B]] =
+    arrowEval[B, Either[A, B], bi.loss, (ai.loss, bi.loss)](eb => (sumEval(scala.Right(eb)), _._2))(bi, sumInfo(ai, bi))
 
   override implicit def sumInfo[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[Either[A, B], (al.loss, bl.loss)] =
     new Loss[Either[A, B]] {
@@ -57,22 +58,23 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
 
   override def sumRightInfo[A, B]: Loss[Either[A, B]] => Loss[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
 
-  override def sumMatch[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]):
-  Eval[(A => C) => (B => C) => Either[A, B] => C] =
-    arrowEval[A => C, (B => C) => Either[A, B] => C, ArrowLoss[A, ct.loss], ArrowLoss[B => C, ArrowLoss[Either[A, B], ct.loss]]](ac =>
-      (arrowEval[B => C, Either[A, B] => C, ArrowLoss[B, ct.loss], ArrowLoss[Either[A, B], ct.loss]](bc =>
-        (arrowEval[Either[A, B], C, (at.loss, bt.loss), ct.loss](ab => seval(ab) match {
-          case Left(a) =>
-            val c = aeval(ac).forward(a)
-            (c.eb, l => (c.backward(l), bt.m.zero))
-          case Right(b) =>
-            val c = aeval(bc).forward(b)
-            (c.eb, l => (at.m.zero, c.backward(l)))
-        })(sumInfo(at, bt), ct), l =>
-          ArrowLoss(l.seq.map(x => (seval[A, B](x._1), x._2)).
-            filter(x => x._1.isRight).map(x => (x._1.right.get, x._2))))),
-        l => ArrowLoss(l.seq.flatMap(x =>
-          x._2.seq.map(y => (seval(y._1), y._2)).filter(y => y._1.isLeft).map(y => (y._1.left.get, y._2))))))
+  private def comb: Comb[Loss, Eval] = EvalComb.apply
+  override def sumMatch[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  Eval[Either[A, B] => (A => C) => (B => C) => C] =
+    arrowEval[
+      Either[A, B],
+      (A => C) => (B => C) => C,
+      (ai.loss, bi.loss),
+      ArrowLoss[A => C, ArrowLoss[B => C, ci.loss]]](sum => seval(sum) match {
+      case Left(a) =>
+        (comb.app(comb.C[B => C, A => C, C])(comb.app(comb.K[(A => C) => C, B => C])(comb.app(comb.Let[A, C])(a))), l =>
+          (l.seq.flatMap(x => x._2.seq.map(y => aeval(x._1).forward(a).backward(y._2))).
+            foldRight(ai.m.zero)((x, y) => ai.m.append(x, y)), bi.m.zero))
+      case Right(b) =>
+        (comb.app(comb.K[(B => C) => C, A => C])(comb.app(comb.Let[B, C])(b)), l =>
+          (ai.m.zero, l.seq.flatMap(x => x._2.seq.map(y => aeval(y._1).forward(b).backward(y._2))).
+            foldRight(bi.m.zero)((x, y) => bi.m.append(x, y))))
+    })
 
   def sumEval[A, B](s: Either[Eval[A], Eval[B]])(implicit al: Loss[A], bl: Loss[B]) = new Eval[Either[A, B]] {
     override val loss: Loss[Either[A, B]] = sumInfo[A, B]

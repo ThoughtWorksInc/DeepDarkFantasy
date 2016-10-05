@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
+import com.thoughtworks.DDF.Combinators.EvalComb
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
@@ -58,25 +59,24 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
         l.seq.map(_._2.foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))).
           foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))(ai, arrowInfo(listInfo(ai), listInfo(ai)))
 
-  override def listMatch[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[B => (A => List[A] => B) => List[A] => B] =
+  private def comb = EvalComb.apply
+
+  override def listMatch[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[List[A] => B => (A => List[A] => B) => B] =
     arrowEval[
-      B,
-      (A => List[A] => B) => List[A] => B,
-      bi.loss,
-      ArrowLoss[A => List[A] => B, ArrowLoss[List[A], bi.loss]]](nilc =>
-      (arrowEval[A => List[A] => B, List[A] => B, ArrowLoss[A, ArrowLoss[List[A], bi.loss]], ArrowLoss[List[A], bi.loss]](consc =>
-        (arrowEval[List[A], B, List[ai.loss], bi.loss](li => leval(li) match {
-          case scala.Nil => (nilc, _ => scala.List(ai.m.zero))
-          case h :: t => {
-            val lb = aeval(consc).forward(h)
-            val b = aeval(lb.eb).forward(listEval(t))
-            (b.eb, l => lb.backward(ArrowLoss(Seq((listEval(t), l)))) :: b.backward(l))
-          }
-        })(listInfo(ai), bi), l => ArrowLoss(l.seq.filter(x => leval(x._1).nonEmpty).map(x =>
-          (leval(x._1).head, ArrowLoss(Seq((listEval(leval(x._1).tail), x._2)))))))),
-        l => l.seq.flatMap(x => x._2.seq.filter(y => leval(y._1).isEmpty).map(z => z._2)).
-          foldRight(bi.m.zero)((x, y) => bi.m.append(x, y))))(
-      bi, arrowInfo(arrowInfo(ai, arrowInfo(listInfo(ai), bi)), arrowInfo(listInfo(ai), bi)))
+      List[A],
+      B => (A => List[A] => B) => B,
+      List[ai.loss],
+      ArrowLoss[B, ArrowLoss[A => List[A] => B, bi.loss]]](l => leval(l) match {
+      case Nil => (comb.K[B, A => List[A] => B], l => List())
+      case lh :: lt => (app(comb.K[(A => List[A] => B) => B, B])(app(app(comb.C[A => List[A] => B, List[A], B])(app(app(
+        comb.C[A => List[A] => B, A, List[A] => B])(
+        comb.I[A => List[A] => B]))(lh)))(listEval(lt))),
+        l => l.seq.flatMap(x => x._2.seq.map(y => {
+          val lab = aeval(y._1).forward(lh)
+          val b = aeval(lab.eb).forward(listEval(lt))
+          lab.backward(ArrowLoss(Seq((listEval(lt), y._2)))) :: b.backward(y._2)
+        })).foldRight(listInfo(ai).m.zero)((x, y) => listInfo(ai).m.append(x, y)))
+    })
 
   def zipEqLength[A, B] : List[A] => List[B] => List[(A, B)] = la => lb => {
     assert(la.length == lb.length)

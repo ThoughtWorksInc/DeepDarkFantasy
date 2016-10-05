@@ -7,7 +7,7 @@ trait SumRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
 
   def right[A, B](implicit ai: Info[A], bi: Info[B]): Repr[B => Either[A, B]]
 
-  def sumMatch[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(A => C) => (B => C) => (Either[A, B] => C)]
+  def sumMatch[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[Either[A, B] => (A => C) => (B => C) => C]
 
   implicit def sumInfo[A, B](implicit ai: Info[A], bi: Info[B]): Info[Either[A, B]]
 

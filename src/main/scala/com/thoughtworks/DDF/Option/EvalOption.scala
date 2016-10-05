@@ -58,7 +58,6 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
             ai.m.zero)((x, y) => ai.m.append(x, y)))
       }
     })
-
 }
 
 object EvalOption {

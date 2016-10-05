@@ -12,7 +12,7 @@ trait ListRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
 
   def cons[A](implicit ai: Info[A]): Repr[A => List[A] => List[A]]
 
-  def listMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[B => (A => List[A] => B) => List[A] => B]
+  def listMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[List[A] => B => (A => List[A] => B) => B]
 
   def listMap[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => List[A] => List[B]]
 }
