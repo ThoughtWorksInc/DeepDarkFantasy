@@ -12,6 +12,12 @@ trait ShowList extends ListRepr[NoInfo, Show] with ShowArrow with ShowUnit with 
   override def nil[A](implicit ai: NoInfo[A]) = Show("Nil")
 
   override def listMap[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMap")
+
+  override def reverse[A](implicit ai: NoInfo[A]) = Show("reverse")
+
+  override def foldRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("foldRight")
+
+  override def foldLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("foldLeft")
 }
 
 object ShowList {

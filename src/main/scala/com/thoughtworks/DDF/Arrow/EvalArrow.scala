@@ -34,7 +34,8 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
     def forward(ea: Eval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
   }
 
-  def arrowEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]) =
+  def arrowEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]):
+  Eval[A => B] =
     new Eval[A => B] {
       override val loss: Loss[A => B] = arrowInfo
 

@@ -21,6 +21,14 @@ trait NextList [Info[_], Repr[_], Arg] extends
 
   override def listMap[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.listMap(convi(ai), convi(bi)))
+
+  override def reverse[A](implicit ai: Info[Arg => A]) = rconv(base.reverse(convi(ai)))
+
+  override def foldRight[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.foldRight(convi(ai), convi(bi)))
+
+  override def foldLeft[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.foldLeft(convi(ai), convi(bi)))
 }
 
 object NextList {
@@ -34,5 +42,5 @@ object NextList {
       override implicit def ski: SKIRepr[Info, Repr] = skir
 
       override implicit def argi: Info[Arg] = arg
-  }
+    }
 }

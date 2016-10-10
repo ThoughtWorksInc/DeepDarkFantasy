@@ -6,6 +6,7 @@ import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
+//(Double * Double) -> Double
 
 trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
   case class ListLC[A]() extends LossCase[List[A]] {
@@ -89,6 +90,36 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
         val lb = leval(la).map(x => aeval(ab).forward(x))
         (listEval(lb.map(_.eb)), l => zipEqLength(lb)(l).map(x => x._1.backward(x._2)))
       }), l => ArrowLoss(l.seq.flatMap(x => zipEqLength(leval(x._1))(x._2)))))
+
+  override def reverse[A](implicit ai: Loss[A]): Eval[List[A] => List[A]] =
+    arrowEval[List[A], List[A], List[ai.loss], List[ai.loss]](la => (listEval(leval(la).reverse), _.reverse))
+  //wrong when lost is not the same length as input.
+
+  override def foldRight[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B => B) => B => List[A] => B] =
+    arrowEval[
+      (A => B => B),
+      B => List[A] => B,
+      ArrowLoss[A, ArrowLoss[B, bi.loss]],
+      ArrowLoss[B, ArrowLoss[List[A], bi.loss]]](abb =>
+      (arrowEval[B, List[A] => B, bi.loss, ArrowLoss[List[A], bi.loss]](b =>
+        (arrowEval[List[A], B, List[ai.loss], bi.loss](la => leval(la) match {
+          case Nil => (b, _ => scala.List())
+          case lh :: lt => {
+            val blab = aeval(foldRight[A, B]).forward(abb)
+            val lab = aeval(blab.eb).forward(b)
+            val nb = aeval(lab.eb).forward(listEval(lt))
+            val bb = aeval(abb).forward(lh)
+            val finb = aeval(bb.eb).forward(nb.eb)
+            (finb.eb, bi => {
+              val rb = finb.backward(bi)
+              val aih = bb.backward(ArrowLoss(Seq((nb.eb, bi))))
+              aih :: nb.backward(rb)
+            })
+          }
+        })(listInfo(ai), bi), ???))(bi, arrowInfo(listInfo(ai), bi)),
+        ???))
+
+  override def foldLeft[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B => A) => A => List[B] => A] = ???
 }
 
 object EvalList {

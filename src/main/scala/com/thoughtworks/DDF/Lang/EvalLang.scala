@@ -3,6 +3,7 @@ package com.thoughtworks.DDF.Lang
 import com.thoughtworks.DDF.Bool.EvalBool
 import com.thoughtworks.DDF.Combinators.EvalComb
 import com.thoughtworks.DDF.Double.EvalDouble
+import com.thoughtworks.DDF.Forall.EvalForall
 import com.thoughtworks.DDF.List.EvalList
 import com.thoughtworks.DDF.Option.EvalOption
 import com.thoughtworks.DDF.Product.EvalProduct
@@ -19,7 +20,8 @@ trait EvalLang extends
   EvalList with
   EvalUnit with
   EvalBool with
-  EvalOption
+  EvalOption with
+  EvalForall
 
 object EvalLang {
   implicit def apply = new EvalLang {}

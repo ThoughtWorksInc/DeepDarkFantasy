@@ -3,6 +3,7 @@ package com.thoughtworks.DDF.Lang
 import com.thoughtworks.DDF.Bool.NextBool
 import com.thoughtworks.DDF.Combinators.{NextComb, SKIRepr}
 import com.thoughtworks.DDF.Double.NextDouble
+import com.thoughtworks.DDF.Forall.NextForall
 import com.thoughtworks.DDF.List.NextList
 import com.thoughtworks.DDF.NextBase
 import com.thoughtworks.DDF.Option.NextOption
@@ -20,7 +21,8 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   NextSum[Info, Repr, Arg] with
   NextList[Info, Repr, Arg] with
   NextUnit[Info, Repr, Arg] with
-  NextBool[Info, Repr, Arg] {
+  NextBool[Info, Repr, Arg] with
+  NextForall[Info, Repr, Arg] {
   implicit def base: Lang[Info, Repr]
 }
 
