@@ -6,9 +6,9 @@ import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
-//(Double * Double) -> Double
 
 trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
+
   case class ListLC[A]() extends LossCase[List[A]] {
     override type ret = Loss[A]
   }
@@ -17,9 +17,9 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
     override type ret = List[Eval[A]]
   }
 
-  def leval[A](e : Eval[List[A]]): List[Eval[A]] = witness(e.ec.unique(ListEC[A]()))(e.eca)
+  def leval[A](e: Eval[List[A]]): List[Eval[A]] = witness(e.ec.unique(ListEC[A]()))(e.eca)
 
-  def listEval[A](l : List[Eval[A]])(implicit ai: Loss[A]): Eval[List[A]] = new Eval[List[A]] {
+  def listEval[A](l: List[Eval[A]])(implicit ai: Loss[A]): Eval[List[A]] = new Eval[List[A]] {
     override def eca: ec.ret = l
 
     override def eval: List[A] = l.map(_.eval)
@@ -43,8 +43,9 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
       override def zero: loss = scala.List()
 
       override def append(f1: loss, f2: => loss): loss =
-        if(f1.length > f2.length)
-          append(f2, f1) else
+        if (f1.length > f2.length)
+          append(f2, f1)
+        else
           f1.zip(f2).map(p => ai.m.append(p._1, p._2)) ++ f2.drop(f1.length)
     }
   }
@@ -79,7 +80,7 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
         })).foldRight(listInfo(ai).m.zero)((x, y) => listInfo(ai).m.append(x, y)))
     })
 
-  def zipEqLength[A, B] : List[A] => List[B] => List[(A, B)] = la => lb => {
+  def zipEqLength[A, B]: List[A] => List[B] => List[(A, B)] = la => lb => {
     assert(la.length == lb.length)
     la.zip(lb)
   }
@@ -104,22 +105,79 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
       (arrowEval[B, List[A] => B, bi.loss, ArrowLoss[List[A], bi.loss]](b =>
         (arrowEval[List[A], B, List[ai.loss], bi.loss](la => leval(la) match {
           case Nil => (b, _ => scala.List())
-          case lh :: lt => {
+          case lh :: lt =>
             val blab = aeval(foldRight[A, B]).forward(abb)
             val lab = aeval(blab.eb).forward(b)
             val nb = aeval(lab.eb).forward(listEval(lt))
             val bb = aeval(abb).forward(lh)
             val finb = aeval(bb.eb).forward(nb.eb)
-            (finb.eb, bi => {
-              val rb = finb.backward(bi)
-              val aih = bb.backward(ArrowLoss(Seq((nb.eb, bi))))
+            (finb.eb, bl => {
+              val rb = finb.backward(bl)
+              val aih = bb.backward(ArrowLoss(Seq((nb.eb, bl))))
               aih :: nb.backward(rb)
             })
-          }
-        })(listInfo(ai), bi), ???))(bi, arrowInfo(listInfo(ai), bi)),
-        ???))
+        })(listInfo(ai), bi), ll => ll.seq.map(l => leval(l._1) match {
+          case Nil => bi.m.zero
+          case lh :: lt =>
+            val blab = aeval(foldRight[A, B]).forward(abb)
+            val lab = aeval(blab.eb).forward(b)
+            val nb = aeval(lab.eb).forward(listEval(lt))
+            val bb = aeval(abb).forward(lh)
+            val finb = aeval(bb.eb).forward(nb.eb)
+            lab.backward(ArrowLoss(Seq((listEval(lt), finb.backward(l._2)))))
+        }).foldRight(bi.m.zero)((l, r) => bi.m.append(l, r))))(bi, arrowInfo(listInfo(ai), bi)),
+        _.seq.flatMap(x => x._2.seq.map(y => leval(y._1) match {
+          case Nil => ArrowLoss[A, ArrowLoss[B, bi.loss]](Seq())
+          case lh :: lt =>
+            val blab = aeval(foldRight[A, B]).forward(abb)
+            val lab = aeval(blab.eb).forward(x._1)
+            val nb = aeval(lab.eb).forward(listEval(lt))
+            val bb = aeval(abb).forward(lh)
+            val finb = aeval(bb.eb).forward(nb.eb)
+            ArrowLoss[A, ArrowLoss[B, bi.loss]](
+              Seq((lh, ArrowLoss[B, bi.loss](Seq((nb.eb, y._2))))) ++
+                blab.backward(ArrowLoss(Seq((x._1, ArrowLoss(Seq((listEval(lt), finb.backward(y._2)))))))).seq)
+        })).foldRight(arrowInfo(ai, arrowInfo(bi, bi)).m.zero)((l, r) => arrowInfo(ai, arrowInfo(bi, bi)).m.append(l, r))))
 
-  override def foldLeft[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B => A) => A => List[B] => A] = ???
+  override def foldLeft[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => B => A) => A => List[B] => A] =
+    arrowEval[
+      A => B => A,
+      A => List[B] => A,
+      ArrowLoss[A, ArrowLoss[B, ai.loss]],
+      ArrowLoss[A, ArrowLoss[List[B], ai.loss]]](aba =>
+      (arrowEval[A, List[B] => A, ai.loss, ArrowLoss[List[B], ai.loss]](a =>
+        (arrowEval[List[B], A, List[bi.loss], ai.loss](lb => leval(lb) match {
+          case Nil => (a, _ => List())
+          case lh :: lt =>
+            val ba = aeval(aba).forward(a)
+            val na = aeval(ba.eb).forward(lh)
+            val alba = aeval(foldLeft[A, B]).forward(aba)
+            val lba = aeval(alba.eb).forward(na.eb)
+            val res = aeval(lba.eb).forward(listEval(lt))
+            (res.eb, ai => na.backward(lba.backward(ArrowLoss(Seq((listEval(lt), ai))))) +: res.backward(ai))
+        })(listInfo(bi), ai),
+          _.seq.map(l =>
+            leval(l._1) match {
+              case Nil => l._2
+              case lh :: lt =>
+                val ba = aeval(aba).forward(a)
+                val na = aeval(ba.eb).forward(lh)
+                val alba = aeval(foldLeft[A, B]).forward(aba)
+                val lba = aeval(alba.eb).forward(na.eb)
+                ba.backward(ArrowLoss(Seq((lh, lba.backward(ArrowLoss(Seq((listEval(lt), l._2))))))))
+            }).foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))(ai, arrowInfo(listInfo(bi), ai)),
+        _.seq.flatMap(x => x._2.seq.map(y => leval(y._1) match {
+          case Nil => ArrowLoss[A, ArrowLoss[B, ai.loss]](Seq())
+          case lh :: lt =>
+            val ba = aeval(aba).forward(x._1)
+            val na = aeval(ba.eb).forward(lh)
+            val alba = aeval(foldLeft[A, B]).forward(aba)
+            val lba = aeval(alba.eb).forward(na.eb)
+            ArrowLoss[A, ArrowLoss[B, ai.loss]](
+              (x._1, ArrowLoss[B, ai.loss](Seq((lh, lba.backward(ArrowLoss(Seq((listEval(lt), y._2)))))))) +:
+                alba.backward(ArrowLoss(Seq((na.eb, ArrowLoss(Seq((listEval(lt), y._2))))))).seq)
+        })).foldRight(arrowInfo(ai, arrowInfo(bi, ai)).m.zero)((x, y) =>
+          arrowInfo(ai, arrowInfo(bi, ai)).m.append(x, y))))
 }
 
 object EvalList {
