@@ -28,30 +28,33 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
   override def right[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[B => Either[A, B]] =
     arrowEval[B, Either[A, B], bi.loss, (ai.loss, bi.loss)](eb => (sumEval(scala.Right(eb)), _._2))(bi, sumInfo(ai, bi))
 
-  override implicit def sumInfo[A, B](implicit al: Loss[A], bl: Loss[B]): Loss.Aux[Either[A, B], (al.loss, bl.loss)] =
+  override implicit def sumInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[Either[A, B], (ai.loss, bi.loss)] =
     new Loss[Either[A, B]] {
 
       override def convert: Either[A, B] => Eval[Either[A, B]] = {
-        case Left(x) => sumEval(scala.Left(al.convert(x)))
-        case Right(x) => sumEval(scala.Right(bl.convert(x)))
+        case Left(x) => sumEval(scala.Left(ai.convert(x)))
+        case Right(x) => sumEval(scala.Right(bi.convert(x)))
       }
 
       override val lc: LossCase.Aux[Either[A, B], SumLCRet[A, B]] = SumLC()
 
       override def lca: lc.ret = new SumLCRet[A, B] {
-        override def Left: Loss[A] = al
+        override def Left: Loss[A] = ai
 
-        override def Right: Loss[B] = bl
+        override def Right: Loss[B] = bi
       }
 
-      override type ret = (al.loss, bl.loss)
+      override type ret = (ai.loss, bi.loss)
 
-      override def m: Monoid[(al.loss, bl.loss)] = new Monoid[(al.loss, bl.loss)] {
-        override def zero: (al.loss, bl.loss) = (al.m.zero, bl.m.zero)
+      override def m: Monoid[(ai.loss, bi.loss)] = new Monoid[(ai.loss, bi.loss)] {
+        override def zero: (ai.loss, bi.loss) = (ai.m.zero, bi.m.zero)
 
-        override def append(f1: (al.loss, bl.loss), f2: => (al.loss, bl.loss)): (al.loss, bl.loss) =
-          (al.m.append(f1._1, f2._1), bl.m.append(f1._2, f2._2))
+        override def append(f1: (ai.loss, bi.loss), f2: => (ai.loss, bi.loss)): (ai.loss, bi.loss) =
+          (ai.m.append(f1._1, f2._1), bi.m.append(f1._2, f2._2))
       }
+
+      override def update(x: Either[A, B], l: (ai.loss, bi.loss), rate: Double): Either[A, B] =
+        x.left.map(y => ai.update(y, l._1, rate)).right.map(y => bi.update(y, l._2, rate))
     }
 
   override def sumLeftInfo[A, B]: Loss[Either[A, B]] => Loss[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left

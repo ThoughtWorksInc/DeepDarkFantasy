@@ -22,6 +22,8 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
     override def lca: lc.ret = ai
 
     override type ret = ai.loss
+
+    override def update(x: Option[A], l: ai.loss, rate: Double): Option[A] = x.map(y => ai.update(y, l, rate))
   }
 
   case class EvalEC[A]() extends EvalCase[Option[A]] {

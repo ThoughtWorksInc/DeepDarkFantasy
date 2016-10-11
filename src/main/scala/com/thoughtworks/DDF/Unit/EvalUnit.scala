@@ -17,6 +17,8 @@ trait EvalUnit extends UnitRepr[Loss, Eval] {
     }
 
     override def lca: lc.ret = ()
+
+    override def update(x: Unit, l: loss, rate: Double): Unit = ()
   }
 
   override def mkUnit: Eval[Unit] = new Eval[Unit] {

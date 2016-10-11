@@ -48,6 +48,8 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
         else
           f1.zip(f2).map(p => ai.m.append(p._1, p._2)) ++ f2.drop(f1.length)
     }
+
+    override def update(x: List[A], l: loss, rate: Double): List[A] = x.zip(l).map(p => ai.update(p._1, p._2, rate))
   }
 
   override def listElmInfo[A](implicit lai: Loss[List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)

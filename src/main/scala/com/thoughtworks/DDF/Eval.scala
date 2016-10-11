@@ -12,6 +12,8 @@ trait Loss[X] extends TypeCase[Loss, X] {
   val lc: LossCase[X]
 
   def lca: lc.ret
+
+  def update(x: X, l: loss, rate: Double): X
 }
 
 object Loss {
