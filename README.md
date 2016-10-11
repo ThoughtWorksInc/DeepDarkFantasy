@@ -33,7 +33,9 @@ Lang is the default language that is usable right off the shelf. EvalLang provid
 
 However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), EvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. Reading EvalArrow -> EvalDouble -> EvalComb will get you know how stuff works. After that you can probably understand whatever just by tracing import dependency.
 # FA Q
+How is the speed?
 
+Horrible. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
 # Thank You Sir
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
 
