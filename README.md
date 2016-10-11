@@ -27,7 +27,11 @@ So, it is possible to add new operation/constructor, and still retain type safet
 
 In fact, there isn't even a core language! All feature(function, double, back propagation, pretty printing) is added as ordinary plugin so you can extend/subset the language as you can wish.
 # Patchouli Go!
+Example/Document is coming up. For now you can only read the code.
 
+Lang is the default language that is usable right off the shelf. EvalLang provide the capability to Evaluate a term and Back Propagate, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
+
+However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), EvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. Reading EvalArrow -> EvalDouble -> EvalComb will get you know how stuff works. After that you can probably understand whatever just by tracing import dependency.
 # FA Q
 
 # Thank You Sir
