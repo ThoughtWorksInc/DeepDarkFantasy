@@ -1,7 +1,35 @@
 # DeepDarkFantasy
+### What if we combine Functional Programming and Deep Learning?
 
+As we all know, a neural network is just a computable math expression (and hence a program). 
+
+**Can we add 'ordinary' programming construct to a 'neural network', like branch, loop, pair, sum, list, and function?** 
+
+Of course, I must still be able to train the network.
+
+**Yes! I had add all the above construct, and I am planning to add more (stream, goto, exception, assignment, for example).** 
+
+They all had their own special gradient structure to propagate loss accordingly. 
+
+However, in the end of the day, what is updated is only container of double (or other representation of real). Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
+
+----------
+Can we make the language typed so we can detect error before we train the network?
+
+**Yes and No.** I am able to type most stuff, but I am having trouble adding higher kinded type, so it is somewhat limited. I need a bit help here.
+
+----------
+Can we make the language modular and extensible so all people can write all sorts of Chuck Norris move into the language?
+
+**Yes Yes Yes!** The whole language is structured in a way very similar to [finally tagless](http://okmij.org/ftp/tagless-final/JFP.pdf), and [object algebra](https://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf). 
+
+So, it is possible to add new operation/constructor, and still retain type safety.
+
+In fact, there isn't even a core language! All feature(function, double, back propagation, pretty printing) is added as ordinary plugin so you can extend/subset the language as you can wish.
 # Patchouli Go!
 
 # FA Q
 
 # Thank You Sir
+This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
+
