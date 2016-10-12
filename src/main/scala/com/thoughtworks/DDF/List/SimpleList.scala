@@ -1,10 +1,15 @@
 package com.thoughtworks.DDF.List
 
+import com.thoughtworks.DDF.Arrow.SimpleArrow
 import com.thoughtworks.DDF.NoInfo
-import com.thoughtworks.DDF.Unit.SimpleUnit
+import com.thoughtworks.DDF.Product.SimpleProduct
 
-trait SimpleList[Repr[_]] extends ListRepr[NoInfo, Repr] {
+trait SimpleList[Repr[_]] extends ListInfo[NoInfo, Repr] with SimpleArrow[Repr] with SimpleProduct[Repr] {
   override implicit def listInfo[A](implicit ai: NoInfo[A]) = NoInfo()
 
   override def listElmInfo[A](implicit lai: NoInfo[List[A]]) = NoInfo()
+}
+
+object SimpleList {
+  implicit def apply[Repr[_]] = new SimpleList[Repr] {}
 }

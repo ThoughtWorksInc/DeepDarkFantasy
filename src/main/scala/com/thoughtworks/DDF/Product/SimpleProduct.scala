@@ -1,11 +1,16 @@
 package com.thoughtworks.DDF.Product
 
+import com.thoughtworks.DDF.Arrow.SimpleArrow
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleProduct[Repr[_]] extends ProductRepr[NoInfo, Repr] {
+trait SimpleProduct[Repr[_]] extends ProductInfo[NoInfo, Repr] with SimpleArrow[Repr] {
   override implicit def productInfo[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = NoInfo()
 
   override def productZerothInfo[A, B] = _ => NoInfo()
 
   override def productFirstInfo[A, B] = _ => NoInfo()
+}
+
+object SimpleProduct {
+  implicit def apply[Repr[_]] = new SimpleProduct[Repr] {}
 }
