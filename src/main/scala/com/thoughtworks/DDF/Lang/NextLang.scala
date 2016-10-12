@@ -25,7 +25,8 @@ trait NextLang[Info[_], Repr[_], Arg] extends
 }
 
 object NextLang {
-  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]):
+  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with NextBase[Info, Repr, Arg] =
     new NextLang[Info, Repr, Arg] {
       override implicit def base: Lang[Info, Repr] = lang
 

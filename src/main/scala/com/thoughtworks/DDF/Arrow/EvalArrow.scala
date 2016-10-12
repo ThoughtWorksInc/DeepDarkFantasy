@@ -76,7 +76,7 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
         override def Rng: Loss[B] = bi
       }
 
-      override def update(x: A => B, l: loss, rate: Double): A => B = x
+      override def update(x: A => B)(rate: Double)(l: loss): A => B = x
     }
 
   def aeval[A, B](ab: Eval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowEC[A, B]()))(ab.eca)

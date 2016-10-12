@@ -53,8 +53,8 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
           (ai.m.append(f1._1, f2._1), bi.m.append(f1._2, f2._2))
       }
 
-      override def update(x: Either[A, B], l: (ai.loss, bi.loss), rate: Double): Either[A, B] =
-        x.left.map(y => ai.update(y, l._1, rate)).right.map(y => bi.update(y, l._2, rate))
+      override def update(x: Either[A, B])(rate: Double)(l: (ai.loss, bi.loss)): Either[A, B] =
+        x.left.map(y => ai.update(y)(rate)(l._1)).right.map(y => bi.update(y)(rate)(l._2))
     }
 
   override def sumLeftInfo[A, B]: Loss[Either[A, B]] => Loss[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left

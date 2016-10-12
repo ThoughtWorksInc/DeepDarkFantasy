@@ -2,10 +2,12 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
 import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Product.NextProduct
 
 trait NextList [Info[_], Repr[_], Arg] extends
   ListRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
-  NextArrow[Info, Repr, Arg] {
+  NextArrow[Info, Repr, Arg] with
+  NextProduct[Info, Repr, Arg] {
   override implicit def base: ListRepr[Info, Repr]
 
   override implicit def listInfo[A](implicit ai: Info[Arg => A]) = iconv(base.listInfo(convi(ai)))
@@ -29,6 +31,9 @@ trait NextList [Info[_], Repr[_], Arg] extends
 
   override def foldLeft[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.foldLeft(convi(ai), convi(bi)))
+
+  override def listZip[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.listZip(convi(ai), convi(bi)))
 }
 
 object NextList {

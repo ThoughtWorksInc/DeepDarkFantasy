@@ -2,12 +2,13 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
 import com.thoughtworks.DDF.Combinators.EvalComb
+import com.thoughtworks.DDF.Product.EvalProduct
 import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
+trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalProduct {
 
   case class ListLC[A]() extends LossCase[List[A]] {
     override type ret = Loss[A]
@@ -49,7 +50,7 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
           f1.zip(f2).map(p => ai.m.append(p._1, p._2)) ++ f2.drop(f1.length)
     }
 
-    override def update(x: List[A], l: loss, rate: Double): List[A] = x.zip(l).map(p => ai.update(p._1, p._2, rate))
+    override def update(x: List[A])(rate: Double)(l: loss): List[A] = x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
   }
 
   override def listElmInfo[A](implicit lai: Loss[List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)
@@ -180,6 +181,16 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow {
                 alba.backward(ArrowLoss(Seq((na.eb, ArrowLoss(Seq((listEval(lt), y._2))))))).seq)
         })).foldRight(arrowInfo(ai, arrowInfo(bi, ai)).m.zero)((x, y) =>
           arrowInfo(ai, arrowInfo(bi, ai)).m.append(x, y))))
+
+  override def listZip[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[List[A] => List[B] => List[(A, B)]] =
+    arrowEval[
+      List[A],
+      List[B] => List[(A, B)],
+      List[ai.loss],
+      ArrowLoss[List[B], List[(ai.loss, bi.loss)]]](al =>
+      (arrowEval[List[B], List[(A, B)], List[bi.loss], List[(ai.loss, bi.loss)]](bl =>
+        (listEval(leval(al).zip(leval(bl)).map(p => productEval(p._1, p._2))), _.map(_._2))),
+        l => l.seq.map(_._2.map(_._1)).foldRight(listInfo(ai).m.zero)((x, y) => listInfo(ai).m.append(x, y))))
 }
 
 object EvalList {

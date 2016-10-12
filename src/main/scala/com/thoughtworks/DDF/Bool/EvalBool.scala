@@ -45,7 +45,7 @@ trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
 
     override type ret = Unit
 
-    override def update(x: Boolean, l: loss, rate: Double): Boolean = x
+    override def update(x: Boolean)(rate: Double)(l: loss): Boolean = x
   }
 }
 

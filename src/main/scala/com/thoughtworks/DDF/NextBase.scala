@@ -13,7 +13,7 @@ trait NextBase[Info[_], Repr[_], Arg] {
 
   def convi[X]: Info[Arg => X] => Info[X] = x => ski.arrowRangeInfo(x)
 
-  def in = Right(ski.I)
+  def in: Either[Repr[Arg], Repr[Arg => Arg]] = Right(ski.I)
 
   def collapse[X]: Either[Repr[X], Repr[Arg => X]] => Repr[Arg => X] = {
     case Left(x) => lift(x)

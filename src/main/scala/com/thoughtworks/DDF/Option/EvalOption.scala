@@ -23,7 +23,7 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
 
     override type ret = ai.loss
 
-    override def update(x: Option[A], l: ai.loss, rate: Double): Option[A] = x.map(y => ai.update(y, l, rate))
+    override def update(x: Option[A])(rate: Double)(l: ai.loss): Option[A] = x.map(y => ai.update(y)(rate)(l))
   }
 
   case class EvalEC[A]() extends EvalCase[Option[A]] {

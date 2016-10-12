@@ -13,7 +13,7 @@ trait Loss[X] extends TypeCase[Loss, X] {
 
   def lca: lc.ret
 
-  def update(x: X, l: loss, rate: Double): X
+  def update(x: X)(rate: Double)(l: loss): X
 }
 
 object Loss {

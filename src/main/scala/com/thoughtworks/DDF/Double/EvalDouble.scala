@@ -57,6 +57,6 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
 
     override type ret = DLoss
 
-    override def update(x: Double, l: loss, rate: Double): Double = x - l.d * rate
+    override def update(x: Double)(rate: Double)(l: loss): Double = x - l.d * rate
   }
 }
