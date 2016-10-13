@@ -4,41 +4,43 @@ import com.thoughtworks.DDF.Arrow._
 import com.thoughtworks.DDF.{Eval, Loss}
 
 trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
-  override def S[A, B, C](implicit at: Loss[A], bt: Loss[B], ct: Loss[C]): Eval[(A => B => C) => (A => B) => A => C] =
+  override def S[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => (A => B) => A => C] =
     arrowEval[
       A => B => C,
       (A => B) => A => C,
-      ArrowLoss[A, ArrowLoss[B, ct.loss]],
-      ArrowLoss[A => B, ArrowLoss[A, ct.loss]]](
-      abc => (arrowEval[A => B, A => C, ArrowLoss[A, bt.loss], ArrowLoss[A, ct.loss]](
-        ab => (arrowEval[A, C, at.loss, ct.loss](a => {
+      ArrowLoss[A, ArrowLoss[B, ci.loss]],
+      ArrowLoss[A => B, ArrowLoss[A, ci.loss]]](
+      abc => (arrowEval[A => B, A => C, ArrowLoss[A, bi.loss], ArrowLoss[A, ci.loss]](
+        ab => (arrowEval[A, C, ai.loss, ci.loss](a => {
           val bc = aeval(abc).forward(a)
           val b = aeval(ab).forward(a)
           val c = aeval(bc.eb).forward(b.eb)
-          (c.eb, l => at.m.append(bc.backward(ArrowLoss(Seq((b.eb, l)))), b.backward(c.backward(l))))
-        })(at, ct), l => ArrowLoss(l.seq.map(x => (x._1, {
-          val bc = aeval(abc).forward(x._1)
-          val b = aeval(ab).forward(x._1)
+          (c.eb, l => ai.m.append(bc.backward(ArrowLoss(b.eb)(l)), b.backward(c.backward(l))))
+        })(ai, ci), _.mapReduce[ArrowLoss[A, bi.loss]](a => l => {
+          val bc = aeval(abc).forward(a)
+          val b = aeval(ab).forward(a)
           val c = aeval(bc.eb).forward(b.eb)
-          c.backward(x._2)
-        }))))), l => ArrowLoss(l.seq.flatMap(x => x._2.seq.map(y => (
-        y._1, ArrowLoss(Seq((app(x._1)(y._1), y._2)))))))))
+          ArrowLoss[A, bi.loss](a)(c.backward(l))
+        })(arrowInfo(ai, bi).m))),
+        _.mapReduce(ab => _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(aeval(ab).forward(a).eb)(l)))(
+          arrowInfo(ai, arrowInfo(bi, ci)).m))(
+          arrowInfo(ai, arrowInfo(bi, ci)).m)))
 
-  override def K[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[A => B => A] =
-    arrowEval[A, B => A, at.loss, ArrowLoss[B, at.loss]](a => (
-      arrowEval[B, A, bt.loss, at.loss](_ => (a, _ => bt.m.zero))(bt, at),
-      l => l.seq.map(_._2).fold(at.m.zero)((l, r) => at.m.append(l, r))))(at, arrowInfo(bt, at))
+  override def K[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[A => B => A] =
+    arrowEval[A, B => A, ai.loss, ArrowLoss[B, ai.loss]](a => (
+      arrowEval[B, A, bi.loss, ai.loss](_ => (a, _ => bi.m.zero))(bi, ai),
+      _.mapReduce(_ => l => l)(ai.m)))(ai, arrowInfo(bi, ai))
 
-  override def I[A](implicit at: Loss[A]): Eval[A => A] = arrowEval[A, A, at.loss, at.loss](x => (x, y => y))(at, at)
+  override def I[A](implicit ai: Loss[A]): Eval[A => A] = arrowEval[A, A, ai.loss, ai.loss](x => (x, y => y))(ai, ai)
 
-  override def Y[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A => B) => A => B) => A => B] = {
-    type abt = ArrowLoss[A, bt.loss]
-    arrowEval[(A => B) => A => B, A => B, ArrowLoss[A => B, abt], abt](abab => {
-      val ab = arrowEval[A, B, at.loss, bt.loss](a => {
-        val fa = aeval(app(abab)(app(Y[A, B])(abab))).forward(a)(at, bt)
+  override def Y[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[((A => B) => A => B) => A => B] = {
+    type abi = ArrowLoss[A, bi.loss]
+    arrowEval[(A => B) => A => B, A => B, ArrowLoss[A => B, abi], abi](abab => {
+      val ab = arrowEval[A, B, ai.loss, bi.loss](a => {
+        val fa = aeval(app(abab)(app(Y[A, B])(abab))).forward(a)(ai, bi)
         (fa.eb, fa.backward)
-      })(at, bt)
-      (ab, abl => ArrowLoss(abl.seq.map(p => (ab, ArrowLoss(Seq(p))))))
+      })(ai, bi)
+      (ab, _.mapReduce(a => l => ArrowLoss(ab)(ArrowLoss(a)(l)))(arrowInfo(arrowInfo(ai, bi), arrowInfo(ai, bi)).m))
     })
   }
 
@@ -48,11 +50,14 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
         val b = aeval(ab).forward(a)
         val c = aeval(bc).forward(b.eb)
         (c.eb, l => b.backward(c.backward(l)))
-      })(ai, ci), l => ArrowLoss(l.seq.map(x => {
-        val b = aeval(ab).forward(x._1)
+      })(ai, ci), _.mapReduce(a => l => {
+        val b = aeval(ab).forward(a)
         val c = aeval(bc).forward(b.eb)
-        (x._1, c.backward(x._2))
-      })))), l => ArrowLoss(l.seq.flatMap(x => x._2.seq.map(y => (app(x._1)(y._1), y._2))))))
+        ArrowLoss(a)(c.backward(l))
+      })(arrowInfo(ai, bi).m))), _.mapReduce(ab => _.mapReduce(a => l => {
+        val b = aeval(ab).forward(a)
+        ArrowLoss(b.eb)(l)
+      })(arrowInfo(bi, ci).m))(arrowInfo(bi, ci).m)))
 
   override def C[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => B => A => C] =
     arrowEval[A => B => C, B => A => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[B, ArrowLoss[A, ci.loss]]](abc =>
@@ -60,19 +65,19 @@ trait EvalComb extends EvalArrow with Comb[Loss, Eval] {
         (arrowEval[A, C, ai.loss, ci.loss](a => {
           val bc = aeval(abc).forward(a)
           val c = aeval(bc.eb).forward(b)
-          (c.eb, l => bc.backward(ArrowLoss(Seq((b, l)))))
-        })(ai, ci), l => l.seq.map(p => aeval(aeval(abc).forward(p._1).eb).forward(b).backward(p._2)).
-          foldRight(bi.m.zero)((l, r) => bi.m.append(l, r))))(bi, arrowInfo(ai, ci)), l =>
-        ArrowLoss(l.seq.flatMap(b => b._2.seq.map(a =>
-          (a._1, ArrowLoss(Seq((b._1, a._2)))))))))
+          (c.eb, l => bc.backward(ArrowLoss(b)(l)))
+        })(ai, ci), _.mapReduce(a => aeval(aeval(abc).forward(a).eb).forward(b).backward)(bi.m)))(bi, arrowInfo(ai, ci)),
+        _.mapReduce(b => _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(b)(l)))(
+          arrowInfo(ai, arrowInfo(bi, ci)).m))(
+          arrowInfo(ai, arrowInfo(bi, ci)).m)))
 
   override def W[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A => A => B) => A => B] =
     arrowEval[A => A => B, A => B, ArrowLoss[A, ArrowLoss[A, bi.loss]], ArrowLoss[A, bi.loss]](aab =>
       (arrowEval[A, B, ai.loss, bi.loss](a => {
         val ab = aeval(aab).forward(a)
         val b = aeval(ab.eb).forward(a)
-        (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrowLoss(Seq((a, bl))))))
-      })(ai, bi), l => ArrowLoss(l.seq.map(x => (x._1, ArrowLoss(Seq((x._1, x._2))))))))
+        (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrowLoss(a)(bl))))
+      })(ai, bi), _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(a)(l)))(arrowInfo(ai, arrowInfo(ai, bi)).m)))
 
   override def Let[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[A => (A => B) => B] = app(C[A => B, A, B])(App)
 

@@ -5,7 +5,15 @@ import com.thoughtworks.DDF.InfoBase.EvalInfoBase
 
 import scalaz.Leibniz._
 
-case class ArrowLoss[A, BL](seq: Seq[(Eval[A], BL)])
+trait ArrowLoss[A, BL] {
+  def mapReduce[C](f: Eval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C
+}
+
+object ArrowLoss {
+  def apply[A, BL](eva: Eval[A])(bl: BL) = new ArrowLoss[A, BL] {
+    override def mapReduce[C](f: Eval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C = f(eva)(bl)
+  }
+}
 
 trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
   case class ArrowEC[A, B]() extends EvalCase[A => B] {
@@ -59,9 +67,14 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
       override type ret = ArrowLoss[A, bi.loss]
 
       override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
-        override def zero: loss = ArrowLoss(Seq())
+        override def zero: loss = new ArrowLoss[A, bi.loss] {
+          override def mapReduce[C](f: Eval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C = m.zero
+        }
 
-        override def append(f1: loss, f2: => loss): loss = ArrowLoss(f1.seq ++ f2.seq)
+        override def append(f1: loss, f2: => loss): loss = new ArrowLoss[A, bi.loss] {
+          override def mapReduce[C](f: Eval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C =
+            m.append(f1.mapReduce(f), f2.mapReduce(f))
+        }
       }
 
       override def convert: (A => B) => Eval[A => B] = ab => arrowEval[A, B, ai.loss, bi.loss](a =>

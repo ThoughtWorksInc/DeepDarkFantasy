@@ -54,9 +54,8 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
     arrowEval[Option[A], B => (A => B) => B, ai.loss, ArrowLoss[B, ArrowLoss[A => B, bi.loss]]](opt => {
       oeval(opt) match {
         case None => (comb.K[B, A => B], _ => ai.m.zero)
-        case Some(a) => (app(comb.K[(A => B) => B, B](arrowInfo(arrowInfo(ai, bi), bi), bi))(app(comb.Let[A, B])(a)), l =>
-          l.seq.flatMap(x => x._2.seq.map(y => aeval(y._1).forward(a).backward(y._2))).foldRight(
-            ai.m.zero)((x, y) => ai.m.append(x, y)))
+        case Some(a) => (app(comb.K[(A => B) => B, B](arrowInfo(arrowInfo(ai, bi), bi), bi))(app(comb.Let[A, B])(a)),
+          _.mapReduce(b => _.mapReduce(ab => l => aeval(ab).forward(a).backward(l))(ai.m))(ai.m))
       }
     })
 }

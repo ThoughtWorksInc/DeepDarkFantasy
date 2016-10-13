@@ -38,12 +38,12 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
   override def first[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
     arrowEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(productInfo(at, bt), bt)
 
-  override def mkProduct[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[(A) => (B) => (A, B)] =
-    arrowEval[A, B => (A, B), at.loss, ArrowLoss[B, (at.loss, bt.loss)]](a =>
-      (arrowEval[B, (A, B), bt.loss, (at.loss, bt.loss)](b =>
-        (productEval(a, b), _._2))(bt, productInfo(at, bt)),
-        _.seq.map(_._2._1).foldRight[at.loss](at.m.zero)((x, y) => at.m.append(x, y))))(
-      at, arrowInfo(bt, productInfo(at, bt)))
+  override def mkProduct[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A) => (B) => (A, B)] =
+    arrowEval[A, B => (A, B), ai.loss, ArrowLoss[B, (ai.loss, bi.loss)]](a =>
+      (arrowEval[B, (A, B), bi.loss, (ai.loss, bi.loss)](b =>
+        (productEval(a, b), _._2))(bi, productInfo(ai, bi)),
+        _.mapReduce(_ => _._1)(ai.m)))(
+      ai, arrowInfo(bi, productInfo(ai, bi)))
 
   override implicit def productInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[(A, B), (ai.loss, bi.loss)] =
     new Loss[(A, B)] {
@@ -81,17 +81,21 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
         (arrowEval[B, C, bi.loss, ci.loss](b => {
           val c = aeval(abc).forward(productEval(a, b))
           (c.eb, l => c.backward(l)._2)
-        })(bi, ci), l => l.seq.map(x => {
-          val c = aeval(abc).forward(productEval(a, x._1))
-          c.backward(x._2)._1
-        }).foldRight(ai.m.zero)((x, y) => ai.m.append(x, y))))
-        (ai, arrowInfo(bi, ci)), l => ArrowLoss(l.seq.flatMap(x => x._2.seq.map(y => (productEval(x._1, y._1), y._2))))))
+        })(bi, ci), l => l.mapReduce(b => l => {
+          val c = aeval(abc).forward(productEval(a, b))
+          c.backward(l)._1
+        })(ai.m)))
+        (ai, arrowInfo(bi, ci)),
+        _.mapReduce(a => _.mapReduce(b => l => ArrowLoss(productEval(a, b))(l))(
+          arrowInfo(productInfo(ai, bi), ci).m))(
+          arrowInfo(productInfo(ai, bi), ci).m)))
 
   def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => ((A, B)) => C] =
     arrowEval[A => B => C, ((A, B)) => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[(A, B), ci.loss]](abc =>
       (arrowEval[(A, B), C, (ai.loss, bi.loss), ci.loss](ab => {
         val bc = aeval(abc).forward(peval(ab)._1)
         val c = aeval(bc.eb).forward(peval(ab)._2)
-        (c.eb, l => (bc.backward(ArrowLoss(Seq((peval(ab)._2, l)))), c.backward(l)))
-      })(productInfo(ai, bi), ci), l => ArrowLoss(l.seq.map(x => (peval(x._1)._1, ArrowLoss(Seq((peval(x._1)._2, x._2))))))))
+        (c.eb, l => (bc.backward(ArrowLoss(peval(ab)._2)(l)), c.backward(l)))
+      })(productInfo(ai, bi), ci),
+        _.mapReduce(p => l => ArrowLoss(peval(p)._1)(ArrowLoss(peval(p)._2)(l)))(arrowInfo(ai, arrowInfo(bi, ci)).m)))
 }

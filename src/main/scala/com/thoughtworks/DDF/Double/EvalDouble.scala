@@ -34,13 +34,13 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) + deval(r)), rl => rl)),
-        ll => DLoss(ll.seq.map(_._2.d).sum)))
+        _.mapReduce(_ => l => l)(doubleInfo.m)))
 
   override def multD: Eval[Double => Double => Double] =
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
-        ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
+        _.mapReduce(d => l => DLoss(deval(d) * l.d))(doubleInfo.m)))
 
   override implicit def doubleInfo: Loss.Aux[Double, DLoss] = new Loss[Double] {
     override def m: CommutativeMonoid[DLoss] = new CommutativeMonoid[DLoss] {

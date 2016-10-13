@@ -69,13 +69,13 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
       (ai.loss, bi.loss),
       ArrowLoss[A => C, ArrowLoss[B => C, ci.loss]]](sum => seval(sum) match {
       case Left(a) =>
-        (comb.app(comb.C[B => C, A => C, C])(comb.app(comb.K[(A => C) => C, B => C])(comb.app(comb.Let[A, C])(a))), l =>
-          (l.seq.flatMap(x => x._2.seq.map(y => aeval(x._1).forward(a).backward(y._2))).
-            foldRight(ai.m.zero)((x, y) => ai.m.append(x, y)), bi.m.zero))
+        (comb.app(comb.C[B => C, A => C, C])(comb.app(comb.K[(A => C) => C, B => C])(comb.app(comb.Let[A, C])(a))),
+          _.mapReduce(ac => _.mapReduce(bc => l => (aeval(ac).forward(a).backward(l), bi.m.zero))(
+            sumInfo(ai, bi).m))(sumInfo(ai, bi).m))
       case Right(b) =>
-        (comb.app(comb.K[(B => C) => C, A => C])(comb.app(comb.Let[B, C])(b)), l =>
-          (ai.m.zero, l.seq.flatMap(x => x._2.seq.map(y => aeval(y._1).forward(b).backward(y._2))).
-            foldRight(bi.m.zero)((x, y) => bi.m.append(x, y))))
+        (comb.app(comb.K[(B => C) => C, A => C])(comb.app(comb.Let[B, C])(b)),
+          _.mapReduce(ac => _.mapReduce(bc => l => (ai.m.zero, aeval(bc).forward(b).backward(l)))(
+          sumInfo(ai, bi).m))(sumInfo(ai, bi).m))
     })
 
   def sumEval[A, B](s: Either[Eval[A], Eval[B]])(implicit al: Loss[A], bl: Loss[B]) = new Eval[Either[A, B]] {

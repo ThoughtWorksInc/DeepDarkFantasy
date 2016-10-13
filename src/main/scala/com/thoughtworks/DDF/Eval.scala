@@ -1,7 +1,5 @@
 package com.thoughtworks.DDF
 
-import scalaz.Monoid
-
 trait Loss[X] extends TypeCase[Loss, X] {
   final type loss = ret
 
