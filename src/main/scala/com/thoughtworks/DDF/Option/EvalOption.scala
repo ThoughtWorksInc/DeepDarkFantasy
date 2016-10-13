@@ -2,9 +2,8 @@ package com.thoughtworks.DDF.Option
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
 import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
 
-import scalaz.Monoid
 import scalaz.Leibniz._
 
 trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
@@ -13,7 +12,7 @@ trait EvalOption extends OptionRepr[Loss, Eval] with EvalArrow {
   }
 
   override implicit def optionInfo[A](implicit ai: Loss[A]): Loss.Aux[Option[A], ai.loss] = new Loss[Option[A]] {
-    override def m: Monoid[ai.loss] = ai.m
+    override def m: CommutativeMonoid[ai.loss] = ai.m
 
     override def convert: Option[A] => Eval[Option[A]] = x => optionEval[A](x.map(ai.convert))
 

@@ -5,7 +5,7 @@ import scalaz.Monoid
 trait Loss[X] extends TypeCase[Loss, X] {
   final type loss = ret
 
-  def m: Monoid[loss]
+  def m: CommutativeMonoid[loss]
 
   def convert: /*loss backprop ability*/ X => Eval[X]
 

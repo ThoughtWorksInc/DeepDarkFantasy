@@ -1,14 +1,12 @@
 package com.thoughtworks.DDF.Unit
 
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase, MonoidUnit}
-
-import scalaz.Monoid
+import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, Eval, EvalCase, Loss, LossCase}
 
 trait EvalUnit extends UnitRepr[Loss, Eval] {
   override implicit def unitInfo: Loss.Aux[Unit, Unit] = new Loss[Unit] {
     override type ret = Unit
 
-    override def m: Monoid[Unit] = MonoidUnit.apply
+    override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit.apply
 
     override def convert: Unit => Eval[Unit] = _ => mkUnit
 

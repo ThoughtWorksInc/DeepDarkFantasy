@@ -43,7 +43,7 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
         ll => DLoss(ll.seq.map(l => deval(l._1) * l._2.d).sum)))
 
   override implicit def doubleInfo: Loss.Aux[Double, DLoss] = new Loss[Double] {
-    override def m: Monoid[DLoss] = new Monoid[DLoss] {
+    override def m: CommutativeMonoid[DLoss] = new CommutativeMonoid[DLoss] {
       override def zero: DLoss = DLoss(0)
 
       override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.d + f2.d)

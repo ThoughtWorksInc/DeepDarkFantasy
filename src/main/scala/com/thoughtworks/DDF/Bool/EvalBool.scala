@@ -2,9 +2,8 @@ package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
 import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase, MonoidUnit}
+import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, Eval, EvalCase, Loss, LossCase}
 
-import scalaz.Monoid
 import scalaz.Leibniz._
 
 trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
@@ -35,7 +34,7 @@ trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
   override implicit def BoolInfo: Loss.Aux[Boolean, Unit] = new Loss[Boolean] {
     override def convert = litB
 
-    override def m: Monoid[Unit] = MonoidUnit.apply
+    override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit.apply
 
     override def lca: lc.ret = ()
 

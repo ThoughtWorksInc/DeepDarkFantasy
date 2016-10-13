@@ -1,10 +1,9 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
 import com.thoughtworks.DDF.InfoBase.EvalInfoBase
 
 import scalaz.Leibniz._
-import scalaz.Monoid
 
 case class ArrowLoss[A, BL](seq: Seq[(Eval[A], BL)])
 
@@ -59,7 +58,7 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
     new Loss[A => B] {
       override type ret = ArrowLoss[A, bi.loss]
 
-      override def m: Monoid[loss] = new Monoid[loss] {
+      override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
         override def zero: loss = ArrowLoss(Seq())
 
         override def append(f1: loss, f2: => loss): loss = ArrowLoss(f1.seq ++ f2.seq)

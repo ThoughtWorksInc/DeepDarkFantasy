@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.List
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
 import com.thoughtworks.DDF.Combinators.EvalComb
 import com.thoughtworks.DDF.Product.EvalProduct
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 import scalaz.Monoid
@@ -40,7 +40,7 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalProduct {
 
     override type ret = List[ai.loss]
 
-    override def m: Monoid[loss] = new Monoid[loss] {
+    override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
       override def zero: loss = scala.List()
 
       override def append(f1: loss, f2: => loss): loss =

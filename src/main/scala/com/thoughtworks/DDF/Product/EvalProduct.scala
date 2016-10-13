@@ -1,10 +1,9 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
+import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
-import scalaz.Monoid
 
 trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
   trait ProductLCRet[A, B] {
@@ -60,7 +59,7 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
 
       override type ret = (ai.loss, bi.loss)
 
-      override def m: Monoid[(ai.loss, bi.loss)] = new Monoid[(ai.loss, bi.loss)] {
+      override def m: CommutativeMonoid[(ai.loss, bi.loss)] = new CommutativeMonoid[(ai.loss, bi.loss)] {
 
         override def zero: (ai.loss, bi.loss) = (ai.m.zero, bi.m.zero)
 

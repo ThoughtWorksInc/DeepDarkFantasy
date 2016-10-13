@@ -2,10 +2,9 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
 import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
-import com.thoughtworks.DDF.{Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
-import scalaz.Monoid
 
 trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
   trait SumLCRet[A, B] {
@@ -46,7 +45,7 @@ trait EvalSum extends SumRepr[Loss, Eval] with EvalArrow {
 
       override type ret = (ai.loss, bi.loss)
 
-      override def m: Monoid[(ai.loss, bi.loss)] = new Monoid[(ai.loss, bi.loss)] {
+      override def m: CommutativeMonoid[(ai.loss, bi.loss)] = new CommutativeMonoid[(ai.loss, bi.loss)] {
         override def zero: (ai.loss, bi.loss) = (ai.m.zero, bi.m.zero)
 
         override def append(f1: (ai.loss, bi.loss), f2: => (ai.loss, bi.loss)): (ai.loss, bi.loss) =
