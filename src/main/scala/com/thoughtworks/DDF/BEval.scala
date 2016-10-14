@@ -5,7 +5,7 @@ trait Loss[X] extends TypeCase[Loss, X] {
 
   def m: CommutativeMonoid[loss]
 
-  def convert: /*loss backprop ability*/ X => Eval[X]
+  def convert: /*loss backprop ability*/ X => BEval[X]
 
   val lc: LossCase[X]
 
@@ -24,18 +24,18 @@ object LossCase {
   type Aux[X, Y] = LossCase[X] {type ret = Y}
 }
 
-trait EvalCase[X] extends TypeCase[EvalCase, X]
+trait BEvalCase[X] extends TypeCase[BEvalCase, X]
 
-object EvalCase {
-  type Aux[X, Y] = EvalCase[X] {type ret = Y}
+object BEvalCase {
+  type Aux[X, Y] = BEvalCase[X] {type ret = Y}
 }
 
-trait Eval[X] {
+trait BEval[X] {
   val loss: Loss[X]
 
   def eval: /*should not be used when defining instance of Eval*/ X
 
-  val ec: EvalCase[X]
+  val ec: BEvalCase[X]
 
   def eca: ec.ret
 }

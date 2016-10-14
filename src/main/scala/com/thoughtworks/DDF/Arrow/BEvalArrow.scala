@@ -1,22 +1,22 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
-import com.thoughtworks.DDF.InfoBase.EvalInfoBase
+import com.thoughtworks.DDF.{CommutativeMonoid, BEval, BEvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.InfoBase.BEvalInfoBase
 
 import scalaz.Leibniz._
 
 trait ArrowLoss[A, BL] {
-  def mapReduce[C](f: Eval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C
+  def mapReduce[C](f: BEval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C
 }
 
 object ArrowLoss {
-  def apply[A, BL](eva: Eval[A])(bl: BL) = new ArrowLoss[A, BL] {
-    override def mapReduce[C](f: Eval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C = f(eva)(bl)
+  def apply[A, BL](eva: BEval[A])(bl: BL) = new ArrowLoss[A, BL] {
+    override def mapReduce[C](f: BEval[A] => BL => C)(implicit m: CommutativeMonoid[C]): C = f(eva)(bl)
   }
 }
 
-trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
-  case class ArrowEC[A, B]() extends EvalCase[A => B] {
+trait BEvalArrow extends ArrowRepr[Loss, BEval] with BEvalInfoBase {
+  case class ArrowBEC[A, B]() extends BEvalCase[A => B] {
     override type ret = forward[A, B]
   }
 
@@ -33,29 +33,29 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
   trait forward[A, B] {
 
     trait backward[AL, BL] {
-      val eb: Eval[B]
+      val eb: BEval[B]
 
       def backward: BL => AL
     }
 
-    def forward(ea: Eval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
+    def forward(ea: BEval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
   }
 
-  def arrowEval[A, B, AL, BL](f: Eval[A] => (Eval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]):
-  Eval[A => B] =
-    new Eval[A => B] {
+  def arrowEval[A, B, AL, BL](f: BEval[A] => (BEval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]):
+  BEval[A => B] =
+    new BEval[A => B] {
       override val loss: Loss[A => B] = arrowInfo
 
       override def eval: A => B = a => eca.forward(al.convert(a)).eb.eval
 
-      override val ec: EvalCase.Aux[A => B, forward[A, B]] = ArrowEC[A, B]()
+      override val ec: BEvalCase.Aux[A => B, forward[A, B]] = ArrowBEC[A, B]()
 
       override def eca: ec.ret = new forward[A, B] {
-        override def forward(ea: Eval[A])(implicit al1: Loss[A], bl1: Loss[B]): backward[al1.loss, bl1.loss] =
+        override def forward(ea: BEval[A])(implicit al1: Loss[A], bl1: Loss[B]): backward[al1.loss, bl1.loss] =
           new backward[al1.loss, bl1.loss] {
             lazy val fea = f(ea)
 
-            override lazy val eb: Eval[B] = fea._1
+            override lazy val eb: BEval[B] = fea._1
 
             override def backward: bl1.loss => al1.loss = bl2 => witness(al.unique(al1))(fea._2(witness(bl1.unique(bl))(bl2)))
           }
@@ -68,16 +68,16 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
 
       override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
         override def zero: loss = new ArrowLoss[A, bi.loss] {
-          override def mapReduce[C](f: Eval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C = m.zero
+          override def mapReduce[C](f: BEval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C = m.zero
         }
 
         override def append(f1: loss, f2: => loss): loss = new ArrowLoss[A, bi.loss] {
-          override def mapReduce[C](f: Eval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C =
+          override def mapReduce[C](f: BEval[A] => bi.loss => C)(implicit m: CommutativeMonoid[C]): C =
             m.append(f1.mapReduce(f), f2.mapReduce(f))
         }
       }
 
-      override def convert: (A => B) => Eval[A => B] = ab => arrowEval[A, B, ai.loss, bi.loss](a =>
+      override def convert: (A => B) => BEval[A => B] = ab => arrowEval[A, B, ai.loss, bi.loss](a =>
         (bi.convert(ab(a.eval)), _ => ai.m.zero))(ai, bi)
 
       override val lc: LossCase.Aux[A => B, ArrowLCRet[A, B]] = ArrowLC()
@@ -91,11 +91,11 @@ trait EvalArrow extends ArrowRepr[Loss, Eval] with EvalInfoBase {
       override def update(x: A => B)(rate: Double)(l: loss): A => B = x
     }
 
-  def aeval[A, B](ab: Eval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowEC[A, B]()))(ab.eca)
+  def aBEval[A, B](ab: BEval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowBEC[A, B]()))(ab.eca)
 
   override def arrowDomainInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
 
   override def arrowRangeInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
 
-  override def app[A, B] = f => x => aeval(f).forward(x)(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(reprInfo(f))).eb
+  override def app[A, B] = f => x => aBEval(f).forward(x)(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(reprInfo(f))).eb
 }

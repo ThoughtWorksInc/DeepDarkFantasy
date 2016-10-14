@@ -1,44 +1,44 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
-import com.thoughtworks.DDF.{CommutativeMonoid, Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.{CommutativeMonoid, BEval, BEvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 
-trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
+trait BEvalProduct extends ProductRepr[Loss, BEval] with BEvalArrow {
   trait ProductLCRet[A, B] {
     def zeroth: Loss[A]
 
     def first: Loss[B]
   }
 
-  case class ProductEC[A, B]() extends EvalCase[(A, B)] {
-    override type ret = (Eval[A], Eval[B])
+  case class ProductBEC[A, B]() extends BEvalCase[(A, B)] {
+    override type ret = (BEval[A], BEval[B])
   }
 
   case class ProductLC[A, B]() extends LossCase[(A, B)] {
     override type ret = ProductLCRet[A, B]
   }
 
-  def peval[A, B](ab: Eval[(A, B)]): (Eval[A], Eval[B]) = witness(ab.ec.unique(ProductEC[A, B]()))(ab.eca)
+  def peval[A, B](ab: BEval[(A, B)]): (BEval[A], BEval[B]) = witness(ab.ec.unique(ProductBEC[A, B]()))(ab.eca)
 
-  def productEval[A, B](a: Eval[A], b: Eval[B])(implicit al: Loss[A], bl: Loss[B]) = new Eval[(A, B)] {
+  def productEval[A, B](a: BEval[A], b: BEval[B])(implicit al: Loss[A], bl: Loss[B]) = new BEval[(A, B)] {
     override val loss: Loss[(A, B)] = productInfo(al, bl)
 
     override def eval: (A, B) = (a.eval, b.eval)
 
-    override val ec: EvalCase.Aux[(A, B), (Eval[A], Eval[B])] = ProductEC()
+    override val ec: BEvalCase.Aux[(A, B), (BEval[A], BEval[B])] = ProductBEC()
 
     override def eca: ec.ret = (a, b)
   }
 
-  override def zeroth[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => A] =
+  override def zeroth[A, B](implicit at: Loss[A], bt: Loss[B]): BEval[((A, B)) => A] =
     arrowEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(productInfo(at, bt), at)
 
-  override def first[A, B](implicit at: Loss[A], bt: Loss[B]): Eval[((A, B)) => B] =
+  override def first[A, B](implicit at: Loss[A], bt: Loss[B]): BEval[((A, B)) => B] =
     arrowEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(productInfo(at, bt), bt)
 
-  override def mkProduct[A, B](implicit ai: Loss[A], bi: Loss[B]): Eval[(A) => (B) => (A, B)] =
+  override def mkProduct[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A) => (B) => (A, B)] =
     arrowEval[A, B => (A, B), ai.loss, ArrowLoss[B, (ai.loss, bi.loss)]](a =>
       (arrowEval[B, (A, B), bi.loss, (ai.loss, bi.loss)](b =>
         (productEval(a, b), _._2))(bi, productInfo(ai, bi)),
@@ -47,7 +47,7 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
 
   override implicit def productInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[(A, B), (ai.loss, bi.loss)] =
     new Loss[(A, B)] {
-      override def convert: ((A, B)) => Eval[(A, B)] = p => productEval(ai.convert(p._1), bi.convert(p._2))
+      override def convert: ((A, B)) => BEval[(A, B)] = p => productEval(ai.convert(p._1), bi.convert(p._2))
 
       override val lc: LossCase.Aux[(A, B), ProductLCRet[A, B]] = ProductLC[A, B]()
 
@@ -75,14 +75,14 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
 
   override def productFirstInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).first
 
-  def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(((A, B)) => C) => A => B => C] =
+  def curry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(((A, B)) => C) => A => B => C] =
     arrowEval[((A, B)) => C, A => B => C, ArrowLoss[(A, B), ci.loss], ArrowLoss[A, ArrowLoss[B, ci.loss]]](abc =>
       (arrowEval[A, B => C, ai.loss, ArrowLoss[B, ci.loss]](a =>
         (arrowEval[B, C, bi.loss, ci.loss](b => {
-          val c = aeval(abc).forward(productEval(a, b))
+          val c = aBEval(abc).forward(productEval(a, b))
           (c.eb, l => c.backward(l)._2)
         })(bi, ci), l => l.mapReduce(b => l => {
-          val c = aeval(abc).forward(productEval(a, b))
+          val c = aBEval(abc).forward(productEval(a, b))
           c.backward(l)._1
         })(ai.m)))
         (ai, arrowInfo(bi, ci)),
@@ -90,11 +90,11 @@ trait EvalProduct extends ProductRepr[Loss, Eval] with EvalArrow {
           arrowInfo(productInfo(ai, bi), ci).m))(
           arrowInfo(productInfo(ai, bi), ci).m)))
 
-  def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): Eval[(A => B => C) => ((A, B)) => C] =
+  def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(A => B => C) => ((A, B)) => C] =
     arrowEval[A => B => C, ((A, B)) => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[(A, B), ci.loss]](abc =>
       (arrowEval[(A, B), C, (ai.loss, bi.loss), ci.loss](ab => {
-        val bc = aeval(abc).forward(peval(ab)._1)
-        val c = aeval(bc.eb).forward(peval(ab)._2)
+        val bc = aBEval(abc).forward(peval(ab)._1)
+        val c = aBEval(bc.eb).forward(peval(ab)._2)
         (c.eb, l => (bc.backward(ArrowLoss(peval(ab)._2)(l)), c.backward(l)))
       })(productInfo(ai, bi), ci),
         _.mapReduce(p => l => ArrowLoss(peval(p)._1)(ArrowLoss(peval(p)._2)(l)))(arrowInfo(ai, arrowInfo(bi, ci)).m)))

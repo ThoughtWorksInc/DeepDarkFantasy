@@ -1,31 +1,31 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, EvalArrow}
-import com.thoughtworks.DDF.Combinators.{Comb, EvalComb}
-import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, Eval, EvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Combinators.{Comb, BEvalComb}
+import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, BEval, BEvalCase, Loss, LossCase}
 
 import scalaz.Leibniz._
 
-trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
-  object BoolEC extends EvalCase[Boolean] {
+trait BEvalBool extends BoolRepr[Loss, BEval] with BEvalArrow {
+  object BoolBEC extends BEvalCase[Boolean] {
     override type ret = Boolean
   }
 
-  override def litB: Boolean => Eval[Boolean] = b => new Eval[Boolean] {
+  override def litB: Boolean => BEval[Boolean] = b => new BEval[Boolean] {
     override def eca: ec.ret = b
 
     override def eval: Boolean = b
 
-    override val ec: EvalCase.Aux[Boolean, Boolean] = BoolEC
+    override val ec: BEvalCase.Aux[Boolean, Boolean] = BoolBEC
 
     override val loss: Loss[Boolean] = BoolInfo
   }
 
-  def beval: Eval[Boolean] => Boolean = x => witness(x.ec.unique(BoolEC))(x.eca)
+  def beval: BEval[Boolean] => Boolean = x => witness(x.ec.unique(BoolBEC))(x.eca)
 
-  private def comb: Comb[Loss, Eval] = EvalComb.apply
+  private def comb: Comb[Loss, BEval] = BEvalComb.apply
 
-  override def ite[A](implicit ai: Loss[A]): Eval[Boolean => A => A => A] =
+  override def ite[A](implicit ai: Loss[A]): BEval[Boolean => A => A => A] =
     arrowEval[Boolean, A => A => A, Unit, ArrowLoss[A, ArrowLoss[A, ai.loss]]](b =>
       (if(beval(b))
         comb.K[A, A](ai, ai) else
@@ -48,6 +48,6 @@ trait EvalBool extends BoolRepr[Loss, Eval] with EvalArrow {
   }
 }
 
-object EvalBool {
-  implicit def apply = new EvalBool {}
+object BEvalBool {
+  implicit def apply = new BEvalBool {}
 }

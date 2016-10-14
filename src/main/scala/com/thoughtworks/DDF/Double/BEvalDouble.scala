@@ -1,14 +1,14 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.{EvalArrow, ArrowLoss}
+import com.thoughtworks.DDF.Arrow.{BEvalArrow, ArrowLoss}
 import com.thoughtworks.DDF._
 import scalaz.Leibniz._
 import scalaz.Monoid
 
-trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
+trait BEvalDouble extends BEvalArrow with DoubleRepr[Loss, BEval] {
   case class DLoss(d: Double)
 
-  object DEC extends EvalCase[Double] {
+  object DoubleBEC extends BEvalCase[Double] {
     override type ret = Double
   }
 
@@ -16,27 +16,27 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
     override type ret = Unit
   }
 
-  def dEval(d: Double) = new Eval[Double] {
+  def dEval(d: Double) = new BEval[Double] {
     override val loss: Loss[Double] = doubleInfo
 
     override def eval: Double = d
 
-    override val ec: EvalCase.Aux[Double, Double] = DEC
+    override val ec: BEvalCase.Aux[Double, Double] = DoubleBEC
 
     override def eca: ec.ret = d
   }
 
-  def deval(d: Eval[Double]): Double = witness(d.ec.unique(DEC))(d.eca)
+  def deval(d: BEval[Double]): Double = witness(d.ec.unique(DoubleBEC))(d.eca)
 
-  override def litD: Double => Eval[Double] = dEval
+  override def litD: Double => BEval[Double] = dEval
 
-  override def plusD: Eval[Double => Double => Double] =
+  override def plusD: BEval[Double => Double => Double] =
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) + deval(r)), rl => rl)),
         _.mapReduce(_ => l => l)(doubleInfo.m)))
 
-  override def multD: Eval[Double => Double => Double] =
+  override def multD: BEval[Double => Double => Double] =
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
@@ -49,7 +49,7 @@ trait EvalDouble extends EvalArrow with DoubleRepr[Loss, Eval] {
       override def append(f1: DLoss, f2: => DLoss): DLoss = DLoss(f1.d + f2.d)
     }
 
-    override def convert: Double => Eval[Double] = dEval
+    override def convert: Double => BEval[Double] = dEval
 
     override val lc: LossCase.Aux[Double, DLC.ret] = DLC
 
