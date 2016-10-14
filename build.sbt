@@ -1,6 +1,6 @@
-name := "DeepDarkFantasy"
+organization in ThisBuild := "com.thoughtworks.deepdarkfantasy"
 
-version := "1.0"
+name := "DeepDarkFantasy"
 
 scalaVersion := "2.11.8"
 
