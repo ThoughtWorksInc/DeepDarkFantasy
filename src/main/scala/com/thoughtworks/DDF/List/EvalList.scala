@@ -42,7 +42,9 @@ trait EvalList extends ListRepr[Loss, Eval] with EvalArrow with EvalProduct {
     override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
       override def zero: loss = scala.List()
 
-      override def append(f1: loss, f2: => loss): loss = f1.zip(f2).map(p => ai.m.append(p._1, p._2))
+      override def append(f1: loss, f2: => loss): loss =
+        if (f1.length > f2.length) append(f2, f1)
+        else f1.zip(f2).map(p => ai.m.append(p._1, p._2)) ++ f2.drop(f1.length)
     }
 
     override def update(x: List[A])(rate: Double)(l: loss): List[A] = x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
