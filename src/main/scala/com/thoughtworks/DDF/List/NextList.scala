@@ -34,6 +34,13 @@ trait NextList [Info[_], Repr[_], Arg] extends
 
   override def listZip[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.listZip(convi(ai), convi(bi)))
+
+
+  override def scanLeft[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.scanLeft(convi(ai), convi(bi)))
+
+  override def scanRight[A, B](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B]) =
+    rconv(base.scanRight(convi(ai), convi(bi)))
 }
 
 object NextList {

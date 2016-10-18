@@ -18,4 +18,8 @@ trait ListRepr[Info[_], Repr[_]] extends ProductRepr[Info, Repr] with ListInfo[I
   def foldLeft[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => A) => A => List[B] => A]
 
   def listZip[A, B](implicit ai: Info[A], bi: Info[B]): Repr[List[A] => List[B] => List[(A, B)]]
+
+  def scanLeft[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(B => A => B) => B => List[A] => List[B]]
+
+  def scanRight[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => B) => B => List[A] => List[B]]
 }

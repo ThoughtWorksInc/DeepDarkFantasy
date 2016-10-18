@@ -79,10 +79,10 @@ trait BEvalProduct extends ProductRepr[Loss, BEval] with BEvalArrow {
     arrowEval[((A, B)) => C, A => B => C, ArrowLoss[(A, B), ci.loss], ArrowLoss[A, ArrowLoss[B, ci.loss]]](abc =>
       (arrowEval[A, B => C, ai.loss, ArrowLoss[B, ci.loss]](a =>
         (arrowEval[B, C, bi.loss, ci.loss](b => {
-          val c = aBEval(abc).forward(productEval(a, b))
+          val c = aeval(abc).forward(productEval(a, b))
           (c.eb, l => c.backward(l)._2)
         })(bi, ci), l => l.mapReduce(b => l => {
-          val c = aBEval(abc).forward(productEval(a, b))
+          val c = aeval(abc).forward(productEval(a, b))
           c.backward(l)._1
         })(ai.m)))
         (ai, arrowInfo(bi, ci)),
@@ -93,8 +93,8 @@ trait BEvalProduct extends ProductRepr[Loss, BEval] with BEvalArrow {
   def uncurry[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(A => B => C) => ((A, B)) => C] =
     arrowEval[A => B => C, ((A, B)) => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[(A, B), ci.loss]](abc =>
       (arrowEval[(A, B), C, (ai.loss, bi.loss), ci.loss](ab => {
-        val bc = aBEval(abc).forward(peval(ab)._1)
-        val c = aBEval(bc.eb).forward(peval(ab)._2)
+        val bc = aeval(abc).forward(peval(ab)._1)
+        val c = aeval(bc.eb).forward(peval(ab)._2)
         (c.eb, l => (bc.backward(ArrowLoss(peval(ab)._2)(l)), c.backward(l)))
       })(productInfo(ai, bi), ci),
         _.mapReduce(p => l => ArrowLoss(peval(p)._1)(ArrowLoss(peval(p)._2)(l)))(arrowInfo(ai, arrowInfo(bi, ci)).m)))

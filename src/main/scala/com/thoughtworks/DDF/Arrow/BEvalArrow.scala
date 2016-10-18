@@ -91,11 +91,11 @@ trait BEvalArrow extends ArrowRepr[Loss, BEval] with BEvalInfoBase {
       override def update(x: A => B)(rate: Double)(l: loss): A => B = x
     }
 
-  def aBEval[A, B](ab: BEval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowBEC[A, B]()))(ab.eca)
+  def aeval[A, B](ab: BEval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowBEC[A, B]()))(ab.eca)
 
   override def arrowDomainInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
 
   override def arrowRangeInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
 
-  override def app[A, B] = f => x => aBEval(f).forward(x)(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(reprInfo(f))).eb
+  override def app[A, B] = f => x => aeval(f).forward(x)(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(reprInfo(f))).eb
 }

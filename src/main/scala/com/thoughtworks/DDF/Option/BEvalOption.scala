@@ -55,7 +55,7 @@ trait BEvalOption extends OptionRepr[Loss, BEval] with BEvalArrow {
       oeval(opt) match {
         case None => (comb.K[B, A => B], _ => ai.m.zero)
         case Some(a) => (app(comb.K[(A => B) => B, B](arrowInfo(arrowInfo(ai, bi), bi), bi))(app(comb.Let[A, B])(a)),
-          _.mapReduce(b => _.mapReduce(ab => l => aBEval(ab).forward(a).backward(l))(ai.m))(ai.m))
+          _.mapReduce(b => _.mapReduce(ab => l => aeval(ab).forward(a).backward(l))(ai.m))(ai.m))
       }
     })
 }

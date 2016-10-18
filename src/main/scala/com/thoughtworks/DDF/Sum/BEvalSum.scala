@@ -70,11 +70,11 @@ trait BEvalSum extends SumRepr[Loss, BEval] with BEvalArrow {
       ArrowLoss[A => C, ArrowLoss[B => C, ci.loss]]](sum => seval(sum) match {
       case Left(a) =>
         (comb.app(comb.C[B => C, A => C, C])(comb.app(comb.K[(A => C) => C, B => C])(comb.app(comb.Let[A, C])(a))),
-          _.mapReduce(ac => _.mapReduce(bc => l => (aBEval(ac).forward(a).backward(l), bi.m.zero))(
+          _.mapReduce(ac => _.mapReduce(bc => l => (aeval(ac).forward(a).backward(l), bi.m.zero))(
             sumInfo(ai, bi).m))(sumInfo(ai, bi).m))
       case Right(b) =>
         (comb.app(comb.K[(B => C) => C, A => C])(comb.app(comb.Let[B, C])(b)),
-          _.mapReduce(ac => _.mapReduce(bc => l => (ai.m.zero, aBEval(bc).forward(b).backward(l)))(
+          _.mapReduce(ac => _.mapReduce(bc => l => (ai.m.zero, aeval(bc).forward(b).backward(l)))(
           sumInfo(ai, bi).m))(sumInfo(ai, bi).m))
     })
 

@@ -20,6 +20,10 @@ trait ShowList extends ListRepr[NoInfo, Show] with ShowArrow with SimpleList[Sho
   override def foldLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("foldLeft")
 
   override def listZip[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listZip")
+
+  override def scanLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("scanLeft")
+
+  override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("scanRight")
 }
 
 object ShowList {
