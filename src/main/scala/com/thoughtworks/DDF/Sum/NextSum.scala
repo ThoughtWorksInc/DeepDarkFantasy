@@ -23,6 +23,15 @@ trait NextSum[Info[_], Repr[_], Arg] extends
   override def sumRightInfo[A, B] = x => iconv(base.sumRightInfo(convi(x)))
 
   implicit def base: SumRepr[Info, Repr]
+
+  override def sumComm[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
+    rconv(base.sumComm(convi(ai), convi(bi)))
+
+  override def sumAssocLR[A, B, C](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B], ci: Info[(Arg) => C]) =
+    rconv(base.sumAssocLR(convi(ai), convi(bi), convi(ci)))
+
+  override def sumAssocRL[A, B, C](implicit ai: Info[(Arg) => A], bi: Info[(Arg) => B], ci: Info[(Arg) => C]) =
+    rconv(base.sumAssocRL(convi(ai), convi(bi), convi(ci)))
 }
 
 object NextSum {

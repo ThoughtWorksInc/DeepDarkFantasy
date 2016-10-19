@@ -60,7 +60,8 @@ trait BEvalSum extends SumRepr[Loss, BEval] with BEvalArrow {
 
   override def sumRightInfo[A, B]: Loss[Either[A, B]] => Loss[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
 
-  private def comb: Comb[Loss, BEval] = BEvalComb.apply
+  private val comb: Comb[Loss, BEval] = BEvalComb.apply
+
   override def sumMatch[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
   BEval[Either[A, B] => (A => C) => (B => C) => C] =
     arrowEval[
@@ -92,4 +93,43 @@ trait BEvalSum extends SumRepr[Loss, BEval] with BEvalArrow {
   }
 
   def seval[A, B](s: BEval[Either[A, B]]): Either[BEval[A], BEval[B]] = witness(s.ec.unique(SumBEC[A, B]()))(s.eca)
+
+  override def sumComm[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[Either[A, B] => Either[B, A]] =
+    arrowEval[Either[A, B], Either[B, A], (ai.loss, bi.loss), (bi.loss, ai.loss)](s =>
+      (sumEval(seval(s).swap), l => (l._2, l._1)))
+
+  override def sumAssocLR[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  BEval[Either[Either[A, B], C] => Either[A, Either[B, C]]] =
+    arrowEval[
+      Either[Either[A, B], C],
+      Either[A, Either[B, C]],
+      ((ai.loss, bi.loss), ci.loss),
+      (ai.loss, (bi.loss, ci.loss))](s =>
+      (seval(s) match {
+        case Left(l) => seval(l) match {
+          case Left(x) => sumEval(Left(x))
+          case Right(y) => sumEval(Right(sumEval(Left(y))))
+        }
+        case Right(r) => sumEval(Right(sumEval(Right(r))))
+      },
+        l => ((l._1, l._2._1), l._2._2)))
+
+  override def sumAssocRL[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  BEval[Either[A, Either[B, C]] => Either[Either[A, B], C]] =
+    arrowEval[
+      Either[A, Either[B, C]],
+      Either[Either[A, B], C],
+      (ai.loss, (bi.loss, ci.loss)),
+      ((ai.loss, bi.loss), ci.loss)](s =>
+      (seval(s) match {
+        case Left(l) => sumEval(Left(sumEval(Left(l))))
+        case Right(r) => seval(r) match {
+          case Left(x) => sumEval(Left(sumEval(Right(x))))
+          case Right(y) => sumEval(Right(y))
+        }
+      }, l => (l._1._1, (l._1._2, l._2))))
+}
+
+object BEvalSum {
+  implicit def apply: BEvalSum = new BEvalSum {}
 }
