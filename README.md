@@ -43,9 +43,9 @@ Lang is the default language that is usable right off the shelf.
 
 EvalLang provide the capability to Evaluate a term and Back Propagate, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
 
-However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), EvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. 
+However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), BEvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. 
 
-Reading EvalArrow -> EvalDouble -> EvalComb will get you know how stuff works. After that you can probably understand whatever just by tracing import dependency.
+Reading BEvalArrow -> BEvalDouble -> BEvalComb will get you know how stuff works. After that you can probably understand whatever just by tracing import dependency.
 
 # FA Q
 
