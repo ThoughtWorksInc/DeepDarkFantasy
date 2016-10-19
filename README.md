@@ -41,7 +41,7 @@ Example is [here](https://github.com/ThoughtWorksInc/DeepDarkFantasy/blob/master
 
 Lang is the default language that is usable right off the shelf. 
 
-EvalLang provide the capability to Evaluate a term and Back Propagate, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
+BEvalLang provide the capability to Evaluate a term and Back Propagate, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
 
 However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), BEvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. 
 
