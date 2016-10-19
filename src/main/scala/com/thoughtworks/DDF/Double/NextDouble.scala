@@ -18,6 +18,8 @@ trait NextDouble[Info[_], Repr[_], Arg] extends
 
   override def expD = rconv(base.expD)
 
+  override def sigD = rconv(base.sigD)
+
   override implicit def doubleInfo: Info[Arg => Double] = iconv(base.doubleInfo)
 
   override implicit def base: DoubleRepr[Info, Repr]
