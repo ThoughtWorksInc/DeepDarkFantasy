@@ -5,7 +5,7 @@ trait Loss[X] extends TypeCase[Loss, X] {
 
   def m: CommutativeMonoid[loss]
 
-  def convert: /*loss backprop ability*/ X => BEval[X]
+  def convert: /*lost backprop ability*/ X => BEval[X]
 
   val lc: LossCase[X]
 
