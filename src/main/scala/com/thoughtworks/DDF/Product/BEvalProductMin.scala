@@ -1,13 +1,9 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.ArrowLoss
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
 import com.thoughtworks.DDF.{BEval, Loss}
 
-object BEvalProductBasic {
-  implicit def apply = new BEvalProductBasic {}
-}
-
-trait BEvalProductBasic extends ProductBasic[Loss, BEval] with BEvalProductInfo {
+trait BEvalProductMin extends ProductMin[Loss, BEval] with BEvalProductInfo with BEvalArrow {
   override def zeroth[A, B](implicit at: Loss[A], bt: Loss[B]): BEval[((A, B)) => A] =
     arrowEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(productInfo(at, bt), at)
 
@@ -20,4 +16,8 @@ trait BEvalProductBasic extends ProductBasic[Loss, BEval] with BEvalProductInfo 
         (productEval(a, b), _._2))(bi, productInfo(ai, bi)),
         _.mapReduce(_ => _._1)(ai.m)))(
       ai, arrowInfo(bi, productInfo(ai, bi)))
+}
+
+object BEvalProductMin {
+  implicit def apply = new BEvalProductMin {}
 }

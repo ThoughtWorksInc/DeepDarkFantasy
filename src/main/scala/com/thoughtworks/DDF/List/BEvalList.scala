@@ -1,11 +1,10 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
-import com.thoughtworks.DDF.Combinators.BEvalComb
+import com.thoughtworks.DDF.Arrow.ArrowLoss
 import com.thoughtworks.DDF.Product.BEvalProduct
 import com.thoughtworks.DDF.{BEval, Loss}
 
-trait BEvalList extends ListRepr[Loss, BEval] with BEvalListBasic with BEvalProduct {
+trait BEvalList extends ListRepr[Loss, BEval] with BEvalListMin with BEvalProduct {
   override def listMap[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B) => List[A] => List[B]] =
     arrowEval[A => B, List[A] => List[B], ArrowLoss[A, bi.loss], ArrowLoss[List[A], List[bi.loss]]](ab =>
       (arrowEval[List[A], List[B], List[ai.loss], List[bi.loss]](la => {

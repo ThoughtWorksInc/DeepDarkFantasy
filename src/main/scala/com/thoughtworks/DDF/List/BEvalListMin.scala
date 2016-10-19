@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
 import com.thoughtworks.DDF.Combinators.BEvalComb
 import com.thoughtworks.DDF.{BEval, Loss}
 
-trait BEvalListBasic extends ListBasic[Loss, BEval] with BEvalListInfo with BEvalArrow {
+trait BEvalListMin extends ListMin[Loss, BEval] with BEvalListInfo with BEvalArrow {
   override def nil[A](implicit ai: Loss[A]): BEval[List[A]] = listEval(scala.List())
 
   override def cons[A](implicit ai: Loss[A]): BEval[A => List[A] => List[A]] =
@@ -33,6 +33,6 @@ trait BEvalListBasic extends ListBasic[Loss, BEval] with BEvalListInfo with BEva
     })
 }
 
-object BEvalListBasic {
-  implicit def apply: BEvalListBasic = new BEvalListBasic {}
+object BEvalListMin {
+  implicit def apply: BEvalListMin = new BEvalListMin {}
 }

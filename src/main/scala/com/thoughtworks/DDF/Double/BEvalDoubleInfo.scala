@@ -1,10 +1,11 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
 import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+
 import scalaz.Leibniz._
 
-trait BEvalDoubleInfo extends BEvalArrow with DoubleInfo[Loss, BEval] {
+trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[Loss, BEval] {
   case class DLoss(d: Double)
 
   object DLC extends LossCase[Double] {

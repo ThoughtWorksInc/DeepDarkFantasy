@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Product.{ProductInfo, ProductRepr}
 
 
 
-trait ListRepr[Info[_], Repr[_]] extends ProductRepr[Info, Repr] with ListBasic[Info, Repr] {
+trait ListRepr[Info[_], Repr[_]] extends ProductRepr[Info, Repr] with ListMin[Info, Repr] {
   def listMap[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => List[A] => List[B]]
 
   def reverse[A](implicit ai: Info[A]): Repr[List[A] => List[A]]

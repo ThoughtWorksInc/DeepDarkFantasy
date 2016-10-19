@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
-import com.thoughtworks.DDF.Combinators.{Comb, BEvalComb}
-import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, BEval, BEvalCase, Loss, LossCase}
+import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossCase}
 
 import scalaz.Leibniz._
 
