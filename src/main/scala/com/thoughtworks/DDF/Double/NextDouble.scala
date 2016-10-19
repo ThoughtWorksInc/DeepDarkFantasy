@@ -14,6 +14,10 @@ trait NextDouble[Info[_], Repr[_], Arg] extends
 
   override def multD = rconv(base.multD)
 
+  override def divD = rconv(base.divD)
+
+  override def expD = rconv(base.expD)
+
   override implicit def doubleInfo: Info[Arg => Double] = iconv(base.doubleInfo)
 
   override implicit def base: DoubleRepr[Info, Repr]
@@ -30,5 +34,5 @@ object NextDouble {
       override implicit def argi: Info[Arg] = arg
 
       override implicit def ski: SKIRepr[Info, Repr] = skir
-  }
+    }
 }

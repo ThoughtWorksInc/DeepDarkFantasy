@@ -8,4 +8,8 @@ trait DoubleRepr[Info[_], Repr[_]] extends DoubleInfo[Info, Repr] with ArrowRepr
   def plusD: Repr[Double => Double => Double]
 
   def multD: Repr[Double => Double => Double]
+
+  def divD: Repr[Double => Double => Double]
+
+  def expD: Repr[Double => Double]
 }

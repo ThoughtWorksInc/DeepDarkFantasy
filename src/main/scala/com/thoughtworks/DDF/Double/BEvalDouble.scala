@@ -3,7 +3,6 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.Arrow.{BEvalArrow, ArrowLoss}
 import com.thoughtworks.DDF._
 import scalaz.Leibniz._
-import scalaz.Monoid
 
 trait BEvalDouble extends BEvalArrow with DoubleRepr[Loss, BEval] {
   case class DLoss(d: Double)
@@ -40,7 +39,7 @@ trait BEvalDouble extends BEvalArrow with DoubleRepr[Loss, BEval] {
     arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](l =>
       (arrowEval[Double, Double, DLoss, DLoss](
         r => (dEval(deval(l) * deval(r)), rl => DLoss(deval(l) * rl.d))),
-        _.mapReduce(d => l => DLoss(deval(d) * l.d))(doubleInfo.m)))
+        _.mapReduce(r => l => DLoss(deval(r) * l.d))(doubleInfo.m)))
 
   override implicit def doubleInfo: Loss.Aux[Double, DLoss] = new Loss[Double] {
     override def m: CommutativeMonoid[DLoss] = new CommutativeMonoid[DLoss] {
@@ -59,4 +58,17 @@ trait BEvalDouble extends BEvalArrow with DoubleRepr[Loss, BEval] {
 
     override def update(x: Double)(rate: Double)(l: loss): Double = x - l.d * rate
   }
+
+  override def expD = arrowEval[Double, Double, DLoss, DLoss](x =>
+    (dEval(Math.exp(deval(x))), l => DLoss(l.d * Math.exp(deval(x)))))
+
+  override def divD = arrowEval[Double, Double => Double, DLoss, ArrowLoss[Double, DLoss]](x =>
+    (arrowEval[Double, Double, DLoss, DLoss](y =>
+      (dEval(deval(x) / deval(y)),
+        l => DLoss(deval(x) * l.d * (-1 / (deval(y) * deval(y)))))),
+      _.mapReduce(y => l => DLoss(l.d / deval(y)))(doubleInfo.m)))
+}
+
+object BEvalDouble {
+  implicit def apply = new BEvalDouble {}
 }

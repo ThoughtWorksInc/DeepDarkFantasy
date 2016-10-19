@@ -9,6 +9,10 @@ trait ShowDouble extends DoubleRepr[NoInfo, Show] with ShowArrow with SimpleDoub
   override def plusD = Show("+")
 
   override def multD = Show("*")
+
+  override def divD = Show("/")
+
+  override def expD = Show("expD")
 }
 
 object ShowDouble {
