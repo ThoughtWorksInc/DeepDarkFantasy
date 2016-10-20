@@ -9,7 +9,7 @@ import com.thoughtworks.DDF.Product.ProductInfo
 import com.thoughtworks.DDF.Sum.SumInfo
 import com.thoughtworks.DDF.Unit.UnitInfo
 
-trait LangInfo[Info[_], Repr[_]] extends
+trait LangLInfo[Info[_], Repr[_]] extends
   ProductInfo[Info, Repr] with
   DoubleInfo[Info, Repr] with
   OptionInfo[Info, Repr] with

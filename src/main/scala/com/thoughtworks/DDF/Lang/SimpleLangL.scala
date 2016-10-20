@@ -9,8 +9,8 @@ import com.thoughtworks.DDF.Option.SimpleOption
 import com.thoughtworks.DDF.Sum.SimpleSum
 import com.thoughtworks.DDF.Unit.SimpleUnit
 
-trait SimpleLang[Repr[_]] extends
-  LangInfo[NoInfo, Repr] with
+trait SimpleLangL[Repr[_]] extends
+  LangLInfo[NoInfo, Repr] with
   SimpleArrow[Repr] with
   SimpleOption[Repr] with
   SimpleDouble[Repr] with
@@ -19,6 +19,6 @@ trait SimpleLang[Repr[_]] extends
   SimpleBool[Repr] with
   SimpleUnit[Repr]
 
-object SimpleLang {
-  implicit def apply[Repr[_]] = new SimpleLang[Repr] {}
+object SimpleLangL {
+  implicit def apply[Repr[_]] = new SimpleLangL[Repr] {}
 }

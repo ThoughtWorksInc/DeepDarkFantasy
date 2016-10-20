@@ -10,8 +10,8 @@ import com.thoughtworks.DDF.Product.NextProduct
 import com.thoughtworks.DDF.Sum.NextSum
 import com.thoughtworks.DDF.Unit.NextUnit
 
-trait NextLang[Info[_], Repr[_], Arg] extends
-  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+trait NextLangL[Info[_], Repr[_], Arg] extends
+  LangL[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextBase[Info, Repr, Arg] with
   NextComb[Info, Repr, Arg] with
   NextDouble[Info, Repr, Arg] with
@@ -21,14 +21,14 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   NextList[Info, Repr, Arg] with
   NextUnit[Info, Repr, Arg] with
   NextBool[Info, Repr, Arg] {
-  implicit def base: Lang[Info, Repr]
+  implicit def base: LangL[Info, Repr]
 }
 
-object NextLang {
-  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]):
-  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with NextBase[Info, Repr, Arg] =
-    new NextLang[Info, Repr, Arg] {
-      override implicit def base: Lang[Info, Repr] = lang
+object NextLangL {
+  implicit def apply[Info[_], Repr[_], Arg](implicit lang: LangL[Info, Repr], arg: Info[Arg]):
+  LangL[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with NextBase[Info, Repr, Arg] =
+    new NextLangL[Info, Repr, Arg] {
+      override implicit def base: LangL[Info, Repr] = lang
 
       override implicit def argi: Info[Arg] = arg
 

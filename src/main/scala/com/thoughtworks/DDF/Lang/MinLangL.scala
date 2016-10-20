@@ -10,8 +10,8 @@ import com.thoughtworks.DDF.Product.ProductMin
 import com.thoughtworks.DDF.Sum.SumRepr
 import com.thoughtworks.DDF.Unit.UnitRepr
 
-trait MinLang[Info[_], Repr[_]] extends
-  LangInfo[Info, Repr] with
+trait MinLangL[Info[_], Repr[_]] extends
+  LangLInfo[Info, Repr] with
   ProductMin[Info, Repr] with
   DoubleRepr[Info, Repr] with
   OptionRepr[Info, Repr] with
