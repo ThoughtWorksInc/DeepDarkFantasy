@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF.Lang
+package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Arrow.ArrowInfo
 import com.thoughtworks.DDF.Bool.BoolInfo
@@ -9,7 +9,7 @@ import com.thoughtworks.DDF.Product.ProductInfo
 import com.thoughtworks.DDF.Sum.SumInfo
 import com.thoughtworks.DDF.Unit.UnitInfo
 
-trait LangLInfo[Info[_], Repr[_]] extends
+trait LangInfo[Info[_], Repr[_]] extends
   ProductInfo[Info, Repr] with
   DoubleInfo[Info, Repr] with
   OptionInfo[Info, Repr] with

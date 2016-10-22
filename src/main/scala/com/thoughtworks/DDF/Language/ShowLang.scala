@@ -1,4 +1,4 @@
-package com.thoughtworks.DDF.Lang
+package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.ShowBool
 import com.thoughtworks.DDF.Combinators.ShowComb
@@ -10,8 +10,8 @@ import com.thoughtworks.DDF.Sum.ShowSum
 import com.thoughtworks.DDF.Unit.ShowUnit
 import com.thoughtworks.DDF.Show
 
-trait ShowLangL extends
-  SimpleLangL[Show] with
+trait ShowLang extends
+  SimpleLang[Show] with
   ShowComb with
   ShowDouble with
   ShowProduct with
@@ -21,8 +21,8 @@ trait ShowLangL extends
   ShowBool with
   ShowOption
 
-object ShowLangL {
-  implicit def apply = new ShowLangL {}
+object ShowLang {
+  implicit def apply = new ShowLang {}
 }
 
 
