@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.InfoBase
 
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.NextBase
 
 trait NextInfoBase[Info[_], Repr[_], Arg] extends
@@ -15,12 +15,12 @@ trait NextInfoBase[Info[_], Repr[_], Arg] extends
 }
 
 object NextInfoBase {
-  implicit def apply[Info[_], Repr[_], Arg](implicit skir: SKIRepr[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit skir: SKI[Info, Repr], arg: Info[Arg]) =
     new NextInfoBase[Info, Repr, Arg] {
       override implicit def base: InfoBase[Info, Repr] = ski
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skir
+      override implicit def ski: SKI[Info, Repr] = skir
   }
 }

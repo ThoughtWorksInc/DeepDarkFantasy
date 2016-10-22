@@ -4,10 +4,10 @@ import com.thoughtworks.DDF.NaiveNextBase
 import com.thoughtworks.DDF.InfoBase.NaiveNextInfoBase
 
 trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
-  SKIRepr[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
+  SKI[Lambda[X => Info[Arg => X]], Lambda[X => Repr[Arg => X]]] with
   NaiveNextBase[Info, Repr, Arg] with
   NaiveNextInfoBase[Info, Repr, Arg] {
-  implicit def base: SKIRepr[Info, Repr]
+  implicit def base: SKI[Info, Repr]
 
   override def arrowDomainInfo[A, B]: Info[Arg => A => B] => Info[Arg => A] = x =>
     iconv(base.arrowDomainInfo(base.arrowRangeInfo(x)))
@@ -32,12 +32,12 @@ trait NaiveNextSKI[Info[_], Repr[_], Arg] extends
 }
 
 object NaiveNextSKI {
-  implicit def apply[Info[_], Repr[_], Arg](implicit skil: SKIRepr[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit skil: SKI[Info, Repr], arg: Info[Arg]) =
     new NaiveNextSKI[Info, Repr, Arg] {
-      override implicit def base: SKIRepr[Info, Repr] = skil
+      override implicit def base: SKI[Info, Repr] = skil
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skil
+      override implicit def ski: SKI[Info, Repr] = skil
     }
 }

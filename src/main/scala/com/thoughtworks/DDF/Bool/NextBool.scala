@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.NextArrow
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextBool[Info[_], Repr[_], Arg] extends
   BoolRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
@@ -18,12 +18,12 @@ trait NextBool[Info[_], Repr[_], Arg] extends
 object NextBool {
   implicit def apply[Info[_], Repr[_], Arg](implicit
                                             bool: BoolRepr[Info, Repr],
-                                            skir: SKIRepr[Info, Repr],
+                                            skir: SKI[Info, Repr],
                                             arg: Info[Arg]) = new NextBool[Info, Repr, Arg] {
     override implicit def base: BoolRepr[Info, Repr] = bool
 
     override implicit def argi: Info[Arg] = arg
 
-    override implicit def ski: SKIRepr[Info, Repr] = skir
+    override implicit def ski: SKI[Info, Repr] = skir
   }
 }

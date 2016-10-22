@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextSum[Info[_], Repr[_], Arg] extends
   SumRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
@@ -37,12 +37,12 @@ trait NextSum[Info[_], Repr[_], Arg] extends
 object NextSum {
   implicit def apply[Info[_], Repr[_], Arg](implicit
                                             sum: SumRepr[Info, Repr],
-                                            skir: SKIRepr[Info, Repr],
+                                            skir: SKI[Info, Repr],
                                             arg: Info[Arg]) = new NextSum[Info, Repr, Arg] {
     override def base: SumRepr[Info, Repr] = sum
 
     override implicit def argi: Info[Arg] = arg
 
-    override implicit def ski: SKIRepr[Info, Repr] = skir
+    override implicit def ski: SKI[Info, Repr] = skir
   }
 }

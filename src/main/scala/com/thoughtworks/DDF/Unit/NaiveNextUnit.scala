@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Unit
 
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.NaiveNextBase
 import com.thoughtworks.DDF.InfoBase.NaiveNextInfoBase
 
@@ -17,12 +17,12 @@ trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
 
 object NaiveNextUnit {
   implicit def apply[Info[_], Repr[_], Arg]
-  (implicit unitl: UnitRepr[Info, Repr], skil: SKIRepr[Info, Repr], arg: Info[Arg]) =
+  (implicit unitl: UnitRepr[Info, Repr], skil: SKI[Info, Repr], arg: Info[Arg]) =
     new NaiveNextUnit[Info, Repr, Arg] {
       override implicit def base: UnitRepr[Info, Repr] = unitl
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skil
+      override implicit def ski: SKI[Info, Repr] = skil
   }
 }

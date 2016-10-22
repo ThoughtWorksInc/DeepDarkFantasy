@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.NextBool
-import com.thoughtworks.DDF.Combinators.{NextComb, SKIRepr}
+import com.thoughtworks.DDF.Combinators.{NextComb, SKI}
 import com.thoughtworks.DDF.Double.NextDouble
 import com.thoughtworks.DDF.List.NextList
 import com.thoughtworks.DDF.NextBase
@@ -32,6 +32,6 @@ object NextLang {
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = lang
+      override implicit def ski: SKI[Info, Repr] = lang
   }
 }

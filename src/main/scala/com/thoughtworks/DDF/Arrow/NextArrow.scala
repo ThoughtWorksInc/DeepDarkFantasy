@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.InfoBase.NextInfoBase
 
 trait NextArrow[Info[_], Repr[_], Arg] extends
@@ -28,11 +28,11 @@ trait NextArrow[Info[_], Repr[_], Arg] extends
 }
 
 object NextArrow {
-  implicit def apply[Info[_], Repr[_], Arg](implicit skir: SKIRepr[Info, Repr], arg: Info[Arg]) =
+  implicit def apply[Info[_], Repr[_], Arg](implicit skir: SKI[Info, Repr], arg: Info[Arg]) =
     new NextArrow[Info, Repr, Arg] {
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skir
+      override implicit def ski: SKI[Info, Repr] = skir
 
       override def base: ArrowRepr[Info, Repr] = ski
   }

@@ -1,11 +1,11 @@
 package com.thoughtworks.DDF
 
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 
 trait NaiveNextBase[Info[_], Repr[_], Arg] {
   implicit def argi: Info[Arg]
 
-  implicit def ski: SKIRepr[Info, Repr]
+  implicit def ski: SKI[Info, Repr]
 
   def rconv[X]: Repr[X] => Repr[Arg => X] = r => ski.app(ski.K[X, Arg](ski.reprInfo(r), argi))(r)
 

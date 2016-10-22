@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Option
 
 import com.thoughtworks.DDF.Arrow.NextArrow
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextOption[Info[_], Repr[_], Arg] extends
   OptionRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
@@ -23,13 +23,13 @@ trait NextOption[Info[_], Repr[_], Arg] extends
 object NextOption {
   implicit def apply[Info[_], Repr[_], Arg](implicit
                                             opt: OptionRepr[Info, Repr],
-                                            skir: SKIRepr[Info, Repr],
+                                            skir: SKI[Info, Repr],
                                             arg: Info[Arg]) =
     new NextOption[Info, Repr, Arg] {
       override def base: OptionRepr[Info, Repr] = opt
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skir
+      override implicit def ski: SKI[Info, Repr] = skir
   }
 }

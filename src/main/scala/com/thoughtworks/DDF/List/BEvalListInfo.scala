@@ -5,35 +5,35 @@ import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase
 import scalaz.Leibniz.witness
 
 trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
-  case class ListLC[A]() extends LossCase[List[A]] {
+  case class ListLC[A]() extends LossCase[scala.List[A]] {
     override type ret = Loss[A]
   }
 
-  case class ListDEC[A]() extends BEvalCase[List[A]] {
-    override type ret = List[BEval[A]]
+  case class ListDEC[A]() extends BEvalCase[scala.List[A]] {
+    override type ret = scala.List[BEval[A]]
   }
 
-  def leval[A](e: BEval[List[A]]): List[BEval[A]] = witness(e.ec.unique(ListDEC[A]()))(e.eca)
+  def leval[A](e: BEval[scala.List[A]]): scala.List[BEval[A]] = witness(e.ec.unique(ListDEC[A]()))(e.eca)
 
-  def listEval[A](l: List[BEval[A]])(implicit ai: Loss[A]): BEval[List[A]] = new BEval[List[A]] {
+  def listEval[A](l: scala.List[BEval[A]])(implicit ai: Loss[A]): BEval[scala.List[A]] = new BEval[scala.List[A]] {
     override def eca: ec.ret = l
 
-    override def eval: List[A] = l.map(_.eval)
+    override def eval: scala.List[A] = l.map(_.eval)
 
-    override val ec: BEvalCase.Aux[List[A], List[BEval[A]]] = ListDEC()
+    override val ec: BEvalCase.Aux[scala.List[A], scala.List[BEval[A]]] = ListDEC()
 
-    override val loss: Loss[List[A]] = listInfo(ai)
+    override val loss: Loss[scala.List[A]] = listInfo(ai)
   }
 
-  override implicit def listInfo[A](implicit ai: Loss[A]): Loss.Aux[List[A], List[ai.loss]] = new Loss[List[A]] {
+  override implicit def listInfo[A](implicit ai: Loss[A]): Loss.Aux[scala.List[A], scala.List[ai.loss]] = new Loss[scala.List[A]] {
 
-    override def convert: List[A] => BEval[List[A]] = la => listEval[A](la.map(ai.convert))
+    override def convert: scala.List[A] => BEval[scala.List[A]] = la => listEval[A](la.map(ai.convert))
 
-    override val lc: LossCase.Aux[List[A], Loss[A]] = ListLC()
+    override val lc: LossCase.Aux[scala.List[A], Loss[A]] = ListLC()
 
     override def lca: lc.ret = ai
 
-    override type ret = List[ai.loss]
+    override type ret = scala.List[ai.loss]
 
     override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
       override def zero: loss = scala.List()
@@ -43,10 +43,11 @@ trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
         else f1.zip(f2).map(p => ai.m.append(p._1, p._2)) ++ f2.drop(f1.length)
     }
 
-    override def update(x: List[A])(rate: Double)(l: loss): List[A] = x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
+    override def update(x: scala.List[A])(rate: Double)(l: loss): scala.List[A] =
+      x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
   }
 
-  override def listElmInfo[A](implicit lai: Loss[List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)
+  override def listElmInfo[A](implicit lai: Loss[scala.List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)
 }
 
 object BEvalListInfo {

@@ -1,18 +1,18 @@
 package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.Product.NextProduct
 
 trait NextList [Info[_], Repr[_], Arg] extends
-  ListRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  List[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextArrow[Info, Repr, Arg] with
   NextProduct[Info, Repr, Arg] {
-  override implicit def base: ListRepr[Info, Repr]
+  override implicit def base: List[Info, Repr]
 
   override implicit def listInfo[A](implicit ai: Info[Arg => A]) = iconv(base.listInfo(convi(ai)))
 
-  override def listElmInfo[A](implicit lai: Info[Arg => List[A]]) = iconv(base.listElmInfo(convi(lai)))
+  override def listElmInfo[A](implicit lai: Info[Arg => scala.List[A]]) = iconv(base.listElmInfo(convi(lai)))
 
   override def nil[A](implicit ai: Info[Arg => A]) = rconv(base.nil(convi(ai)))
 
@@ -45,13 +45,13 @@ trait NextList [Info[_], Repr[_], Arg] extends
 
 object NextList {
   implicit def apply[Info[_], Repr[_], Arg](implicit
-                                            list: ListRepr[Info, Repr],
-                                            skir: SKIRepr[Info, Repr],
+                                            list: List[Info, Repr],
+                                            skir: SKI[Info, Repr],
                                             arg: Info[Arg])  =
     new NextList[Info, Repr, Arg] {
-      override implicit def base: ListRepr[Info, Repr] = list
+      override implicit def base: List[Info, Repr] = list
 
-      override implicit def ski: SKIRepr[Info, Repr] = skir
+      override implicit def ski: SKI[Info, Repr] = skir
 
       override implicit def argi: Info[Arg] = arg
     }

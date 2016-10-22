@@ -29,7 +29,7 @@ trait NextComb[Info[_], Repr[_], Arg] extends
   override def W[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.W(base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
 
-  override implicit def ski: SKIRepr[Info, Repr] = base
+  override implicit def ski: SKI[Info, Repr] = base
 
   override def Let[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) = rconv(base.Let(convi(ai), convi(bi)))
 

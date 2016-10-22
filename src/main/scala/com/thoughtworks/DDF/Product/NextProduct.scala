@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
-import com.thoughtworks.DDF.Combinators.SKIRepr
+import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextProduct[Info[_], Repr[_], Arg] extends
   ProductRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
@@ -34,13 +34,13 @@ trait NextProduct[Info[_], Repr[_], Arg] extends
 object NextProduct {
   implicit def apply[Info[_], Repr[_], Arg](implicit
                                             prod: ProductRepr[Info, Repr],
-                                            skir: SKIRepr[Info, Repr],
+                                            skir: SKI[Info, Repr],
                                             arg: Info[Arg]) =
     new NextProduct[Info, Repr, Arg] {
       override def base: ProductRepr[Info, Repr] = prod
 
       override implicit def argi: Info[Arg] = arg
 
-      override implicit def ski: SKIRepr[Info, Repr] = skir
+      override implicit def ski: SKI[Info, Repr] = skir
   }
 }
