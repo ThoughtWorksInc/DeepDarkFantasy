@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Unit.UnitRepr
+import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss, NoInfo}
 
 trait ImpWProduct[Info[_], Repr[_]] extends
@@ -11,7 +11,7 @@ trait ImpWProduct[Info[_], Repr[_]] extends
   ImpWArrowMin[Info, Repr] {
   def base: ProductRepr[Info, Repr]
 
-  def runit: UnitRepr[Info, Repr]
+  def runit: Unit[Info, Repr]
 
   def baseE: ProductRepr[Loss, BEval] = BEvalProduct.apply
   override def mkProduct[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ImpW[Info, Repr, A => B => (A, B)] =
@@ -27,5 +27,9 @@ object ImpWProduct {
     override def rp: ProductRepr[Info, Repr] = ???
 
     override def rcomb: Comb[Info, Repr] = ???
+
+    override def base: ProductRepr[Info, Repr] = rp
+
+    override def runit: Unit[Info, Repr] = ???
   }
 }

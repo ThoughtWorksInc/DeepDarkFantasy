@@ -1,7 +1,6 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArrow
-import com.thoughtworks.DDF.CombUnit.CombUnit
 
 trait ImpW[Info[_], Repr[_], T] {
   ext =>
@@ -36,6 +35,7 @@ trait ImpW[Info[_], Repr[_], T] {
 }
 
 object ImpW {
+  import com.thoughtworks.DDF.CombUnit.CombUnit
   def apply[Info[_], Repr[_], T](expT: Repr[T], evalT: BEval[T])(
     implicit cuex: CombUnit[Info, Repr], cuev: CombUnit[Loss, BEval]): ImpW[Info, Repr, T] =
     new ImpW[Info, Repr, T] {

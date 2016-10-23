@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Unit
 
 import com.thoughtworks.DDF.{CommutativeMonoid, CommutativeMonoidUnit, BEval, BEvalCase, Loss, LossCase}
 
-trait BEvalUnit extends UnitRepr[Loss, BEval] {
+trait BEvalUnit extends Unit[Loss, BEval] {
   override implicit def unitInfo: Loss.Aux[Unit, Unit] = new Loss[Unit] {
     override type ret = Unit
 

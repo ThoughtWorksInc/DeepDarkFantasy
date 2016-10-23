@@ -8,7 +8,7 @@ import com.thoughtworks.DDF.List.List
 import com.thoughtworks.DDF.Option.OptionRepr
 import com.thoughtworks.DDF.Product.ProductRepr
 import com.thoughtworks.DDF.Sum.SumRepr
-import com.thoughtworks.DDF.Unit.UnitRepr
+import com.thoughtworks.DDF.Unit.Unit
 
 trait Lang[Info[_], Repr[_]] extends
   LangInfo[Info, Repr] with
@@ -16,7 +16,7 @@ trait Lang[Info[_], Repr[_]] extends
   DoubleRepr[Info, Repr] with
   OptionRepr[Info, Repr] with
   ArrowRepr[Info, Repr] with
-  UnitRepr[Info, Repr] with
+  Unit[Info, Repr] with
   List[Info, Repr] with
   BoolRepr[Info, Repr] with
   SumRepr[Info, Repr] with
