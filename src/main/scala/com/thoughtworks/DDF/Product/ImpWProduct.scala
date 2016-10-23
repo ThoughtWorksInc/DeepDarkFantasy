@@ -1,9 +1,8 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
-import com.thoughtworks.DDF.CombUnit.CombUnitExt
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Unit.{BEvalUnit, Unit}
+import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
 trait ImpWProduct[Info[_], Repr[_]] extends
