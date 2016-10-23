@@ -2,12 +2,13 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Product.ProductRepr
+import com.thoughtworks.DDF.Product.{ImpWProduct, ProductRepr}
+import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{ImpW, Loss}
 
 trait ImpWList[Info[_], Repr[_]] extends
   List[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
-  ImpWArrowMin[Info, Repr] {
+  ImpWProduct[Info, Repr] {
 
 }
 
@@ -31,16 +32,6 @@ object ImpWList {
 
     override def listElmInfo[A](implicit lai: (Info[scala.List[A]], Loss[scala.List[A]])): (Info[A], Loss[A]) = ???
 
-    override def curry[A, B, C](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B]), ci: (Info[C], Loss[C])): ImpW[Info, Repr, (((A, B)) => C) => (A) => (B) => C] = ???
-
-    override def uncurry[A, B, C](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B]), ci: (Info[C], Loss[C])): ImpW[Info, Repr, ((A) => (B) => C) => ((A, B)) => C] = ???
-
-    override def mkProduct[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (A) => (B) => (A, B)] = ???
-
-    override def zeroth[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, ((A, B)) => A] = ???
-
-    override def first[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, ((A, B)) => B] = ???
-
     override def rp: ProductRepr[Info, Repr] = ???
 
     override def rcomb: Comb[Info, Repr] = ???
@@ -51,10 +42,9 @@ object ImpWList {
 
     override def listMatch[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (scala.List[A]) => (B) => ((A) => (scala.List[A]) => B) => B] = ???
 
-    override implicit def productInfo[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): (Info[(A, B)], Loss[(A, B)]) = ???
+    override def base: ProductRepr[Info, Repr] = ???
 
-    override def productZerothInfo[A, B]: ((Info[(A, B)], Loss[(A, B)])) => (Info[A], Loss[A]) = ???
+    override def runit: Unit[Info, Repr] = ???
 
-    override def productFirstInfo[A, B]: ((Info[(A, B)], Loss[(A, B)])) => (Info[B], Loss[B]) = ???
   }
 }
