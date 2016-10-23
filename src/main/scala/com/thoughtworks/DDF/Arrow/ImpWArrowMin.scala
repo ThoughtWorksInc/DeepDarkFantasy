@@ -1,8 +1,10 @@
 package com.thoughtworks.DDF.Arrow
 
+import com.thoughtworks.DDF.CombUnit.{CombUnit, CombUnitExt}
 import com.thoughtworks.DDF.Combinators.Comb
 import com.thoughtworks.DDF.Combinators.BEvalComb
 import com.thoughtworks.DDF.Product.{BEvalProduct, ProductRepr}
+import com.thoughtworks.DDF.Unit.{BEvalUnit, Unit}
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
 trait ImpWArrowMin[Info[_], Repr[_]] extends
@@ -11,6 +13,10 @@ trait ImpWArrowMin[Info[_], Repr[_]] extends
   def rp: ProductRepr[Info, Repr]
   def becomb: Comb[Loss, BEval] = BEvalComb.apply
   def rcomb: Comb[Info, Repr]
+  def rcun: CombUnit[Info, Repr] = CombUnitExt.apply(rcomb, runit)
+  def runit: Unit[Info, Repr]
+  def becun: CombUnit[Loss, BEval] = CombUnitExt.apply(becomb, BEvalUnit.apply)
+
   override def app[A, B]: ImpW[Info, Repr, A => B] => ImpW[Info, Repr, A] => ImpW[Info, Repr, B] = f => x =>
     new ImpW[Info, Repr, B] {
       override type Weight = (f.Weight, x.Weight)
@@ -38,10 +44,15 @@ trait ImpWArrowMin[Info[_], Repr[_]] extends
 }
 
 object ImpWArrowMin {
-  implicit def apply[Info[_], Repr[_]](implicit rprod: ProductRepr[Info, Repr], rc: Comb[Info, Repr]):
+  implicit def apply[Info[_], Repr[_]](implicit
+                                       rprod: ProductRepr[Info, Repr],
+                                       rc: Comb[Info, Repr],
+                                       u: Unit[Info, Repr]):
   ImpWArrowMin[Info, Repr] = new ImpWArrowMin[Info, Repr] {
     override def rp: ProductRepr[Info, Repr] = rprod
 
     override def rcomb: Comb[Info, Repr] = rc
+
+    override def runit: Unit[Info, Repr] = u
   }
 }

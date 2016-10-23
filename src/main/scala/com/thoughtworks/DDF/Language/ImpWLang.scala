@@ -2,13 +2,14 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Combinators.Comb
 import com.thoughtworks.DDF.List.{ImpWList, List}
+import com.thoughtworks.DDF.Sum.ImpWSum
 import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{ImpW, Loss}
 
 trait ImpWLang[Info[_], Repr[_]] extends
   Lang[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
-  ImpWList[Info, Repr] {
-
+  ImpWList[Info, Repr] with
+  ImpWSum[Info, Repr] {
 }
 
 object ImpWLang {
@@ -35,12 +36,6 @@ object ImpWLang {
 
     override def K[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (A) => (B) => A] = ???
 
-    override def sumComm[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (Either[A, B]) => Either[B, A]] = ???
-
-    override def sumAssocLR[A, B, C](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B]), ci: (Info[C], Loss[C])): ImpW[Info, Repr, (Either[Either[A, B], C]) => Either[A, Either[B, C]]] = ???
-
-    override def sumAssocRL[A, B, C](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B]), ci: (Info[C], Loss[C])): ImpW[Info, Repr, (Either[A, Either[B, C]]) => Either[Either[A, B], C]] = ???
-
     override implicit def doubleInfo: (Info[Double], Loss[Double]) = ???
 
     override def Let[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (A) => ((A) => B) => B] = ???
@@ -65,12 +60,6 @@ object ImpWLang {
 
     override def S[A, B, C](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B]), ci: (Info[C], Loss[C])): ImpW[Info, Repr, ((A) => (B) => C) => ((A) => B) => (A) => C] = ???
 
-    override def none[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, Option[A]] = ???
-
-    override def some[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, (A) => Option[A]] = ???
-
-    override def optionMatch[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (Option[A]) => (B) => ((A) => B) => B] = ???
-
     override def left[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (A) => Either[A, B]] = ???
 
     override def right[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (B) => Either[A, B]] = ???
@@ -81,12 +70,12 @@ object ImpWLang {
 
     override def mkUnit: ImpW[Info, Repr, scala.Unit] = ???
 
-    override implicit def sumInfo[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): (Info[Either[A, B]], Loss[Either[A, B]]) = ???
-
-    override def sumLeftInfo[A, B]: ((Info[Either[A, B]], Loss[Either[A, B]])) => (Info[A], Loss[A]) = ???
-
-    override def sumRightInfo[A, B]: ((Info[Either[A, B]], Loss[Either[A, B]])) => (Info[B], Loss[B]) = ???
-
     override def base: List[Info, Repr] = ???
+
+    override def none[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, Option[A]] = ???
+
+    override def some[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, (A) => Option[A]] = ???
+
+    override def optionMatch[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])): ImpW[Info, Repr, (Option[A]) => (B) => ((A) => B) => B] = ???
   }
 }

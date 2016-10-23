@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
 import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextSum[Info[_], Repr[_], Arg] extends
-  SumRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  Sum[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextArrow[Info, Repr, Arg] {
   override def left[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.left(convi(ai), convi(bi)))
@@ -22,7 +22,7 @@ trait NextSum[Info[_], Repr[_], Arg] extends
 
   override def sumRightInfo[A, B] = x => iconv(base.sumRightInfo(convi(x)))
 
-  implicit def base: SumRepr[Info, Repr]
+  implicit def base: Sum[Info, Repr]
 
   override def sumComm[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     rconv(base.sumComm(convi(ai), convi(bi)))
@@ -36,10 +36,10 @@ trait NextSum[Info[_], Repr[_], Arg] extends
 
 object NextSum {
   implicit def apply[Info[_], Repr[_], Arg](implicit
-                                            sum: SumRepr[Info, Repr],
+                                            sum: Sum[Info, Repr],
                                             skir: SKI[Info, Repr],
                                             arg: Info[Arg]) = new NextSum[Info, Repr, Arg] {
-    override def base: SumRepr[Info, Repr] = sum
+    override def base: Sum[Info, Repr] = sum
 
     override implicit def argi: Info[Arg] = arg
 

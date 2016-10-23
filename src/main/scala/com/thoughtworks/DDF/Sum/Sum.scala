@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Sum
 
-trait SumRepr[Info[_], Repr[_]] extends SumMin[Info, Repr] {
+trait Sum[Info[_], Repr[_]] extends SumMin[Info, Repr] {
   def sumComm[A, B](implicit ai: Info[A], bi: Info[B]): Repr[Either[A, B] => Either[B, A]]
 
   def sumAssocLR[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):

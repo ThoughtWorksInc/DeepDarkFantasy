@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.{BEval, Loss}
 
-trait BEvalSum extends SumRepr[Loss, BEval] with BEvalSumMin {
+trait BEvalSum extends Sum[Loss, BEval] with BEvalSumMin {
   override def sumComm[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[Either[A, B] => Either[B, A]] =
     arrowEval[Either[A, B], Either[B, A], (ai.loss, bi.loss), (bi.loss, ai.loss)](s =>
       (sumEval(seval(s).swap), l => (l._2, l._1)))
