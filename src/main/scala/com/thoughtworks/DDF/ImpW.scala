@@ -37,7 +37,7 @@ trait ImpW[Info[_], Repr[_], T] {
 
 object ImpW {
   def apply[Info[_], Repr[_], T](expT: Repr[T], evalT: BEval[T])(
-    implicit cuex: CombUnit[Info, Repr], cuev: CombUnit[Loss, BEval]) =
+    implicit cuex: CombUnit[Info, Repr], cuev: CombUnit[Loss, BEval]): ImpW[Info, Repr, T] =
     new ImpW[Info, Repr, T] {
       override type Weight = Unit
 
