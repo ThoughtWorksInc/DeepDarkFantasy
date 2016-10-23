@@ -53,12 +53,12 @@ trait ImpWProduct[Info[_], Repr[_]] extends
 }
 
 object ImpWProduct {
-  implicit def apply[Info[_], Repr[_]] = new ImpWProduct[Info, Repr] {
-    override def base: ProductRepr[Info, Repr] = ???
+  implicit def apply[Info[_], Repr[_]](implicit p: ProductRepr[Info, Repr], c: Comb[Info, Repr], u: Unit[Info, Repr]) =
+    new ImpWProduct[Info, Repr] {
+      override def base: ProductRepr[Info, Repr] = p
 
-    override def rcomb: Comb[Info, Repr] = ???
+      override def rcomb: Comb[Info, Repr] = c
 
-    override def runit: Unit[Info, Repr] = ???
-
+      override def runit: Unit[Info, Repr] = u
   }
 }

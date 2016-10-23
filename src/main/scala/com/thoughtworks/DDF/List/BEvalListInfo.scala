@@ -47,7 +47,7 @@ trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
       x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
   }
 
-  override def listElmInfo[A](implicit lai: Loss[scala.List[A]]): Loss[A] = witness(lai.lc.unique(ListLC[A]()))(lai.lca)
+  override def listElmInfo[A]:  Loss[scala.List[A]] => Loss[A] = lai => witness(lai.lc.unique(ListLC[A]()))(lai.lca)
 }
 
 object BEvalListInfo {

@@ -12,7 +12,7 @@ trait NextList [Info[_], Repr[_], Arg] extends
 
   override implicit def listInfo[A](implicit ai: Info[Arg => A]) = iconv(base.listInfo(convi(ai)))
 
-  override def listElmInfo[A](implicit lai: Info[Arg => scala.List[A]]) = iconv(base.listElmInfo(convi(lai)))
+  override def listElmInfo[A] = lai => iconv(base.listElmInfo(convi(lai)))
 
   override def nil[A](implicit ai: Info[Arg => A]) = rconv(base.nil(convi(ai)))
 

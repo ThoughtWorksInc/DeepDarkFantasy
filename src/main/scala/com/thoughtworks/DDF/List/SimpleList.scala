@@ -7,7 +7,7 @@ import com.thoughtworks.DDF.Product.SimpleProduct
 trait SimpleList[Repr[_]] extends ListInfo[NoInfo, Repr] with SimpleArrow[Repr] with SimpleProduct[Repr] {
   override implicit def listInfo[A](implicit ai: NoInfo[A]) = NoInfo()
 
-  override def listElmInfo[A](implicit lai: NoInfo[scala.List[A]]) = NoInfo()
+  override def listElmInfo[A] = _ => NoInfo()
 }
 
 object SimpleList {
