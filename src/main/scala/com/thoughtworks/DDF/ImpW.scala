@@ -39,16 +39,16 @@ object ImpW {
   def apply[Info[_], Repr[_], T](expT: Repr[T], evalT: BEval[T])(
     implicit cuex: CombUnit[Info, Repr], cuev: CombUnit[Loss, BEval]): ImpW[Info, Repr, T] =
     new ImpW[Info, Repr, T] {
-      override type Weight = Unit
+      override type Weight = scala.Unit
 
-      override implicit val l: Loss[Unit] = cuev.unitInfo
+      override implicit val l: Loss[scala.Unit] = cuev.unitInfo
 
-      override def wi: Info[Unit] = cuex.unitInfo
+      override def wi: Info[scala.Unit] = cuex.unitInfo
 
-      override val w: Unit = ()
+      override val w: scala.Unit = ()
 
-      override val exp: Repr[Unit => T] = cuex.app(cuex.K(cuex.reprInfo(expT), cuex.unitInfo))(expT)
+      override val exp: Repr[scala.Unit => T] = cuex.app(cuex.K(cuex.reprInfo(expT), cuex.unitInfo))(expT)
 
-      override val eval: BEval[Unit => T] = cuev.app(cuev.K(cuev.reprInfo(evalT), cuev.unitInfo))(evalT)
+      override val eval: BEval[scala.Unit => T] = cuev.app(cuev.K(cuev.reprInfo(evalT), cuev.unitInfo))(evalT)
     }
 }

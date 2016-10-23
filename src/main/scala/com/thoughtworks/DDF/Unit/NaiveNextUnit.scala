@@ -10,9 +10,9 @@ trait NaiveNextUnit[Info[_], Repr[_], Arg] extends
   NaiveNextInfoBase[Info, Repr, Arg] {
   implicit def base: Unit[Info, Repr]
 
-  override def mkUnit: Repr[Arg => Unit] = rconv(base.mkUnit)
+  override def mkUnit: Repr[Arg => scala.Unit] = rconv(base.mkUnit)
 
-  override implicit def unitInfo: Info[Arg => Unit] = iconv(base.unitInfo)
+  override implicit def unitInfo: Info[Arg => scala.Unit] = iconv(base.unitInfo)
 }
 
 object NaiveNextUnit {

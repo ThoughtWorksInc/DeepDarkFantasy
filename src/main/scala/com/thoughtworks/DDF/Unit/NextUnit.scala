@@ -12,7 +12,7 @@ trait NextUnit[Info[_], Repr[_], Arg] extends
 
   override def mkUnit = rconv(base.mkUnit)
 
-  override implicit def unitInfo: Info[Arg => Unit] = iconv(base.unitInfo)
+  override implicit def unitInfo: Info[Arg => scala.Unit] = iconv(base.unitInfo)
 }
 
 object NextUnit {
