@@ -37,7 +37,7 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 Document is coming up. For now you can only read the code.
 
-Example is [here](https://github.com/ThoughtWorksInc/DeepDarkFantasy/blob/master/src/main/scala/com/thoughtworks/DDF/Lang/Preclude.scala)
+Example is [here](https://github.com/ThoughtWorksInc/DeepDarkFantasy/blob/master/src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
 
 Lang is the default language that is usable right off the shelf. 
 
