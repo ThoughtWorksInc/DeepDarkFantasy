@@ -1,21 +1,16 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.CombUnit.{CombUnit, CombUnitExt}
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Combinators.BEvalComb
+import com.thoughtworks.DDF.InfoBase.ImpWInfoBase
 import com.thoughtworks.DDF.Product.{BEvalProduct, Product}
-import com.thoughtworks.DDF.Unit.{BEvalUnit, Unit}
+import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
 trait ImpWArrowMin[Info[_], Repr[_]] extends
-  ArrowMin[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] {
+  ArrowMin[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with ImpWInfoBase[Info, Repr] {
   def bep: Product[Loss, BEval] = BEvalProduct.apply
+
   def rp: Product[Info, Repr]
-  def becomb: Comb[Loss, BEval] = BEvalComb.apply
-  def rcomb: Comb[Info, Repr]
-  def rcun: CombUnit[Info, Repr] = CombUnitExt.apply(rcomb, runit)
-  def runit: Unit[Info, Repr]
-  def becun: CombUnit[Loss, BEval] = CombUnitExt.apply(becomb, BEvalUnit.apply)
 
   override def app[A, B]: ImpW[Info, Repr, A => B] => ImpW[Info, Repr, A] => ImpW[Info, Repr, B] = f => x =>
     new ImpW[Info, Repr, B] {
@@ -37,10 +32,6 @@ trait ImpWArrowMin[Info[_], Repr[_]] extends
 
   override def arrowRangeInfo[A, B]: ((Info[A => B], Loss[A => B])) => (Info[B], Loss[B]) = x =>
     (rp.arrowRangeInfo(x._1), bep.arrowRangeInfo(x._2))
-
-  override def reprInfo[A]: ImpW[Info, Repr, A] => (Info[A], Loss[A]) = x =>
-    (rp.arrowRangeInfo(rp.reprInfo(x.exp)), bep.arrowRangeInfo(bep.reprInfo(x.eval)))
-
 }
 
 object ImpWArrowMin {
