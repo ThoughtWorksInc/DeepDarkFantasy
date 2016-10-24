@@ -4,7 +4,7 @@ object Preclude {
   def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
     val next = NextLang.apply[Info, Repr, Double](lang, lang.doubleInfo)
     import next._
-    collapse(app(app(multD)(in))(in))
+    collapse(multD__(in)(in))
   }
 
   def sumList[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => Double] = {
