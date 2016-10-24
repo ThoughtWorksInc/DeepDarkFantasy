@@ -1,5 +1,6 @@
 package com.thoughtworks.DDF.Language
 
+import com.thoughtworks.DDF.Bool.ImpWBool
 import com.thoughtworks.DDF.Combinators.{Comb, ImpWComb}
 import com.thoughtworks.DDF.Double.ImpWDouble
 import com.thoughtworks.DDF.List.ImpWList
@@ -15,7 +16,8 @@ trait ImpWLang[Info[_], Repr[_]] extends
   ImpWComb[Info, Repr] with
   ImpWDouble[Info, Repr] with
   ImpWOption[Info, Repr] with
-  ImpWUnit[Info, Repr] {
+  ImpWUnit[Info, Repr] with
+  ImpWBool[Info, Repr] {
   override def base: Lang[Info, Repr]
 
   override def baseE: Lang[Loss, BEval] = BEvalLang.apply
@@ -24,13 +26,7 @@ trait ImpWLang[Info[_], Repr[_]] extends
 }
 
 object ImpWLang {
-  implicit def apply[Info[_], Repr[_]]: ImpWLang[Info, Repr] = new ImpWLang[Info, Repr] {
-    override def litB: (Boolean) => ImpW[Info, Repr, Boolean] = ???
-
-    override def ite[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, Boolean => A => A => A] = ???
-
-    override implicit def boolInfo: (Info[Boolean], Loss[Boolean]) = ???
-
-    override def base: Lang[Info, Repr] = ???
+  implicit def apply[Info[_], Repr[_]](implicit l: Lang[Info, Repr]): ImpWLang[Info, Repr] = new ImpWLang[Info, Repr] {
+    override def base: Lang[Info, Repr] = l
   }
 }
