@@ -26,8 +26,6 @@ object Preclude {
       Lambda[X => Either[
         Either[Repr[X], Repr[List[Double] => X]],
         Either[Repr[List[Double] => X], Repr[List[Double] => List[Double] => X]]]]](nNLang))(
-      app(
-        app(listMap[(Double, Double), Double])(app(uncurry[Double, Double, Double])(multD)))
-      (app(app(listZip[Double, Double])(rconv(nLang.in)))(in)))))
+      listMap__(uncurry_(multD))(listZip__(rconv(nLang.in))(in)))))
   }
 }

@@ -11,7 +11,7 @@ trait S[Info[_], Repr[_]] extends Arrow[Info, Repr] {
       arrowDomainInfo(arrowRangeInfo(reprInfo(f))),
       arrowRangeInfo(arrowRangeInfo(reprInfo(f)))))(f)
 
-  final def S__[A, B, C]: Repr[A => B => C] => Repr[A => B] => Repr [A => C] = f => x => app(S_(f))(x)
+  final def S__[A, B, C]: Repr[A => B => C] => Repr[A => B] => Repr [A => C] = f => app(S_(f))
 
-  final def S___[A, B, C]: Repr[A => B => C] => Repr[A => B] => Repr[A] => Repr[C] = f => x => a => app(S__(f)(x))(a)
+  final def S___[A, B, C]: Repr[A => B => C] => Repr[A => B] => Repr[A] => Repr[C] = f => x => app(S__(f)(x))
 }

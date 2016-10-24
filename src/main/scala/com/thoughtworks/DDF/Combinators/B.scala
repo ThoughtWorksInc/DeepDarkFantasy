@@ -11,6 +11,5 @@ trait B[Info[_], Repr[_]] extends Arrow[Info, Repr] {
   final def B__[A, B, C]: Repr[B => C] => Repr[A => B] => Repr[A => C] = bc => ab =>
     app(B_[A, B, C](bc)(arrowDomainInfo(reprInfo(ab))))(ab)
 
-  final def B___[A, B, C]: Repr[B => C] => Repr[A => B] => Repr[A] => Repr[C] = bc => ab => a =>
-    app(B__(bc)(ab))(a)
+  final def B___[A, B, C]: Repr[B => C] => Repr[A => B] => Repr[A] => Repr[C] = bc => ab => app(B__(bc)(ab))
 }
