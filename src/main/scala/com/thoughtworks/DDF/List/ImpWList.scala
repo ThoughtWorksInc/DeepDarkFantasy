@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.CombUnit.{CombUnit, CombUnitExt}
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Product.{ImpWProduct, ProductRepr}
+import com.thoughtworks.DDF.Product.{ImpWProduct, Product}
 import com.thoughtworks.DDF.Unit.{BEvalUnit, Unit}
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
@@ -42,7 +42,7 @@ trait ImpWList[Info[_], Repr[_]] extends
   override def listElmInfo[A]: ((Info[scala.List[A]], Loss[scala.List[A]])) => (Info[A], Loss[A]) = i =>
     (base.listElmInfo(i._1), baseE.listElmInfo(i._2))
 
-  override def rp: ProductRepr[Info, Repr] = base
+  override def rp: Product[Info, Repr] = base
 
   override def nil[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, scala.List[A]] =
     ImpW(base.nil(ai._1), baseE.nil(ai._2))(rcun, becun)

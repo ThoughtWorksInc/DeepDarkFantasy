@@ -30,11 +30,9 @@ object ImpWLang {
 
     override def rcomb: Comb[Info, Repr] = base
 
-    override implicit def doubleInfo: (Info[Double], Loss[Double]) = ???
-
     override def litB: (Boolean) => ImpW[Info, Repr, Boolean] = ???
 
-    override def ite[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, (Boolean) => (A) => (A) => A] = ???
+    override def ite[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, Boolean => A => A => A] = ???
 
     override implicit def BoolInfo: (Info[Boolean], Loss[Boolean]) = ???
 

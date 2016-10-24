@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Product
 import com.thoughtworks.DDF.Arrow.ShowArrow
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowProduct extends ProductRepr[NoInfo, Show] with ShowArrow with SimpleProduct[Show] {
+trait ShowProduct extends Product[NoInfo, Show] with ShowArrow with SimpleProduct[Show] {
   override def mkProduct[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
 
   override def first[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("snd")

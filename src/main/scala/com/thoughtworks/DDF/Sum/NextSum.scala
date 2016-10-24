@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
+import com.thoughtworks.DDF.Arrow.{Arrow, NextArrow}
 import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextSum[Info[_], Repr[_], Arg] extends

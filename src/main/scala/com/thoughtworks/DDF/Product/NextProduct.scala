@@ -1,12 +1,12 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
+import com.thoughtworks.DDF.Arrow.{Arrow, NextArrow}
 import com.thoughtworks.DDF.Combinators.SKI
 
 trait NextProduct[Info[_], Repr[_], Arg] extends
-  ProductRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  Product[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextArrow[Info, Repr, Arg] {
-  implicit def base: ProductRepr[Info, Repr]
+  implicit def base: Product[Info, Repr]
 
   override implicit def productInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     iconv(base.productInfo(convi(ai), convi(bi)))
@@ -33,11 +33,11 @@ trait NextProduct[Info[_], Repr[_], Arg] extends
 
 object NextProduct {
   implicit def apply[Info[_], Repr[_], Arg](implicit
-                                            prod: ProductRepr[Info, Repr],
+                                            prod: Product[Info, Repr],
                                             skir: SKI[Info, Repr],
                                             arg: Info[Arg]) =
     new NextProduct[Info, Repr, Arg] {
-      override def base: ProductRepr[Info, Repr] = prod
+      override def base: Product[Info, Repr] = prod
 
       override implicit def argi: Info[Arg] = arg
 

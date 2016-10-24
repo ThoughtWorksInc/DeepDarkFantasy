@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Product.ProductRepr
+import com.thoughtworks.DDF.Product.Product
 import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
@@ -48,11 +48,11 @@ trait ImpWSum[Info[_], Repr[_]] extends
 
 object ImpWSum {
   implicit def apply[Info[_], Repr[_]](implicit
-                                       p: ProductRepr[Info, Repr],
+                                       p: Product[Info, Repr],
                                        c: Comb[Info, Repr],
                                        s: Sum[Info, Repr],
                                        u: Unit[Info, Repr]): ImpWSum[Info, Repr] = new ImpWSum[Info, Repr] {
-    override def rp: ProductRepr[Info, Repr] = p
+    override def rp: Product[Info, Repr] = p
 
     override def rcomb: Comb[Info, Repr] = c
 

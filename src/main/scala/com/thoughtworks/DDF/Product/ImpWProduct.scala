@@ -6,13 +6,13 @@ import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
 trait ImpWProduct[Info[_], Repr[_]] extends
-  ProductRepr[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
+  Product[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
   ImpWArrowMin[Info, Repr] {
-  def base: ProductRepr[Info, Repr]
+  def base: Product[Info, Repr]
 
-  def baseE: ProductRepr[Loss, BEval] = BEvalProduct.apply
+  def baseE: Product[Loss, BEval] = BEvalProduct.apply
 
-  override def rp: ProductRepr[Info, Repr] = base
+  override def rp: Product[Info, Repr] = base
 
   override def mkProduct[A, B](implicit ai: (Info[A], Loss[A]), bi: (Info[B], Loss[B])):
   ImpW[Info, Repr, A => B => (A, B)] =
@@ -44,9 +44,9 @@ trait ImpWProduct[Info[_], Repr[_]] extends
 }
 
 object ImpWProduct {
-  implicit def apply[Info[_], Repr[_]](implicit p: ProductRepr[Info, Repr], c: Comb[Info, Repr], u: Unit[Info, Repr]) =
+  implicit def apply[Info[_], Repr[_]](implicit p: Product[Info, Repr], c: Comb[Info, Repr], u: Unit[Info, Repr]) =
     new ImpWProduct[Info, Repr] {
-      override def base: ProductRepr[Info, Repr] = p
+      override def base: Product[Info, Repr] = p
 
       override def rcomb: Comb[Info, Repr] = c
 

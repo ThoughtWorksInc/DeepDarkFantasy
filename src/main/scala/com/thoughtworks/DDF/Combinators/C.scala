@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Combinators
 
-import com.thoughtworks.DDF.Arrow.ArrowRepr
+import com.thoughtworks.DDF.Arrow.Arrow
 
-trait C[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] {
+trait C[Info[_], Repr[_]] extends Arrow[Info, Repr] {
   def C[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(A => B => C) => (B => A => C)]
 
   final def C_[A, B, C]: Repr[A => B => C] => Repr[B => A => C] = f =>

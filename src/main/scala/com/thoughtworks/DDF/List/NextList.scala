@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.{ArrowRepr, NextArrow}
+import com.thoughtworks.DDF.Arrow.{Arrow, NextArrow}
 import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.Product.NextProduct
 

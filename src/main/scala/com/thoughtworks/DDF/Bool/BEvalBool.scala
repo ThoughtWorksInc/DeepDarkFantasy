@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMon
 
 import scalaz.Leibniz._
 
-trait BEvalBool extends BoolRepr[Loss, BEval] with BEvalArrow {
+trait BEvalBool extends Bool[Loss, BEval] with BEvalArrow {
   object BoolBEC extends BEvalCase[Boolean] {
     override type ret = Boolean
   }

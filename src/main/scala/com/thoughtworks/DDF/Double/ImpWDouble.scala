@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Product.ProductRepr
+import com.thoughtworks.DDF.Product.Product
 import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
@@ -32,10 +32,10 @@ trait ImpWDouble[Info[_], Repr[_]] extends
 object ImpWDouble {
   implicit def apply[Info[_], Repr[_]](implicit
                                        d: Double[Info, Repr],
-                                       p: ProductRepr[Info, Repr],
+                                       p: Product[Info, Repr],
                                        c: Comb[Info, Repr],
                                        u: Unit[Info, Repr]) = new ImpWDouble[Info, Repr] {
-    override def rp: ProductRepr[Info, Repr] = p
+    override def rp: Product[Info, Repr] = p
 
     override def rcomb: Comb[Info, Repr] = c
 

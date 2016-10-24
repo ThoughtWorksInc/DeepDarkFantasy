@@ -4,9 +4,9 @@ import com.thoughtworks.DDF.Combinators.SKI
 import com.thoughtworks.DDF.InfoBase.NextInfoBase
 
 trait NextArrow[Info[_], Repr[_], Arg] extends
-  ArrowRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  Arrow[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextInfoBase[Info, Repr, Arg] {
-  implicit def base: ArrowRepr[Info, Repr]
+  implicit def base: Arrow[Info, Repr]
 
   override def arrowInfo[A, B](implicit ai: Info[Arg => A], bi: Info[Arg => B]) =
     iconv(base.arrowInfo[A, B](base.arrowRangeInfo(ai), base.arrowRangeInfo(bi)))
@@ -34,6 +34,6 @@ object NextArrow {
 
       override implicit def ski: SKI[Info, Repr] = skir
 
-      override def base: ArrowRepr[Info, Repr] = ski
+      override def base: Arrow[Info, Repr] = ski
   }
 }

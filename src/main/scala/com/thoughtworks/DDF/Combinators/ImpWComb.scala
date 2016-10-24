@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
-import com.thoughtworks.DDF.Product.ProductRepr
+import com.thoughtworks.DDF.Product.Product
 import com.thoughtworks.DDF.Unit.Unit
 import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
@@ -45,9 +45,9 @@ trait ImpWComb[Info[_], Repr[_]] extends
 object ImpWComb {
   implicit def apply[Info[_], Repr[_]](implicit
                                        c: Comb[Info, Repr],
-                                       p: ProductRepr[Info, Repr],
+                                       p: Product[Info, Repr],
                                        u: Unit[Info, Repr]): ImpWComb[Info, Repr] = new ImpWComb[Info, Repr] {
-    override def rp: ProductRepr[Info, Repr] = p
+    override def rp: Product[Info, Repr] = p
 
     override def runit: Unit[Info, Repr] = u
 

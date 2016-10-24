@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.Arrow.ArrowRepr
+import com.thoughtworks.DDF.Arrow.Arrow
 
-trait BoolRepr[Info[_], Repr[_]] extends ArrowRepr[Info, Repr] with BoolInfo[Info, Repr] {
+trait Bool[Info[_], Repr[_]] extends Arrow[Info, Repr] with BoolInfo[Info, Repr] {
   def litB: Boolean => Repr[Boolean]
 
   def ite[A](implicit ai: Info[A]): Repr[Boolean => A => A => A]
