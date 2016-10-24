@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Combinators.{Comb, ImpWComb}
+import com.thoughtworks.DDF.Double.ImpWDouble
 import com.thoughtworks.DDF.List.{ImpWList, List}
 import com.thoughtworks.DDF.Sum.{ImpWSum, Sum}
 import com.thoughtworks.DDF.Unit.Unit
@@ -10,7 +11,8 @@ trait ImpWLang[Info[_], Repr[_]] extends
   Lang[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
   ImpWList[Info, Repr] with
   ImpWSum[Info, Repr] with
-  ImpWComb[Info, Repr] {
+  ImpWComb[Info, Repr] with
+  ImpWDouble[Info, Repr] {
   override def base: Lang[Info, Repr]
 
   override def baseE: Lang[Loss, BEval] = BEvalLang.apply
@@ -33,18 +35,6 @@ object ImpWLang {
     override def litB: (Boolean) => ImpW[Info, Repr, Boolean] = ???
 
     override def ite[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, (Boolean) => (A) => (A) => A] = ???
-
-    override def litD: (Double) => ImpW[Info, Repr, Double] = ???
-
-    override def plusD: ImpW[Info, Repr, (Double) => (Double) => Double] = ???
-
-    override def multD: ImpW[Info, Repr, (Double) => (Double) => Double] = ???
-
-    override def divD: ImpW[Info, Repr, (Double) => (Double) => Double] = ???
-
-    override def expD: ImpW[Info, Repr, (Double) => Double] = ???
-
-    override def sigD: ImpW[Info, Repr, (Double) => Double] = ???
 
     override implicit def BoolInfo: (Info[Boolean], Loss[Boolean]) = ???
 

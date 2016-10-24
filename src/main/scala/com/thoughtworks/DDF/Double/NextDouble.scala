@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Combinators.{Comb, NextComb, SKI}
 import com.thoughtworks.DDF.NextBase
 
 trait NextDouble[Info[_], Repr[_], Arg] extends
-  DoubleRepr[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  Double[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NextBase[Info, Repr, Arg] with
   NextArrow[Info, Repr, Arg] {
   override def litD = d => rconv(base.litD(d))
@@ -20,18 +20,18 @@ trait NextDouble[Info[_], Repr[_], Arg] extends
 
   override def sigD = rconv(base.sigD)
 
-  override implicit def doubleInfo: Info[Arg => Double] = iconv(base.doubleInfo)
+  override implicit def doubleInfo = iconv(base.doubleInfo)
 
-  override implicit def base: DoubleRepr[Info, Repr]
+  override implicit def base: Double[Info, Repr]
 }
 
 object NextDouble {
   implicit def apply[Info[_], Repr[_], Arg](implicit
-                                            double: DoubleRepr[Info, Repr],
+                                            double: Double[Info, Repr],
                                             skir: SKI[Info, Repr],
                                             arg: Info[Arg]) =
     new NextDouble[Info, Repr, Arg] {
-      override implicit def base: DoubleRepr[Info, Repr] = double
+      override implicit def base: Double[Info, Repr] = double
 
       override implicit def argi: Info[Arg] = arg
 
