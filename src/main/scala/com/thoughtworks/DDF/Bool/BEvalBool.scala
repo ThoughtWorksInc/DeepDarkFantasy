@@ -18,7 +18,7 @@ trait BEvalBool extends Bool[Loss, BEval] with BEvalArrow {
 
     override val ec: BEvalCase.Aux[Boolean, Boolean] = BoolBEC
 
-    override val loss: Loss[Boolean] = BoolInfo
+    override val loss: Loss[Boolean] = boolInfo
   }
 
   def beval: BEval[Boolean] => Boolean = x => witness(x.ec.unique(BoolBEC))(x.eca)
@@ -29,9 +29,9 @@ trait BEvalBool extends Bool[Loss, BEval] with BEvalArrow {
     arrowEval[Boolean, A => A => A, Unit, ArrowLoss[A, ArrowLoss[A, ai.loss]]](b =>
       (if(beval(b))
         comb.K[A, A](ai, ai) else
-        app(comb.C[A, A, A](ai, ai, ai))(comb.K[A, A](ai, ai)), _ => ()))(BoolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
+        app(comb.C[A, A, A](ai, ai, ai))(comb.K[A, A](ai, ai)), _ => ()))(boolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
 
-  override implicit def BoolInfo: Loss.Aux[Boolean, Unit] = new Loss[Boolean] {
+  override implicit def boolInfo: Loss.Aux[Boolean, Unit] = new Loss[Boolean] {
     override def convert = litB
 
     override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit.apply

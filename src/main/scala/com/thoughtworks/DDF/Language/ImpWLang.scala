@@ -29,7 +29,7 @@ object ImpWLang {
 
     override def ite[A](implicit ai: (Info[A], Loss[A])): ImpW[Info, Repr, Boolean => A => A => A] = ???
 
-    override implicit def BoolInfo: (Info[Boolean], Loss[Boolean]) = ???
+    override implicit def boolInfo: (Info[Boolean], Loss[Boolean]) = ???
 
     override def base: Lang[Info, Repr] = ???
   }

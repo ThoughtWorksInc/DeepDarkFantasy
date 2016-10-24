@@ -12,7 +12,7 @@ trait NextBool[Info[_], Repr[_], Arg] extends
 
   override implicit def ite[A](implicit ai: Info[Arg => A]) = rconv(base.ite(base.arrowRangeInfo(ai)))
 
-  override def BoolInfo: Info[Arg => Boolean] = iconv(base.BoolInfo)
+  override def boolInfo: Info[Arg => Boolean] = iconv(base.boolInfo)
 }
 
 object NextBool {
