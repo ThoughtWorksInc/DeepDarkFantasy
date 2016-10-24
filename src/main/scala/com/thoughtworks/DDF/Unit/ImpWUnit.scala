@@ -9,6 +9,8 @@ trait ImpWUnit[Info[_], Repr[_]] extends
   ImpWInfoBase[Info, Repr] {
   def base: Unit[Info, Repr]
 
+  override def runit: Unit[Info, Repr] = base
+
   def baseE: Unit[Loss, BEval] = BEvalUnit.apply
 
   override implicit def unitInfo = (base.unitInfo, baseE.unitInfo)
@@ -20,8 +22,6 @@ object ImpWUnit {
   implicit def apply[Info[_], Repr[_]](implicit u: Unit[Info, Repr], c: Comb[Info, Repr]):
   ImpWUnit[Info, Repr] = new ImpWUnit[Info, Repr] {
     override def rcomb: Comb[Info, Repr] = c
-
-    override def runit: Unit[Info, Repr] = base
 
     override def base: Unit[Info, Repr] = u
   }
