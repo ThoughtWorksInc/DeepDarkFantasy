@@ -2,15 +2,15 @@ package com.thoughtworks.DDF.Language
 
 object Preclude {
   def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
-    val next = NextLang.apply(lang, lang.doubleInfo)
+    val next = NextLang(lang, lang.doubleInfo)
     import next._
     collapse(multD__(in)(in))
   }
 
   def sumList[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => Double] = {
-    val nLang = NextLang.apply(lang, lang.listInfo(lang.doubleInfo))
+    val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     import nLang._
-    collapse(app(app(app(foldLeft[Double, Double])(plusD))(litD(0)))(in))
+    collapse(foldLeft___[Double, Double](plusD)(litD(0))(in))
   }
 
   def dot[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double] => Double] = {
