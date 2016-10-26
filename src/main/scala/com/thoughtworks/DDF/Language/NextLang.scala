@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Bool.NextBool
 import com.thoughtworks.DDF.Combinators.{NextComb, SKI}
 import com.thoughtworks.DDF.Double.NextDouble
 import com.thoughtworks.DDF.List.NextList
-import com.thoughtworks.DDF.NextBase
+import com.thoughtworks.DDF.{Next, NextBase}
 import com.thoughtworks.DDF.Option.NextOption
 import com.thoughtworks.DDF.Product.NextProduct
 import com.thoughtworks.DDF.Sum.NextSum
@@ -26,7 +26,7 @@ trait NextLang[Info[_], Repr[_], Arg] extends
 
 object NextLang {
   implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]):
-  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with NextBase[Info, Repr, Arg] =
+  Lang[Next[Info, Repr, Arg]#info, Next[Info, Repr, Arg]#repr] with NextBase[Info, Repr, Arg] =
     new NextLang[Info, Repr, Arg] {
       override implicit def base: Lang[Info, Repr] = lang
 

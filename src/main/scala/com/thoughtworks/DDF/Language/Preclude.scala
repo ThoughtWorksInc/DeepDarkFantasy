@@ -1,31 +1,23 @@
 package com.thoughtworks.DDF.Language
 
 object Preclude {
-  def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
-    val next = NextLang(lang, lang.doubleInfo)
-    import next._
-    collapse(multD__(in)(in))
-  }
+  def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = lang.W_(lang.multD)
 
   def sumList[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => Double] = {
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     import nLang._
-    collapse(foldLeft___[Double, Double](plusD)(litD(0))(in))
+    collapse(foldLeft___(plusD)(litD(0))(in))
   }
+
+  def sumList_[Info[_], Repr[_]](li: Repr[List[Double]])(implicit lang: Lang[Info, Repr]) =
+    lang.app(sumList)(li)
 
   def dot[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double] => Double] = {
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     val nNLang =
-      NextLang.apply[
-        Lambda[X => Info[List[Double] => X]],
-        Lambda[X => Either[Repr[X], Repr[List[Double] => X]]],
-        List[Double]](nLang, nLang.listInfo(nLang.doubleInfo))
+      NextLang.apply[nLang.info, nLang.repr, List[Double]](nLang, nLang.listInfo(nLang.doubleInfo))
     import nNLang._
-    nLang.collapse(collapse(app(sumList[
-      Lambda[X => Info[List[Double] => List[Double] => X]],
-      Lambda[X => Either[
-        Either[Repr[X], Repr[List[Double] => X]],
-        Either[Repr[List[Double] => X], Repr[List[Double] => List[Double] => X]]]]](nNLang))(
-      listMap__(uncurry_(multD))(listZip__(rconv(nLang.in))(in)))))
+    nLang.collapse(collapse(sumList_[nNLang.info, nNLang.repr](
+      listMap__(uncurry_(multD))(listZip__(rconv(nLang.in))(in)))(nNLang)))
   }
 }
