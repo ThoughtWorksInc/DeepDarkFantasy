@@ -17,6 +17,8 @@ They all had their own special gradient structure to propagate loss accordingly.
 
 However, in the end of the day, what is updated is only container of double (or other representation of real). Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
 
+The full list of features implemented can be seen [here](FEATURES.md)
+
 ----------
 
 Can we make the language typed so we can detect error before we train the network?
