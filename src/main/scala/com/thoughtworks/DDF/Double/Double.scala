@@ -5,4 +5,5 @@ trait Double[Info[_], Repr[_]] extends
   MultD[Info, Repr] with
   DivD[Info, Repr] with
   ExpD[Info, Repr] with
-  SigD[Info, Repr]
+  SigD[Info, Repr] with
+  LtD[Info, Repr]

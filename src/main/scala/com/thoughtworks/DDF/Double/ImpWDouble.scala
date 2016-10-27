@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.ImpWArrowMin
+import com.thoughtworks.DDF.Bool.ImpWBool
 import com.thoughtworks.DDF.Combinators.Comb
 import com.thoughtworks.DDF.Product.Product
 import com.thoughtworks.DDF.Unit.Unit
@@ -8,11 +9,12 @@ import com.thoughtworks.DDF.{BEval, ImpW, Loss}
 
 trait ImpWDouble[Info[_], Repr[_]] extends
   Double[Lambda[X => (Info[X], Loss[X])], ImpW[Info, Repr, ?]] with
-  ImpWArrowMin[Info, Repr] {
+  ImpWArrowMin[Info, Repr] with
+  ImpWBool[Info, Repr] {
 
   def base: Double[Info, Repr]
 
-  def baseE: Double[Loss, BEval] = BEvalDouble.apply
+  override def baseE: Double[Loss, BEval] = BEvalDouble.apply
 
   override implicit def doubleInfo: (Info[scala.Double], Loss[scala.Double]) = (base.doubleInfo, baseE.doubleInfo)
 
@@ -27,6 +29,8 @@ trait ImpWDouble[Info[_], Repr[_]] extends
   override def expD = ImpW(base.expD, baseE.expD)(rcun, becun)
 
   override def sigD = ImpW(base.sigD, baseE.sigD)(rcun, becun)
+
+  override def ltD = ImpW(base.ltD, baseE.ltD)(rcun, becun)
 }
 
 object ImpWDouble {

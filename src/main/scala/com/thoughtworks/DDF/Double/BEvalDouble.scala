@@ -1,9 +1,10 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Bool.BEvalBool
 import com.thoughtworks.DDF.{BEval, Loss}
 
-trait BEvalDouble extends BEvalDoubleInfo with BEvalArrow with Double[Loss, BEval] {
+trait BEvalDouble extends BEvalDoubleInfo with BEvalArrow with Double[Loss, BEval] with BEvalBool {
   override def litD = dEval
 
   override def plusD: BEval[scala.Double => scala.Double => scala.Double] =
@@ -30,6 +31,12 @@ trait BEvalDouble extends BEvalDoubleInfo with BEvalArrow with Double[Loss, BEva
   override def sigD = arrowEval[scala.Double, scala.Double, DLoss, DLoss](x =>
     (litD(1 / (1 + Math.exp(- deval(x)))),
       l => DLoss(l.d * (1 / (1 + Math.exp(- deval(x)))) * (1 / (1 + Math.exp(- (1 - deval(x))))))))
+
+  override def ltD = arrowEval[scala.Double, scala.Double => Boolean, DLoss, ArrowLoss[scala.Double, Unit]](x =>
+      (arrowEval[scala.Double, Boolean, DLoss, Unit](y =>
+        (litB(deval(x) < deval(y)),
+          _ => doubleInfo.m.zero)),
+        _ => doubleInfo.m.zero))
 }
 
 object BEvalDouble {
