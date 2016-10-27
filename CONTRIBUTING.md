@@ -37,3 +37,5 @@ However, a refactoring moving toward such standard is always appreciated
 8. Each Tagless trait TRAIT has TRAITExt which require sub tagless trait, but defined all other operation, so it is easy to compose TRAIT from it's subtrait.
 
 9. Every Destructor implemented Lang
+
+10. If a feature is implemented, update FEATURES.md
