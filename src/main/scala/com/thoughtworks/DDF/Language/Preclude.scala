@@ -31,4 +31,24 @@ object Preclude {
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(dot_[nLang.info, nLang.repr](nLang.in)(nLang))
   }
+
+  def divAvg_[Info[_], Repr[_]](ld : Repr[List[Double]])(implicit lang: Lang[Info, Repr]): Repr[List[Double]] = {
+    import lang._
+    listMap__(C__(divD)(sumList_(ld)))(ld)
+  }
+
+  def divAvg[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double]] = {
+    val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
+    nLang.collapse(divAvg_[nLang.info, nLang.repr](nLang.in)(nLang))
+  }
+
+  def softMax_[Info[_], Repr[_]](ld : Repr[List[Double]])(implicit lang: Lang[Info, Repr]): Repr[List[Double]] = {
+    import lang._
+    divAvg_(listMap__(expD)(ld))
+  }
+
+  def softMax[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double]] = {
+    val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
+    nLang.collapse(softMax_[nLang.info, nLang.repr](nLang.in)(nLang))
+  }
 }
