@@ -275,7 +275,8 @@ trait LangTermLang extends
 
   override def sumMatch[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
     new LangTerm[Either[A, B] => (A => C) => (B => C) => C] {
-      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumMatch(ai(lang), bi(lang), ci(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
+        lang.sumMatch(ai(lang), bi(lang), ci(lang))
     }
 
   override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = i => new LangInfoG[A] {
@@ -283,6 +284,4 @@ trait LangTermLang extends
   }
 }
 
-object LangTermLang {
-  implicit def apply: LangTermLang = new LangTermLang { }
-}
+object LangTermLang extends LangTermLang

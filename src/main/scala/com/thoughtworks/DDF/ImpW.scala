@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArrow
-import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm}
+import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm, LangTermLang}
 
 trait ImpW[T] {
   ext =>
@@ -14,11 +14,16 @@ trait ImpW[T] {
 
   implicit val bel = BEvalLang.apply
 
-  implicit val l: Loss[Weight] =
-    bel.arrowDomainInfo(bel.reprInfo(exp(bel)))
+  implicit val ltl = LangTermLang
+
+  implicit val wi = ltl.arrowDomainInfo(ltl.reprInfo(exp(ltl)))
+
+  implicit val ti = ltl.arrowRangeInfo(ltl.reprInfo(exp(ltl)))
+
+  implicit val wl: Loss[Weight] = wi(bel)
 
   def update[TL](rate: Double, tl: TL)(implicit ti: Loss.Aux[T, TL]): ImpW[T] = {
-    val newW = l.update(w)(rate)(new BEvalArrow {}.aeval(exp(bel)).forward(ext.l.convert(w)).backward(tl))
+    val newW = wl.update(w)(rate)(new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w)).backward(tl))
     new ImpW[T] {
       override type Weight = ext.Weight
 

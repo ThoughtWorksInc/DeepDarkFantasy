@@ -12,7 +12,5 @@ trait BEvalPlusD extends BEvalLitD with PlusD[Loss, BEval] {
 }
 
 object BEvalPlusD {
-  implicit def apply: BEvalPlusD = new BEvalPlusD {
-
-  }
+  implicit def apply: BEvalPlusD = new BEvalPlusD { }
 }
