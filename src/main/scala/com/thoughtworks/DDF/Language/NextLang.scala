@@ -1,37 +1,48 @@
 package com.thoughtworks.DDF.Language
-
-import com.thoughtworks.DDF.Bool.NextBool
-import com.thoughtworks.DDF.Combinators.{NextComb, SKI}
-import com.thoughtworks.DDF.Double.NextDouble
-import com.thoughtworks.DDF.List.NextList
-import com.thoughtworks.DDF.{Next, NextBase}
-import com.thoughtworks.DDF.Option.NextOption
-import com.thoughtworks.DDF.Product.NextProduct
-import com.thoughtworks.DDF.Sum.NextSum
-import com.thoughtworks.DDF.Unit.NextUnit
+import scalaz.NaturalTransformation
 
 trait NextLang[Info[_], Repr[_], Arg] extends
-  Lang[Lambda[X => Info[Arg => X]], Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
-  NextBase[Info, Repr, Arg] with
-  NextComb[Info, Repr, Arg] with
-  NextDouble[Info, Repr, Arg] with
-  NextProduct[Info, Repr, Arg] with
-  NextOption[Info, Repr, Arg] with
-  NextSum[Info, Repr, Arg] with
-  NextList[Info, Repr, Arg] with
-  NextUnit[Info, Repr, Arg] with
-  NextBool[Info, Repr, Arg] {
-  implicit def base: Lang[Info, Repr]
+  NTLang[
+    Info,
+    Repr,
+    Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {
+
+  type repr[X] = Either[Repr[X], Repr[Arg => X]]
+
+  implicit def argi: Info[Arg]
+
+  override def reprInfo[A]: repr[A] => Info[A] = {
+    case Left(x) => base.reprInfo(x)
+    case Right(x) => base.arrowRangeInfo(base.reprInfo(x))
+  }
+
+  override def NTF = new NaturalTransformation[Repr, repr] {
+    override def apply[A](fa: Repr[A]): Either[Repr[A], Repr[Arg => A]] = Left(fa)
+  }
+
+  override def app[A, B]: repr[A => B] => repr[A] => repr[B] = f => x => (f, x) match {
+    case (Left(f_), Left(x_)) => Left(base.app(f_)(x_))
+    case (Right(f_), Right(x_)) => Right(base.S__(f_)(x_))
+    case (Left(f_), Right(_)) => app(Right(base.K_(f_)(argi)))(x)
+    case (Right(_), Left(x_)) => app(f)(Right(base.K_(x_)(argi)))
+  }
+
+  val in: repr[Arg] = Right(base.I(argi))
+
+  def collapse[A]: repr[A] => Repr[Arg => A] = {
+    case Left(x) => base.K_(x)(argi)
+    case Right(x) => x
+  }
+
+  def rconv[A]: Repr[A] => repr[A] = x => Left(x)
 }
 
 object NextLang {
-  implicit def apply[Info[_], Repr[_], Arg](implicit lang: Lang[Info, Repr], arg: Info[Arg]):
-  Lang[Next[Info, Repr, Arg]#info, Next[Info, Repr, Arg]#repr] with NextBase[Info, Repr, Arg] =
+  implicit def apply[Info[_], Repr[_], Arg](implicit l: Lang[Info, Repr], ai: Info[Arg]):
+  NextLang[Info, Repr, Arg] =
     new NextLang[Info, Repr, Arg] {
-      override implicit def base: Lang[Info, Repr] = lang
+      override def base: Lang[Info, Repr] = l
 
-      override implicit def argi: Info[Arg] = arg
-
-      override implicit def ski: SKI[Info, Repr] = lang
-  }
+      override implicit def argi: Info[Arg] = ai
+    }
 }
