@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArrow
-import com.thoughtworks.DDF.Language.{BEvalLang, LangTerm}
+import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm}
 
 trait ImpW[T] {
   ext =>
@@ -36,6 +36,9 @@ object ImpW {
 
       override val w: scala.Unit = ()
 
-      override val exp: LangTerm[scala.Unit => T] = ???
+      override val exp: LangTerm[scala.Unit => T] = new LangTerm[scala.Unit => T] {
+        override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[scala.Unit => T] =
+          lang.K_(expT(lang))(lang.unitInfo)
+      }
     }
 }
