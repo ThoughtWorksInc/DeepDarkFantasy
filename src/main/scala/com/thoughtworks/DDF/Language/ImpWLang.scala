@@ -6,13 +6,7 @@ import scalaz.NaturalTransformation
 
 trait ImpWLang extends NTLang[LangInfoG, LangTerm, ImpW] {
   override def NTF: NaturalTransformation[LangTerm, ImpW] = new NaturalTransformation[LangTerm, ImpW] {
-    override def apply[A](fa: LangTerm[A]): ImpW[A] = new ImpW[A] {
-      override type Weight = Unit
-
-      override val w: Unit = ()
-
-      override val exp: LangTerm[Unit => A] = LangTermLang.K_(fa)(LangTermLang.unitInfo)
-    }
+    override def apply[A](fa: LangTerm[A]): ImpW[A] = ImpW(fa)
   }
 
   override def reprInfo[A]: ImpW[A] => LangInfoG[A] = _.ti
@@ -31,6 +25,4 @@ trait ImpWLang extends NTLang[LangInfoG, LangTerm, ImpW] {
   }
 }
 
-object ImpWLang {
-  implicit def apply: ImpWLang = new ImpWLang { }
-}
+object ImpWLang extends ImpWLang

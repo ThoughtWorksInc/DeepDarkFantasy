@@ -2,6 +2,7 @@ package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArrow
 import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm, LangTermLang}
+import scalaz.Leibniz._
 
 trait ImpW[T] {
   ext =>
@@ -22,14 +23,19 @@ trait ImpW[T] {
 
   implicit val wl: Loss[Weight] = wi(bel)
 
-  def update[TL](rate: Double, tl: TL)(implicit ti: Loss.Aux[T, TL]): ImpW[T] = {
-    val newW = wl.update(w)(rate)(new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w)).backward(tl))
-    new ImpW[T] {
-      override type Weight = ext.Weight
+  implicit val tl = ti(bel)
 
-      override val w: ext.Weight = newW
+  def forward = new Object {
+    val res = new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w))
+    def update[TL](rate: Double, tloss: TL)(implicit ti: Loss.Aux[T, TL]): ImpW[T] = {
+      val newW = wl.update(w)(rate)(res.backward(witness(ti.unique(tl))(tloss)))
+      new ImpW[T] {
+        override type Weight = ext.Weight
 
-      override val exp: LangTerm[ext.Weight => T] = ext.exp
+        override val w: ext.Weight = newW
+
+        override val exp: LangTerm[ext.Weight => T] = ext.exp
+      }
     }
   }
 }

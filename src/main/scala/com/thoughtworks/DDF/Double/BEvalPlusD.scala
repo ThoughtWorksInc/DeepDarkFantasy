@@ -11,6 +11,4 @@ trait BEvalPlusD extends BEvalLitD with PlusD[Loss, BEval] {
         _.mapReduce(_ => l => l)(doubleInfo.m)))
 }
 
-object BEvalPlusD {
-  implicit def apply: BEvalPlusD = new BEvalPlusD { }
-}
+object BEvalPlusD extends BEvalPlusD
