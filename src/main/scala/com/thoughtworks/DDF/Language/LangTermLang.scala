@@ -133,19 +133,19 @@ trait LangTermLang extends
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Double] = lang.doubleInfo
   }
 
-  override implicit def arrowInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
+  override implicit def aInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
     new LangInfoG[A => B] {
-      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.arrowInfo(ai(lang), bi(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.aInfo(ai(lang), bi(lang))
     }
 
-  override def arrowDomainInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = i =>
+  override def domInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = i =>
     new LangInfoG[A] {
-      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.arrowDomainInfo(i(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.domInfo(i(lang))
     }
 
-  override def arrowRangeInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = i =>
+  override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = i =>
     new LangInfoG[B] {
-      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.arrowRangeInfo(i(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.rngInfo(i(lang))
     }
 
   override def mkUnit: LangTerm[Unit] = new LangTerm[Unit] {

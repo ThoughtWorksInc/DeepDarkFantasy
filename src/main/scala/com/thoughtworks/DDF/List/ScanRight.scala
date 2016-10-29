@@ -6,7 +6,7 @@ trait ScanRight[Info[_], Repr[_]] extends Product[Info, Repr] with ListMin[Info,
   def scanRight[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => B) => B => scala.List[A] => scala.List[B]]
 
   final def scanRight_[A, B]: Repr[A => B => B] => Repr[B => scala.List[A] => scala.List[B]] = f =>
-    app(scanRight(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(arrowRangeInfo(reprInfo(f)))))(f)
+    app(scanRight(domInfo(reprInfo(f)), rngInfo(rngInfo(reprInfo(f)))))(f)
 
   final def scanRight__[A, B]: Repr[A => B => B] => Repr[B] => Repr[scala.List[A] => scala.List[B]] = f =>
     app(scanRight_(f))

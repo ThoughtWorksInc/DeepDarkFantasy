@@ -5,9 +5,9 @@ trait Curry[Info[_], Repr[_]] extends ProductMin[Info, Repr] {
 
   final def curry_[A, B, C]: Repr[((A, B)) => C] => Repr[A => B => C] = f =>
     app(curry(
-      productZerothInfo(arrowDomainInfo(reprInfo(f))),
-      productFirstInfo(arrowDomainInfo(reprInfo(f))),
-      arrowRangeInfo(reprInfo(f))))(f)
+      productZerothInfo(domInfo(reprInfo(f))),
+      productFirstInfo(domInfo(reprInfo(f))),
+      rngInfo(reprInfo(f))))(f)
 
   final def curry__[A, B, C]: Repr[((A, B)) => C] => Repr[A] => Repr[B => C] = f => app(curry_(f))
 

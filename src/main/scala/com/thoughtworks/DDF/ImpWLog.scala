@@ -8,7 +8,7 @@ trait ImpWLog[X] {
 
     val log: Seq[String]
 
-    def update[XL](rate: Double, tloss: XL)(implicit xi: LossInfo.Aux[X, XL]): ImpWLog[X]
+    def update(rate: Double)(tloss: Loss[X]): ImpWLog[X]
   }
 
   def forward: Forward

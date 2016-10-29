@@ -23,11 +23,11 @@ trait CombExt[Info[_], Repr[_]] extends Comb[Info, Repr] {
 
   override def app[A, B] = comb.app
 
-  override implicit def arrowInfo[A, B](implicit ai: Info[A], bi: Info[B]) = comb.arrowInfo
+  override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = comb.aInfo
 
-  override def arrowDomainInfo[A, B] = comb.arrowDomainInfo
+  override def domInfo[A, B] = comb.domInfo
 
-  override def arrowRangeInfo[A, B] = comb.arrowRangeInfo
+  override def rngInfo[A, B] = comb.rngInfo
 
   override def reprInfo[A] = comb.reprInfo
 

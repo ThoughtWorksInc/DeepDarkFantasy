@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Option
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Arrow.BEvalArrow
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase, LossInfo}
 
 import scalaz.Leibniz._
 
@@ -11,9 +11,17 @@ trait BEvalOption extends Option[LossInfo, BEval] with BEvalArrow {
     type ret = LossInfo[A]
   }
 
-  override implicit def optionInfo[A](implicit ai: LossInfo[A]): LossInfo.Aux[scala.Option[A], ai.loss] =
+  def lossO[A]: Loss[A] => Loss[scala.Option[A]] = l => new Loss[scala.Option[A]] {
+    override val x: li.loss = l
+
+    override val li: LossInfo.Aux[scala.Option[A], Loss[A]] = optionInfo[A](x.li)
+  }
+
+  def oloss[A]: Loss[scala.Option[A]] => Loss[A] = l => witness(l.li.unique(optionInfo(optionElmInfo(l.li))))(l.x)
+
+  override implicit def optionInfo[A](implicit ai: LossInfo[A]): LossInfo.Aux[scala.Option[A], Loss[A]] =
     new LossInfo[scala.Option[A]] {
-      override def m: CommutativeMonoid[ai.loss] = ai.m
+      override def m: CommutativeMonoid[Loss[A]] = ai.lm
 
     override def convert: scala.Option[A] => BEval[scala.Option[A]] = x => optionEval[A](x.map(ai.convert))
 
@@ -21,10 +29,10 @@ trait BEvalOption extends Option[LossInfo, BEval] with BEvalArrow {
 
     override def lca: lc.ret = ai
 
-    override type ret = ai.loss
+    override type ret = Loss[A]
 
-    override def update(x: scala.Option[A])(rate: Double)(l: ai.loss): scala.Option[A] =
-      x.map(y => ai.update(y)(rate)(l))
+    override def update(x: scala.Option[A])(rate: Double)(l: Loss[A]): scala.Option[A] =
+      x.map(y => ai.updatel(y)(rate)(l))
   }
 
   case class OptionBEC[A]() extends BEvalCase[scala.Option[A]] {
@@ -48,16 +56,18 @@ trait BEvalOption extends Option[LossInfo, BEval] with BEvalArrow {
   override def none[A](implicit ai: LossInfo[A]): BEval[scala.Option[A]] = optionEval[A](None)
 
   override def some[A](implicit ai: LossInfo[A]): BEval[A => scala.Option[A]] =
-    arrowEval[A, scala.Option[A], ai.loss, ai.loss](a => (optionEval(Some(a)), l => l))(ai, optionInfo(ai))
+    aEval[A, scala.Option[A]](a => (optionEval(Some(a)), oloss))(ai, optionInfo(ai))
 
   private def comb : Comb[LossInfo, BEval] = BEvalComb.apply
 
-  override def optionMatch[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[scala.Option[A] => B => (A => B) => B] =
-    arrowEval[scala.Option[A], B => (A => B) => B, ai.loss, ArrowLoss[B, ArrowLoss[A => B, bi.loss]]](opt => {
+  override def optionMatch[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
+  BEval[scala.Option[A] => B => (A => B) => B] =
+    aEval[scala.Option[A], B => (A => B) => B](opt => {
       oeval(opt) match {
-        case None => (comb.K[B, A => B], _ => ai.m.zero)
-        case Some(a) => (app(comb.K[(A => B) => B, B](arrowInfo(arrowInfo(ai, bi), bi), bi))(app(comb.Let[A, B])(a)),
-          _.mapReduce(b => _.mapReduce(ab => l => aeval(ab).forward(a).backward(l))(ai.m))(ai.m))
+        case None => (comb.K[B, A => B], _ => optionInfo(ai).lm.zero)
+        case Some(a) => (comb.K_[(A => B) => B, B](comb.Let_[A, B](a))(bi),
+          x => aloss(x).mapReduce(b => y => aloss(y).mapReduce(ab => l => lossO(aeval(ab).forward(a).backward(l)))(
+            optionInfo(ai).lm))(optionInfo(ai).lm))
       }
     })
 }

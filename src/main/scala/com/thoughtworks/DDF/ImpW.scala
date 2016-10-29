@@ -17,9 +17,9 @@ trait ImpW[T] {
 
   implicit val ltl = LangTermLang
 
-  implicit val wi = ltl.arrowDomainInfo(ltl.reprInfo(exp(ltl)))
+  implicit val wi = ltl.domInfo(ltl.reprInfo(exp(ltl)))
 
-  implicit val ti = ltl.arrowRangeInfo(ltl.reprInfo(exp(ltl)))
+  implicit val ti = ltl.rngInfo(ltl.reprInfo(exp(ltl)))
 
   implicit val wl: LossInfo[Weight] = wi(bel)
 
@@ -27,7 +27,7 @@ trait ImpW[T] {
 
   trait Forward {
     val res: BEval[T]
-    def update[TL](rate: Double, tloss: TL)(implicit ti: LossInfo.Aux[T, TL]): ImpW[T]
+    def update(rate: Double, tloss: Loss[T]): ImpW[T]
   }
   def forward = new Forward {
 
@@ -35,8 +35,8 @@ trait ImpW[T] {
 
     override val res: BEval[T] = fres.eb
 
-    def update[TL](rate: Double, tloss: TL)(implicit ti: LossInfo.Aux[T, TL]): ImpW[T] = {
-      val newW = wl.update(w)(rate)(fres.backward(witness(ti.unique(tl))(tloss)))
+    def update(rate: Double, tloss: Loss[T]): ImpW[T] = {
+      val newW = wl.updatel(w)(rate)(fres.backward(tloss))
       new ImpW[T] {
         override type Weight = ext.Weight
 

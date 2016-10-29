@@ -6,7 +6,7 @@ trait FoldRight[Info[_], Repr[_]] extends Product[Info, Repr] with ListMin[Info,
   def foldRight[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => B) => B => scala.List[A] => B]
 
   final def foldRight_[A, B]: Repr[A => B => B] => Repr[B => scala.List[A] => B] = f =>
-    app(foldRight(arrowDomainInfo(reprInfo(f)), arrowRangeInfo(arrowRangeInfo(reprInfo(f)))))(f)
+    app(foldRight(domInfo(reprInfo(f)), rngInfo(rngInfo(reprInfo(f)))))(f)
 
   final def foldRight__[A, B]: Repr[A => B => B] => Repr[B] => Repr[scala.List[A] => B] = f => app(foldRight_(f))
 

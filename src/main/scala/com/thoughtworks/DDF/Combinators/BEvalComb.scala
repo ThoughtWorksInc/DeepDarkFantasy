@@ -1,85 +1,85 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow._
-import com.thoughtworks.DDF.{BEval, LossInfo}
+import com.thoughtworks.DDF.{BEval, Loss, LossInfo}
 
 trait BEvalComb extends BEvalArrow with Comb[LossInfo, BEval] {
   override def S[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(A => B => C) => (A => B) => A => C] =
-    arrowEval[
+    aEval[
       A => B => C,
-      (A => B) => A => C,
-      ArrowLoss[A, ArrowLoss[B, ci.loss]],
-      ArrowLoss[A => B, ArrowLoss[A, ci.loss]]](
-      abc => (arrowEval[A => B, A => C, ArrowLoss[A, bi.loss], ArrowLoss[A, ci.loss]](
-        ab => (arrowEval[A, C, ai.loss, ci.loss](a => {
+      (A => B) => A => C](
+      abc => (aEval[A => B, A => C](
+        ab => (aEval[A, C](a => {
           val bc = aeval(abc).forward(a)
           val b = aeval(ab).forward(a)
           val c = aeval(bc.eb).forward(b.eb)
-          (c.eb, l => ai.m.append(bc.backward(ArrowLoss(b.eb)(l)), b.backward(c.backward(l))))
-        })(ai, ci), _.mapReduce[ArrowLoss[A, bi.loss]](a => l => {
+          (c.eb, l => ai.lm.append(bc.backward(lossA(b.eb)(l)), b.backward(c.backward(l))))
+        })(ai, ci), x => aloss(x).mapReduce[Loss[A => B]](a => l => {
           val bc = aeval(abc).forward(a)
           val b = aeval(ab).forward(a)
           val c = aeval(bc.eb).forward(b.eb)
-          ArrowLoss[A, bi.loss](a)(c.backward(l))
-        })(arrowInfo(ai, bi).m))),
-        _.mapReduce(ab => _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(aeval(ab).forward(a).eb)(l)))(
-          arrowInfo(ai, arrowInfo(bi, ci)).m))(
-          arrowInfo(ai, arrowInfo(bi, ci)).m)))
+          lossA[A, B](a)(c.backward(l))
+        })(aInfo(ai, bi).lm))),
+        x => aloss(x).mapReduce(ab => y => aloss(y).mapReduce(a => l => lossA(a)(lossA(aeval(ab).forward(a).eb)(l)))(
+          aInfo(ai, aInfo(bi, ci)).lm))(
+          aInfo(ai, aInfo(bi, ci)).lm)))
 
   override def K[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => B => A] =
-    arrowEval[A, B => A, ai.loss, ArrowLoss[B, ai.loss]](a => (
-      arrowEval[B, A, bi.loss, ai.loss](_ => (a, _ => bi.m.zero))(bi, ai),
-      _.mapReduce(_ => l => l)(ai.m)))(ai, arrowInfo(bi, ai))
+    aEval[A, B => A](a => (
+      aEval[B, A](_ => (a, _ => bi.lm.zero))(bi, ai),
+      x => aloss(x).mapReduce(_ => l => l)(ai.lm)))(ai, aInfo(bi, ai))
 
-  override def I[A](implicit ai: LossInfo[A]): BEval[A => A] = arrowEval[A, A, ai.loss, ai.loss](x => (x, y => y))(ai, ai)
+  override def I[A](implicit ai: LossInfo[A]): BEval[A => A] = aEval[A, A](x => (x, y => y))(ai, ai)
 
   override def Y[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((A => B) => A => B) => A => B] = {
     type abi = ArrowLoss[A, bi.loss]
-    arrowEval[(A => B) => A => B, A => B, ArrowLoss[A => B, abi], abi](abab => {
-      val ab = arrowEval[A, B, ai.loss, bi.loss](a => {
-        val fa = aeval(app(abab)(app(Y[A, B])(abab))).forward(a)(ai, bi)
+    aEval[(A => B) => A => B, A => B](abab => {
+      val ab = aEval[A, B](a => {
+        val fa = aeval(app(abab)(app(Y[A, B])(abab))).forward(a)
         (fa.eb, fa.backward)
       })(ai, bi)
-      (ab, _.mapReduce(a => l => ArrowLoss(ab)(ArrowLoss(a)(l)))(arrowInfo(arrowInfo(ai, bi), arrowInfo(ai, bi)).m))
+      (ab, x => aloss(x).mapReduce(a => l => lossA(ab)(lossA(a)(l)))(
+        aInfo(aInfo(ai, bi), aInfo(ai, bi)).lm))
     })
   }
 
   override def B[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(B => C) => (A => B) => A => C] =
-    arrowEval[B => C, (A => B) => A => C, ArrowLoss[B, ci.loss], ArrowLoss[A => B, ArrowLoss[A, ci.loss]]](bc =>
-      (arrowEval[A => B, A => C, ArrowLoss[A, bi.loss], ArrowLoss[A, ci.loss]](ab => (arrowEval[A, C, ai.loss, ci.loss](a => {
+    aEval[B => C, (A => B) => A => C](bc =>
+      (aEval[A => B, A => C](ab => (aEval[A, C](a => {
         val b = aeval(ab).forward(a)
         val c = aeval(bc).forward(b.eb)
         (c.eb, l => b.backward(c.backward(l)))
-      })(ai, ci), _.mapReduce(a => l => {
+      })(ai, ci), x => aloss(x).mapReduce(a => l => {
         val b = aeval(ab).forward(a)
         val c = aeval(bc).forward(b.eb)
-        ArrowLoss(a)(c.backward(l))
-      })(arrowInfo(ai, bi).m))), _.mapReduce(ab => _.mapReduce(a => l => {
+        lossA(a)(c.backward(l))
+      })(aInfo(ai, bi).lm))), x => aloss(x).mapReduce(ab => y => aloss(y).mapReduce(a => l => {
         val b = aeval(ab).forward(a)
-        ArrowLoss(b.eb)(l)
-      })(arrowInfo(bi, ci).m))(arrowInfo(bi, ci).m)))
+        lossA(b.eb)(l)
+      })(aInfo(bi, ci).lm))(aInfo(bi, ci).lm)))
 
   override def C[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(A => B => C) => B => A => C] =
-    arrowEval[A => B => C, B => A => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[B, ArrowLoss[A, ci.loss]]](abc =>
-      (arrowEval[B, A => C, bi.loss, ArrowLoss[A, ci.loss]](b =>
-        (arrowEval[A, C, ai.loss, ci.loss](a => {
+    aEval[A => B => C, B => A => C](abc =>
+      (aEval[B, A => C](b =>
+        (aEval[A, C](a => {
           val bc = aeval(abc).forward(a)
           val c = aeval(bc.eb).forward(b)
-          (c.eb, l => bc.backward(ArrowLoss(b)(l)))
-        })(ai, ci), _.mapReduce(a => aeval(aeval(abc).forward(a).eb).forward(b).backward)(bi.m)))(bi, arrowInfo(ai, ci)),
-        _.mapReduce(b => _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(b)(l)))(
-          arrowInfo(ai, arrowInfo(bi, ci)).m))(
-          arrowInfo(ai, arrowInfo(bi, ci)).m)))
+          (c.eb, l => bc.backward(lossA(b)(l)))
+        })(ai, ci), x => aloss(x).mapReduce(a => aeval(aeval(abc).forward(a).eb).forward(b).backward)(bi.lm))),
+        x => aloss(x).mapReduce(b => y => aloss(y).mapReduce(a => l => lossA(a)(lossA(b)(l)))(
+          aInfo(ai, aInfo(bi, ci)).lm))(
+          aInfo(ai, aInfo(bi, ci)).lm)))
 
   override def W[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => A => B) => A => B] =
-    arrowEval[A => A => B, A => B, ArrowLoss[A, ArrowLoss[A, bi.loss]], ArrowLoss[A, bi.loss]](aab =>
-      (arrowEval[A, B, ai.loss, bi.loss](a => {
+    aEval[A => A => B, A => B](aab =>
+      (aEval[A, B](a => {
         val ab = aeval(aab).forward(a)
         val b = aeval(ab.eb).forward(a)
-        (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrowLoss(a)(bl))))
-      })(ai, bi), _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(a)(l)))(arrowInfo(ai, arrowInfo(ai, bi)).m)))
+        (b.eb, bl => ai.lm.append(b.backward(bl), ab.backward(lossA(a)(bl))))
+      })(ai, bi), x => aloss(x).mapReduce(a => l => lossA(a)(lossA(a)(l)))(aInfo(ai, aInfo(ai, bi)).lm)))
 
-  override def Let[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => (A => B) => B] = app(C[A => B, A, B])(App)
+  override def Let[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => (A => B) => B] =
+    app(C[A => B, A, B])(App)
 
   override def App[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B) => A => B] = I[A => B]
 }

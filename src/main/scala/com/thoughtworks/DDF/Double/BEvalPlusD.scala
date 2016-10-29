@@ -1,14 +1,13 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.ArrowLoss
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
 trait BEvalPlusD extends BEvalLitD with PlusD[LossInfo, BEval] {
   override def plusD: BEval[scala.Double => scala.Double => scala.Double] =
-    arrowEval[scala.Double, scala.Double => scala.Double, DLoss, ArrowLoss[scala.Double, DLoss]](l =>
-      (arrowEval[scala.Double, scala.Double, DLoss, DLoss](
+    aEval[scala.Double, scala.Double => scala.Double](l =>
+      (aEval[scala.Double, scala.Double](
         r => (litD(deval(l) + deval(r)), rl => rl)),
-        _.mapReduce(_ => l => l)(doubleInfo.m)))
+        x => aloss(x).mapReduce(_ => l => l)(doubleInfo.lm)))
 }
 
 object BEvalPlusD extends BEvalPlusD

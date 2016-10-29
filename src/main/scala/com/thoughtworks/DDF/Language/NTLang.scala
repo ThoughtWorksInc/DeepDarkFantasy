@@ -37,11 +37,11 @@ trait NTLang[Info[_], Repr[_], F[_]] extends Lang[Info, F] {
 
   override def Let[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.Let)
 
-  override implicit def arrowInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.arrowInfo
+  override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.aInfo
 
-  override def arrowDomainInfo[A, B] = base.arrowDomainInfo
+  override def domInfo[A, B] = base.domInfo
 
-  override def arrowRangeInfo[A, B] = base.arrowRangeInfo
+  override def rngInfo[A, B] = base.rngInfo
 
   override def mkUnit = NTF(base.mkUnit)
 

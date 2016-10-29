@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, LossCase, LossInfo}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossCase, LossInfo}
 
 import scalaz.Leibniz._
 
@@ -25,11 +25,17 @@ trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArrow {
 
   private def comb: Comb[LossInfo, BEval] = BEvalComb.apply
 
+  val bLoss: Loss[Boolean] = new Loss[Boolean] {
+    override val li: LossInfo.Aux[Boolean, Unit] = boolInfo
+
+    override val x: li.loss = ()
+  }
+
   override def ite[A](implicit ai: LossInfo[A]): BEval[Boolean => A => A => A] =
-    arrowEval[Boolean, A => A => A, Unit, ArrowLoss[A, ArrowLoss[A, ai.loss]]](b =>
+    aEval[Boolean, A => A => A](b =>
       (if(beval(b))
         comb.K[A, A](ai, ai) else
-        app(comb.C[A, A, A](ai, ai, ai))(comb.K[A, A](ai, ai)), _ => ()))(boolInfo, arrowInfo(ai, arrowInfo(ai, ai)))
+        app(comb.C[A, A, A](ai, ai, ai))(comb.K[A, A](ai, ai)), _ => bLoss))(boolInfo, aInfo(ai, aInfo(ai, ai)))
 
   override implicit def boolInfo: LossInfo.Aux[Boolean, Unit] = new LossInfo[Boolean] {
     override def convert = litB

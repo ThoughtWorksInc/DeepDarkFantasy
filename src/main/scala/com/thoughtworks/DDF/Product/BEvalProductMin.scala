@@ -1,21 +1,20 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Arrow.BEvalArrow
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
 trait BEvalProductMin extends ProductMin[LossInfo, BEval] with BEvalProductInfo with BEvalArrow {
-  override def zeroth[A, B](implicit at: LossInfo[A], bt: LossInfo[B]): BEval[((A, B)) => A] =
-    arrowEval[(A, B), A, (at.loss, bt.loss), at.loss](p => (peval(p)._1, al => (al, bt.m.zero)))(productInfo(at, bt), at)
+  override def zeroth[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((A, B)) => A] =
+    aEval[(A, B), A](p => (peval(p)._1, al => lossP(al)(bi.lm.zero)))(productInfo(ai, bi), ai)
 
-  override def first[A, B](implicit at: LossInfo[A], bt: LossInfo[B]): BEval[((A, B)) => B] =
-    arrowEval[(A, B), B, (at.loss, bt.loss), bt.loss](p => (peval(p)._2, bl => (at.m.zero, bl)))(productInfo(at, bt), bt)
+  override def first[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((A, B)) => B] =
+    aEval[(A, B), B](p => (peval(p)._2, bl => lossP(ai.lm.zero)(bl)))(productInfo(ai, bi), bi)
 
   override def mkProduct[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A) => (B) => (A, B)] =
-    arrowEval[A, B => (A, B), ai.loss, ArrowLoss[B, (ai.loss, bi.loss)]](a =>
-      (arrowEval[B, (A, B), bi.loss, (ai.loss, bi.loss)](b =>
-        (productEval(a, b), _._2))(bi, productInfo(ai, bi)),
-        _.mapReduce(_ => _._1)(ai.m)))(
-      ai, arrowInfo(bi, productInfo(ai, bi)))
+    aEval[A, B => (A, B)](a => (aEval[B, (A, B)](b =>
+        (productEval(a, b), ploss1))(bi, productInfo(ai, bi)),
+        x => aloss(x).mapReduce(_ => ploss0)(ai.lm)))(
+      ai, aInfo(bi, productInfo(ai, bi)))
 }
 
 object BEvalProductMin {

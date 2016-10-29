@@ -7,9 +7,9 @@ trait C[Info[_], Repr[_]] extends Arrow[Info, Repr] {
 
   final def C_[A, B, C]: Repr[A => B => C] => Repr[B => A => C] = f =>
     app(C[A, B, C](
-      arrowDomainInfo(reprInfo(f)),
-      arrowDomainInfo(arrowRangeInfo(reprInfo(f))),
-      arrowRangeInfo(arrowRangeInfo(reprInfo(f)))))(f)
+      domInfo(reprInfo(f)),
+      domInfo(rngInfo(reprInfo(f))),
+      rngInfo(rngInfo(reprInfo(f)))))(f)
 
   final def C__[A, B, C]: Repr[A => B => C] => Repr[B] => Repr[A => C] = f => app(C_(f))
 }

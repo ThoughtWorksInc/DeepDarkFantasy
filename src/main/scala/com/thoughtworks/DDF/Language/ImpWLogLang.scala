@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.LossInfo.Aux
-import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, LossInfo, NoInfo}
+import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss, LossInfo}
 
+import scala.language.reflectiveCalls
 import scalaz.Leibniz._
 import scalaz.NaturalTransformation
 
@@ -16,7 +17,7 @@ trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
       override val exp: ImpW[A] = fa
 
       override def forward: Forward = new Forward {
-        override def update[XL](rate: Double, tloss: XL)(implicit xi: LossInfo.Aux[A, XL]): ImpWLog[A] =
+        override def update(rate: Double)(tloss: Loss[A]): ImpWLog[A] =
           NTF(fres.update(rate, tloss))
 
         val fres = exp.forward
@@ -31,16 +32,16 @@ trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
   override def app[A, B]: ImpWLog[A => B] => ImpWLog[A] => ImpWLog[B] = f => x =>
     new ImpWLog[B] {
       override def forward: Forward = new Forward {
-        override def update[XL](rate: Double, tloss: XL)(implicit xi: LossInfo.Aux[B, XL]): ImpWLog[B] = {
+        override def update(rate: Double)(tloss: Loss[B]): ImpWLog[B] = {
           //tem.backward(witness(xi.unique(tem.eb.loss))(tloss))
-          app(ff.update(rate, ???)(???))(xf.update(rate, ???)(???))
+          app(ff.update(rate)(???))(xf.update(rate)(???))
         }
 
         val ff = f.forward
 
         val xf = x.forward
 
-        val tem = BEvalLang.aeval(ff.res).forward(xf.res)(???, ???)
+        val tem = BEvalLang.aeval(ff.res).forward(xf.res)
 
         override val res: BEval[B] = tem.eb
 

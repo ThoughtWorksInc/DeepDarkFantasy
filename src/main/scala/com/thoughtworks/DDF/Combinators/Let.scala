@@ -8,5 +8,5 @@ trait Let[Info[_], Repr[_]] extends Arrow[Info, Repr] {
   final def Let_[A, B](a: Repr[A])(implicit bi: Info[B]): Repr[(A => B) => B] = app(Let(reprInfo(a), bi))(a)
 
   final def Let__[A, B]: Repr[A] => Repr[(A => B)] => Repr[B] = a => f =>
-    app(Let_(a)(arrowRangeInfo(reprInfo(f))))(f)
+    app(Let_(a)(rngInfo(reprInfo(f))))(f)
 }

@@ -3,8 +3,8 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
 trait BEvalExpD extends ExpD[LossInfo, BEval] with BEvalLitD {
-  override def expD = arrowEval[scala.Double, scala.Double, DLoss, DLoss](x =>
-    (litD(Math.exp(deval(x))), l => DLoss(l.d * Math.exp(deval(x)))))
+  override def expD = aEval[scala.Double, scala.Double](x =>
+    (litD(Math.exp(deval(x))), l => lossD(dloss(l) * Math.exp(deval(x)))))
 }
 
 object BEvalExpD {

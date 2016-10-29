@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase, LossInfo}
 
 import scalaz.Leibniz.witness
 
@@ -32,7 +32,21 @@ trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrowInfo 
     override def eca: ec.ret = (a, b)
   }
 
-  override implicit def productInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): LossInfo.Aux[(A, B), (ai.loss, bi.loss)] =
+  def lossP[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = l => r => new Loss[(A, B)] {
+    override val li: LossInfo.Aux[(A, B), (Loss[A], Loss[B])] = productInfo(l.li, r.li)
+
+    override val x: li.loss = (l, r)
+  }
+
+  def ploss[A, B]: Loss[(A, B)] => (Loss[A], Loss[B]) = l =>
+    witness(l.li.unique(productInfo(productZerothInfo(l.li), productFirstInfo(l.li))))(l.x)
+
+  def ploss0[A, B]: Loss[(A, B)] => Loss[A] = l => ploss(l)._1
+
+  def ploss1[A, B]: Loss[(A, B)] => Loss[B] = l => ploss(l)._2
+
+  override implicit def productInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
+  LossInfo.Aux[(A, B), (Loss[A], Loss[B])] =
     new LossInfo[(A, B)] {
       override def convert: ((A, B)) => BEval[(A, B)] = p => productEval(ai.convert(p._1), bi.convert(p._2))
 
@@ -44,21 +58,22 @@ trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrowInfo 
         override def first: LossInfo[B] = bi
       }
 
-      override type ret = (ai.loss, bi.loss)
+      override type ret = (Loss[A], Loss[B])
 
-      override def m: CommutativeMonoid[(ai.loss, bi.loss)] = new CommutativeMonoid[(ai.loss, bi.loss)] {
+      override def m: CommutativeMonoid[(Loss[A], Loss[B])] = new CommutativeMonoid[(Loss[A], Loss[B])] {
 
-        override def zero: (ai.loss, bi.loss) = (ai.m.zero, bi.m.zero)
+        override def zero: (Loss[A], Loss[B]) = (ai.lm.zero, bi.lm.zero)
 
-        override def append(f1: (ai.loss, bi.loss), f2: => (ai.loss, bi.loss)): (ai.loss, bi.loss) =
-          (ai.m.append(f1._1, f2._1), bi.m.append(f1._2, f2._2))
+        override def append(f1: (Loss[A], Loss[B]), f2: => (Loss[A], Loss[B])): (Loss[A], Loss[B]) =
+          (ai.lm.append(f1._1, f2._1), bi.lm.append(f1._2, f2._2))
       }
 
-      override def update(x: (A, B))(rate: Double)(l: (ai.loss, bi.loss)): (A, B) =
-        (ai.update(x._1)(rate)(l._1), bi.update(x._2)(rate)(l._2))
+      override def update(x: (A, B))(rate: Double)(l: (Loss[A], Loss[B])): (A, B) =
+        (ai.updatel(x._1)(rate)(l._1), bi.updatel(x._2)(rate)(l._2))
     }
 
-  override def productZerothInfo[A, B]: LossInfo[(A, B)] => LossInfo[A] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).zeroth
+  override def productZerothInfo[A, B]: LossInfo[(A, B)] => LossInfo[A] = p =>
+    witness(p.lc.unique(ProductLC[A, B]()))(p.lca).zeroth
 
   override def productFirstInfo[A, B]: LossInfo[(A, B)] => LossInfo[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).first
 }

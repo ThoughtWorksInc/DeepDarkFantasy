@@ -13,7 +13,7 @@ trait NextLang[Info[_], Repr[_], Arg] extends
 
   override def reprInfo[A]: repr[A] => Info[A] = {
     case Left(x) => base.reprInfo(x)
-    case Right(x) => base.arrowRangeInfo(base.reprInfo(x))
+    case Right(x) => base.rngInfo(base.reprInfo(x))
   }
 
   override def NTF = new NaturalTransformation[Repr, repr] {
