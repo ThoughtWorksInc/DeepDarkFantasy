@@ -13,7 +13,7 @@ trait ImpW[T] {
 
   val exp: LangTerm[Weight => T]
 
-  implicit val bel = BEvalLang.apply
+  implicit val bel = BEvalLang
 
   implicit val ltl = LangTermLang
 
@@ -21,14 +21,22 @@ trait ImpW[T] {
 
   implicit val ti = ltl.arrowRangeInfo(ltl.reprInfo(exp(ltl)))
 
-  implicit val wl: Loss[Weight] = wi(bel)
+  implicit val wl: LossInfo[Weight] = wi(bel)
 
   implicit val tl = ti(bel)
 
-  def forward = new Object {
-    val res = new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w))
-    def update[TL](rate: Double, tloss: TL)(implicit ti: Loss.Aux[T, TL]): ImpW[T] = {
-      val newW = wl.update(w)(rate)(res.backward(witness(ti.unique(tl))(tloss)))
+  trait Forward {
+    val res: BEval[T]
+    def update[TL](rate: Double, tloss: TL)(implicit ti: LossInfo.Aux[T, TL]): ImpW[T]
+  }
+  def forward = new Forward {
+
+    val fres = new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w))
+
+    override val res: BEval[T] = fres.eb
+
+    def update[TL](rate: Double, tloss: TL)(implicit ti: LossInfo.Aux[T, TL]): ImpW[T] = {
+      val newW = wl.update(w)(rate)(fres.backward(witness(ti.unique(tl))(tloss)))
       new ImpW[T] {
         override type Weight = ext.Weight
 
@@ -52,4 +60,6 @@ object ImpW {
           lang.K_(expT(lang))(lang.unitInfo)
       }
     }
+
+  type Aux[X, XL] = ImpW[X] { type Weight = XL }
 }

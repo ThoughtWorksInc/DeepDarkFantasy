@@ -13,16 +13,19 @@ trait ImpWLang extends NTLang[LangInfoG, LangTerm, ImpW] {
 
   override def base: Lang[LangInfoG, LangTerm] = LangTermLang
 
-  override def app[A, B]: ImpW[A => B] => ImpW[A] => ImpW[B] = f => x => new ImpW[B] {
-    override type Weight = (f.Weight, x.Weight)
+  def appRich[A, B](f: ImpW[A => B])(x: ImpW[A]): ImpW.Aux[B, (f.Weight, x.Weight)] =
+    new ImpW[B] {
+      override type Weight = (f.Weight, x.Weight)
 
-    override val w: Weight = (f.w, x.w)
+      override val w: Weight = (f.w, x.w)
 
-    override val exp: LangTerm[Weight => B] = {
-      val l = LangTermLang
-      l.S__(l.B__(f.exp)(l.zeroth(f.wi, x.wi)))(l.B__(x.exp)(l.first(f.wi, x.wi)))
+      override val exp: LangTerm[Weight => B] = {
+        val l = LangTermLang
+        l.S__(l.B__(f.exp)(l.zeroth(f.wi, x.wi)))(l.B__(x.exp)(l.first(f.wi, x.wi)))
+      }
     }
-  }
+
+  override def app[A, B]: ImpW[A => B] => ImpW[A] => ImpW[B] = f => x => appRich[A, B](f)(x)
 }
 
 object ImpWLang extends ImpWLang

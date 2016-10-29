@@ -1,14 +1,15 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
+
 import scalaz.Leibniz.witness
 
-trait BEvalProductInfo extends ProductInfo[Loss, BEval] with BEvalArrowInfo {
+trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrowInfo {
   trait ProductLCRet[A, B] {
-    def zeroth: Loss[A]
+    def zeroth: LossInfo[A]
 
-    def first: Loss[B]
+    def first: LossInfo[B]
   }
 
   case class ProductBEC[A, B]() extends BEvalCase[(A, B)] {
@@ -21,8 +22,8 @@ trait BEvalProductInfo extends ProductInfo[Loss, BEval] with BEvalArrowInfo {
 
   def peval[A, B](ab: BEval[(A, B)]): (BEval[A], BEval[B]) = witness(ab.ec.unique(ProductBEC[A, B]()))(ab.eca)
 
-  def productEval[A, B](a: BEval[A], b: BEval[B])(implicit al: Loss[A], bl: Loss[B]) = new BEval[(A, B)] {
-    override val loss: Loss[(A, B)] = productInfo(al, bl)
+  def productEval[A, B](a: BEval[A], b: BEval[B])(implicit al: LossInfo[A], bl: LossInfo[B]) = new BEval[(A, B)] {
+    override val loss: LossInfo[(A, B)] = productInfo(al, bl)
 
     override def eval: (A, B) = (a.eval, b.eval)
 
@@ -31,16 +32,16 @@ trait BEvalProductInfo extends ProductInfo[Loss, BEval] with BEvalArrowInfo {
     override def eca: ec.ret = (a, b)
   }
 
-  override implicit def productInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[(A, B), (ai.loss, bi.loss)] =
-    new Loss[(A, B)] {
+  override implicit def productInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): LossInfo.Aux[(A, B), (ai.loss, bi.loss)] =
+    new LossInfo[(A, B)] {
       override def convert: ((A, B)) => BEval[(A, B)] = p => productEval(ai.convert(p._1), bi.convert(p._2))
 
       override val lc: LossCase.Aux[(A, B), ProductLCRet[A, B]] = ProductLC[A, B]()
 
       override def lca: lc.ret = new ProductLCRet[A, B] {
-        override def zeroth: Loss[A] = ai
+        override def zeroth: LossInfo[A] = ai
 
-        override def first: Loss[B] = bi
+        override def first: LossInfo[B] = bi
       }
 
       override type ret = (ai.loss, bi.loss)
@@ -57,9 +58,9 @@ trait BEvalProductInfo extends ProductInfo[Loss, BEval] with BEvalArrowInfo {
         (ai.update(x._1)(rate)(l._1), bi.update(x._2)(rate)(l._2))
     }
 
-  override def productZerothInfo[A, B]: Loss[(A, B)] => Loss[A] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).zeroth
+  override def productZerothInfo[A, B]: LossInfo[(A, B)] => LossInfo[A] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).zeroth
 
-  override def productFirstInfo[A, B]: Loss[(A, B)] => Loss[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).first
+  override def productFirstInfo[A, B]: LossInfo[(A, B)] => LossInfo[B] = p => witness(p.lc.unique(ProductLC[A, B]()))(p.lca).first
 }
 
 object BEvalProductInfo {

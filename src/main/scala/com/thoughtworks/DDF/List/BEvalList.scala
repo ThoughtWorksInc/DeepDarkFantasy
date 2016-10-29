@@ -2,10 +2,10 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.ArrowLoss
 import com.thoughtworks.DDF.Product.BEvalProduct
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
-  override def listMap[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B) => scala.List[A] => scala.List[B]] =
+trait BEvalList extends List[LossInfo, BEval] with BEvalListMin with BEvalProduct {
+  override def listMap[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B) => scala.List[A] => scala.List[B]] =
     arrowEval[A => B, scala.List[A] => scala.List[B], ArrowLoss[A, bi.loss], ArrowLoss[scala.List[A], scala.List[bi.loss]]](ab =>
       (arrowEval[scala.List[A], scala.List[B], scala.List[ai.loss], scala.List[bi.loss]](la => {
         val lb = leval(la).map(x => aeval(ab).forward(x))
@@ -13,10 +13,10 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
       }), _.mapReduce(la => l => leval(la).zip(l).map(p => ArrowLoss(p._1)(p._2)).
         foldRight(arrowInfo(ai, bi).m.zero)((x, y) => arrowInfo(ai, bi).m.append(x, y)))(arrowInfo(ai, bi).m)))
 
-  override def reverse[A](implicit ai: Loss[A]): BEval[scala.List[A] => scala.List[A]] =
+  override def reverse[A](implicit ai: LossInfo[A]): BEval[scala.List[A] => scala.List[A]] =
     arrowEval[scala.List[A], scala.List[A], scala.List[ai.loss], scala.List[ai.loss]](la => (listEval(leval(la).reverse), _.reverse))
 
-  override def foldRight[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B => B) => B => scala.List[A] => B] =
+  override def foldRight[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B => B) => B => scala.List[A] => B] =
     arrowEval[
       (A => B => B),
       B => scala.List[A] => B,
@@ -59,7 +59,7 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
               blab.backward(ArrowLoss(b)(ArrowLoss(listEval(lt))(finb.backward(l)))))
         })(arrowInfo(ai, arrowInfo(bi, bi)).m))(arrowInfo(ai, arrowInfo(bi, bi)).m)))
 
-  override def foldLeft[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B => A) => A => scala.List[B] => A] =
+  override def foldLeft[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B => A) => A => scala.List[B] => A] =
     arrowEval[
       A => B => A,
       A => scala.List[B] => A,
@@ -98,7 +98,7 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
               alba.backward(ArrowLoss(na.eb)(ArrowLoss(listEval(lt))(l))))
         })(arrowInfo(ai, arrowInfo(bi, ai)).m))(arrowInfo(ai, arrowInfo(bi, ai)).m)))
 
-  override def listZip[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[scala.List[A] => scala.List[B] => scala.List[(A, B)]] =
+  override def listZip[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[scala.List[A] => scala.List[B] => scala.List[(A, B)]] =
     arrowEval[
       scala.List[A],
       scala.List[B] => scala.List[(A, B)],
@@ -108,7 +108,7 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
         (listEval(leval(al).zip(leval(bl)).map(p => productEval(p._1, p._2))), _.map(_._2))),
         _.mapReduce(_ => _.map(_._1))(listInfo(ai).m)))
 
-  def scanLeftUC[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[((((B => A => B), B), scala.List[A])) => scala.List[B]] =
+  def scanLeftUC[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((((B => A => B), B), scala.List[A])) => scala.List[B]] =
     arrowEval[
       ((((B => A => B), B), scala.List[A])),
       scala.List[B],
@@ -131,10 +131,10 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
       }
     })
 
-  override def scanLeft[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(B => A => B) => B => scala.List[A] => scala.List[B]] =
+  override def scanLeft[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(B => A => B) => B => scala.List[A] => scala.List[B]] =
     app(curry[(B => A => B), B, scala.List[A] => scala.List[B]])(app(curry[((B => A => B), B), scala.List[A], scala.List[B]])(scanLeftUC[A, B]))
 
-  def scanRightUC[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[((((A => B => B), B), scala.List[A])) => scala.List[B]] =
+  def scanRightUC[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((((A => B => B), B), scala.List[A])) => scala.List[B]] =
     arrowEval[
       ((((A => B => B), B), scala.List[A])),
       scala.List[B],
@@ -157,7 +157,7 @@ trait BEvalList extends List[Loss, BEval] with BEvalListMin with BEvalProduct {
       }
     })
 
-  override def scanRight[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B => B) => B => scala.List[A] => scala.List[B]] =
+  override def scanRight[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B => B) => B => scala.List[A] => scala.List[B]] =
     app(
       curry[(A => B => B), B, scala.List[A] => scala.List[B]])(
       app(curry[((A => B => B), B), scala.List[A], scala.List[B]])(scanRightUC[A, B]))

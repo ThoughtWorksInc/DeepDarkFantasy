@@ -2,18 +2,18 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalSumMin extends SumMin[Loss, BEval] with BEvalSumInfo with BEvalArrow {
-  override def left[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[A => Either[A, B]] =
+trait BEvalSumMin extends SumMin[LossInfo, BEval] with BEvalSumInfo with BEvalArrow {
+  override def left[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => Either[A, B]] =
     arrowEval[A, Either[A, B], ai.loss, (ai.loss, bi.loss)](ea => (sumEval(scala.Left(ea)), _._1))(ai, sumInfo(ai, bi))
 
-  override def right[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[B => Either[A, B]] =
+  override def right[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[B => Either[A, B]] =
     arrowEval[B, Either[A, B], bi.loss, (ai.loss, bi.loss)](eb => (sumEval(scala.Right(eb)), _._2))(bi, sumInfo(ai, bi))
 
-  private val comb: Comb[Loss, BEval] = BEvalComb.apply
+  private val comb: Comb[LossInfo, BEval] = BEvalComb.apply
 
-  override def sumMatch[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  override def sumMatch[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[Either[A, B] => (A => C) => (B => C) => C] =
     arrowEval[
       Either[A, B],

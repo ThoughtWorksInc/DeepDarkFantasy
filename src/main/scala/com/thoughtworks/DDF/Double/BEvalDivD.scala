@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.ArrowLoss
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalDivD extends BEvalLitD with DivD[Loss, BEval] {
+trait BEvalDivD extends BEvalLitD with DivD[LossInfo, BEval] {
   override def divD = arrowEval[scala.Double, scala.Double => scala.Double, DLoss, ArrowLoss[scala.Double, DLoss]](x =>
     (arrowEval[scala.Double, scala.Double, DLoss, DLoss](y =>
       (litD(deval(x) / deval(y)),

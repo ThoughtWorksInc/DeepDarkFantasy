@@ -2,12 +2,12 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
 import com.thoughtworks.DDF.Combinators.BEvalComb
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalListMin extends ListMin[Loss, BEval] with BEvalListInfo with BEvalArrow {
-  override def nil[A](implicit ai: Loss[A]): BEval[scala.List[A]] = listEval(scala.List())
+trait BEvalListMin extends ListMin[LossInfo, BEval] with BEvalListInfo with BEvalArrow {
+  override def nil[A](implicit ai: LossInfo[A]): BEval[scala.List[A]] = listEval(scala.List())
 
-  override def cons[A](implicit ai: Loss[A]): BEval[A => scala.List[A] => scala.List[A]] =
+  override def cons[A](implicit ai: LossInfo[A]): BEval[A => scala.List[A] => scala.List[A]] =
     arrowEval[A, scala.List[A] => scala.List[A], ai.loss, ArrowLoss[scala.List[A], scala.List[ai.loss]]](a =>
       (arrowEval[scala.List[A], scala.List[A], scala.List[ai.loss], scala.List[ai.loss]](la =>
         (listEval(a :: leval(la)), l => l.tail)), _.mapReduce(_ => l => l.head)(ai.m)))(
@@ -15,7 +15,7 @@ trait BEvalListMin extends ListMin[Loss, BEval] with BEvalListInfo with BEvalArr
 
   private def comb = BEvalComb.apply
 
-  override def listMatch[A, B](implicit ai: Loss[A], bi: Loss[B]):
+  override def listMatch[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
   BEval[scala.List[A] => B => (A => scala.List[A] => B) => B] =
     arrowEval[
       scala.List[A],

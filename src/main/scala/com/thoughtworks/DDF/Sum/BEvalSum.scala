@@ -1,13 +1,13 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalSum extends Sum[Loss, BEval] with BEvalSumMin {
-  override def sumComm[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[Either[A, B] => Either[B, A]] =
+trait BEvalSum extends Sum[LossInfo, BEval] with BEvalSumMin {
+  override def sumComm[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[Either[A, B] => Either[B, A]] =
     arrowEval[Either[A, B], Either[B, A], (ai.loss, bi.loss), (bi.loss, ai.loss)](s =>
       (sumEval(seval(s).swap), l => (l._2, l._1)))
 
-  override def sumAssocLR[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  override def sumAssocLR[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[Either[Either[A, B], C] => Either[A, Either[B, C]]] =
     arrowEval[
       Either[Either[A, B], C],
@@ -23,7 +23,7 @@ trait BEvalSum extends Sum[Loss, BEval] with BEvalSumMin {
       },
         l => ((l._1, l._2._1), l._2._2)))
 
-  override def sumAssocRL[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]):
+  override def sumAssocRL[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[Either[A, Either[B, C]] => Either[Either[A, B], C]] =
     arrowEval[
       Either[A, Either[B, C]],

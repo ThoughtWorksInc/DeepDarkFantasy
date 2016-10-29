@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalExpD extends ExpD[Loss, BEval] with BEvalLitD {
+trait BEvalExpD extends ExpD[LossInfo, BEval] with BEvalLitD {
   override def expD = arrowEval[scala.Double, scala.Double, DLoss, DLoss](x =>
     (litD(Math.exp(deval(x))), l => DLoss(l.d * Math.exp(deval(x)))))
 }

@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
 trait BEvalDouble extends
-  Double[Loss, BEval] with
+  Double[LossInfo, BEval] with
   BEvalPlusD with
   BEvalMultD with
   BEvalDivD with

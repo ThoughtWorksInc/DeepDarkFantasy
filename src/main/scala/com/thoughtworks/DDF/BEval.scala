@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF
 
-trait Loss[X] extends TypeCase[Loss, X] {
+trait LossInfo[X] extends TypeCase[LossInfo, X] {
   final type loss = ret
 
   def m: CommutativeMonoid[loss]
@@ -14,8 +14,8 @@ trait Loss[X] extends TypeCase[Loss, X] {
   def update(x: X)(rate: Double)(l: loss): X
 }
 
-object Loss {
-  type Aux[X, XL] = Loss[X] {type ret = XL}
+object LossInfo {
+  type Aux[X, XL] = LossInfo[X] {type ret = XL}
 }
 
 trait LossCase[X] extends TypeCase[LossCase, X]
@@ -31,7 +31,7 @@ object BEvalCase {
 }
 
 trait BEval[X] {
-  val loss: Loss[X]
+  val loss: LossInfo[X]
 
   def eval: /*should not be used when defining instance of Eval*/ X
 

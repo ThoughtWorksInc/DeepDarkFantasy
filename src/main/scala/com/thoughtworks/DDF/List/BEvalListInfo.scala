@@ -1,12 +1,13 @@
 package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
+
 import scalaz.Leibniz.witness
 
-trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
+trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrowInfo {
   case class ListLC[A]() extends LossCase[scala.List[A]] {
-    override type ret = Loss[A]
+    override type ret = LossInfo[A]
   }
 
   case class ListDEC[A]() extends BEvalCase[scala.List[A]] {
@@ -15,21 +16,21 @@ trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
 
   def leval[A](e: BEval[scala.List[A]]): scala.List[BEval[A]] = witness(e.ec.unique(ListDEC[A]()))(e.eca)
 
-  def listEval[A](l: scala.List[BEval[A]])(implicit ai: Loss[A]): BEval[scala.List[A]] = new BEval[scala.List[A]] {
+  def listEval[A](l: scala.List[BEval[A]])(implicit ai: LossInfo[A]): BEval[scala.List[A]] = new BEval[scala.List[A]] {
     override def eca: ec.ret = l
 
     override def eval: scala.List[A] = l.map(_.eval)
 
     override val ec: BEvalCase.Aux[scala.List[A], scala.List[BEval[A]]] = ListDEC()
 
-    override val loss: Loss[scala.List[A]] = listInfo(ai)
+    override val loss: LossInfo[scala.List[A]] = listInfo(ai)
   }
 
-  override implicit def listInfo[A](implicit ai: Loss[A]): Loss.Aux[scala.List[A], scala.List[ai.loss]] = new Loss[scala.List[A]] {
+  override implicit def listInfo[A](implicit ai: LossInfo[A]): LossInfo.Aux[scala.List[A], scala.List[ai.loss]] = new LossInfo[scala.List[A]] {
 
     override def convert: scala.List[A] => BEval[scala.List[A]] = la => listEval[A](la.map(ai.convert))
 
-    override val lc: LossCase.Aux[scala.List[A], Loss[A]] = ListLC()
+    override val lc: LossCase.Aux[scala.List[A], LossInfo[A]] = ListLC()
 
     override def lca: lc.ret = ai
 
@@ -47,7 +48,7 @@ trait BEvalListInfo extends ListInfo[Loss, BEval] with BEvalArrowInfo {
       x.zip(l).map(p => ai.update(p._1)(rate)(p._2))
   }
 
-  override def listElmInfo[A]:  Loss[scala.List[A]] => Loss[A] = lai => witness(lai.lc.unique(ListLC[A]()))(lai.lca)
+  override def listElmInfo[A]:  LossInfo[scala.List[A]] => LossInfo[A] = lai => witness(lai.lc.unique(ListLC[A]()))(lai.lca)
 }
 
 object BEvalListInfo {

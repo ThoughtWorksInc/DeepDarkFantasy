@@ -1,18 +1,18 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
 
 import scalaz.Leibniz._
 
-trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[Loss, BEval] {
+trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[LossInfo, BEval] {
   case class DLoss(d: scala.Double)
 
   object DLC extends LossCase[scala.Double] {
     override type ret = Unit
   }
 
-  override implicit def doubleInfo: Loss.Aux[scala.Double, DLoss] = new Loss[scala.Double] {
+  override implicit def doubleInfo: LossInfo.Aux[scala.Double, DLoss] = new LossInfo[scala.Double] {
     override def m: CommutativeMonoid[DLoss] = new CommutativeMonoid[DLoss] {
       override def zero: DLoss = DLoss(0)
 
@@ -35,7 +35,7 @@ trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[Loss, BEval] {
   }
 
   def dEval(d: scala.Double) = new BEval[scala.Double] {
-    override val loss: Loss[scala.Double] = doubleInfo
+    override val loss: LossInfo[scala.Double] = doubleInfo
 
     override def eval: scala.Double = d
 

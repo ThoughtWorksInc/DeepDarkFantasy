@@ -1,15 +1,15 @@
 package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossCase, LossInfo}
 
 import scalaz.Leibniz.witness
 
-trait BEvalSumInfo extends SumInfo[Loss, BEval] with BEvalArrowInfo {
+trait BEvalSumInfo extends SumInfo[LossInfo, BEval] with BEvalArrowInfo {
   trait SumLCRet[A, B] {
-    def Left: Loss[A]
+    def Left: LossInfo[A]
 
-    def Right: Loss[B]
+    def Right: LossInfo[B]
   }
 
   case class SumBEC[A, B]() extends BEvalCase[Either[A, B]] {
@@ -20,8 +20,8 @@ trait BEvalSumInfo extends SumInfo[Loss, BEval] with BEvalArrowInfo {
     override type ret = SumLCRet[A, B]
   }
 
-  override implicit def sumInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[Either[A, B], (ai.loss, bi.loss)] =
-    new Loss[Either[A, B]] {
+  override implicit def sumInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): LossInfo.Aux[Either[A, B], (ai.loss, bi.loss)] =
+    new LossInfo[Either[A, B]] {
 
       override def convert: Either[A, B] => BEval[Either[A, B]] = {
         case Left(x) => sumEval(scala.Left(ai.convert(x)))
@@ -31,9 +31,9 @@ trait BEvalSumInfo extends SumInfo[Loss, BEval] with BEvalArrowInfo {
       override val lc: LossCase.Aux[Either[A, B], SumLCRet[A, B]] = SumLC()
 
       override def lca: lc.ret = new SumLCRet[A, B] {
-        override def Left: Loss[A] = ai
+        override def Left: LossInfo[A] = ai
 
-        override def Right: Loss[B] = bi
+        override def Right: LossInfo[B] = bi
       }
 
       override type ret = (ai.loss, bi.loss)
@@ -49,12 +49,12 @@ trait BEvalSumInfo extends SumInfo[Loss, BEval] with BEvalArrowInfo {
         x.left.map(y => ai.update(y)(rate)(l._1)).right.map(y => bi.update(y)(rate)(l._2))
     }
 
-  override def sumLeftInfo[A, B]: Loss[Either[A, B]] => Loss[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left
+  override def sumLeftInfo[A, B]: LossInfo[Either[A, B]] => LossInfo[A] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Left
 
-  override def sumRightInfo[A, B]: Loss[Either[A, B]] => Loss[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
+  override def sumRightInfo[A, B]: LossInfo[Either[A, B]] => LossInfo[B] = l => witness(l.lc.unique(SumLC[A, B]()))(l.lca).Right
 
-  def sumEval[A, B](s: Either[BEval[A], BEval[B]])(implicit al: Loss[A], bl: Loss[B]) = new BEval[Either[A, B]] {
-    override val loss: Loss[Either[A, B]] = sumInfo[A, B]
+  def sumEval[A, B](s: Either[BEval[A], BEval[B]])(implicit al: LossInfo[A], bl: LossInfo[B]) = new BEval[Either[A, B]] {
+    override val loss: LossInfo[Either[A, B]] = sumInfo[A, B]
 
     override def eval: Either[A, B] = s match {
       case Left(x) => scala.Left(x.eval)

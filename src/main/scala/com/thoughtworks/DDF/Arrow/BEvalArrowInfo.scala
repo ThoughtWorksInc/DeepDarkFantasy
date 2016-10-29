@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Arrow
 
 import com.thoughtworks.DDF.InfoBase.BEvalInfoBase
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, LossInfo, LossCase}
 import scalaz.Leibniz.witness
 
 trait ArrowLoss[A, BL] {
@@ -14,9 +14,9 @@ object ArrowLoss {
   }
 }
 
-trait BEvalArrowInfo extends ArrowInfo[Loss, BEval] with BEvalInfoBase {
+trait BEvalArrowInfo extends ArrowInfo[LossInfo, BEval] with BEvalInfoBase {
   case class ArrowBEC[A, B]() extends BEvalCase[A => B] {
-    override type ret = forward[A, B]
+    override type ret = Forward[A, B]
   }
 
   case class ArrowLC[A, B]() extends LossCase[A => B] {
@@ -24,34 +24,34 @@ trait BEvalArrowInfo extends ArrowInfo[Loss, BEval] with BEvalInfoBase {
   }
 
   trait ArrowLCRet[A, B] {
-    def Dom: Loss[A]
+    def Dom: LossInfo[A]
 
-    def Rng: Loss[B]
+    def Rng: LossInfo[B]
   }
 
-  trait forward[A, B] {
+  trait Forward[A, B] {
 
-    trait backward[AL, BL] {
+    trait Backward[AL, BL] {
       val eb: BEval[B]
 
       def backward: BL => AL
     }
 
-    def forward(ea: BEval[A])(implicit al: Loss[A], bl: Loss[B]): backward[al.loss, bl.loss]
+    def forward(ea: BEval[A])(implicit al: LossInfo[A], bl: LossInfo[B]): Backward[al.loss, bl.loss]
   }
 
-  def arrowEval[A, B, AL, BL](f: BEval[A] => (BEval[B], BL => AL))(implicit al: Loss.Aux[A, AL], bl: Loss.Aux[B, BL]):
+  def arrowEval[A, B, AL, BL](f: BEval[A] => (BEval[B], BL => AL))(implicit al: LossInfo.Aux[A, AL], bl: LossInfo.Aux[B, BL]):
   BEval[A => B] =
     new BEval[A => B] {
-      override val loss: Loss[A => B] = arrowInfo
+      override val loss: LossInfo[A => B] = arrowInfo
 
       override def eval: A => B = a => eca.forward(al.convert(a)).eb.eval
 
-      override val ec: BEvalCase.Aux[A => B, forward[A, B]] = ArrowBEC[A, B]()
+      override val ec: BEvalCase.Aux[A => B, Forward[A, B]] = ArrowBEC[A, B]()
 
-      override def eca: ec.ret = new forward[A, B] {
-        override def forward(ea: BEval[A])(implicit al1: Loss[A], bl1: Loss[B]): backward[al1.loss, bl1.loss] =
-          new backward[al1.loss, bl1.loss] {
+      override def eca: ec.ret = new Forward[A, B] {
+        override def forward(ea: BEval[A])(implicit al1: LossInfo[A], bl1: LossInfo[B]): Backward[al1.loss, bl1.loss] =
+          new Backward[al1.loss, bl1.loss] {
             lazy val fea = f(ea)
 
             override lazy val eb: BEval[B] = fea._1
@@ -61,8 +61,8 @@ trait BEvalArrowInfo extends ArrowInfo[Loss, BEval] with BEvalInfoBase {
       }
     }
 
-  override implicit def arrowInfo[A, B](implicit ai: Loss[A], bi: Loss[B]): Loss.Aux[A => B, ArrowLoss[A, bi.loss]] =
-    new Loss[A => B] {
+  override implicit def arrowInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): LossInfo.Aux[A => B, ArrowLoss[A, bi.loss]] =
+    new LossInfo[A => B] {
       override type ret = ArrowLoss[A, bi.loss]
 
       override def m: CommutativeMonoid[loss] = new CommutativeMonoid[loss] {
@@ -82,19 +82,19 @@ trait BEvalArrowInfo extends ArrowInfo[Loss, BEval] with BEvalInfoBase {
       override val lc: LossCase.Aux[A => B, ArrowLCRet[A, B]] = ArrowLC()
 
       override def lca: lc.ret = new ArrowLCRet[A, B] {
-        override def Dom: Loss[A] = ai
+        override def Dom: LossInfo[A] = ai
 
-        override def Rng: Loss[B] = bi
+        override def Rng: LossInfo[B] = bi
       }
 
       override def update(x: A => B)(rate: Double)(l: loss): A => B = x
     }
 
-  def aeval[A, B](ab: BEval[A => B]): forward[A, B] = witness(ab.ec.unique(ArrowBEC[A, B]()))(ab.eca)
+  def aeval[A, B](ab: BEval[A => B]): Forward[A, B] = witness(ab.ec.unique(ArrowBEC[A, B]()))(ab.eca)
 
-  override def arrowDomainInfo[A, B]: Loss[A => B] => Loss[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
+  override def arrowDomainInfo[A, B]: LossInfo[A => B] => LossInfo[A] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Dom
 
-  override def arrowRangeInfo[A, B]: Loss[A => B] => Loss[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
+  override def arrowRangeInfo[A, B]: LossInfo[A => B] => LossInfo[B] = l => witness(l.lc.unique(ArrowLC[A, B]()))(l.lca).Rng
 }
 
 object BEvalArrowInfo {

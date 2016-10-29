@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.InfoBase
 
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalInfoBase extends InfoBase[Loss, BEval] {
-  override def reprInfo[A]: BEval[A] => Loss[A] = _.loss
+trait BEvalInfoBase extends InfoBase[LossInfo, BEval] {
+  override def reprInfo[A]: BEval[A] => LossInfo[A] = _.loss
 }

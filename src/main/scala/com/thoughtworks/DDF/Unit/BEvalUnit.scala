@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Unit
 
 import com.thoughtworks.DDF.InfoBase.BEvalInfoBase
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossCase}
+import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, LossCase, LossInfo}
 
-trait BEvalUnit extends Unit[Loss, BEval] with BEvalInfoBase {
-  override implicit def unitInfo: Loss.Aux[scala.Unit, scala.Unit] = new Loss[scala.Unit] {
+trait BEvalUnit extends Unit[LossInfo, BEval] with BEvalInfoBase {
+  override implicit def unitInfo: LossInfo.Aux[scala.Unit, scala.Unit] = new LossInfo[scala.Unit] {
     override type ret = scala.Unit
 
     override def m: CommutativeMonoid[scala.Unit] = CommutativeMonoidUnit.apply
@@ -29,7 +29,7 @@ trait BEvalUnit extends Unit[Loss, BEval] with BEvalInfoBase {
       override type ret = scala.Unit
     }
 
-    override implicit val loss: Loss[scala.Unit] = unitInfo
+    override implicit val loss: LossInfo[scala.Unit] = unitInfo
   }
 
 }

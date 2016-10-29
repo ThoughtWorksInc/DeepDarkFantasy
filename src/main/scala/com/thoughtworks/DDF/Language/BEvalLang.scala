@@ -8,10 +8,10 @@ import com.thoughtworks.DDF.Option.BEvalOption
 import com.thoughtworks.DDF.Product.BEvalProduct
 import com.thoughtworks.DDF.Sum.BEvalSum
 import com.thoughtworks.DDF.Unit.BEvalUnit
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
 trait BEvalLang extends
-  Lang[Loss, BEval] with
+  Lang[LossInfo, BEval] with
   BEvalProduct with
   BEvalComb with
   BEvalDouble with
@@ -21,6 +21,4 @@ trait BEvalLang extends
   BEvalBool with
   BEvalOption
 
-object BEvalLang {
-  implicit def apply = new BEvalLang {}
-}
+object BEvalLang extends BEvalLang

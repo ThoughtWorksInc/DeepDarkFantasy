@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow._
-import com.thoughtworks.DDF.{BEval, Loss}
+import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
-  override def S[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(A => B => C) => (A => B) => A => C] =
+trait BEvalComb extends BEvalArrow with Comb[LossInfo, BEval] {
+  override def S[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(A => B => C) => (A => B) => A => C] =
     arrowEval[
       A => B => C,
       (A => B) => A => C,
@@ -26,14 +26,14 @@ trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
           arrowInfo(ai, arrowInfo(bi, ci)).m))(
           arrowInfo(ai, arrowInfo(bi, ci)).m)))
 
-  override def K[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[A => B => A] =
+  override def K[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => B => A] =
     arrowEval[A, B => A, ai.loss, ArrowLoss[B, ai.loss]](a => (
       arrowEval[B, A, bi.loss, ai.loss](_ => (a, _ => bi.m.zero))(bi, ai),
       _.mapReduce(_ => l => l)(ai.m)))(ai, arrowInfo(bi, ai))
 
-  override def I[A](implicit ai: Loss[A]): BEval[A => A] = arrowEval[A, A, ai.loss, ai.loss](x => (x, y => y))(ai, ai)
+  override def I[A](implicit ai: LossInfo[A]): BEval[A => A] = arrowEval[A, A, ai.loss, ai.loss](x => (x, y => y))(ai, ai)
 
-  override def Y[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[((A => B) => A => B) => A => B] = {
+  override def Y[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((A => B) => A => B) => A => B] = {
     type abi = ArrowLoss[A, bi.loss]
     arrowEval[(A => B) => A => B, A => B, ArrowLoss[A => B, abi], abi](abab => {
       val ab = arrowEval[A, B, ai.loss, bi.loss](a => {
@@ -44,7 +44,7 @@ trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
     })
   }
 
-  override def B[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(B => C) => (A => B) => A => C] =
+  override def B[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(B => C) => (A => B) => A => C] =
     arrowEval[B => C, (A => B) => A => C, ArrowLoss[B, ci.loss], ArrowLoss[A => B, ArrowLoss[A, ci.loss]]](bc =>
       (arrowEval[A => B, A => C, ArrowLoss[A, bi.loss], ArrowLoss[A, ci.loss]](ab => (arrowEval[A, C, ai.loss, ci.loss](a => {
         val b = aeval(ab).forward(a)
@@ -59,7 +59,7 @@ trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
         ArrowLoss(b.eb)(l)
       })(arrowInfo(bi, ci).m))(arrowInfo(bi, ci).m)))
 
-  override def C[A, B, C](implicit ai: Loss[A], bi: Loss[B], ci: Loss[C]): BEval[(A => B => C) => B => A => C] =
+  override def C[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(A => B => C) => B => A => C] =
     arrowEval[A => B => C, B => A => C, ArrowLoss[A, ArrowLoss[B, ci.loss]], ArrowLoss[B, ArrowLoss[A, ci.loss]]](abc =>
       (arrowEval[B, A => C, bi.loss, ArrowLoss[A, ci.loss]](b =>
         (arrowEval[A, C, ai.loss, ci.loss](a => {
@@ -71,7 +71,7 @@ trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
           arrowInfo(ai, arrowInfo(bi, ci)).m))(
           arrowInfo(ai, arrowInfo(bi, ci)).m)))
 
-  override def W[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => A => B) => A => B] =
+  override def W[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => A => B) => A => B] =
     arrowEval[A => A => B, A => B, ArrowLoss[A, ArrowLoss[A, bi.loss]], ArrowLoss[A, bi.loss]](aab =>
       (arrowEval[A, B, ai.loss, bi.loss](a => {
         val ab = aeval(aab).forward(a)
@@ -79,9 +79,9 @@ trait BEvalComb extends BEvalArrow with Comb[Loss, BEval] {
         (b.eb, bl => ai.m.append(b.backward(bl), ab.backward(ArrowLoss(a)(bl))))
       })(ai, bi), _.mapReduce(a => l => ArrowLoss(a)(ArrowLoss(a)(l)))(arrowInfo(ai, arrowInfo(ai, bi)).m)))
 
-  override def Let[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[A => (A => B) => B] = app(C[A => B, A, B])(App)
+  override def Let[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => (A => B) => B] = app(C[A => B, A, B])(App)
 
-  override def App[A, B](implicit ai: Loss[A], bi: Loss[B]): BEval[(A => B) => A => B] = I[A => B]
+  override def App[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[(A => B) => A => B] = I[A => B]
 }
 
 object BEvalComb {
