@@ -1,10 +1,8 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.LossInfo.Aux
-import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss, LossInfo}
+import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss}
 
-import scala.language.reflectiveCalls
-import scalaz.Leibniz._
+import scala.language.reflectiveCalls //TODO: no idea what this is for, find out later
 import scalaz.NaturalTransformation
 
 trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
@@ -33,8 +31,8 @@ trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
     new ImpWLog[B] {
       override def forward: Forward = new Forward {
         override def update(rate: Double)(tloss: Loss[B]): ImpWLog[B] = {
-          //tem.backward(witness(xi.unique(tem.eb.loss))(tloss))
-          app(ff.update(rate)(???))(xf.update(rate)(???))
+          val al = tem.backward(tloss)
+          app(ff.update(rate)(BEvalLang.lossA(xf.res)(tloss)))(xf.update(rate)(al))
         }
 
         val ff = f.forward
