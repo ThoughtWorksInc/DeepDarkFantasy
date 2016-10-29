@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss}
 
-import scala.language.reflectiveCalls //TODO: no idea what this is for, find out later
+import scala.language.reflectiveCalls
 import scalaz.NaturalTransformation
 
 trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
