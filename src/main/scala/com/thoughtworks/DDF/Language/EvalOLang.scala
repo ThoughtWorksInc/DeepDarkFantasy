@@ -2,31 +2,20 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.{EvalO, EvalOMatch}
 
-class EvalOLang extends Lang[LangInfoG, EvalO] {
+trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
   val ltl = LangTermLang
 
+  def aeval[A, B]: LangTerm[A => B] => (EvalO[A] => EvalO[B]) => EvalO[A => B] = la => f =>
+    new EvalO[A => B] {
+      override def l: LangTerm[A => B] = la
+
+      override def tmr: tm.ret = f
+
+      override val tm: EvalOMatch.Aux[A => B, EvalO[A] => EvalO[B]] = AEM[A, B]
+    }
   override def B[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
   EvalO[(B => C) => (A => B) => A => C] =
-    new EvalO[(B => C) => (A => B) => (A) => C] {
-      override def l: LangTerm[(B => C) => (A => B) => A => C] = ltl.B[A, B, C]
-
-      override def tmr: tm.ret = f => new EvalO[(A => B) => A => C] {
-        override def l: LangTerm[(A => B) => A => C] = ltl.B_[A, B, C](f.l)
-
-        override def tmr: tm.ret = g => new EvalO[A => C] {
-          override def l: LangTerm[A => C] = ltl.B__[A, B, C](f.l)(g.l)
-
-          override def tmr: tm.ret = x => app(f)(app(g)(x))
-
-          override val tm: EvalOMatch.Aux[A => C, EvalO[A] => EvalO[C]] = AEM[A, C]
-        }
-
-        override val tm: EvalOMatch.Aux[(A => B) => A => C, EvalO[A => B] => EvalO[A => C]] = AEM[A => B, A => C]
-      }
-
-      override val tm: EvalOMatch.Aux[(B => C) => (A => B) => A => C, EvalO[B => C] => EvalO[(A => B) => A => C]] =
-        AEM[B => C, (A => B) => A => C]
-    }
+    aeval(ltl.B[A, B, C])(f => aeval(ltl.B_[A, B, C](f.l))(g => aeval(ltl.B__(f.l)(g.l))(x => app(f)(app(g)(x)))))
 
   def AEM[A, B]: EvalOMatch.Aux[A => B, EvalO[A] => EvalO[B]] = new EvalOMatch[A => B] {
     override type ret = EvalO[A] => EvalO[B]
@@ -34,13 +23,10 @@ class EvalOLang extends Lang[LangInfoG, EvalO] {
 
   override def app[A, B]: EvalO[A => B] => EvalO[A] => EvalO[B] = f => f.get(AEM[A, B])
 
-  override def scanRight[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A) => (B) => B) => (B) => (List[A]) => List[B]] = ???
+  override def scanRight[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]):
+  EvalO[(A => B => B) => B => List[A] => List[B]] = ???
 
-  override def divD: EvalO[(Double) => (Double) => Double] = ???
-
-  override implicit def optionInfo[A](implicit ai: LangInfoG[A]): LangInfoG[Option[A]] = ???
-
-  override def optionElmInfo[A]: (LangInfoG[Option[A]]) => LangInfoG[A] = ???
+  override def divD: EvalO[Double => Double => Double] = ???
 
   override def ltD: EvalO[(Double) => (Double) => Boolean] = ???
 
@@ -59,14 +45,6 @@ class EvalOLang extends Lang[LangInfoG, EvalO] {
   override def I[A](implicit ai: LangInfoG[A]): EvalO[(A) => A] = ???
 
   override def foldLeft[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A) => (B) => A) => (A) => (List[B]) => A] = ???
-
-  override implicit def aInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangInfoG[(A) => B] = ???
-
-  override def domInfo[A, B]: (LangInfoG[(A) => B]) => LangInfoG[A] = ???
-
-  override def rngInfo[A, B]: (LangInfoG[(A) => B]) => LangInfoG[B] = ???
-
-  override implicit def boolInfo: LangInfoG[Boolean] = ???
 
   override def listMap[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A) => B) => (List[A]) => List[B]] = ???
 
@@ -94,8 +72,6 @@ class EvalOLang extends Lang[LangInfoG, EvalO] {
 
   override def multD: EvalO[(Double) => (Double) => Double] = ???
 
-  override implicit def doubleInfo: LangInfoG[Double] = ???
-
   override def mkProduct[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A) => (B) => (A, B)] = ???
 
   override def zeroth[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A, B)) => A] = ???
@@ -116,12 +92,6 @@ class EvalOLang extends Lang[LangInfoG, EvalO] {
 
   override def sumMatch[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]): EvalO[(Either[A, B]) => ((A) => C) => ((B) => C) => C] = ???
 
-  override implicit def sumInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangInfoG[Either[A, B]] = ???
-
-  override def sumLeftInfo[A, B]: (LangInfoG[Either[A, B]]) => LangInfoG[A] = ???
-
-  override def sumRightInfo[A, B]: (LangInfoG[Either[A, B]]) => LangInfoG[B] = ???
-
   override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(((A) => B) => (A) => B) => (A) => B] = ???
 
   override def Let[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A) => ((A) => B) => B] = ???
@@ -134,21 +104,13 @@ class EvalOLang extends Lang[LangInfoG, EvalO] {
 
   override def S[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]): EvalO[((A) => (B) => C) => ((A) => B) => (A) => C] = ???
 
-  override implicit def productInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangInfoG[(A, B)] = ???
-
-  override def productZerothInfo[A, B]: (LangInfoG[(A, B)]) => LangInfoG[A] = ???
-
-  override def productFirstInfo[A, B]: (LangInfoG[(A, B)]) => LangInfoG[B] = ???
-
   override def expD: EvalO[(Double) => Double] = ???
 
   override def litB: (Boolean) => EvalO[Boolean] = ???
 
   override def ite[A](implicit ai: LangInfoG[A]): EvalO[(Boolean) => (A) => (A) => A] = ???
 
-  override implicit def listInfo[A](implicit ai: LangInfoG[A]): LangInfoG[List[A]] = ???
-
-  override def listElmInfo[A]: (LangInfoG[List[A]]) => LangInfoG[A] = ???
-
-  override def reprInfo[A]: (EvalO[A]) => LangInfoG[A] = ???
+  override def reprInfo[A]: EvalO[A] => LangInfoG[A] = x => ltl.reprInfo(x.l)
 }
+
+object EvalOLang extends EvalOLang
