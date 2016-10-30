@@ -1,20 +1,18 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase, LossInfo}
-
-import scalaz.Leibniz._
+import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
 trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[LossInfo, BEval] {
   def lossD: scala.Double => Loss[scala.Double] = y => new Loss[scala.Double] {
-    override val x: li.loss = y
+    override val tmr: tm.loss = y
 
-    override val li: LossInfo.Aux[scala.Double, scala.Double] = doubleInfo
+    override val tm: LossInfo.Aux[scala.Double, scala.Double] = doubleInfo
   }
 
-  def dloss: Loss[scala.Double] => scala.Double = x => witness(x.li.unique(doubleInfo))(x.x)
+  def dloss: Loss[scala.Double] => scala.Double = _.get(doubleInfo)
 
-  object DLC extends LossCase[scala.Double] {
+  object DLC extends LossMatch[scala.Double] {
     override type ret = Unit
   }
 
@@ -27,16 +25,16 @@ trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[LossInfo, BEval] {
 
     override def convert: scala.Double => BEval[scala.Double] = dEval
 
-    override val lc: LossCase.Aux[scala.Double, DLC.ret] = DLC
+    override val tm: LossMatch.Aux[scala.Double, DLC.ret] = DLC
 
-    override def lca: lc.ret = ()
+    override val tmr: tm.ret = ()
 
     override type ret = scala.Double
 
     override def update(x: scala.Double)(rate: scala.Double)(l: loss): scala.Double = x - l * rate
   }
 
-  object DoubleBEC extends BEvalCase[scala.Double] {
+  object DoubleBEC extends BEvalMatch[scala.Double] {
     override type ret = scala.Double
   }
 
@@ -45,12 +43,12 @@ trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[LossInfo, BEval] {
 
     override def eval: scala.Double = d
 
-    override val ec: BEvalCase.Aux[scala.Double, scala.Double] = DoubleBEC
+    override val tm: BEvalMatch.Aux[scala.Double, scala.Double] = DoubleBEC
 
-    override def eca: ec.ret = d
+    override val tmr: tm.ret = d
   }
 
-  def deval(d: BEval[scala.Double]): scala.Double = witness(d.ec.unique(DoubleBEC))(d.eca)
+  def deval(d: BEval[scala.Double]): scala.Double = d.get(DoubleBEC)
 }
 
 object BEvalDoubleInfo {

@@ -2,8 +2,10 @@ package com.thoughtworks.DDF
 
 import scalaz.Leibniz._
 
-trait TypeCase[Self[Y] <: TypeCase[Self, Y], X] {
-  type ret
+trait TypeCase[Match[Y] <: TypeMatch[Match, Y], X] {
+  val tm: Match[X]
 
-  def unique(tc: Self[X]): ret === tc.ret = /*enforce by user*/ force[Nothing, Any, ret, tc.ret]
+  def tmr: tm.ret
+
+  def get[Z](implicit tmz: Match[X] {type ret = Z}): Z = witness(tm.unique(tmz))(tmr)
 }

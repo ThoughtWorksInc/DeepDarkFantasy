@@ -2,73 +2,60 @@ package com.thoughtworks.DDF
 
 import scalaz.Leibniz._
 
-trait LossInfo[X] extends TypeCase[LossInfo, X] { ext =>
+trait LossInfo[X] extends TypeMatch[LossInfo, X] with TypeCase[LossMatch, X] { ext =>
   final type loss = ret
 
   def m: CommutativeMonoid[loss]
 
   def lm: CommutativeMonoid[Loss[X]] = new CommutativeMonoid[Loss[X]] {
     override def zero: Loss[X] = new Loss[X] {
-      override val li: LossInfo.Aux[X, ret] = ext
+      override val tm: LossInfo.Aux[X, ret] = ext
 
-      override val x: li.loss = m.zero
+      override val tmr: tm.ret = m.zero
     }
 
     override def append(f1: Loss[X], f2: => Loss[X]): Loss[X] = new Loss[X] {
       val f2_ : Loss[X] = f2
+      override val tm: LossInfo.Aux[X, ret] = ext
 
-      override val li: LossInfo.Aux[X, ret] = ext
-
-      override val x: ext.loss = m.append(witness(f1.li.unique(li))(f1.x), witness(f2_.li.unique(li))(f2_.x))
+      override val tmr: tm.ret = m.append(f1.get(tm), f2.get(tm))
     }
   }
   def convert: /*lose backprop ability*/ X => BEval[X]
 
-  val lc: LossCase[X]
-
-  def lca: lc.ret
-
   def update(x: X)(rate: Double)(l: loss): X
 
-  def updatel(x: X)(rate: Double)(l: Loss[X]): X = update(x)(rate)(witness(l.li.unique(ext))(l.x))
+  def updatel(x: X)(rate: Double)(l: Loss[X]): X = update(x)(rate)(l.get[loss](ext))
 }
 
 object LossInfo {
   type Aux[X, XL] = LossInfo[X] {type ret = XL}
 }
 
-trait LossCase[X] extends TypeCase[LossCase, X]
+trait LossMatch[X] extends TypeMatch[LossMatch, X]
 
-object LossCase {
-  type Aux[X, Y] = LossCase[X] {type ret = Y}
+object LossMatch {
+  type Aux[X, Y] = LossMatch[X] {type ret = Y}
 }
 
-trait Loss[X] {
-  val li: LossInfo[X]
-
-  val x: li.loss
-}
+trait Loss[X] extends TypeCase[LossInfo, X]
 
 object Loss {
   def apply[X, XL](l: XL)(implicit xi: LossInfo.Aux[X, XL]) = new Loss[X] {
-    override val li: LossInfo.Aux[X, XL] = xi
+    override val tm: LossInfo.Aux[X, XL] = xi
 
-    override val x: li.loss = l
+    override val tmr: tm.ret = l
   }
 }
 
-trait BEvalCase[X] extends TypeCase[BEvalCase, X]
+trait BEvalMatch[X] extends TypeMatch[BEvalMatch, X]
 
-object BEvalCase {
-  type Aux[X, Y] = BEvalCase[X] {type ret = Y}
+object BEvalMatch {
+  type Aux[X, Y] = BEvalMatch[X] {type ret = Y}
 }
 
-trait BEval[X] {
+trait BEval[X] extends TypeCase[BEvalMatch, X] {
   val loss: LossInfo[X]
 
   def eval: /*should not be used when defining instance of Eval*/ X
-
-  val ec: BEvalCase[X]
-
-  def eca: ec.ret
 }

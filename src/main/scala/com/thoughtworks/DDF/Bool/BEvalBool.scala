@@ -1,34 +1,32 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Arrow.BEvalArrow
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossCase, LossInfo}
-
-import scalaz.Leibniz._
+import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossMatch, LossInfo}
 
 trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArrow {
-  object BoolBEC extends BEvalCase[Boolean] {
+  object BoolBEC extends BEvalMatch[Boolean] {
     override type ret = Boolean
   }
 
   override def litB: Boolean => BEval[Boolean] = b => new BEval[Boolean] {
-    override def eca: ec.ret = b
+    override val tmr: tm.ret = b
 
     override def eval: Boolean = b
 
-    override val ec: BEvalCase.Aux[Boolean, Boolean] = BoolBEC
+    override val tm: BEvalMatch.Aux[Boolean, Boolean] = BoolBEC
 
     override val loss: LossInfo[Boolean] = boolInfo
   }
 
-  def beval: BEval[Boolean] => Boolean = x => witness(x.ec.unique(BoolBEC))(x.eca)
+  def beval: BEval[Boolean] => Boolean = _.get(BoolBEC)
 
   private def comb: Comb[LossInfo, BEval] = BEvalComb.apply
 
   val bLoss: Loss[Boolean] = new Loss[Boolean] {
-    override val li: LossInfo.Aux[Boolean, Unit] = boolInfo
+    override val tm: LossInfo.Aux[Boolean, Unit] = boolInfo
 
-    override val x: li.loss = ()
+    override val tmr: tm.loss = ()
   }
 
   override def ite[A](implicit ai: LossInfo[A]): BEval[Boolean => A => A => A] =
@@ -42,9 +40,9 @@ trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArrow {
 
     override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit.apply
 
-    override def lca: lc.ret = ()
+    override val tmr: tm.ret = ()
 
-    override val lc: LossCase.Aux[Boolean, Unit] = new LossCase[Boolean] {
+    override val tm: LossMatch.Aux[Boolean, Unit] = new LossMatch[Boolean] {
       override type ret = Unit
     }
 

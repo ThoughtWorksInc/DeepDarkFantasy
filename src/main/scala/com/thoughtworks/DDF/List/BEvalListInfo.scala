@@ -1,37 +1,34 @@
 package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
-import com.thoughtworks.DDF.{BEval, BEvalCase, CommutativeMonoid, Loss, LossCase, LossInfo}
-
-import scalaz.Leibniz.witness
+import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
 trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrowInfo {
   def lLoss[A](l: scala.List[Loss[A]])(implicit ai: LossInfo[A]): Loss[scala.List[A]] =
     new Loss[scala.List[A]] {
-      override val li: LossInfo.Aux[scala.List[A], scala.List[Loss[A]]] = listInfo[A]
+      override val tm: LossInfo.Aux[scala.List[A], scala.List[Loss[A]]] = listInfo[A]
 
-      override val x: li.loss = l
+      override val tmr: tm.loss = l
     }
 
-  def lloss[A]: Loss[scala.List[A]] => scala.List[Loss[A]] = l =>
-    witness(l.li.unique(listInfo[A](listElmInfo(l.li))))(l.x)
+  def lloss[A]: Loss[scala.List[A]] => scala.List[Loss[A]] = l => l.get(listInfo(listElmInfo(l.tm)))
 
-  case class ListLC[A]() extends LossCase[scala.List[A]] {
+  case class ListLC[A]() extends LossMatch[scala.List[A]] {
     override type ret = LossInfo[A]
   }
 
-  case class ListDEC[A]() extends BEvalCase[scala.List[A]] {
+  case class ListBEC[A]() extends BEvalMatch[scala.List[A]] {
     override type ret = scala.List[BEval[A]]
   }
 
-  def leval[A](e: BEval[scala.List[A]]): scala.List[BEval[A]] = witness(e.ec.unique(ListDEC[A]()))(e.eca)
+  def leval[A](e: BEval[scala.List[A]]): scala.List[BEval[A]] = e.get(ListBEC())
 
   def listEval[A](l: scala.List[BEval[A]])(implicit ai: LossInfo[A]): BEval[scala.List[A]] = new BEval[scala.List[A]] {
-    override def eca: ec.ret = l
+    override val tmr: tm.ret = l
 
     override def eval: scala.List[A] = l.map(_.eval)
 
-    override val ec: BEvalCase.Aux[scala.List[A], scala.List[BEval[A]]] = ListDEC()
+    override val tm: BEvalMatch.Aux[scala.List[A], scala.List[BEval[A]]] = ListBEC()
 
     override val loss: LossInfo[scala.List[A]] = listInfo(ai)
   }
@@ -40,9 +37,9 @@ trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrowInfo {
     new LossInfo[scala.List[A]] {
       override def convert: scala.List[A] => BEval[scala.List[A]] = la => listEval[A](la.map(ai.convert))
 
-      override val lc: LossCase.Aux[scala.List[A], LossInfo[A]] = ListLC()
+      override val tm: LossMatch.Aux[scala.List[A], LossInfo[A]] = ListLC()
 
-      override def lca: lc.ret = ai
+      override val tmr: tm.ret = ai
 
       override type ret = scala.List[Loss[A]]
 
@@ -60,7 +57,7 @@ trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrowInfo {
         x.zip(l).map(p => ai.updatel(p._1)(rate)(p._2))
     }
 
-  override def listElmInfo[A]:  LossInfo[scala.List[A]] => LossInfo[A] = lai => witness(lai.lc.unique(ListLC[A]()))(lai.lca)
+  override def listElmInfo[A]: LossInfo[scala.List[A]] => LossInfo[A] = _.get(ListLC[A]())
 }
 
 object BEvalListInfo {
