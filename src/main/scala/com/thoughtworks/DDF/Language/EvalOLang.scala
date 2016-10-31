@@ -42,28 +42,32 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
 
   override def foldRight[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A => B => B) => B => List[A] => B] = ???
 
+  def otm[A]: EvalOMatch.Aux[Option[A], Option[EvalO[A]]] = new EvalOMatch[Option[A]] {
+    override type ret = Option[EvalO[A]]
+  }
+
   override def none[A](implicit ai: LangInfoG[A]): EvalO[Option[A]] = new EvalO[Option[A]] {
     override def l: LangTerm[Option[A]] = ltl.none[A]
 
-    override def tmr: tm.ret = ()
+    override def tmr: tm.ret = None
 
-    override val tm: EvalOMatch.Aux[Option[A], Unit] = new EvalOMatch[Option[A]] {
-      override type ret = Unit
-    }
+    override val tm = otm[A]
   }
 
   override def some[A](implicit ai: LangInfoG[A]): EvalO[A => Option[A]] =
     aeval(ltl.some[A])(a => new EvalO[Option[A]] {
       override def l: LangTerm[Option[A]] = ltl.some_(a.l)
 
-      override def tmr: tm.ret = ()
+      override def tmr: tm.ret = Some(a)
 
-      override val tm: EvalOMatch.Aux[Option[A], Unit] = new EvalOMatch[Option[A]] {
-        override type ret = Unit
-      }
+      override val tm = otm[A]
     })
 
-  override def optionMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(Option[A]) => (B) => ((A) => B) => B] = ???
+  override def optionMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[Option[A] => B => (A => B) => B] =
+    aeval(ltl.optionMatch[A, B])(_.get(otm[A]) match {
+      case None => K[B, A => B]
+      case Some(x) => K_[(A => B) => B, B](Let_[A, B](x))
+    })
 
   override def I[A](implicit ai: LangInfoG[A]): EvalO[A => A] = aeval(ltl.I[A])(identity[EvalO[A]])
 
@@ -84,11 +88,14 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
   EvalO[(A => B => C) => B => A => C] =
     aeval(ltl.C[A, B, C])(f => aeval(ltl.C_(f.l))(b => aeval(ltl.C__(f.l)(b.l))(a => app(app(f)(a))(b))))
 
-  override def App[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A => B) => A => B] = ???
+  override def App[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A => B) => A => B] = I[A => B]
 
-  override def uncurry[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]): EvalO[((A) => (B) => C) => ((A, B)) => C] = ???
+  override def uncurry[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
+  EvalO[(A => B => C) => ((A, B)) => C] = aeval(ltl.uncurry[A, B, C])(f =>
+    aeval(ltl.uncurry_(f.l))(p => app(app(f)(zeroth_(p)))(first_(p))))
 
-  override def plusD: EvalO[(Double) => (Double) => Double] = ???
+  override def plusD: EvalO[Double => Double => Double] =
+    aeval(ltl.plusD)(l => aeval(ltl.plusD_(l.l))(r => litD(eval(l) + eval(r))))
 
   override def mkUnit: EvalO[Unit] = new EvalO[Unit] {
     override def l: LangTerm[Unit] = ltl.mkUnit
@@ -100,16 +107,29 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
     }
   }
 
-  override def sigD: EvalO[(Double) => Double] = ???
+  override def sigD: EvalO[Double => Double] = aeval(ltl.sigD)(x => litD(1 / (1 + Math.exp(-eval(x)))))
 
   override def multD: EvalO[Double => Double => Double] =
     aeval(ltl.multD)(l => aeval(ltl.multD_(l.l))(r => litD(eval(l) * eval(r))))
 
-  override def mkProduct[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A) => (B) => (A, B)] = ???
+  def ptm[A, B]: EvalOMatch.Aux[(A, B), (EvalO[A], EvalO[B])] = new EvalOMatch[(A, B)] {
+    override type ret = (EvalO[A], EvalO[B])
+  }
 
-  override def zeroth[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A, B)) => A] = ???
+  override def mkProduct[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[A => B => (A, B)] =
+    aeval(ltl.mkProduct[A, B])(x => aeval(ltl.mkProduct_[A, B](x.l))(y => new EvalO[(A, B)] {
+      override def l: LangTerm[(A, B)] = ltl.mkProduct__(x.l)(y.l)
 
-  override def first[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A, B)) => B] = ???
+      override def tmr: tm.ret = (x, y)
+
+      override val tm = ptm[A, B]
+    }))
+
+  override def zeroth[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A, B)) => A] =
+    aeval(ltl.zeroth[A, B])(_.get(ptm[A, B])._1)
+
+  override def first[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A, B)) => B] =
+    aeval(ltl.first[A, B])(_.get(ptm[A, B])._2)
 
   override def litD: Double => EvalO[Double] = d => new EvalO[Double] {
     override def l: LangTerm[Double] = ltl.litD(d)
@@ -121,22 +141,61 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
     }
   }
 
-  override def sumComm[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(Either[A, B]) => Either[B, A]] = ???
+  def stm[A, B]: EvalOMatch.Aux[Either[A, B], Either[EvalO[A], EvalO[B]]] = new EvalOMatch[Either[A, B]] {
+    override type ret = Either[EvalO[A], EvalO[B]]
+  }
 
-  override def sumAssocLR[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]): EvalO[(Either[Either[A, B], C]) => Either[A, Either[B, C]]] = ???
+  override def sumComm[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[Either[A, B] => Either[B, A]] =
+    aeval(ltl.sumComm[A, B])(_.get(stm[A, B]) match {
+      case Left(x) => right_(x)
+      case Right(x) => left_(x)
+    })
 
-  override def sumAssocRL[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]): EvalO[(Either[A, Either[B, C]]) => Either[Either[A, B], C]] = ???
+  override def sumAssocLR[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
+  EvalO[Either[Either[A, B], C] => Either[A, Either[B, C]]] =
+    aeval(ltl.sumAssocLR[A, B, C])(_.get(stm[Either[A, B], C]).left.map(_.get(stm[A, B])) match {
+      case Left(Left(x)) => left_(x)
+      case Left(Right(x)) => right_(left_(x))
+      case Right(x) => right_(right_(x))
+    })
 
-  override def left[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[A => Either[A, B]] = ???
+  override def sumAssocRL[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
+  EvalO[Either[A, Either[B, C]] => Either[Either[A, B], C]] =
+    aeval(ltl.sumAssocRL[A, B, C])(_.get(stm[A, Either[B, C]]).right.map(_.get(stm[B, C])) match {
+      case Left(x) => left_(left_(x))
+      case Right(Left(x)) => left_(right_(x))
+      case Right(Right(x)) => right_(x)
+    })
 
-  override def right[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[B => Either[A, B]] = ???
+  override def left[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[A => Either[A, B]] =
+    aeval(ltl.left[A, B])(a => new EvalO[Either[A, B]] {
+      override def l: LangTerm[Either[A, B]] = ltl.left_(a.l)
+
+      override def tmr: tm.ret = Left(a)
+
+      override val tm = stm[A, B]
+    })
+
+  override def right[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[B => Either[A, B]] =
+    aeval(ltl.right[A, B])(b => new EvalO[Either[A, B]] {
+      override def l: LangTerm[Either[A, B]] = ltl.right_(b.l)
+
+      override def tmr: tm.ret = Right(b)
+
+      override val tm = stm[A, B]
+    })
 
   override def sumMatch[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
-  EvalO[(Either[A, B]) => ((A) => C) => ((B) => C) => C] = ???
+  EvalO[Either[A, B] => (A => C) => (B => C) => C] = aeval(ltl.sumMatch[A, B, C])(_.get(stm[A, B]) match {
+    case Left(x) => C_(K_(Let_[A, C](x)))
+    case Right(x) => K_(Let_[B, C](x))
+  })
 
-  override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(((A) => B) => (A) => B) => (A) => B] = ???
+  override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[((A => B) => A => B) => A => B] =
+    aeval(ltl.Y[A, B])(f => aeval(ltl.Y_(f.l))(a => app(app(f)(Y_(f)))(a)))
 
-  override def Let[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[A => (A => B) => B] = ???
+  override def Let[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[A => (A => B) => B] =
+    aeval(ltl.Let[A, B])(a => aeval(ltl.Let_[A, B](a.l))(f => app(f)(a)))
 
   override def W[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): EvalO[(A => A => B) => A => B] =
     aeval(ltl.W[A, B])(f => aeval(ltl.W_[A, B](f.l))(a => app(app(f)(a))(a)))
@@ -145,7 +204,8 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
     aeval(ltl.K[A, B])(a => aeval(ltl.K_[A, B](a.l))(_ => a))
 
   override def curry[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
-  EvalO[(((A, B)) => C) => A => B => C] = ???
+  EvalO[(((A, B)) => C) => A => B => C] = aeval(ltl.curry[A, B, C])(f =>
+    aeval(ltl.curry_(f.l))(a => aeval(ltl.curry__(f.l)(a.l))(b => app(f)(mkProduct__(a)(b)))))
 
   override def S[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]):
   EvalO[(A => B => C) => (A => B) => A => C] =
@@ -163,7 +223,11 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
     }
   }
 
-  override def ite[A](implicit ai: LangInfoG[A]): EvalO[Boolean => A => A => A] = ???
+  override def ite[A](implicit ai: LangInfoG[A]): EvalO[Boolean => A => A => A] =
+    aeval(ltl.ite[A])(b => eval(b) match {
+      case true => K[A, A]
+      case false => C_(K[A, A])
+    })
 
   override def reprInfo[A]: EvalO[A] => LangInfoG[A] = x => ltl.reprInfo(x.l)
 }
