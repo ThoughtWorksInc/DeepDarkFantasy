@@ -103,7 +103,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def contBind[R, A, B](implicit ri: Info[R], ai: Info[A], bi: Info[B]):
   Repr[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]] = {
-    val nLang = NextInterLang(i, aInfo(aInfo(ai, ri), ri))
+    val nLang = NextInterLang.apply[Info, Repr, Cont[R, A]](i, aInfo(aInfo(ai, ri), ri))
     val nNLang = NextInterLang.apply[Info, nLang.repr, A => Cont[R, B]](nLang, aInfo(ai, aInfo(aInfo(bi, ri), ri)))
     val nnnl = NextInterLang.apply[Info, nNLang.repr, B => R](nNLang, aInfo(bi, ri))
     nLang.collapse(nNLang.collapse(nnnl.collapse(
@@ -137,6 +137,13 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def mkUnit = i.mkUnit
 
   override def reprInfo[A] = i.reprInfo[A]
+
+  override def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
+  Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]] = {
+    val nLang = NextInterLang.apply[Info, Repr, Except[A, B]](i, sumInfo(ai, bi))
+    val nnl = NextInterLang.apply[Info, nLang.repr, B => Except[A, C]](nLang, aInfo(bi, sumInfo(ai, ci)))
+    nLang.collapse(nnl.collapse(nnl.sumMatch___(nnl.rconv(nLang.in))(nnl.left[A, C])(nnl.in)))
+  }
 }
 
 object InterLang2Lang {
