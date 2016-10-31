@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Language
 import scalaz.NaturalTransformation
 
-trait NextLang[Info[_], Repr[_], Arg] extends
-  NTLang[
+trait NextInterLang[Info[_], Repr[_], Arg] extends
+  NTInterLang[
     Info,
     Repr,
     Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {
@@ -37,11 +37,11 @@ trait NextLang[Info[_], Repr[_], Arg] extends
   def rconv[A]: Repr[A] => repr[A] = x => Left(x)
 }
 
-object NextLang {
-  implicit def apply[Info[_], Repr[_], Arg](implicit l: Lang[Info, Repr], ai: Info[Arg]):
-  NextLang[Info, Repr, Arg] =
-    new NextLang[Info, Repr, Arg] {
-      override def base: Lang[Info, Repr] = l
+object NextInterLang {
+  implicit def apply[Info[_], Repr[_], Arg](implicit l: InterLang[Info, Repr], ai: Info[Arg]):
+  NextInterLang[Info, Repr, Arg] =
+    new NextInterLang[Info, Repr, Arg] {
+      override def base: InterLang[Info, Repr] = l
 
       override implicit def argi: Info[Arg] = ai
     }

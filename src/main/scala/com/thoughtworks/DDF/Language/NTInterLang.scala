@@ -2,8 +2,8 @@ package com.thoughtworks.DDF.Language
 
 import scalaz.{Forall, NaturalTransformation}
 
-trait NTLang[Info[_], Repr[_], F[_]] extends Lang[Info, F] {
-  def base: Lang[Info, Repr]
+trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
+  def base: InterLang[Info, Repr]
 
   def NTF: NaturalTransformation[Repr, F]
 
@@ -126,14 +126,14 @@ trait NTLang[Info[_], Repr[_], F[_]] extends Lang[Info, F] {
   override implicit def doubleInfo = base.doubleInfo
 }
 
-object NTLang {
+object NTInterLang {
   implicit def apply[Info[_], Repr[_], F[_]](implicit
-                                             l: Lang[Info, Repr],
+                                             l: InterLang[Info, Repr],
                                              n: NaturalTransformation[Repr, F],
                                              ap: Forall[Lambda[A => Forall[Lambda[B => F[A => B] => F[A] => F[B]]]]],
-                                             r: NaturalTransformation[F, Info]): NTLang[Info, Repr, F] =
-    new NTLang[Info, Repr, F] {
-      override def base: Lang[Info, Repr] = l
+                                             r: NaturalTransformation[F, Info]): NTInterLang[Info, Repr, F] =
+    new NTInterLang[Info, Repr, F] {
+      override def base: InterLang[Info, Repr] = l
 
       override def NTF: NaturalTransformation[Repr, F] = n
 

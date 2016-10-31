@@ -1,8 +1,7 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArr
-import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm, LangTermLang}
-import scalaz.Leibniz._
+import com.thoughtworks.DDF.Language.{BEvalInterLang, InterLang, LangTerm, LangTermInterLang}
 
 trait ImpW[T] {
   ext =>
@@ -13,9 +12,9 @@ trait ImpW[T] {
 
   val exp: LangTerm[Weight => T]
 
-  implicit val bel = BEvalLang
+  implicit val bel = BEvalInterLang
 
-  implicit val ltl = LangTermLang
+  implicit val ltl = LangTermInterLang
 
   implicit val wi = ltl.domInfo(ltl.reprInfo(exp(ltl)))
 
@@ -56,10 +55,10 @@ object ImpW {
       override val w: scala.Unit = ()
 
       override val exp: LangTerm[scala.Unit => T] = new LangTerm[scala.Unit => T] {
-        override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[scala.Unit => T] =
+        override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[scala.Unit => T] =
           lang.K_(expT(lang))(lang.unitInfo)
       }
     }
 
-  type Aux[X, XL] = ImpW[X] { type Weight = XL }
+  type Aux[X, XL] = ImpW[X] {type Weight = XL}
 }

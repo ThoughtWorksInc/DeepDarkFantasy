@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.Combinators.{Comb, EvalMComb}
+import com.thoughtworks.DDF.Combinators.EvalMComb
 import com.thoughtworks.DDF.NoInfo
 
-trait EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X => X]] with EvalMComb {
+trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X => X]] with EvalMComb {
   override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): (A => B => B) => B => List[A] => List[B] =
     f => z => _.scanRight(z)((x, y) => f(x)(y))
 
@@ -103,4 +103,4 @@ trait EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
   }
 }
 
-object EvalMLang extends EvalMLang
+object EvalMInterLang extends EvalMInterLang

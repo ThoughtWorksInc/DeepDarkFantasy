@@ -2,10 +2,10 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.{EvalO, EvalOMatch, NoInfo}
 
-trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
-  val ltl = LangTermLang
+trait EvalOInterLang extends InterLang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
+  val ltl = LangTermInterLang
 
-  def eval[X]: EvalO[X] => X = x => x.l.apply[NoInfo, Lambda[X => X]](EvalMLang)
+  def eval[X]: EvalO[X] => X = x => x.l.apply[NoInfo, Lambda[X => X]](EvalMInterLang)
 
   def aeval[A, B]: LangTerm[A => B] => (EvalO[A] => EvalO[B]) => EvalO[A => B] = la => f =>
     new EvalO[A => B] {
@@ -274,4 +274,4 @@ trait EvalOLang extends Lang[LangInfoG, EvalO] with LangTermLangInfo[EvalO] {
   override def reprInfo[A]: EvalO[A] => LangInfoG[A] = x => ltl.reprInfo(x.l)
 }
 
-object EvalOLang extends EvalOLang
+object EvalOInterLang extends EvalOInterLang

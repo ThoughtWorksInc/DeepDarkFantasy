@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.Arrow.Arr
 import com.thoughtworks.DDF.Bool.Bool
 import com.thoughtworks.DDF.Combinators.Comb
+import com.thoughtworks.DDF.Cont.Cont
 import com.thoughtworks.DDF.Double.Double
 import com.thoughtworks.DDF.List.List
 import com.thoughtworks.DDF.Option.Option
@@ -15,9 +15,9 @@ trait Lang[Info[_], Repr[_]] extends
   Product[Info, Repr] with
   Double[Info, Repr] with
   Option[Info, Repr] with
-  Arr[Info, Repr] with
   Unit[Info, Repr] with
   List[Info, Repr] with
   Bool[Info, Repr] with
-  Sum[Info, Repr] with
-  Comb[Info, Repr]
+  Comb[Info, Repr] with
+  Cont[Info, Repr] with
+  Sum[Info, Repr]

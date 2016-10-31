@@ -4,8 +4,8 @@ import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss}
 
 import scalaz.NaturalTransformation
 
-trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
-  override def base: Lang[LangInfoG, ImpW] = ImpWLang
+trait ImpWLogInterLang extends NTInterLang[LangInfoG, ImpW, ImpWLog] {
+  override def base: InterLang[LangInfoG, ImpW] = ImpWInterLang
 
   def defLogHandler: Seq[String] => Seq[String]
 
@@ -31,21 +31,21 @@ trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
       override def forward: Forward = new Forward {
         override def update(rate: Double)(tloss: Loss[B]): ImpWLog[B] = {
           val al = tem.backward(tloss)
-          app(ff.update(rate)(BEvalLang.lossA(xf.res)(tloss)))(xf.update(rate)(al))
+          app(ff.update(rate)(BEvalInterLang.lossA(xf.res)(tloss)))(xf.update(rate)(al))
         }
 
         val ff = f.forward
 
         val xf = x.forward
 
-        val tem = BEvalLang.aeval(ff.res).forward(xf.res)
+        val tem = BEvalInterLang.aeval(ff.res).forward(xf.res)
 
         override val res: BEval[B] = tem.eb
 
         override val log: Seq[String] = ff.log ++ xf.log
       }
 
-      val expRich: ImpW.Aux[B, (f.exp.Weight, x.exp.Weight)] = ImpWLang.appRich(f.exp)(x.exp)
+      val expRich: ImpW.Aux[B, (f.exp.Weight, x.exp.Weight)] = ImpWInterLang.appRich(f.exp)(x.exp)
 
       override val exp: ImpW[B] = expRich
     }
@@ -53,8 +53,8 @@ trait ImpWLogLang extends NTLang[LangInfoG, ImpW, ImpWLog] {
   override def reprInfo[A]: ImpWLog[A] => LangInfoG[A] = _.exp.ti
 }
 
-object ImpWLogLang {
-  def apply(h: Seq[String] => Seq[String]) = new ImpWLogLang {
+object ImpWLogInterLang {
+  def apply(h: Seq[String] => Seq[String]) = new ImpWLogInterLang {
     override def defLogHandler: Seq[String] => Seq[String] = h
   }
 }
