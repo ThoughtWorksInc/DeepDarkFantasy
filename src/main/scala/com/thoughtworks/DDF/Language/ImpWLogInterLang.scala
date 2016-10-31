@@ -4,8 +4,8 @@ import com.thoughtworks.DDF.{BEval, ImpW, ImpWLog, Loss}
 
 import scalaz.NaturalTransformation
 
-trait ImpWLogInterLang extends NTInterLang[LangInfoG, ImpW, ImpWLog] {
-  override def base: InterLang[LangInfoG, ImpW] = ImpWInterLang
+trait ImpWLogInterLang extends NTInterLang[InterLangInfoG, ImpW, ImpWLog] {
+  override def base: InterLang[InterLangInfoG, ImpW] = ImpWInterLang
 
   def defLogHandler: Seq[String] => Seq[String]
 
@@ -50,7 +50,7 @@ trait ImpWLogInterLang extends NTInterLang[LangInfoG, ImpW, ImpWLog] {
       override val exp: ImpW[B] = expRich
     }
 
-  override def reprInfo[A]: ImpWLog[A] => LangInfoG[A] = _.exp.ti
+  override def reprInfo[A]: ImpWLog[A] => InterLangInfoG[A] = _.exp.ti
 }
 
 object ImpWLogInterLang {

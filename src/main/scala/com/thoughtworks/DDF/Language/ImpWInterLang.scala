@@ -4,14 +4,14 @@ import com.thoughtworks.DDF.ImpW
 
 import scalaz.NaturalTransformation
 
-trait ImpWInterLang extends NTInterLang[LangInfoG, LangTerm, ImpW] {
-  override def NTF: NaturalTransformation[LangTerm, ImpW] = new NaturalTransformation[LangTerm, ImpW] {
-    override def apply[A](fa: LangTerm[A]): ImpW[A] = ImpW(fa)
+trait ImpWInterLang extends NTInterLang[InterLangInfoG, InterLangTerm, ImpW] {
+  override def NTF: NaturalTransformation[InterLangTerm, ImpW] = new NaturalTransformation[InterLangTerm, ImpW] {
+    override def apply[A](fa: InterLangTerm[A]): ImpW[A] = ImpW(fa)
   }
 
-  override def reprInfo[A]: ImpW[A] => LangInfoG[A] = _.ti
+  override def reprInfo[A]: ImpW[A] => InterLangInfoG[A] = _.ti
 
-  override def base: InterLang[LangInfoG, LangTerm] = LangTermInterLang
+  override def base: InterLang[InterLangInfoG, InterLangTerm] = InterLangTermInterLang
 
   def appRich[A, B](f: ImpW[A => B])(x: ImpW[A]): ImpW.Aux[B, (f.Weight, x.Weight)] =
     new ImpW[B] {
@@ -19,8 +19,8 @@ trait ImpWInterLang extends NTInterLang[LangInfoG, LangTerm, ImpW] {
 
       override val w: Weight = (f.w, x.w)
 
-      override val exp: LangTerm[Weight => B] = {
-        val l = LangTermInterLang
+      override val exp: InterLangTerm[Weight => B] = {
+        val l = InterLangTermInterLang
         l.S__(l.B__(f.exp)(l.zeroth(f.wi, x.wi)))(l.B__(x.exp)(l.first(f.wi, x.wi)))
       }
     }

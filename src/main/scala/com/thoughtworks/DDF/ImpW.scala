@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Arrow.BEvalArr
-import com.thoughtworks.DDF.Language.{BEvalInterLang, InterLang, LangTerm, LangTermInterLang}
+import com.thoughtworks.DDF.Language.{BEvalInterLang, InterLang, InterLangTerm, InterLangTermInterLang}
 
 trait ImpW[T] {
   ext =>
@@ -10,11 +10,11 @@ trait ImpW[T] {
 
   val w: Weight
 
-  val exp: LangTerm[Weight => T]
+  val exp: InterLangTerm[Weight => T]
 
   implicit val bel = BEvalInterLang
 
-  implicit val ltl = LangTermInterLang
+  implicit val ltl = InterLangTermInterLang
 
   implicit val wi = ltl.domInfo(ltl.reprInfo(exp(ltl)))
 
@@ -41,20 +41,20 @@ trait ImpW[T] {
 
         override val w: ext.Weight = newW
 
-        override val exp: LangTerm[ext.Weight => T] = ext.exp
+        override val exp: InterLangTerm[ext.Weight => T] = ext.exp
       }
     }
   }
 }
 
 object ImpW {
-  def apply[T](expT: LangTerm[T]): ImpW[T] =
+  def apply[T](expT: InterLangTerm[T]): ImpW[T] =
     new ImpW[T] {
       override type Weight = scala.Unit
 
       override val w: scala.Unit = ()
 
-      override val exp: LangTerm[scala.Unit => T] = new LangTerm[scala.Unit => T] {
+      override val exp: InterLangTerm[scala.Unit => T] = new InterLangTerm[scala.Unit => T] {
         override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[scala.Unit => T] =
           lang.K_(expT(lang))(lang.unitInfo)
       }

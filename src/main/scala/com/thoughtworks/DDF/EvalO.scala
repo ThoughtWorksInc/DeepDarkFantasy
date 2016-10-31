@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF
 
-import com.thoughtworks.DDF.Language.LangTerm
+import com.thoughtworks.DDF.Language.InterLangTerm
 
 trait EvalOMatch[X] extends TypeMatch[EvalOMatch, X]
 
@@ -9,5 +9,5 @@ object EvalOMatch {
 }
 
 trait EvalO[X] extends TypeCase[EvalOMatch, X] {
-  def l: LangTerm[X]
+  def l: InterLangTerm[X]
 }
