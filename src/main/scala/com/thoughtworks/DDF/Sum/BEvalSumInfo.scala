@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
+import com.thoughtworks.DDF.Arrow.BEvalArrInfo
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
-trait BEvalSumInfo extends SumInfo[LossInfo, BEval] with BEvalArrowInfo {
+trait BEvalSumInfo extends SumInfo[LossInfo, BEval] with BEvalArrInfo {
   trait SumLCRet[A, B] {
     def Left: LossInfo[A]
 

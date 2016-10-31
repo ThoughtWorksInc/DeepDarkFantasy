@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
+import com.thoughtworks.DDF.Arrow.BEvalArrInfo
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
-trait BEvalDoubleInfo extends BEvalArrowInfo with DoubleInfo[LossInfo, BEval] {
+trait BEvalDoubleInfo extends BEvalArrInfo with DoubleInfo[LossInfo, BEval] {
   def lossD: scala.Double => Loss[scala.Double] = y => new Loss[scala.Double] {
     override val tmr: tm.loss = y
 

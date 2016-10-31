@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalProductMin extends ProductMin[LossInfo, BEval] with BEvalProductInfo with BEvalArrow {
+trait BEvalProductMin extends ProductMin[LossInfo, BEval] with BEvalProductInfo with BEvalArr {
   override def zeroth[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[((A, B)) => A] =
     aEval[(A, B), A](p => (peval(p)._1, al => lossP(al)(bi.lm.zero)))(productInfo(ai, bi), ai)
 

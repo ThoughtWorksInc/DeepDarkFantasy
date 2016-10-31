@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArrow}
+import com.thoughtworks.DDF.Arrow.{ArrowLoss, BEvalArr}
 import com.thoughtworks.DDF.Combinators.BEvalComb
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalListMin extends ListMin[LossInfo, BEval] with BEvalListInfo with BEvalArrow {
+trait BEvalListMin extends ListMin[LossInfo, BEval] with BEvalListInfo with BEvalArr {
   override def nil[A](implicit ai: LossInfo[A]): BEval[scala.List[A]] = listEval(scala.List())
 
   override def cons[A](implicit ai: LossInfo[A]): BEval[A => scala.List[A] => scala.List[A]] =

@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
+import com.thoughtworks.DDF.Arrow.BEvalArrInfo
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
 
-trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrowInfo {
+trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrInfo {
   trait ProductLCRet[A, B] {
     def zeroth: LossInfo[A]
 

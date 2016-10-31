@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.ShowArrow
+import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.Bool.ShowBool
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowDouble extends Double[NoInfo, Show] with ShowArrow with SimpleDouble[Show] with ShowBool {
+trait ShowDouble extends Double[NoInfo, Show] with ShowArr with SimpleDouble[Show] with ShowBool {
   override def litD = d => Show(d.toString)
 
   override def plusD = Show("+")

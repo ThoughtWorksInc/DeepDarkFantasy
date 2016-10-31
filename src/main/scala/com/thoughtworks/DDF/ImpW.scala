@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.Language.{BEvalLang, Lang, LangTerm, LangTermLang}
 import scalaz.Leibniz._
 
@@ -31,7 +31,7 @@ trait ImpW[T] {
   }
   def forward = new Forward {
 
-    val fres = new BEvalArrow {}.aeval(exp(bel)).forward(ext.wl.convert(w))
+    val fres = new BEvalArr {}.aeval(exp(bel)).forward(ext.wl.convert(w))
 
     override val res: BEval[T] = fres.eb
 

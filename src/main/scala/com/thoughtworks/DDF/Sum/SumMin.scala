@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.Arrow
+import com.thoughtworks.DDF.Arrow.Arr
 
-trait SumMin[Info[_], Repr[_]] extends Arrow[Info, Repr] with SumInfo[Info, Repr] {
+trait SumMin[Info[_], Repr[_]] extends Arr[Info, Repr] with SumInfo[Info, Repr] {
   def left[A, B](implicit ai: Info[A], bi: Info[B]): Repr[A => Either[A, B]]
 
   def right[A, B](implicit ai: Info[A], bi: Info[B]): Repr[B => Either[A, B]]

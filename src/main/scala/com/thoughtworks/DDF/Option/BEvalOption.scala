@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Option
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossInfo, LossMatch}
 
-trait BEvalOption extends Option[LossInfo, BEval] with BEvalArrow {
+trait BEvalOption extends Option[LossInfo, BEval] with BEvalArr {
   case class OptionLC[A]() extends LossMatch[scala.Option[A]] {
     type ret = LossInfo[A]
   }

@@ -1,5 +1,5 @@
 package com.thoughtworks.DDF.Arrow
 
-trait ArrowMin[Info[_], Repr[_]] extends ArrowInfo[Info, Repr] {
+trait ArrMin[Info[_], Repr[_]] extends ArrInfo[Info, Repr] {
   def app[A, B]: Repr[A => B] => Repr[A] => Repr[B]
 }

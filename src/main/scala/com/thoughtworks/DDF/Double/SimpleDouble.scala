@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.SimpleArrow
+import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleDouble[Repr[_]] extends DoubleInfo[NoInfo, Repr] with SimpleArrow[Repr] {
+trait SimpleDouble[Repr[_]] extends DoubleInfo[NoInfo, Repr] with SimpleArr[Repr] {
   override implicit def doubleInfo = NoInfo()
 }
 

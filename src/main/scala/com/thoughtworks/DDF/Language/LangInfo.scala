@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.Arrow.ArrowInfo
+import com.thoughtworks.DDF.Arrow.ArrInfo
 import com.thoughtworks.DDF.Bool.BoolInfo
 import com.thoughtworks.DDF.Double.DoubleInfo
 import com.thoughtworks.DDF.List.ListInfo
@@ -13,7 +13,7 @@ trait LangInfo[Info[_], Repr[_]] extends
   ProductInfo[Info, Repr] with
   DoubleInfo[Info, Repr] with
   OptionInfo[Info, Repr] with
-  ArrowInfo[Info, Repr] with
+  ArrInfo[Info, Repr] with
   UnitInfo[Info, Repr] with
   ListInfo[Info, Repr] with
   BoolInfo[Info, Repr] with

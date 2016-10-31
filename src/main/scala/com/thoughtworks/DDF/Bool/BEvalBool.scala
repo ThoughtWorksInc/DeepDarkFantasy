@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Bool
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, CommutativeMonoidUnit, Loss, LossMatch, LossInfo}
 
-trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArrow {
+trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArr {
   object BoolBEC extends BEvalMatch[Boolean] {
     override type ret = Boolean
   }

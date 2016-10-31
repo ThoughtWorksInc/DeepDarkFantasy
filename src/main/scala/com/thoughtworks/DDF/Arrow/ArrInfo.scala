@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Arrow
 
 import com.thoughtworks.DDF.InfoBase.InfoBase
 
-trait ArrowInfo[Info[_], Repr[_]] extends InfoBase[Info, Repr] {
+trait ArrInfo[Info[_], Repr[_]] extends InfoBase[Info, Repr] {
   implicit def aInfo[A, B](implicit ai : Info[A], bi : Info[B]) : Info[A => B]
 
   def domInfo[A, B]: Info[A => B] => Info[A]

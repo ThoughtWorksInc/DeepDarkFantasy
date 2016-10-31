@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalLitD extends BEvalDoubleInfo with BEvalArrow with LitD[LossInfo, BEval] {
+trait BEvalLitD extends BEvalDoubleInfo with BEvalArr with LitD[LossInfo, BEval] {
   override def litD = dEval
 }
 

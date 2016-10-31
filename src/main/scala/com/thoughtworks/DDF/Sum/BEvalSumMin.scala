@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.Combinators.{BEvalComb, Comb}
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalSumMin extends SumMin[LossInfo, BEval] with BEvalSumInfo with BEvalArrow {
+trait BEvalSumMin extends SumMin[LossInfo, BEval] with BEvalSumInfo with BEvalArr {
   override def left[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]): BEval[A => Either[A, B]] =
     aEval[A, Either[A, B]](ea => (sumEval(scala.Left(ea)), slossl))(ai, sumInfo(ai, bi))
 

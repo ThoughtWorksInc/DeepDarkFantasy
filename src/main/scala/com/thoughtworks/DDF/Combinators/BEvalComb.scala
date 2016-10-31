@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Combinators
 import com.thoughtworks.DDF.Arrow._
 import com.thoughtworks.DDF.{BEval, Loss, LossInfo}
 
-trait BEvalComb extends BEvalArrow with Comb[LossInfo, BEval] {
+trait BEvalComb extends BEvalArr with Comb[LossInfo, BEval] {
   override def S[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]): BEval[(A => B => C) => (A => B) => A => C] =
     aEval[
       A => B => C,

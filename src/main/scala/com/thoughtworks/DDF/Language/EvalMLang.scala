@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Language
 
+import com.thoughtworks.DDF.Combinators.{Comb, EvalMComb}
 import com.thoughtworks.DDF.NoInfo
 
-class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X => X]] {
+trait EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X => X]] with EvalMComb {
   override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): (A => B => B) => B => List[A] => List[B] =
     f => z => _.scanRight(z)((x, y) => f(x)(y))
 
@@ -33,11 +34,6 @@ class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
     case h :: t => _ => f => f(h)(t)
   }
 
-  override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): (A => B => C) => B => A => C = f =>
-    y => x => f(x)(y)
-
-  override def App[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): (A => B) => A => B = identity[A => B]
-
   override def none[A](implicit ai: NoInfo[A]): Option[A] = None
 
   override def some[A](implicit ai: NoInfo[A]): A => Option[A] = Some[A]
@@ -49,8 +45,6 @@ class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
 
   override def uncurry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): (A => B => C) => ((A, B)) => C =
     f => x => f(x._1)(x._2)
-
-  override def I[A](implicit ai: NoInfo[A]): A => A = identity[A]
 
   override def reverse[A](implicit ai: NoInfo[A]): List[A] => List[A] = _.reverse
 
@@ -69,15 +63,6 @@ class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
   override def multD: Double => Double => Double = l => r => l * r
 
   override def litD: Double => Double = identity[Double]
-
-  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A => B) => A => B) => A => B = f => x =>
-    f(Y[A, B](NoInfo(), NoInfo())(f))(x)
-
-  override def Let[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => (A => B) => B = x => f => f(x)
-
-  override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): (A => A => B) => A => B = f => a => f(a)(a)
-
-  override def K[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => B => A = a => _ => a
 
   override def curry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]):
   (((A, B)) => C) => A => B => C = f => a => b => f((a, b))
@@ -108,9 +93,6 @@ class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
     case Right(x) => _ => f => f(x)
   }
 
-  override def S[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]):
-  (A => B => C) => (A => B) => A => C = f => x => a => f(a)(x(a))
-
   override def expD: Double => Double = Math.exp
 
   override def litB: Boolean => Boolean = identity[Boolean]
@@ -119,9 +101,6 @@ class EvalMLang extends Lang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X =>
     case true => x => _ => x
     case false => _ => x => x
   }
-
-  override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]): (B => C) => (A => B) => A => C =
-    f => g => f.compose(g)
-
-  override def app[A, B]: (A => B) => A => B = identity[A => B]
 }
+
+object EvalMLang extends EvalMLang

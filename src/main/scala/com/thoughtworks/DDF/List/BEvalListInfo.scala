@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.BEvalArrowInfo
+import com.thoughtworks.DDF.Arrow.BEvalArrInfo
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
-trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrowInfo {
+trait BEvalListInfo extends ListInfo[LossInfo, BEval] with BEvalArrInfo {
   def lLoss[A](l: scala.List[Loss[A]])(implicit ai: LossInfo[A]): Loss[scala.List[A]] =
     new Loss[scala.List[A]] {
       override val tm: LossInfo.Aux[scala.List[A], scala.List[Loss[A]]] = listInfo[A]

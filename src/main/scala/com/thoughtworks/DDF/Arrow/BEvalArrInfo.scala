@@ -9,7 +9,7 @@ trait ArrowLoss[A, B] {
   def mapReduce[C](f: BEval[A] => Loss[B] => C)(implicit m: CommutativeMonoid[C]): C
 }
 
-trait BEvalArrowInfo extends ArrowInfo[LossInfo, BEval] with BEvalInfoBase {
+trait BEvalArrInfo extends ArrInfo[LossInfo, BEval] with BEvalInfoBase {
   def lossA[A, B]: BEval[A] => Loss[B] => Loss[A => B] = eva => bl => new Loss[A => B] {
     override val tm: LossInfo.Aux[A => B, ArrowLoss[A, B]] = aInfo[A, B](eva.loss, bl.tm)
 
@@ -102,6 +102,6 @@ trait BEvalArrowInfo extends ArrowInfo[LossInfo, BEval] with BEvalInfoBase {
   override def rngInfo[A, B]: LossInfo[A => B] => LossInfo[B] = _.get(ArrowLC[A, B]()).Rng
 }
 
-object BEvalArrowInfo {
-  implicit def apply: BEvalArrowInfo = new BEvalArrowInfo {}
+object BEvalArrInfo {
+  implicit def apply: BEvalArrInfo = new BEvalArrInfo {}
 }

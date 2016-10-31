@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.BEvalArrow
+import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalProduct extends Product[LossInfo, BEval] with BEvalProductMin with BEvalArrow {
+trait BEvalProduct extends Product[LossInfo, BEval] with BEvalProductMin with BEvalArr {
   def curry[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[(((A, B)) => C) => A => B => C] =
     aEval[((A, B)) => C, A => B => C](abc =>

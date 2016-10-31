@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Sum
 
-import com.thoughtworks.DDF.Arrow.ShowArrow
+import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowSum extends Sum[NoInfo, Show] with ShowArrow with SimpleSum[Show] {
+trait ShowSum extends Sum[NoInfo, Show] with ShowArr with SimpleSum[Show] {
   override def left[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("left")
 
   override def right[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("right")

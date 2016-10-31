@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.Arrow.SimpleArrow
+import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.Bool.SimpleBool
 import com.thoughtworks.DDF.Double.SimpleDouble
 import com.thoughtworks.DDF.List.SimpleList
@@ -11,7 +11,7 @@ import com.thoughtworks.DDF.Unit.SimpleUnit
 
 trait SimpleLang[Repr[_]] extends
   LangInfo[NoInfo, Repr] with
-  SimpleArrow[Repr] with
+  SimpleArr[Repr] with
   SimpleOption[Repr] with
   SimpleDouble[Repr] with
   SimpleList[Repr] with
