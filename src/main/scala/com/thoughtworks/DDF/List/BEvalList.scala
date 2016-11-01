@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Product.BEvalProduct
+import com.thoughtworks.DDF.Product.BEvalProd
 import com.thoughtworks.DDF.{BEval, Loss, LossInfo}
 
-trait BEvalList extends List[LossInfo, BEval] with BEvalListMin with BEvalProduct {
+trait BEvalList extends List[LossInfo, BEval] with BEvalListMin with BEvalProd {
   override def listMap[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
   BEval[(A => B) => scala.List[A] => scala.List[B]] =
     aEval[A => B, scala.List[A] => scala.List[B]](ab =>

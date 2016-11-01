@@ -56,9 +56,9 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
 
   override def mkProduct[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => B => (A, B) = l => r => (l, r)
 
-  override def zeroth[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A, B)) => A = _._1
+  override def zro[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A, B)) => A = _._1
 
-  override def first[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A, B)) => B = _._2
+  override def fst[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A, B)) => B = _._2
 
   override def multD: Double => Double => Double = l => r => l * r
 
@@ -101,6 +101,8 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
     case true => x => _ => x
     case false => _ => x => x
   }
+
+  override def exfalso[A](implicit ai: NoInfo[A]): Nothing => A = x => x
 }
 
 object EvalMInterLang extends EvalMInterLang

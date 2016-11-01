@@ -38,7 +38,7 @@ trait BEvalBool extends Bool[LossInfo, BEval] with BEvalArr {
   override implicit def boolInfo: LossInfo.Aux[Boolean, Unit] = new LossInfo[Boolean] {
     override def convert = litB
 
-    override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit.apply
+    override def m: CommutativeMonoid[Unit] = CommutativeMonoidUnit
 
     override val tmr: tm.ret = ()
 

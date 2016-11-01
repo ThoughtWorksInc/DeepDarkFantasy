@@ -37,7 +37,7 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
 
   override def listZip[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[(List[A]) => (List[B]) => List[(A, B)]] = ???
 
-  override def zeroth[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[((A, B)) => A] = ???
+  override def zro[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[((A, B)) => A] = ???
 
   override def C[A, B, C](implicit ai: FEvalMatch[A], bi: FEvalMatch[B], ci: FEvalMatch[C]): FEval[((A) => (B) => C) => (B) => (A) => C] = ???
 
@@ -75,7 +75,7 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
 
   override def optionMatch[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[(Option[A]) => (B) => ((A) => B) => B] = ???
 
-  override def first[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[((A, B)) => B] = ???
+  override def fst[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[((A, B)) => B] = ???
 
   override def litB: (Boolean) => FEval[Boolean] = ???
 
@@ -121,11 +121,11 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
 
   override def S[A, B, C](implicit ai: FEvalMatch[A], bi: FEvalMatch[B], ci: FEvalMatch[C]): FEval[((A) => (B) => C) => ((A) => B) => (A) => C] = ???
 
-  override implicit def productInfo[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEvalMatch[(A, B)] = ???
+  override implicit def prodInfo[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEvalMatch[(A, B)] = ???
 
-  override def productZerothInfo[A, B]: (FEvalMatch[(A, B)]) => FEvalMatch[A] = ???
+  override def prodZroInfo[A, B]: (FEvalMatch[(A, B)]) => FEvalMatch[A] = ???
 
-  override def productFirstInfo[A, B]: (FEvalMatch[(A, B)]) => FEvalMatch[B] = ???
+  override def prodFstInfo[A, B]: (FEvalMatch[(A, B)]) => FEvalMatch[B] = ???
 
   override def sumAssocLR[A, B, C](implicit ai: FEvalMatch[A], bi: FEvalMatch[B], ci: FEvalMatch[C]): FEval[(Either[Either[A, B], C]) => Either[A, Either[B, C]]] = ???
 
@@ -140,6 +140,10 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
   override def mkProduct[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[(A) => (B) => (A, B)] = ???
 
   override def reprInfo[A]: (FEval[A]) => FEvalMatch[A] = ???
+
+  override implicit def botInfo: FEvalMatch[Nothing] = ???
+
+  override def exfalso[A](implicit ai: FEvalMatch[A]): FEval[Nothing => A] = ???
 }
 
 object FEvalInterLang extends FEvalInterLang

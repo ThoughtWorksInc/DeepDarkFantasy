@@ -12,7 +12,7 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def scanRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]) =
     reprIso.to(l.scanRight[A, B](infoIso.from(ai), infoIso.from(bi)))
 
-  override def zeroth[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => A] = ???
+  override def zro[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => A] = ???
 
   override def right[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(B) => Either[A, B]] = ???
 
@@ -76,7 +76,7 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def sumAssocRL[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Either[A, Either[B, C]]) => Either[Either[A, B], C]] = ???
 
-  override def first[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => B] = ???
+  override def fst[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => B] = ???
 
   override def litB: (Boolean) => NRepr[Boolean] = ???
 
@@ -114,11 +114,11 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def S[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[((A) => (B) => C) => ((A) => B) => (A) => C] = ???
 
-  override implicit def productInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NInfo[(A, B)] = ???
+  override implicit def prodInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NInfo[(A, B)] = ???
 
-  override def productZerothInfo[A, B]: (NInfo[(A, B)]) => NInfo[A] = ???
+  override def prodZroInfo[A, B]: (NInfo[(A, B)]) => NInfo[A] = ???
 
-  override def productFirstInfo[A, B]: (NInfo[(A, B)]) => NInfo[B] = ???
+  override def prodFstInfo[A, B]: (NInfo[(A, B)]) => NInfo[B] = ???
 
   override def sumAssocLR[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Either[Either[A, B], C]) => Either[A, Either[B, C]]] = ???
 
@@ -137,6 +137,10 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def mkProduct[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => (B) => (A, B)] = ???
 
   override def reprInfo[A]: NRepr[A] => NInfo[A] = ???
+
+  override def exfalso[A](implicit ai: NInfo[A]): NRepr[(Nothing) => A] = ???
+
+  override implicit def botInfo: NInfo[Nothing] = ???
 }
 
 object IsoLang {

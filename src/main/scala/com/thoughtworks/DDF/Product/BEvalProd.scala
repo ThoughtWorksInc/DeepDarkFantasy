@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Product
 import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.{BEval, LossInfo}
 
-trait BEvalProduct extends Product[LossInfo, BEval] with BEvalProductMin with BEvalArr {
+trait BEvalProd extends Prod[LossInfo, BEval] with BEvalProdMin with BEvalArr {
   def curry[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[(((A, B)) => C) => A => B => C] =
     aEval[((A, B)) => C, A => B => C](abc =>
@@ -17,8 +17,8 @@ trait BEvalProduct extends Product[LossInfo, BEval] with BEvalProductMin with BE
         })(ai.lm)))
         (ai, aInfo(bi, ci)),
         x => aloss(x).mapReduce(a => y => aloss(y).mapReduce(b => l => lossA(productEval(a, b))(l))(
-          aInfo(productInfo(ai, bi), ci).lm))(
-          aInfo(productInfo(ai, bi), ci).lm)))
+          aInfo(prodInfo(ai, bi), ci).lm))(
+          aInfo(prodInfo(ai, bi), ci).lm)))
 
   def uncurry[A, B, C](implicit ai: LossInfo[A], bi: LossInfo[B], ci: LossInfo[C]):
   BEval[(A => B => C) => ((A, B)) => C] =
@@ -27,10 +27,10 @@ trait BEvalProduct extends Product[LossInfo, BEval] with BEvalProductMin with BE
         val bc = aeval(abc).forward(peval(ab)._1)
         val c = aeval(bc.eb).forward(peval(ab)._2)
         (c.eb, l => lossP(bc.backward(lossA(peval(ab)._2)(l)))(c.backward(l)))
-      })(productInfo(ai, bi), ci),
+      })(prodInfo(ai, bi), ci),
         x => aloss(x).mapReduce(p => l => lossA(peval(p)._1)(lossA(peval(p)._2)(l)))(aInfo(ai, aInfo(bi, ci)).lm)))
 }
 
-object BEvalProduct {
-  implicit def apply = new BEvalProduct {}
+object BEvalProd {
+  implicit def apply = new BEvalProd {}
 }

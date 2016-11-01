@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Product
 
-trait UnCurry[Info[_], Repr[_]] extends ProductMin[Info, Repr] {
+trait UnCurry[Info[_], Repr[_]] extends ProdMin[Info, Repr] {
   def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(A => B => C) => ((A, B)) => C]
 
   final def uncurry_[A, B, C]: Repr[A => B => C] => Repr[((A, B)) => C] = f =>

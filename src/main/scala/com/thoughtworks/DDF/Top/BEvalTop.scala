@@ -1,13 +1,13 @@
-package com.thoughtworks.DDF.Unit
+package com.thoughtworks.DDF.Top
 
 import com.thoughtworks.DDF.InfoBase.BEvalInfoBase
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, CommutativeMonoidUnit, LossMatch, LossInfo}
 
-trait BEvalUnit extends Unit[LossInfo, BEval] with BEvalInfoBase {
+trait BEvalTop extends Top[LossInfo, BEval] with BEvalInfoBase {
   override implicit def unitInfo: LossInfo.Aux[scala.Unit, scala.Unit] = new LossInfo[scala.Unit] {
     override type ret = scala.Unit
 
-    override def m: CommutativeMonoid[scala.Unit] = CommutativeMonoidUnit.apply
+    override def m: CommutativeMonoid[scala.Unit] = CommutativeMonoidUnit
 
     override def convert: scala.Unit => BEval[scala.Unit] = _ => mkUnit
 
@@ -34,6 +34,6 @@ trait BEvalUnit extends Unit[LossInfo, BEval] with BEvalInfoBase {
 
 }
 
-object BEvalUnit {
-  implicit def apply = new BEvalUnit {}
+object BEvalTop {
+  implicit def apply = new BEvalTop {}
 }

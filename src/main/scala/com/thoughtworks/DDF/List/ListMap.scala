@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Product.Product
+import com.thoughtworks.DDF.Product.Prod
 
-trait ListMap[Info[_], Repr[_]] extends Product[Info, Repr] with ListMin[Info, Repr] {
+trait ListMap[Info[_], Repr[_]] extends Prod[Info, Repr] with ListMin[Info, Repr] {
   def listMap[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => scala.List[A] => scala.List[B]]
 
   final def listMap_[A, B]: Repr[A => B] => Repr[scala.List[A] => scala.List[B]] = f =>

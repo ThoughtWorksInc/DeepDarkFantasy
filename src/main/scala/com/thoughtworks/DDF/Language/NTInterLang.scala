@@ -79,11 +79,11 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = NTF(base.curry)
 
-  override implicit def productInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.productInfo
+  override implicit def prodInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.prodInfo
 
-  override def productZerothInfo[A, B] = base.productZerothInfo
+  override def prodZroInfo[A, B] = base.prodZroInfo
 
-  override def productFirstInfo[A, B] = base.productFirstInfo
+  override def prodFstInfo[A, B] = base.prodFstInfo
 
   override def litD = d => NTF(base.litD(d))
 
@@ -111,9 +111,9 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def mkProduct[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.mkProduct)
 
-  override def zeroth[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.zeroth)
+  override def zro[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.zro)
 
-  override def first[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.first)
+  override def fst[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.fst)
 
   override def Y[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.Y)
 
@@ -124,6 +124,11 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
   override def listMatch[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.listMatch)
 
   override implicit def doubleInfo = base.doubleInfo
+
+  override def exfalso[A](implicit ai: Info[A]) = NTF(base.exfalso[A])
+
+  override implicit def botInfo = base.botInfo
+
 }
 
 object NTInterLang {
@@ -140,5 +145,5 @@ object NTInterLang {
       override def app[A, B] = ap.apply[A].apply[B]
 
       override def reprInfo[A] = r.apply[A]
-  }
+    }
 }

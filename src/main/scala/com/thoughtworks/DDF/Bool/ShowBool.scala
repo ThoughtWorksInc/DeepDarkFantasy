@@ -9,6 +9,4 @@ trait ShowBool extends Bool[NoInfo, Show] with SimpleBool[Show] with ShowArr {
   override def ite[A](implicit ai: NoInfo[A]) = Show("ite")
 }
 
-object ShowBool {
-  implicit def apply = new ShowBool {}
-}
+object ShowBool extends ShowBool

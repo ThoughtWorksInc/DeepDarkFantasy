@@ -21,7 +21,7 @@ trait ImpWInterLang extends NTInterLang[InterLangInfoG, InterLangTerm, ImpW] {
 
       override val exp: InterLangTerm[Weight => B] = {
         val l = InterLangTermInterLang
-        l.S__(l.B__(f.exp)(l.zeroth(f.wi, x.wi)))(l.B__(x.exp)(l.first(f.wi, x.wi)))
+        l.S__(l.B__(f.exp)(l.zro(f.wi, x.wi)))(l.B__(x.exp)(l.fst(f.wi, x.wi)))
       }
     }
 

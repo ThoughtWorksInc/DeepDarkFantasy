@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.BEvalArrInfo
 import com.thoughtworks.DDF.{BEval, BEvalMatch, CommutativeMonoid, Loss, LossMatch, LossInfo}
 
 
-trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrInfo {
+trait BEvalProdInfo extends ProdInfo[LossInfo, BEval] with BEvalArrInfo {
   trait ProductLCRet[A, B] {
     def zeroth: LossInfo[A]
 
@@ -22,7 +22,7 @@ trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrInfo {
   def peval[A, B](ab: BEval[(A, B)]): (BEval[A], BEval[B]) = ab.get(ProductBEC[A, B]())
 
   def productEval[A, B](a: BEval[A], b: BEval[B])(implicit al: LossInfo[A], bl: LossInfo[B]) = new BEval[(A, B)] {
-    override val loss: LossInfo[(A, B)] = productInfo(al, bl)
+    override val loss: LossInfo[(A, B)] = prodInfo(al, bl)
 
     override def eval: (A, B) = (a.eval, b.eval)
 
@@ -32,19 +32,19 @@ trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrInfo {
   }
 
   def lossP[A, B]: Loss[A] => Loss[B] => Loss[(A, B)] = l => r => new Loss[(A, B)] {
-    override val tm: LossInfo.Aux[(A, B), (Loss[A], Loss[B])] = productInfo(l.tm, r.tm)
+    override val tm: LossInfo.Aux[(A, B), (Loss[A], Loss[B])] = prodInfo(l.tm, r.tm)
 
     override val tmr: tm.loss = (l, r)
   }
 
   def ploss[A, B]: Loss[(A, B)] => (Loss[A], Loss[B]) = l =>
-    l.get(productInfo(productZerothInfo(l.tm), productFirstInfo(l.tm)))
+    l.get(prodInfo(prodZroInfo(l.tm), prodFstInfo(l.tm)))
 
   def ploss0[A, B]: Loss[(A, B)] => Loss[A] = l => ploss(l)._1
 
   def ploss1[A, B]: Loss[(A, B)] => Loss[B] = l => ploss(l)._2
 
-  override implicit def productInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
+  override implicit def prodInfo[A, B](implicit ai: LossInfo[A], bi: LossInfo[B]):
   LossInfo.Aux[(A, B), (Loss[A], Loss[B])] =
     new LossInfo[(A, B)] {
       override def convert: ((A, B)) => BEval[(A, B)] = p => productEval(ai.convert(p._1), bi.convert(p._2))
@@ -71,11 +71,11 @@ trait BEvalProductInfo extends ProductInfo[LossInfo, BEval] with BEvalArrInfo {
         (ai.updatel(x._1)(rate)(l._1), bi.updatel(x._2)(rate)(l._2))
     }
 
-  override def productZerothInfo[A, B]: LossInfo[(A, B)] => LossInfo[A] = _.get(ProductLC[A, B]()).zeroth
+  override def prodZroInfo[A, B]: LossInfo[(A, B)] => LossInfo[A] = _.get(ProductLC[A, B]()).zeroth
 
-  override def productFirstInfo[A, B]: LossInfo[(A, B)] => LossInfo[B] = _.get(ProductLC[A, B]()).first
+  override def prodFstInfo[A, B]: LossInfo[(A, B)] => LossInfo[B] = _.get(ProductLC[A, B]()).first
 }
 
-object BEvalProductInfo {
-  implicit def apply: BEvalProductInfo = new BEvalProductInfo {}
+object BEvalProdInfo {
+  implicit def apply: BEvalProdInfo = new BEvalProdInfo {}
 }

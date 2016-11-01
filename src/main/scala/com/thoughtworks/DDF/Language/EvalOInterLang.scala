@@ -134,7 +134,7 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def uncurry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
   EvalO[(A => B => C) => ((A, B)) => C] = aeval(ltl.uncurry[A, B, C])(f =>
-    aeval(ltl.uncurry_(f.l))(p => app(app(f)(zeroth_(p)))(first_(p))))
+    aeval(ltl.uncurry_(f.l))(p => app(app(f)(zro_(p)))(fst_(p))))
 
   override def plusD: EvalO[Double => Double => Double] =
     aeval(ltl.plusD)(l => aeval(ltl.plusD_(l.l))(r => litD(eval(l) + eval(r))))
@@ -167,11 +167,11 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
       override val tm = ptm[A, B]
     }))
 
-  override def zeroth[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[((A, B)) => A] =
-    aeval(ltl.zeroth[A, B])(_.get(ptm[A, B])._1)
+  override def zro[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[((A, B)) => A] =
+    aeval(ltl.zro[A, B])(_.get(ptm[A, B])._1)
 
-  override def first[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[((A, B)) => B] =
-    aeval(ltl.first[A, B])(_.get(ptm[A, B])._2)
+  override def fst[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[((A, B)) => B] =
+    aeval(ltl.fst[A, B])(_.get(ptm[A, B])._2)
 
   override def litD: Double => EvalO[Double] = d => new EvalO[Double] {
     override def l: InterLangTerm[Double] = ltl.litD(d)
@@ -272,6 +272,12 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     })
 
   override def reprInfo[A]: EvalO[A] => InterLangInfoG[A] = x => ltl.reprInfo(x.l)
+
+  override implicit def botInfo: InterLangInfoG[Nothing] = new InterLangInfoG[Nothing] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo
+  }
+
+  override def exfalso[A](implicit ai: InterLangInfoG[A]): EvalO[Nothing => A] = aeval[Nothing, A](ltl.exfalso[A])(eval)
 }
 
 object EvalOInterLang extends EvalOInterLang

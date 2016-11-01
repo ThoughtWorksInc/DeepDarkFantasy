@@ -184,12 +184,12 @@ trait InterLangTermInterLang extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.mkProduct(ai(lang), bi(lang))
   }
 
-  override def zeroth[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[((A, B)) => A] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.zeroth(ai(lang), bi(lang))
+  override def zro[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[((A, B)) => A] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.zro(ai(lang), bi(lang))
   }
 
-  override def first[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[((A, B)) => B] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.first(ai(lang), bi(lang))
+  override def fst[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[((A, B)) => B] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.fst(ai(lang), bi(lang))
   }
 
   override def left[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[A => Either[A, B]] {
@@ -210,6 +210,15 @@ trait InterLangTermInterLang extends
     new InterLangInfoG[A] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(x(lang))
     }
+
+  override def exfalso[A](implicit ai: InterLangInfoG[A]): InterLangTerm[Nothing => A] =
+    new InterLangTerm[Nothing => A] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.exfalso(ai(lang))
+    }
+
+  override implicit def botInfo: InterLangInfoG[Nothing] = new InterLangInfoG[Nothing] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo
+  }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

@@ -9,7 +9,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def scanLeft[A, B](implicit ai: Info[A], bi: Info[B]) = i.scanLeft[A, B]
 
-  override def zeroth[A, B](implicit ai: Info[A], bi: Info[B]) = i.zeroth[A, B]
+  override def zro[A, B](implicit ai: Info[A], bi: Info[B]) = i.zro[A, B]
 
   override def right[A, B](implicit ai: Info[A], bi: Info[B]) = i.right[A, B]
 
@@ -67,7 +67,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def sumAssocRL[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = i.sumAssocRL[A, B, C]
 
-  override def first[A, B](implicit ai: Info[A], bi: Info[B]) = i.first[A, B]
+  override def fst[A, B](implicit ai: Info[A], bi: Info[B]) = i.fst[A, B]
 
   override def multD = i.multD
 
@@ -112,11 +112,11 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
         nnnl.app(nnnl.C_(nnnl.rconv(nNLang.in)))(nnnl.in)))))
   }
 
-  override implicit def productInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.productInfo[A, B]
+  override implicit def prodInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.prodInfo[A, B]
 
-  override def productZerothInfo[A, B] = i.productZerothInfo[A, B]
+  override def prodZroInfo[A, B] = i.prodZroInfo[A, B]
 
-  override def productFirstInfo[A, B] = i.productFirstInfo[A, B]
+  override def prodFstInfo[A, B] = i.prodFstInfo[A, B]
 
   override def sumAssocLR[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = i.sumAssocLR[A, B, C]
 
@@ -144,6 +144,10 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
     val nnl = NextInterLang.apply[Info, nLang.repr, B => Except[A, C]](nLang, aInfo(bi, sumInfo(ai, ci)))
     nLang.collapse(nnl.collapse(nnl.sumMatch___(nnl.rconv(nLang.in))(nnl.left[A, C])(nnl.in)))
   }
+
+  override def exfalso[A](implicit ai: Info[A]): Repr[Nothing => A] = i.exfalso[A]
+
+  override implicit def botInfo: Info[Nothing] = i.botInfo
 }
 
 object InterLang2Lang {

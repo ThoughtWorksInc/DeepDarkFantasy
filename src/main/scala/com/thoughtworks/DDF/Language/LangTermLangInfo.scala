@@ -4,20 +4,20 @@ import scalaz.NaturalTransformation
 
 trait LangTermLangInfo[R[_]] extends
   LangInfo[InterLangInfoG, R] {
-  override implicit def productInfo[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
+  override implicit def prodInfo[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangInfoG[(A, B)] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[(A, B)] =
-        lang.productInfo(ai(lang), bi(lang))
+        lang.prodInfo(ai(lang), bi(lang))
     }
 
-  override def productZerothInfo[A, B]: InterLangInfoG[(A, B)] => InterLangInfoG[A] = i =>
+  override def prodZroInfo[A, B]: InterLangInfoG[(A, B)] => InterLangInfoG[A] = i =>
     new InterLangInfoG[A] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.productZerothInfo(i(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.prodZroInfo(i(lang))
     }
 
-  override def productFirstInfo[A, B]: InterLangInfoG[(A, B)] => InterLangInfoG[B] = i =>
+  override def prodFstInfo[A, B]: InterLangInfoG[(A, B)] => InterLangInfoG[B] = i =>
     new InterLangInfoG[B] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[B] = lang.productFirstInfo(i(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[B] = lang.prodFstInfo(i(lang))
     }
 
   override implicit def doubleInfo: InterLangInfoG[Double] = new InterLangInfoG[Double] {

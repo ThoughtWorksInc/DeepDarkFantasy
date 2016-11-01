@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Product.Product
+import com.thoughtworks.DDF.Product.Prod
 
-trait FoldLeft[Info[_], Repr[_]] extends Product[Info, Repr] with ListMin[Info, Repr] {
+trait FoldLeft[Info[_], Repr[_]] extends Prod[Info, Repr] with ListMin[Info, Repr] {
   def foldLeft[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => A) => A => scala.List[B] => A]
 
   final def foldLeft_[A, B]: Repr[A => B => A] => Repr[A => scala.List[B] => A] = f =>

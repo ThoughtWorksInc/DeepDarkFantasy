@@ -1,22 +1,24 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.Bool
+import com.thoughtworks.DDF.Bot.Bot
 import com.thoughtworks.DDF.Combinators.{SKI, Y}
 import com.thoughtworks.DDF.Double.Double
 import com.thoughtworks.DDF.List.ListMin
 import com.thoughtworks.DDF.Option.Option
-import com.thoughtworks.DDF.Product.ProductMin
+import com.thoughtworks.DDF.Product.ProdMin
 import com.thoughtworks.DDF.Sum.Sum
-import com.thoughtworks.DDF.Unit.Unit
+import com.thoughtworks.DDF.Top.Top
 
 trait MinLang[Info[_], Repr[_]] extends
+  ProdMin[Info, Repr] with
   LangInfo[Info, Repr] with
-  ProductMin[Info, Repr] with
+  ListMin[Info, Repr] with
   Double[Info, Repr] with
   Option[Info, Repr] with
-  Unit[Info, Repr] with
-  ListMin[Info, Repr] with
+  Top[Info, Repr] with
   Bool[Info, Repr] with
   Sum[Info, Repr] with
+  Bot[Info, Repr] with
   SKI[Info, Repr] with
   Y[Info, Repr]
