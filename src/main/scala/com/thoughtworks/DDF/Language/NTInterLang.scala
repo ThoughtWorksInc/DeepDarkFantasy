@@ -97,7 +97,7 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def sumAssocRL[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = NTF(base.sumAssocRL)
 
-  override implicit def unitInfo = base.unitInfo
+  override implicit def topInfo = base.topInfo
 
   override def S[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = NTF(base.S)
 

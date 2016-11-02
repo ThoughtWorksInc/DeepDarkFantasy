@@ -13,7 +13,7 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
 
   override def rngInfo[A, B]: FEvalMatch[A => B] => FEvalMatch[B] = ???
 
-  override implicit def unitInfo: FEvalMatch[Unit] = new FEvalMatch[Unit] {
+  override implicit def topInfo: FEvalMatch[Unit] = new FEvalMatch[Unit] {
     override def gSelf: LangTerm[Unit => Unit] = ltl.I(LI)
 
     override def selfG: LangTerm[Unit => Unit] = ltl.I(LI)
@@ -26,7 +26,7 @@ trait FEvalInterLang extends InterLang[FEvalMatch, FEval] {
       override type ret = Unit
     }
 
-    override def LI: LangInfoG[Unit] = ltl.unitInfo
+    override def LI: LangInfoG[Unit] = ltl.topInfo
   }
 
   override def scanRight[A, B](implicit ai: FEvalMatch[A], bi: FEvalMatch[B]): FEval[((A) => (B) => B) => (B) => (List[A]) => List[B]] = ???

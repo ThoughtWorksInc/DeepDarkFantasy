@@ -57,7 +57,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override implicit def boolInfo = i.boolInfo
 
-  override implicit def unitInfo = i.unitInfo
+  override implicit def topInfo = i.topInfo
 
   override def foldRight[A, B](implicit ai: Info[A], bi: Info[B]) = i.foldRight[A, B]
 
@@ -148,6 +148,10 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def exfalso[A](implicit ai: Info[A]): Repr[Nothing => A] = i.exfalso[A]
 
   override implicit def botInfo: Info[Nothing] = i.botInfo
+
+  override def imfalso[A](implicit ai: Info[A]): Repr[Unit => A] = B__[Unit, Nothing, A](exfalso[A])(impossible)
+
+  override def impossible: Repr[Unit => Nothing] = Y_[Unit, Nothing](I[Unit => Nothing](aInfo[Unit, Nothing]))
 }
 
 object InterLang2Lang {

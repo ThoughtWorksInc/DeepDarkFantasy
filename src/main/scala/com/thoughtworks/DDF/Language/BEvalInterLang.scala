@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.BEvalBool
-import com.thoughtworks.DDF.Bot.BEvalBot
+import com.thoughtworks.DDF.Bot.BEvalBotMin
 import com.thoughtworks.DDF.Combinators.BEvalComb
 import com.thoughtworks.DDF.Double.BEvalDouble
 import com.thoughtworks.DDF.List.BEvalList
@@ -21,6 +21,6 @@ trait BEvalInterLang extends
   BEvalTop with
   BEvalBool with
   BEvalOption with
-  BEvalBot
+  BEvalBotMin
 
 object BEvalInterLang extends BEvalInterLang

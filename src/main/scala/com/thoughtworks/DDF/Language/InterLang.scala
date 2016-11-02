@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Arrow.Arr
 import com.thoughtworks.DDF.Bool.Bool
-import com.thoughtworks.DDF.Bot.Bot
+import com.thoughtworks.DDF.Bot.BotMin
 import com.thoughtworks.DDF.Combinators.Comb
 import com.thoughtworks.DDF.Double.Double
 import com.thoughtworks.DDF.List.List
@@ -22,4 +22,4 @@ trait InterLang[Info[_], Repr[_]] extends
   Bool[Info, Repr] with
   Sum[Info, Repr] with
   Comb[Info, Repr] with
-  Bot[Info, Repr]
+  BotMin[Info, Repr]

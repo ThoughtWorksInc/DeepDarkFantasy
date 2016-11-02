@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Bot
 import com.thoughtworks.DDF.Arrow.BEvalArr
 import com.thoughtworks.DDF.{BEval, CommutativeMonoid, CommutativeMonoidUnit, LossInfo, LossMatch}
 
-trait BEvalBot extends Bot[LossInfo, BEval] with BEvalArr {
+trait BEvalBotMin extends BotMin[LossInfo, BEval] with BEvalArr {
   override def exfalso[A](implicit ai: LossInfo[A]): BEval[Nothing => A] =
     aEval[Nothing, A](_.eval)
 
@@ -24,4 +24,4 @@ trait BEvalBot extends Bot[LossInfo, BEval] with BEvalArr {
   }
 }
 
-object BEvalBot extends BEvalBot
+object BEvalBotMin extends BEvalBotMin

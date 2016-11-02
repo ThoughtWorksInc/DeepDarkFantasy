@@ -56,7 +56,7 @@ object ImpW {
 
       override val exp: InterLangTerm[scala.Unit => T] = new InterLangTerm[scala.Unit => T] {
         override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[scala.Unit => T] =
-          lang.K_(expT(lang))(lang.unitInfo)
+          lang.K_(expT(lang))(lang.topInfo)
       }
     }
 

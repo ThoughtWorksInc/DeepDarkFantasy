@@ -66,7 +66,7 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def rngInfo[A, B]: (NInfo[(A) => B]) => NInfo[B] = ???
 
-  override implicit def unitInfo: NInfo[Unit] = ???
+  override implicit def topInfo: NInfo[Unit] = ???
 
   override def foldLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => (B) => A) => (A) => (List[B]) => A] = ???
 
@@ -132,15 +132,20 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def litD: (Double) => NRepr[Double] = ???
 
-  override def contBind[R, A, B](implicit ri: NInfo[R], ai: NInfo[A], bi: NInfo[B]): NRepr[(Cont[R, A]) => ((A) => Cont[R, B]) => Cont[R, B]] = ???
+  override def contBind[R, A, B](implicit ri: NInfo[R], ai: NInfo[A], bi: NInfo[B]):
+  NRepr[(Cont[R, A]) => ((A) => Cont[R, B]) => Cont[R, B]] = ???
 
   override def mkProduct[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => (B) => (A, B)] = ???
 
   override def reprInfo[A]: NRepr[A] => NInfo[A] = ???
 
-  override def exfalso[A](implicit ai: NInfo[A]): NRepr[(Nothing) => A] = ???
+  override def exfalso[A](implicit ai: NInfo[A]): NRepr[Nothing => A] = ???
 
   override implicit def botInfo: NInfo[Nothing] = ???
+
+  override def imfalso[A](implicit ai: NInfo[A]): NRepr[Unit => A] = ???
+
+  override def impossible: NRepr[Unit => Nothing] = ???
 }
 
 object IsoLang {

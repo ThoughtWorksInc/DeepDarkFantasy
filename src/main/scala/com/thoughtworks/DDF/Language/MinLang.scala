@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.Bool
-import com.thoughtworks.DDF.Bot.Bot
+import com.thoughtworks.DDF.Bot.BotMin
 import com.thoughtworks.DDF.Combinators.{SKI, Y}
 import com.thoughtworks.DDF.Double.Double
 import com.thoughtworks.DDF.List.ListMin
@@ -19,6 +19,6 @@ trait MinLang[Info[_], Repr[_]] extends
   Top[Info, Repr] with
   Bool[Info, Repr] with
   Sum[Info, Repr] with
-  Bot[Info, Repr] with
+  BotMin[Info, Repr] with
   SKI[Info, Repr] with
   Y[Info, Repr]

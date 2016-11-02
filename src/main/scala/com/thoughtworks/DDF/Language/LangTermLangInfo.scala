@@ -67,8 +67,8 @@ trait LangTermLangInfo[R[_]] extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[B] = lang.sumRightInfo(i(lang))
     }
 
-  override implicit def unitInfo: InterLangInfoG[Unit] = new InterLangInfoG[Unit] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Unit] = lang.unitInfo
+  override implicit def topInfo: InterLangInfoG[Unit] = new InterLangInfoG[Unit] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Unit] = lang.topInfo
   }
 
   override implicit def optionInfo[A](implicit ai: InterLangInfoG[A]): InterLangInfoG[Option[A]] = new InterLangInfoG[Option[A]] {
