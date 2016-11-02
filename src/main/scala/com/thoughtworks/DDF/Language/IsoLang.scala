@@ -85,83 +85,86 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def fst[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.fst[A, B])
 
-  override def litB: (Boolean) => NRepr[Boolean] = ???
+  override def litB = x => rconv(l.litB(x))
 
-  override implicit def sumInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NInfo[Either[A, B]] = ???
+  override implicit def sumInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = iconv(l.sumInfo[A, B])
 
-  override def sumLeftInfo[A, B]: (NInfo[Either[A, B]]) => NInfo[A] = ???
+  override def sumLeftInfo[A, B] = si => iconv(l.sumLeftInfo(convi(si)))
 
-  override def sumRightInfo[A, B]: (NInfo[Either[A, B]]) => NInfo[B] = ???
+  override def sumRightInfo[A, B] = si => iconv(l.sumRightInfo(convi(si)))
 
-  override def Y[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(((A) => B) => (A) => B) => (A) => B] = ???
+  override def Y[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.Y[A, B])
 
-  override def Let[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => ((A) => B) => B] = ???
+  override def Let[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.Let[A, B])
 
-  override def nil[A](implicit ai: NInfo[A]): NRepr[List[A]] = ???
+  override def nil[A](implicit ai: NInfo[A]) = rconv(l.nil[A])
 
-  override def listMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(List[A]) => (B) => ((A) => (List[A]) => B) => B] = ???
+  override def listMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.listMatch[A, B])
 
-  override def W[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => (A) => B) => (A) => B] = ???
+  override def W[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.W[A, B])
 
-  override def sumMatch[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Either[A, B]) => ((A) => C) => ((B) => C) => C] = ???
+  override def sumMatch[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.sumMatch[A, B, C])
 
-  override def ite[A](implicit ai: NInfo[A]): NRepr[(Boolean) => (A) => (A) => A] = ???
+  override def ite[A](implicit ai: NInfo[A]) = rconv(l.ite[A])
 
-  override def sigD: NRepr[(Double) => Double] = ???
+  override def sigD = rconv(l.sigD)
 
-  override def plusD: NRepr[(Double) => (Double) => Double] = ???
+  override def plusD = rconv(l.plusD)
 
-  override def multD: NRepr[(Double) => (Double) => Double] = ???
+  override def multD = rconv(l.multD)
 
-  override def K[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => (B) => A] = ???
+  override def K[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.K[A, B])
 
-  override def curry[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(((A, B)) => C) => (A) => (B) => C] = ???
+  override def curry[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.curry[A, B, C])
 
-  override def left[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => Either[A, B]] = ???
+  override def left[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.left[A, B])
 
-  override def S[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[((A) => (B) => C) => ((A) => B) => (A) => C] = ???
+  override def S[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.S[A, B, C])
 
-  override implicit def prodInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NInfo[(A, B)] = ???
+  override implicit def prodInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = iconv(l.prodInfo[A, B])
 
-  override def prodZroInfo[A, B]: (NInfo[(A, B)]) => NInfo[A] = ???
+  override def prodZroInfo[A, B] = pi => iconv(l.prodZroInfo(convi(pi)))
 
-  override def prodFstInfo[A, B]: (NInfo[(A, B)]) => NInfo[B] = ???
+  override def prodFstInfo[A, B] = pi => iconv(l.prodFstInfo(convi(pi)))
 
-  override def sumAssocLR[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Either[Either[A, B], C]) => Either[A, Either[B, C]]] = ???
+  override def sumAssocLR[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.sumAssocLR[A, B, C])
 
-  override def B[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[((B) => C) => ((A) => B) => (A) => C] = ???
+  override def B[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.B[A, B, C])
 
-  override implicit def boolInfo: NInfo[Boolean] = ???
+  override implicit def boolInfo = iconv(l.boolInfo)
 
-  override implicit def listInfo[A](implicit ai: NInfo[A]): NInfo[List[A]] = ???
+  override implicit def listInfo[A](implicit ai: NInfo[A]) = iconv(l.listInfo[A])
 
-  override def listElmInfo[A]: (NInfo[List[A]]) => NInfo[A] = ???
+  override def listElmInfo[A] = li => iconv(l.listElmInfo(convi(li)))
 
-  override def litD: (Double) => NRepr[Double] = ???
+  override def litD = d => rconv(l.litD(d))
 
-  override def contBind[R, A, B](implicit ri: NInfo[R], ai: NInfo[A], bi: NInfo[B]):
-  NRepr[(Cont[R, A]) => ((A) => Cont[R, B]) => Cont[R, B]] = ???
+  override def contBind[R, A, B](implicit ri: NInfo[R], ai: NInfo[A], bi: NInfo[B]) = rconv(l.contBind[R, A, B])
 
-  override def mkProduct[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(A) => (B) => (A, B)] = ???
+  override def mkProduct[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.mkProduct[A, B])
 
-  override def reprInfo[A]: NRepr[A] => NInfo[A] = ???
+  override def reprInfo[A]: NRepr[A] => NInfo[A] = r => iconv(l.reprInfo(convr(r)))
 
-  override def exfalso[A](implicit ai: NInfo[A]): NRepr[Nothing => A] = ???
+  override def exfalso[A](implicit ai: NInfo[A]) = rconv(l.exfalso[A])
 
-  override implicit def botInfo: NInfo[Nothing] = ???
+  override implicit def botInfo: NInfo[Nothing] = iconv[Nothing](l.botInfo)
 
-  override def imfalso[A](implicit ai: NInfo[A]): NRepr[Unit => A] = ???
+  override def imfalso[A](implicit ai: NInfo[A]) = rconv(l.imfalso[A])
 
-  override def impossible: NRepr[Unit => Nothing] = ???
+  override def impossible = rconv(l.impossible)
 }
 
 object IsoLang {
-  def apply[OInfo[_], NInfo[_], ORepr[_], NRepr[_]]: IsoLang[OInfo, NInfo, ORepr, NRepr] =
+  def apply[OInfo[_], NInfo[_], ORepr[_], NRepr[_]](implicit
+                                                    ii: OInfo <~> NInfo,
+                                                    ri: ORepr <~> NRepr,
+                                                    lang: Lang[OInfo, ORepr]):
+  IsoLang[OInfo, NInfo, ORepr, NRepr] =
     new IsoLang[OInfo, NInfo, ORepr, NRepr] {
-      override def infoIso: OInfo <~> NInfo = ???
+      override def infoIso: OInfo <~> NInfo = ii
 
-      override def reprIso: ORepr <~> NRepr = ???
+      override def reprIso: ORepr <~> NRepr = ri
 
-      override def l: Lang[OInfo, ORepr] = ???
+      override def l: Lang[OInfo, ORepr] = lang
     }
 }
