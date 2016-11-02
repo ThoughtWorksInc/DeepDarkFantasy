@@ -9,74 +9,81 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   def l: Lang[OInfo, ORepr]
 
-  override def scanRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]) =
-    reprIso.to(l.scanRight[A, B](infoIso.from(ai), infoIso.from(bi)))
+  def rconv[A]: ORepr[A] => NRepr[A] = reprIso.to.apply[A]
 
-  override def zro[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => A] = ???
+  def convr[A]: NRepr[A] => ORepr[A] = reprIso.from.apply[A]
 
-  override def right[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(B) => Either[A, B]] = ???
+  def iconv[A]: OInfo[A] => NInfo[A] = infoIso.to.apply[A]
 
-  override def ltD: NRepr[(Double) => (Double) => Boolean] = ???
+  implicit def convi[A](implicit n: NInfo[A]): OInfo[A] = infoIso.from(n)
 
-  override def contRet[R, A](implicit ri: NInfo[R], ai: NInfo[A]): NRepr[(A) => Cont[R, A]] = ???
+  override def scanRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.scanRight[A, B])
 
-  override def scanLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((B) => (A) => B) => (B) => (List[A]) => List[B]] = ???
+  override def zro[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.zro[A, B])
 
-  override def listZip[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(List[A]) => (List[B]) => List[(A, B)]] = ???
+  override def right[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.right[A, B])
 
-  override def divD: NRepr[(Double) => (Double) => Double] = ???
+  override def ltD = rconv(l.ltD)
 
-  override def foldRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => (B) => B) => (B) => (List[A]) => B] = ???
+  override def contRet[R, A](implicit ri: NInfo[R], ai: NInfo[A]) = rconv(l.contRet[R, A])
 
-  override def none[A](implicit ai: NInfo[A]): NRepr[Option[A]] = ???
+  override def scanLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.scanLeft[A, B])
 
-  override def some[A](implicit ai: NInfo[A]): NRepr[(A) => Option[A]] = ???
+  override def listZip[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.listZip[A, B])
 
-  override def optionMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(Option[A]) => (B) => ((A) => B) => B] = ???
+  override def divD = rconv(l.divD)
 
-  override def exceptBind[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Except[A, B]) => ((B) => Except[A, C]) => Except[A, C]] = ???
+  override def foldRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.foldRight[A, B])
 
-  override def reverse[A](implicit ai: NInfo[A]): NRepr[(List[A]) => List[A]] = ???
+  override def none[A](implicit ai: NInfo[A]) = rconv(l.none[A])
 
-  override def cons[A](implicit ai: NInfo[A]): NRepr[(A) => (List[A]) => List[A]] = ???
+  override def some[A](implicit ai: NInfo[A]) = rconv(l.some[A])
 
-  override def app[A, B]: (NRepr[(A) => B]) => (NRepr[A]) => NRepr[B] = ???
+  override def optionMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.optionMatch[A, B])
 
-  override implicit def optionInfo[A](implicit ai: NInfo[A]): NInfo[Option[A]] = ???
+  override def exceptBind[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.exceptBind[A, B, C])
 
-  override def optionElmInfo[A]: (NInfo[Option[A]]) => NInfo[A] = ???
+  override def reverse[A](implicit ai: NInfo[A]) = rconv(l.reverse[A])
 
-  override def listMap[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => B) => (List[A]) => List[B]] = ???
+  override def cons[A](implicit ai: NInfo[A]) = rconv(l.cons[A])
 
-  override def expD: NRepr[(Double) => Double] = ???
+  override def app[A, B]: NRepr[A => B] => NRepr[A] => NRepr[B] = f => x => rconv(l.app(convr(f))(convr(x)))
 
-  override def sumComm[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[(Either[A, B]) => Either[B, A]] = ???
+  override implicit def optionInfo[A](implicit ai: NInfo[A]) = iconv(l.optionInfo[A])
 
-  override def C[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[((A) => (B) => C) => (B) => (A) => C] = ???
+  override def optionElmInfo[A] = oi => iconv(l.optionElmInfo[A](convi(oi)))
 
-  override def App[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => B) => (A) => B] = ???
+  override def listMap[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.listMap[A, B])
 
-  override def uncurry[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[((A) => (B) => C) => ((A, B)) => C] = ???
+  override def expD = rconv(l.expD)
 
-  override def I[A](implicit ai: NInfo[A]): NRepr[(A) => A] = ???
+  override def sumComm[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.sumComm[A, B])
 
-  override implicit def aInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NInfo[(A) => B] = ???
+  override def C[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.C[A, B, C])
 
-  override def domInfo[A, B]: (NInfo[(A) => B]) => NInfo[A] = ???
+  override def App[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.App[A, B])
 
-  override def rngInfo[A, B]: (NInfo[(A) => B]) => NInfo[B] = ???
+  override def uncurry[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.uncurry[A, B, C])
 
-  override implicit def topInfo: NInfo[Unit] = ???
+  override def I[A](implicit ai: NInfo[A]) = rconv(l.I[A])
 
-  override def foldLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A) => (B) => A) => (A) => (List[B]) => A] = ???
+  override implicit def aInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = iconv(l.aInfo[A, B])
 
-  override def mkUnit: NRepr[Unit] = ???
+  override def domInfo[A, B] = ai => iconv(l.domInfo(convi(ai)))
 
-  override implicit def doubleInfo: NInfo[Double] = ???
+  override def rngInfo[A, B] = ai => iconv(l.rngInfo(convi(ai)))
 
-  override def sumAssocRL[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]): NRepr[(Either[A, Either[B, C]]) => Either[Either[A, B], C]] = ???
+  override implicit def topInfo = iconv(l.topInfo)
 
-  override def fst[A, B](implicit ai: NInfo[A], bi: NInfo[B]): NRepr[((A, B)) => B] = ???
+  override def foldLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.foldLeft[A, B])
+
+  override def mkUnit: NRepr[Unit] = rconv(l.mkUnit)
+
+  override implicit def doubleInfo = iconv(l.doubleInfo)
+
+  override def sumAssocRL[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.sumAssocRL[A, B, C])
+
+  override def fst[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.fst[A, B])
 
   override def litB: (Boolean) => NRepr[Boolean] = ???
 
