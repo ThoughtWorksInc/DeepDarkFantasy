@@ -157,6 +157,11 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def readerBind[E, A, B](implicit ei: Info[E], ai: Info[A], bi: Info[B]):
   Repr[Reader[E, A] => (A => Reader[E, B]) => Reader[E, B]] = C_(B__(S[E, A, B])(C))
+
+  override def stateRet[S, A](implicit si: Info[S], ai: Info[A]): Repr[A => State[S, A]] = mkProduct[A, S]
+
+  override def stateBind[S, A, B](implicit si: Info[S], ai: Info[A], bi: Info[B]):
+  Repr[State[S, A] => (A => State[S, B]) => State[S, B]] = C_(B__(B[S, (A, S), (B, S)])(uncurry[A, S, (B, S)]))
 }
 
 object InterLang2Lang {

@@ -156,6 +156,10 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def readerRet[E, A](implicit ei: NInfo[E], ai: NInfo[A]) = rconv(l.readerRet[E, A])
 
   override def readerBind[E, A, B](implicit ei: NInfo[E], ai: NInfo[A], bi: NInfo[B]) = rconv(l.readerBind[E, A, B])
+
+  override def stateRet[S, A](implicit si: NInfo[S], ai: NInfo[A]) = rconv(l.stateRet[S, A])
+
+  override def stateBind[S, A, B](implicit si: NInfo[S], ai: NInfo[A], bi: NInfo[B]) = rconv(l.stateBind[S, A, B])
 }
 
 object IsoLang {
