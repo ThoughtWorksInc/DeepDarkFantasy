@@ -9,6 +9,7 @@ import com.thoughtworks.DDF.Except.Except
 import com.thoughtworks.DDF.List.List
 import com.thoughtworks.DDF.Option.Option
 import com.thoughtworks.DDF.Product.Prod
+import com.thoughtworks.DDF.Reader.Reader
 import com.thoughtworks.DDF.Sum.Sum
 import com.thoughtworks.DDF.Top.Top
 
@@ -18,6 +19,7 @@ trait Lang[Info[_], Repr[_]] extends
   Double[Info, Repr] with
   Option[Info, Repr] with
   Except[Info, Repr] with
+  Reader[Info, Repr] with 
   Top[Info, Repr] with
   List[Info, Repr] with
   Bool[Info, Repr] with

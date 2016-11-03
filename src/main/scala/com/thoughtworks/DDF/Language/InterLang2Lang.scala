@@ -152,6 +152,11 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def imfalso[A](implicit ai: Info[A]): Repr[Unit => A] = B__[Unit, Nothing, A](exfalso[A])(impossible)
 
   override def impossible: Repr[Unit => Nothing] = Y_[Unit, Nothing](I[Unit => Nothing](aInfo[Unit, Nothing]))
+
+  override def readerRet[E, A](implicit ei: Info[E], ai: Info[A]): Repr[A => Reader[E, A]] = K[A, E]
+
+  override def readerBind[E, A, B](implicit ei: Info[E], ai: Info[A], bi: Info[B]):
+  Repr[Reader[E, A] => (A => Reader[E, B]) => Reader[E, B]] = C_(B__(S[E, A, B])(C))
 }
 
 object InterLang2Lang {
