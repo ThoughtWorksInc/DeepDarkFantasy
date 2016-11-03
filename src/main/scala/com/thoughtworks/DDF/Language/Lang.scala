@@ -16,6 +16,7 @@ import com.thoughtworks.DDF.Top.Top
 
 trait Lang[Info[_], Repr[_]] extends
   LangInfo[Info, Repr] with
+  InterLang[Info, Repr] with
   Prod[Info, Repr] with
   Double[Info, Repr] with
   Option[Info, Repr] with

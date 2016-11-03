@@ -77,7 +77,7 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def foldLeft[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.foldLeft[A, B])
 
-  override def mkUnit: NRepr[Unit] = rconv(l.mkUnit)
+  override def mkTop: NRepr[Unit] = rconv(l.mkTop)
 
   override implicit def doubleInfo = iconv(l.doubleInfo)
 

@@ -50,7 +50,7 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
 
   override def plusD: Double => Double => Double = l => r => l + r
 
-  override def mkUnit: Unit = Unit
+  override def mkTop: Unit = Unit
 
   override def sigD: Double => Double = x => 1 / (1 + Math.exp(-x))
 

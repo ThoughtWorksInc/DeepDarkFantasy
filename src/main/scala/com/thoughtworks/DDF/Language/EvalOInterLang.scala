@@ -139,8 +139,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
   override def plusD: EvalO[Double => Double => Double] =
     aeval(ltl.plusD)(l => aeval(ltl.plusD_(l.l))(r => litD(eval(l) + eval(r))))
 
-  override def mkUnit: EvalO[Unit] = new EvalO[Unit] {
-    override def l: InterLangTerm[Unit] = ltl.mkUnit
+  override def mkTop: EvalO[Unit] = new EvalO[Unit] {
+    override def l: InterLangTerm[Unit] = ltl.mkTop
 
     override def tmr: tm.ret = ()
 

@@ -43,7 +43,7 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def rngInfo[A, B] = base.rngInfo
 
-  override def mkUnit = NTF(base.mkUnit)
+  override def mkTop = NTF(base.mkTop)
 
   override implicit def optionInfo[A](implicit ai: Info[A]) = base.optionInfo
 

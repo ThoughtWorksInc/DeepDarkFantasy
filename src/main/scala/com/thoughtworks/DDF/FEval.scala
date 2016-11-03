@@ -2,28 +2,24 @@ package com.thoughtworks.DDF
 
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
 
-trait FEMMatch[X] extends TypeMatch[FEMMatch, X]
+trait FEMMatch[G, X] extends TypeMatch[FEMMatch[G, ?], X]
 
 object FEMMatch {
-  type Aux[X, XM] = FEMMatch[X] {type ret = XM}
+  type Aux[G, X, XM] = FEMMatch[G, X] {type ret = XM}
 }
 
-trait FEvalMatch[X] extends TypeMatch[FEvalMatch, X] with TypeCase[FEMMatch, X] {
-  def selfG: LangTerm[X => ret]
-
-  def gSelf: LangTerm[ret => X]
-
-  def LI: LangInfoG[X]
+trait FEvalCase[G, X] extends TypeMatch[FEvalCase[G, ?], X] with TypeCase[FEMMatch[G, ?], X] {
+  def lr: LangInfoG[ret]
 }
 
-object FEvalMatch {
-  type Aux[X, XM] = FEvalMatch[X] {type ret = XM}
+object FEvalCase {
+  type Aux[G, X, XM] = FEvalCase[G, X] {type ret = XM}
 }
 
-trait FEval[X] {
-  val tm: FEvalMatch[X]
+trait FEval[G, X] {
+  val tm: FEvalCase[G, X]
 
   val deriv: LangTerm[tm.ret]
 
-  def get[XM](implicit fm: FEvalMatch.Aux[X, XM]): LangTerm[XM] = tm.unique(fm).subst(deriv)
+  def get[XM](implicit fm: FEvalCase.Aux[G, X, XM]): LangTerm[XM] = tm.unique(fm).subst(deriv)
 }

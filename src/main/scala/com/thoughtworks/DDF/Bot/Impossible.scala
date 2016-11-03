@@ -7,5 +7,5 @@ trait Impossible[Info[_], Repr[_]] extends BotMin[Info, Repr] with Top[Info, Rep
 
   final def impossible_(u: Repr[Unit]): Repr[Nothing] = app[Unit, Nothing](impossible)(u)
 
-  final def impossible__ : Repr[Nothing] = impossible_(mkUnit)
+  final def impossible__ : Repr[Nothing] = impossible_(mkTop)
 }

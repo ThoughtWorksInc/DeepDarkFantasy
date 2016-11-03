@@ -99,8 +99,8 @@ trait InterLangTermInterLang extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.ltD
   }
 
-  override def mkUnit: InterLangTerm[Unit] = new InterLangTerm[Unit] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[Unit] = lang.mkUnit
+  override def mkTop: InterLangTerm[Unit] = new InterLangTerm[Unit] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[Unit] = lang.mkTop
   }
 
   override def multD = new InterLangTerm[Double => Double => Double] {

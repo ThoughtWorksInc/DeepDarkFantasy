@@ -134,7 +134,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def mkProduct[A, B](implicit ai: Info[A], bi: Info[B]) = i.mkProduct[A, B]
 
-  override def mkUnit = i.mkUnit
+  override def mkTop = i.mkTop
 
   override def reprInfo[A] = i.reprInfo[A]
 

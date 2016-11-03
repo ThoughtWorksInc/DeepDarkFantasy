@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Top
 trait TopExt[Info[_], Repr[_]] extends Top[Info, Repr] {
   val unit: Top[Info, Repr]
 
-  override def mkUnit = unit.mkUnit
+  override def mkTop = unit.mkTop
 
   override implicit def topInfo = unit.topInfo
 
