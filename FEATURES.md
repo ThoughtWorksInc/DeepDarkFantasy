@@ -2,7 +2,7 @@
 
 ## Ordinary Language Feature
 
-1. Double
+1. [Double](src/main/scala/com/thoughtworks/DDF/Double/Double.scala)
 
 2. Boolean
 
