@@ -24,6 +24,8 @@
 
 11. Goto (Continuation)
 
+12. Pair
+
 ## Machine Learning Feature
 1. Symbolic Automatic Differentiation
 2. Higher Derivative
