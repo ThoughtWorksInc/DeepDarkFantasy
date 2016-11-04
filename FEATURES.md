@@ -16,9 +16,17 @@
 
 7. Pretty Print
 
+8. Constant (Reader)
+
+9. Variable (State)
+
+10. Exception (Either)
+
+11. Goto (Continuation)
+
 ## Machine Learning Feature
-1. Back Propagation
-2. Implicit Weight
+1. Symbolic Automatic Differentiation
+2. Higher Derivative
 3. Sigmoid
 4. Relu
 5. Soft Max
