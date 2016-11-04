@@ -6,8 +6,8 @@ trait ExceptBind[Info[_], Repr[_]] extends ExceptBase[Info, Repr] {
 
   final def exceptBind_[A, B, C](e: Repr[Except[A, B]])(implicit ci: Info[C]):
   Repr[(B => Except[A, C]) => Except[A, C]] =
-    app(exceptBind(sumLeftInfo(reprInfo(e)), sumRightInfo(reprInfo(e)), ci))(e)
+    app(exceptBind(exceptInfoA(reprInfo(e)), exceptInfoB(reprInfo(e)), ci))(e)
 
   final def exceptBind__[A, B, C]: Repr[Except[A, B]] => Repr[B => Except[A, C]] => Repr[Except[A, C]] = e => f =>
-    app(exceptBind_(e)(sumRightInfo(rngInfo(reprInfo(f)))))(f)
+    app(exceptBind_(e)(exceptInfoB(rngInfo(reprInfo(f)))))(f)
 }
