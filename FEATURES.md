@@ -28,7 +28,11 @@
 
 ## Machine Learning Feature
 1. [Symbolic Automatic Differentiation](src/main/scala/com/thoughtworks/DDF/Language/FEvalInterLang.scala)
+
 2. [Higher Derivative](src/main/scala/com/thoughtworks/DDF/Language/FEvalInterLang.scala)
+
 3. [Sigmoid](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
+
 4. [Relu](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
+
 5. [Soft Max](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
