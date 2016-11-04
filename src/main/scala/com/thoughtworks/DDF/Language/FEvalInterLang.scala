@@ -426,6 +426,41 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
   override def sumRightInfo[A, B]: FEvalCase[G, Either[A, B]] => FEvalCase[G, B] = _.get(sfem[A, B])._2
 
   override def reprInfo[A]: FEval[G, A] => FEvalCase[G, A] = _.tm
+
+  override def putDouble: FEval[G, Double => IO[Unit]] = ???
+
+  override def IOBind[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
+    new FEval[G, IO[A] => (A => IO[B]) => IO[B]] {
+      override val tm = aInfo(IOInfo(ai), aInfo(aInfo(ai, IOInfo(bi)), IOInfo(bi)))
+
+      override val deriv = base.IOBind(ai.lr, bi.lr)
+    }
+
+  override def IORet[A](implicit ai: FEvalCase[G, A]): FEval[G, A => IO[A]] =
+    new FEval[G, A => IO[A]] {
+      override val tm = aInfo(ai, IOInfo(ai))
+
+      override val deriv: LangTerm[tm.ret] = base.IORet(ai.lr)
+    }
+
+  override def getDouble: FEval[G, IO[Double]] = ???
+
+  def iofem[A] = new FEMMatch[G, IO[A]] {
+    override type ret = FEvalCase[G, A]
+  }
+
+  override def IOInfo[A](implicit ai: FEvalCase[G, A]): FEvalCase.Aux[G, IO[A], IO[ai.ret]] =
+    new FEvalCase[G, IO[A]] {
+      override def lr: LangInfoG[IO[ai.ret]] = base.IOInfo(ai.lr)
+
+      override type ret = IO[ai.ret]
+
+      override val tm = iofem[A]
+
+      override def tmr: tm.ret = ai
+    }
+
+  override def IOElmInfo[A]: FEvalCase[G, IO[A]] => FEvalCase[G, A] = _.get(iofem[A])
 }
 
 object FEvalInterLang {

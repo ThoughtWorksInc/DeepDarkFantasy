@@ -160,6 +160,18 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def stateRet[S, A](implicit si: NInfo[S], ai: NInfo[A]) = rconv(l.stateRet[S, A])
 
   override def stateBind[S, A, B](implicit si: NInfo[S], ai: NInfo[A], bi: NInfo[B]) = rconv(l.stateBind[S, A, B])
+
+  override def putDouble = rconv(l.putDouble)
+
+  override def IOBind[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.IOBind[A, B])
+
+  override def IORet[A](implicit ai: NInfo[A]) = rconv(l.IORet[A])
+
+  override def getDouble: NRepr[IO[Double]] = rconv(l.getDouble)
+
+  override def IOInfo[A](implicit ai: NInfo[A]): NInfo[IO[A]] = iconv(l.IOInfo[A])
+
+  override def IOElmInfo[A]: NInfo[IO[A]] => NInfo[A] = ioa => iconv(l.IOElmInfo(convi(ioa)))
 }
 
 object IsoLang {

@@ -4,6 +4,7 @@ import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.Bool.SimpleBool
 import com.thoughtworks.DDF.Bot.SimpleBot
 import com.thoughtworks.DDF.Double.SimpleDouble
+import com.thoughtworks.DDF.IO.SimpleIO
 import com.thoughtworks.DDF.List.SimpleList
 import com.thoughtworks.DDF.NoInfo
 import com.thoughtworks.DDF.Option.SimpleOption
@@ -19,7 +20,8 @@ trait SimpleLang[Repr[_]] extends
   SimpleSum[Repr] with
   SimpleBool[Repr] with
   SimpleTop[Repr] with
-  SimpleBot[Repr]
+  SimpleBot[Repr] with
+  SimpleIO[Repr]
 
 object SimpleLang {
   implicit def apply[Repr[_]] = new SimpleLang[Repr] {}

@@ -278,6 +278,33 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
   }
 
   override def exfalso[A](implicit ai: InterLangInfoG[A]): EvalO[Nothing => A] = aeval[Nothing, A](ltl.exfalso[A])(eval)
+
+  def ioeval[A]: InterLangTerm[IO[A]] => EvalO[IO[A]] = lio => new EvalO[IO[A]] {
+    override def l: InterLangTerm[IO[A]] = lio
+
+    override val tm = new EvalOMatch[IO[A]] {
+      override type ret = Unit
+    }
+
+    override def tmr: tm.ret = ()
+  }
+
+  override def putDouble: EvalO[Double => IO[Unit]] =
+    aeval(ltl.putDouble)(d => ioeval(ltl.putDouble_(ltl.litD(eval(d)))))
+
+  override def IOBind[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[IO[A] => (A => IO[B]) => IO[B]] = aeval(ltl.IOBind[A, B])(ioa => aeval(ltl.IOBind_[A, B](ioa.l))(f =>
+    ioeval[B](ltl.IOBind__(ioa.l)(f.l))))
+
+  override def IORet[A](implicit ai: InterLangInfoG[A]):
+  EvalO[A => IO[A]] = aeval(ltl.IORet[A])(a => ioeval(ltl.IORet_(a.l)))
+
+  override def getDouble: EvalO[IO[Double]] = ioeval(ltl.getDouble)
+
+  override def IOInfo[A](implicit ai: InterLangInfoG[A]): InterLangInfoG[EvalOInterLang.IO[A]] = ltl.IOInfo[A]
+
+  override def IOElmInfo[A]: InterLangInfoG[EvalOInterLang.IO[A]] => InterLangInfoG[A] = ltl.IOElmInfo[A]
+
 }
 
 object EvalOInterLang extends EvalOInterLang

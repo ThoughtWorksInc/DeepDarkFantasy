@@ -2,6 +2,7 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Combinators.EvalMComb
 import com.thoughtworks.DDF.NoInfo
+import scalaz.effect.IO
 
 trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[Lambda[X => X]] with EvalMComb {
   override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): (A => B => B) => B => List[A] => List[B] =
@@ -103,6 +104,18 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
   }
 
   override def exfalso[A](implicit ai: NoInfo[A]): Nothing => A = x => x
+
+  override def putDouble: Double => IO[Unit] = d => IO.put[Double](d)(scalaz.std.anyVal.doubleInstance)
+
+  override def IOBind[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): IO[A] => (A => IO[B]) => IO[B] = _.flatMap
+
+  override def IORet[A](implicit ai: NoInfo[A]): A => IO[A] = a => IO(a)
+
+  override def getDouble: IO[Double] = IO.readLn.map(_.toDouble)
+
+  override def IOInfo[A](implicit ai: NoInfo[A]): NoInfo[IO[A]] = NoInfo()
+
+  override def IOElmInfo[A]: NoInfo[IO[A]] => NoInfo[A] = _ => NoInfo()
 }
 
 object EvalMInterLang extends EvalMInterLang

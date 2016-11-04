@@ -1,5 +1,6 @@
 package com.thoughtworks.DDF.Language
 
+import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.Bool.ShowBool
 import com.thoughtworks.DDF.Bot.ShowBotMin
 import com.thoughtworks.DDF.Combinators.ShowComb
@@ -22,7 +23,8 @@ trait ShowLang extends
   ShowTop with
   ShowBool with
   ShowOption with
-  ShowBotMin
+  ShowBotMin with
+  ShowArr
 
 object ShowLang {
   implicit def apply = new ShowLang {}

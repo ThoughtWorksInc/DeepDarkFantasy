@@ -138,6 +138,18 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def reprInfo[A] = i.reprInfo[A]
 
+  override def putDouble = i.putDouble
+
+  override def IOBind[A, B](implicit ai: Info[A], bi: Info[B]) = i.IOBind[A, B]
+
+  override def IORet[A](implicit ai: Info[A]) = i.IORet[A]
+
+  override def getDouble = i.getDouble
+
+  override def IOInfo[A](implicit ai: Info[A]) = i.IOInfo[A]
+
+  override def IOElmInfo[A] = i.IOElmInfo[A]
+
   override def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
   Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]] = {
     val nLang = NextInterLang.apply[Info, Repr, Except[A, B]](i, exceptInfo(ai)(bi))

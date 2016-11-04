@@ -219,6 +219,31 @@ trait InterLangTermInterLang extends
   override implicit def botInfo: InterLangInfoG[Nothing] = new InterLangInfoG[Nothing] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo
   }
+
+  override def putDouble = new InterLangTerm[Double => IO[Unit]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.putDouble
+  }
+
+  override def IOBind[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
+    new InterLangTerm[IO[A] => (A => IO[B]) => IO[B]] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOBind(ai(lang), bi(lang))
+    }
+
+  override def IORet[A](implicit ai: InterLangInfoG[A]) = new InterLangTerm[A => IO[A]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IORet(ai(lang))
+  }
+
+  override def getDouble = new InterLangTerm[IO[Double]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.getDouble
+  }
+
+  override def IOInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[IO[A]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOInfo(ai(lang))
+  }
+
+  override def IOElmInfo[A]: InterLangInfoG[IO[A]] => InterLangInfoG[A] = ioa => new InterLangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOElmInfo[A](ioa(lang))
+  }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

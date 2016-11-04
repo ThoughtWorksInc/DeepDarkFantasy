@@ -43,7 +43,7 @@ trait LangTermLangInfo[R[_]] extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Boolean] = lang.boolInfo
   }
 
-  override implicit def listInfo[A](implicit ai: InterLangInfoG[A]): InterLangInfoG[List[A]] = new InterLangInfoG[List[A]] {
+  override implicit def listInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[List[A]] = lang.listInfo(ai(lang))
   }
 
@@ -71,12 +71,20 @@ trait LangTermLangInfo[R[_]] extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Unit] = lang.topInfo
   }
 
-  override implicit def optionInfo[A](implicit ai: InterLangInfoG[A]): InterLangInfoG[Option[A]] = new InterLangInfoG[Option[A]] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Option[A]] = lang.optionInfo(ai(lang))
+  override implicit def optionInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[Option[A]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.optionInfo(ai(lang))
   }
 
   override def optionElmInfo[A]: InterLangInfoG[Option[A]] => InterLangInfoG[A] = i => new InterLangInfoG[A] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.optionElmInfo(i(lang))
+  }
+
+  override def IOInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[IO[A]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOInfo(ai(lang))
+  }
+
+  override def IOElmInfo[A]: InterLangInfoG[IO[A]] => InterLangInfoG[A] = ioa => new InterLangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.IOElmInfo(ioa(lang))
   }
 }
 

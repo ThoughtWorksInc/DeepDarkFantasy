@@ -129,6 +129,17 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override implicit def botInfo = base.botInfo
 
+  override def putDouble = NTF(base.putDouble)
+
+  override def IOBind[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.IOBind[A, B])
+
+  override def getDouble = NTF(base.getDouble)
+
+  override def IORet[A](implicit ai: Info[A]) = NTF(base.IORet[A])
+
+  override def IOInfo[A](implicit ai: Info[A]) = base.IOInfo[A]
+
+  override def IOElmInfo[A]: Info[IO[A]] => Info[A] = base.IOElmInfo[A]
 }
 
 object NTInterLang {

@@ -3,6 +3,7 @@ package com.thoughtworks.DDF.Language
 import com.thoughtworks.DDF.Arrow.ArrInfo
 import com.thoughtworks.DDF.Bool.BoolInfo
 import com.thoughtworks.DDF.Double.DoubleInfo
+import com.thoughtworks.DDF.IO.IOInfo
 import com.thoughtworks.DDF.List.ListInfo
 import com.thoughtworks.DDF.Option.OptionInfo
 import com.thoughtworks.DDF.Product.ProdInfo
@@ -17,4 +18,5 @@ trait LangInfo[Info[_], Repr[_]] extends
   TopInfo[Info, Repr] with
   ListInfo[Info, Repr] with
   BoolInfo[Info, Repr] with
-  SumInfo[Info, Repr]
+  SumInfo[Info, Repr] with
+  IOInfo[Info, Repr]
