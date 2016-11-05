@@ -53,7 +53,7 @@ A: Unoptimized. This is more of a proof of concept that we can use function in n
 
 Q: Where is back propagation?
 
-A: It was [deprecated](tree/With-Backward-Ad) because I am unable to fina a clean/efficent implementation of it. Forward mode ad is used instead. If you found a foundation for backward mode that generalize well on typed function please let me know.
+A: It was [deprecated](https://github.com/ThoughtWorksInc/DeepDarkFantasy/tree/With-Backward-Ad) because I am unable to fina a clean/efficent implementation of it. Forward mode ad is used instead. If you found a foundation for backward mode that generalize well on typed function please let me know.
 
 # Thank You Sir
 
