@@ -11,7 +11,7 @@ As we all know, a neural network is just a computable math expression (and hence
 
 Of course, I must still be able to train the network.
 
-**Yes! I had add all the above construct, and I am planning to add more (stream, goto, exception, assignment, for example).** 
+**Yes! I had add all the above construct, and I am planning to add more (stream, tree, map, set, for example).** 
 
 They all had their own special gradient structure to propagate loss accordingly. 
 
@@ -43,17 +43,17 @@ Example is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
 
 Lang is the default language that is usable right off the shelf. 
 
-BEvalLang provide the capability to Evaluate a term and Back Propagate, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
-
-However, none of those files does anymore than assembling 'feature provider' from ShowList (which pretty print operation related to List), BEvalComb (which do evaluation and backpropagation on SKI/BCKW/Y Combinator), or whatNot. 
-
-Reading BEvalArrow -> BEvalDouble -> BEvalComb will get you know how stuff works. After that you can probably understand whatever just by tracing import dependency.
+FEvalInterLang provide the capability to Evaluate a term and it's derivative, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
 
 # FA Q
 
-How is the speed?
+Q: How is the speed?
 
-Horrible. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
+A: Unoptimized. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
+
+Q: Where is back propagation?
+
+A: It was [deprecated](tree/With-Backward-Ad) because I am unable to fina a clean/efficent implementation of it. Forward mode ad is used instead. If you found a foundation for backward mode that generalize well on typed function please let me know.
 
 # Thank You Sir
 
