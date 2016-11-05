@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.Language
 
+import com.thoughtworks.DDF.Product.Prod
 import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
 
-trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
-  val base = LangTermLang
+trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEval[G, ?]] {
 
   override def scanLeft[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
     new FEval[G, (B => A => B) => B => List[A] => List[B]] {
@@ -79,13 +79,6 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
 
   override def ltD: FEval[G, Double => Double => Boolean] = ???
 
-  override def zro[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, ((A, B)) => A] {
-      override val tm = aInfo(prodInfo(ai, bi), ai)
-
-      override val deriv = base.zro(ai.lr, bi.lr)
-    }
-
   override def C[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
     new FEval[G, (A => B => C) => B => A => C] {
       override val tm = aInfo(aInfo(ai, aInfo(bi, ci)), aInfo(bi, aInfo(ai, ci)))
@@ -112,20 +105,6 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
       override val tm = aInfo(listInfo(ai), aInfo(bi, aInfo(aInfo(ai, aInfo(listInfo(ai), bi)), bi)))
 
       override val deriv = base.listMatch(ai.lr, bi.lr)
-    }
-
-  override def fst[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, ((A, B)) => B] {
-      override val tm = aInfo(prodInfo(ai, bi), bi)
-
-      override val deriv = base.fst(ai.lr, bi.lr)
-    }
-
-  override def mkProduct[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, A => B => (A, B)] {
-      override val tm = aInfo(ai, aInfo(bi, prodInfo(ai, bi)))
-
-      override val deriv = base.mkProduct(ai.lr, bi.lr)
     }
 
   override def divD: FEval[G, Double => Double => Double] = ???
@@ -213,13 +192,6 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
       override val deriv = base.reverse(ai.lr)
     }
 
-  override def uncurry[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, (A => B => C) => ((A, B)) => C] {
-      override val tm = aInfo(aInfo(ai, aInfo(bi, ci)), aInfo(prodInfo(ai, bi), ci))
-
-      override val deriv = base.uncurry(ai.lr, bi.lr, ci.lr)
-    }
-
   override def expD: FEval[G, (Double) => Double] = ???
 
   override def right[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
@@ -252,26 +224,6 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
 
       override val deriv = base.left(ai.lr, bi.lr)
     }
-
-  def pfem[A, B] = new FEMMatch[G, (A, B)] {
-    override type ret = (FEvalCase[G, A], FEvalCase[G, B])
-  }
-
-  override implicit def prodInfo[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]):
-  FEvalCase.Aux[G, (A, B), (ai.ret, bi.ret)] =
-    new FEvalCase[G, (A, B)] {
-      override type ret = (ai.ret, bi.ret)
-
-      override def lr: LangInfoG[(ai.ret, bi.ret)] = base.prodInfo(ai.lr, bi.lr)
-
-      override val tm = pfem[A, B]
-
-      override def tmr: tm.ret = (ai, bi)
-    }
-
-  override def prodZroInfo[A, B]: FEvalCase[G, (A, B)] => FEvalCase[G, A] = _.get(pfem[A, B])._1
-
-  override def prodFstInfo[A, B]: FEvalCase[G, (A, B)] => FEvalCase[G, B] = _.get(pfem[A, B])._2
 
   override def S[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
     new FEval[G, (A => B => C) => (A => B) => A => C] {
@@ -391,13 +343,6 @@ trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] {
 
     override def lr: LangInfoG[Boolean] = base.boolInfo
   }
-
-  override def curry[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, (((A, B)) => C) => A => B => C] {
-      override val tm = aInfo(aInfo(prodInfo(ai, bi), ci), aInfo(ai, aInfo(bi, ci)))
-
-      override val deriv = base.curry(ai.lr, bi.lr, ci.lr)
-    }
 
   override def exfalso[A](implicit ai: FEvalCase[G, A]) =
     new FEval[G, Nothing => A] {
