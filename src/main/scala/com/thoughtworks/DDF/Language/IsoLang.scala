@@ -141,7 +141,7 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def contBind[R, A, B](implicit ri: NInfo[R], ai: NInfo[A], bi: NInfo[B]) = rconv(l.contBind[R, A, B])
 
-  override def mkProduct[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.mkProduct[A, B])
+  override def mkProd[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.mkProd[A, B])
 
   override def reprInfo[A]: NRepr[A] => NInfo[A] = r => iconv(l.reprInfo(convr(r)))
 

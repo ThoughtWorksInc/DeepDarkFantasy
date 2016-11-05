@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.{NoInfo, Show}
 
 trait ShowProd extends Prod[NoInfo, Show] with ShowArr with SimpleProd[Show] {
-  override def mkProduct[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
+  override def mkProd[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("mkPair")
 
   override def fst[A, B](implicit at: NoInfo[A], bt: NoInfo[B]) = Show("snd")
 

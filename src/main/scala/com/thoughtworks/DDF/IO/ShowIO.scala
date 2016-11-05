@@ -1,9 +1,10 @@
 package com.thoughtworks.DDF.IO
 
 import com.thoughtworks.DDF.Double.ShowDouble
+import com.thoughtworks.DDF.Top.ShowTop
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowIO extends IO[NoInfo, Show] with SimpleIO[Show] with ShowDouble {
+trait ShowIO extends IO[NoInfo, Show] with SimpleIO[Show] with ShowDouble with ShowTop {
   override def putDouble = Show("putDouble")
 
   override def IOBind[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("IOBind")

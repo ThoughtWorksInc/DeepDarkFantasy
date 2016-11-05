@@ -3,12 +3,14 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Bool.FEvalBool
 import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase, Gradient}
 
 trait FEvalDouble[G] extends
   Double[FEvalCase[G, ?], FEval[G, ?]] with
   FEvalArr[G] with
   FEvalBool[G] {
+  val grad: Gradient[G]
+
   override def ltD: FEval[G, scala.Double => scala.Double => Boolean] = ???
 
   override def divD: FEval[G, scala.Double => scala.Double => scala.Double] = ???
@@ -38,5 +40,7 @@ trait FEvalDouble[G] extends
 }
 
 object FEvalDouble {
-  implicit def apply[G]: FEvalDouble[G] = new FEvalDouble[G] { }
+  implicit def apply[G](implicit g: Gradient[G]): FEvalDouble[G] = new FEvalDouble[G] {
+    override val grad: Gradient[G] = g
+  }
 }

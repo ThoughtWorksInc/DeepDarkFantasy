@@ -109,7 +109,7 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def I[A](implicit ai: Info[A]) = NTF(base.I)
 
-  override def mkProduct[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.mkProduct)
+  override def mkProd[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.mkProd)
 
   override def zro[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.zro)
 

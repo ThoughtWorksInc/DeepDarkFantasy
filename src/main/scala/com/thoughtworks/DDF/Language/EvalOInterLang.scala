@@ -158,8 +158,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     override type ret = (EvalO[A], EvalO[B])
   }
 
-  override def mkProduct[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[A => B => (A, B)] =
-    aeval(ltl.mkProduct[A, B])(x => aeval(ltl.mkProduct_[A, B](x.l))(y => new EvalO[(A, B)] {
+  override def mkProd[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[A => B => (A, B)] =
+    aeval(ltl.mkProd[A, B])(x => aeval(ltl.mkProduct_[A, B](x.l))(y => new EvalO[(A, B)] {
       override def l: InterLangTerm[(A, B)] = ltl.mkProduct__(x.l)(y.l)
 
       override def tmr: tm.ret = (x, y)

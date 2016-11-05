@@ -55,7 +55,7 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
 
   override def sigD: Double => Double = x => 1 / (1 + Math.exp(-x))
 
-  override def mkProduct[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => B => (A, B) = l => r => (l, r)
+  override def mkProd[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => B => (A, B) = l => r => (l, r)
 
   override def zro[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A, B)) => A = _._1
 

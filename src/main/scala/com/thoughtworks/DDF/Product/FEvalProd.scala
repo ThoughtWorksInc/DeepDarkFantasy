@@ -27,11 +27,11 @@ trait FEvalProd[G] extends Prod[FEvalCase[G, ?], FEval[G, ?]] with FEvalArr[G] {
 
   override def prodFstInfo[A, B]: FEvalCase[G, (A, B)] => FEvalCase[G, B] = _.get(pfem[A, B])._2
 
-  override def mkProduct[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
+  override def mkProd[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
     new FEval[G, A => B => (A, B)] {
       override val tm = aInfo(ai, aInfo(bi, prodInfo(ai, bi)))
 
-      override val deriv = base.mkProduct(ai.lr, bi.lr)
+      override val deriv = base.mkProd(ai.lr, bi.lr)
     }
 
   override def uncurry[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =

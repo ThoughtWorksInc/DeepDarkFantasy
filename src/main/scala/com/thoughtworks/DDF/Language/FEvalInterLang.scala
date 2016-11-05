@@ -8,7 +8,7 @@ import com.thoughtworks.DDF.Option.FEvalOption
 import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.Sum.FEvalSum
 import com.thoughtworks.DDF.Top.FEvalTop
-import com.thoughtworks.DDF.{FEval, FEvalCase}
+import com.thoughtworks.DDF.{FEval, FEvalCase, Gradient}
 
 trait FEvalInterLang[G] extends
   InterLang[FEvalCase[G, ?], FEval[G, ?]] with
@@ -24,5 +24,7 @@ trait FEvalInterLang[G] extends
 }
 
 object FEvalInterLang {
-  implicit def apply[G]: FEvalInterLang[G] = new FEvalInterLang[G] { }
+  implicit def apply[G](implicit g: Gradient[G]): FEvalInterLang[G] = new FEvalInterLang[G] {
+    override val grad = g
+  }
 }

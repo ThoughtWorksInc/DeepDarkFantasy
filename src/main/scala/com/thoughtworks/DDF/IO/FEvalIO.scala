@@ -1,13 +1,21 @@
 package com.thoughtworks.DDF.IO
 
 import com.thoughtworks.DDF.Double.FEvalDouble
-import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
+import com.thoughtworks.DDF.Top.FEvalTop
+import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase, Gradient}
 
 trait FEvalIO[G] extends
   IO[FEvalCase[G, ?], FEval[G, ?]] with
-  FEvalDouble[G] {
-  override def putDouble: FEval[G, Double => IO[Unit]] = ???
+  FEvalDouble[G] with
+  FEvalTop[G] {
+  override val base = LangTermLang
+
+  override def putDouble: FEval[G, Double => IO[Unit]] = new FEval[G, Double => IO[Unit]] {
+    override val tm = aInfo(doubleInfo, IOInfo(topInfo))
+
+    override val deriv = base.B__(base.putDouble)(base.zro(base.doubleInfo, grad.GInfo))
+  }
 
   override def IOBind[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
     new FEval[G, IO[A] => (A => IO[B]) => IO[B]] {
@@ -28,9 +36,9 @@ trait FEvalIO[G] extends
       override val tm = IOInfo(doubleInfo)
 
       override val deriv =
-        base.IOBind__[Double, (Double, G)](
+        base.IOBind__(
           base.getDouble)(
-          base.B__[Double, (Double, G), IO[(Double, G)]](base.IORet[(Double, G)](doubleInfo.lr))(???))
+          base.B__(base.IORet(doubleInfo.lr))(base.C__(base.mkProd(base.doubleInfo, grad.GInfo))(grad.constG)))
     }
 
   def iofem[A] = new FEMMatch[G, IO[A]] {
@@ -52,5 +60,7 @@ trait FEvalIO[G] extends
 }
 
 object FEvalIO {
-  implicit def apply[G]: FEvalIO[G] = new FEvalIO[G] { }
+  implicit def apply[G](implicit g: Gradient[G]): FEvalIO[G] = new FEvalIO[G] {
+    override val grad: Gradient[G] = g
+  }
 }

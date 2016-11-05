@@ -180,8 +180,8 @@ trait InterLangTermInterLang extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.foldLeft(ai(lang), bi(lang))
     }
 
-  override def mkProduct[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[A => B => (A, B)] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.mkProduct(ai(lang), bi(lang))
+  override def mkProd[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[A => B => (A, B)] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.mkProd(ai(lang), bi(lang))
   }
 
   override def zro[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) = new InterLangTerm[((A, B)) => A] {
