@@ -1,5 +1,5 @@
 package com.thoughtworks.DDF.IO
 
-import com.thoughtworks.DDF.Arrow.ArrMin
+import com.thoughtworks.DDF.Double.Double
 
-trait IOBase[Info[_], Repr[_]] extends ArrMin[Info, Repr] with IOInfo[Info, Repr]
+trait IOBase[Info[_], Repr[_]] extends Double[Info, Repr] with IOInfo[Info, Repr]

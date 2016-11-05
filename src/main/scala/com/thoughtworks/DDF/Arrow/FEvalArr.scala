@@ -1,12 +1,15 @@
 package com.thoughtworks.DDF.Arrow
 
+import com.thoughtworks.DDF.InfoBase.{FEvalInfoBase, InfoBase}
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
 import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
 
-trait FEvalArr[G] extends Arr[FEvalCase[G, ?], FEval[G, ?]] {
-  val base = LangTermLang
 
-  override def reprInfo[A]: FEval[G, A] => FEvalCase[G, A] = _.tm
+
+
+
+trait FEvalArr[G] extends Arr[FEvalCase[G, ?], FEval[G, ?]] with FEvalInfoBase[G] {
+  val base = LangTermLang
 
   override def app[A, B]: FEval[G, A => B] => FEval[G, A] => FEval[G, B] = f => x => new FEval[G, B] {
     val ai = domInfo(f.tm)
