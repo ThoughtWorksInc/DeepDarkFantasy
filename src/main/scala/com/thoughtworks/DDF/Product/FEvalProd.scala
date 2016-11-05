@@ -1,7 +1,7 @@
-package com.thoughtworks.DDF.Language
+package com.thoughtworks.DDF.Product
 
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
 import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
-import com.thoughtworks.DDF.Product.Prod
 
 trait FEvalProd[G] extends Prod[FEvalCase[G, ?], FEval[G, ?]] {
   val base = LangTermLang

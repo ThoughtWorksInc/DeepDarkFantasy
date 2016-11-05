@@ -1,8 +1,6 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Product.Prod
-
-trait ScanRight[Info[_], Repr[_]] extends Prod[Info, Repr] with ListMin[Info, Repr] {
+trait ScanRight[Info[_], Repr[_]] extends ListMin[Info, Repr] {
   def scanRight[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => B) => B => scala.List[A] => scala.List[B]]
 
   final def scanRight_[A, B]: Repr[A => B => B] => Repr[B => scala.List[A] => scala.List[B]] = f =>

@@ -1,17 +1,10 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.Product.Prod
+import com.thoughtworks.DDF.List.FEvalList
+import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
 
-trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEval[G, ?]] {
-
-  override def scanLeft[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, (B => A => B) => B => List[A] => List[B]] {
-      override val tm = aInfo(aInfo(bi, aInfo(ai, bi)), aInfo(bi, aInfo(listInfo(ai), listInfo(bi))))
-
-      override val deriv = base.scanLeft(ai.lr, bi.lr)
-    }
-
+trait FEvalInterLang[G] extends InterLang[FEvalCase[G, ?], FEval[G, ?]] with FEvalProd[G] with FEvalList[G] {
   override def sumAssocRL[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
     new FEval[G, Either[A, Either[B, C]] => Either[Either[A, B], C]] {
       override val tm = aInfo(sumInfo(ai, sumInfo(bi, ci)), sumInfo(sumInfo(ai, bi), ci))
@@ -53,30 +46,6 @@ trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEv
       override val deriv = base.W(ai.lr, bi.lr)
     }
 
-  override def listZip[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, List[A] => List[B] => List[(A, B)]] {
-      override val tm = aInfo(listInfo(ai), aInfo(listInfo(bi), listInfo(prodInfo(ai, bi))))
-
-      override val deriv = base.listZip(ai.lr, bi.lr)
-    }
-
-  def lfem[A] = new FEMMatch[G, List[A]] {
-    override type ret = FEvalCase[G, A]
-  }
-
-  override implicit def listInfo[A](implicit ai: FEvalCase[G, A]): FEvalCase.Aux[G, List[A], List[ai.ret]] =
-    new FEvalCase[G, List[A]] {
-      override type ret = List[ai.ret]
-
-      override def lr = base.listInfo(ai.lr)
-
-      override val tm = lfem[A]
-
-      override def tmr = ai
-    }
-
-  override def listElmInfo[A]: FEvalCase[G, List[A]] => FEvalCase[G, A] = _.get(lfem[A])
-
   override def ltD: FEval[G, Double => Double => Boolean] = ???
 
   override def C[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
@@ -84,27 +53,6 @@ trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEv
       override val tm = aInfo(aInfo(ai, aInfo(bi, ci)), aInfo(bi, aInfo(ai, ci)))
 
       override val deriv = base.C(ai.lr, bi.lr, ci.lr)
-    }
-
-  override def listMap[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, (A => B) => List[A] => List[B]] {
-      override val tm = aInfo(aInfo(ai, bi), aInfo(listInfo(ai), listInfo(bi)))
-
-      override val deriv = base.listMap(ai.lr, bi.lr)
-    }
-
-  override def nil[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, List[A]] {
-      override val tm = listInfo(ai)
-
-      override val deriv = base.nil(ai.lr)
-    }
-
-  override def listMatch[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, List[A] => B => (A => List[A] => B) => B] {
-      override val tm = aInfo(listInfo(ai), aInfo(bi, aInfo(aInfo(ai, aInfo(listInfo(ai), bi)), bi)))
-
-      override val deriv = base.listMatch(ai.lr, bi.lr)
     }
 
   override def divD: FEval[G, Double => Double => Double] = ???
@@ -171,27 +119,6 @@ trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEv
       override val deriv = base.ite(ai.lr)
     }
 
-  override def foldRight[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, (A => B => B) => B => List[A] => B] {
-      override val tm = aInfo(aInfo(ai, aInfo(bi, bi)), aInfo(bi, aInfo(listInfo(ai), bi)))
-
-      override val deriv = base.foldRight(ai.lr, bi.lr)
-    }
-
-  override def foldLeft[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, (A => B => A) => A => List[B] => A] {
-      override val tm = aInfo(aInfo(ai, aInfo(bi, ai)), aInfo(ai, aInfo(listInfo(bi), ai)))
-
-      override val deriv = base.foldLeft(ai.lr, bi.lr)
-    }
-
-  override def reverse[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, List[A] => List[A]] {
-      override val tm = aInfo(listInfo(ai), listInfo(ai))
-
-      override val deriv = base.reverse(ai.lr)
-    }
-
   override def expD: FEval[G, (Double) => Double] = ???
 
   override def right[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
@@ -237,20 +164,6 @@ trait FEvalInterLang[G] extends FEvalProd[G] with InterLang[FEvalCase[G, ?], FEv
       override val tm = aInfo(sumInfo(ai, bi), sumInfo(bi, ai))
 
       override val deriv: LangTerm[tm.ret] = base.sumComm(ai.lr, bi.lr)
-    }
-
-  override def scanRight[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, (A => B => B) => B => List[A] => List[B]] {
-      override val tm = aInfo(aInfo(ai, aInfo(bi, bi)), aInfo(bi, aInfo(listInfo(ai), listInfo(bi))))
-
-      override val deriv = base.scanRight(ai.lr, bi.lr)
-    }
-
-  override def cons[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, A => List[A] => List[A]] {
-      override val tm = aInfo(ai, aInfo(listInfo(ai), listInfo(ai)))
-
-      override val deriv = base.cons(ai.lr)
     }
 
   override def sigD: FEval[G, Double => Double] = ???
