@@ -23,3 +23,11 @@ trait FEval[G, X] {
 
   def get[XM](implicit fm: FEvalCase.Aux[G, X, XM]): LangTerm[XM] = tm.unique(fm).subst(deriv)
 }
+
+trait FEvalCaseG[X] {
+
+}
+
+trait FEvalG[X] {
+
+}

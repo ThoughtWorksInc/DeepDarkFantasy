@@ -44,7 +44,7 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def listZip[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[List[A] => List[B] => List[(A, B)]] =
     aeval(ltl.listZip[A, B])(l => aeval(ltl.listZip_[A, B](l.l))(r =>
-      leval(getList(l).zip(getList(r)).map(p => mkProduct__(p._1)(p._2)))))
+      leval(getList(l).zip(getList(r)).map(p => mkProd__(p._1)(p._2)))))
 
   override def foldRight[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[(A => B => B) => B => List[A] => B] =
     aeval(ltl.foldRight[A, B])(f => aeval(ltl.foldRight_(f.l))(z => aeval(ltl.foldRight__(f.l)(z.l))(l =>
@@ -159,8 +159,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
   }
 
   override def mkProd[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[A => B => (A, B)] =
-    aeval(ltl.mkProd[A, B])(x => aeval(ltl.mkProduct_[A, B](x.l))(y => new EvalO[(A, B)] {
-      override def l: InterLangTerm[(A, B)] = ltl.mkProduct__(x.l)(y.l)
+    aeval(ltl.mkProd[A, B])(x => aeval(ltl.mkProd_[A, B](x.l))(y => new EvalO[(A, B)] {
+      override def l: InterLangTerm[(A, B)] = ltl.mkProd__(x.l)(y.l)
 
       override def tmr: tm.ret = (x, y)
 
@@ -247,7 +247,7 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def curry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
   EvalO[(((A, B)) => C) => A => B => C] = aeval(ltl.curry[A, B, C])(f =>
-    aeval(ltl.curry_(f.l))(a => aeval(ltl.curry__(f.l)(a.l))(b => app(f)(mkProduct__(a)(b)))))
+    aeval(ltl.curry_(f.l))(a => aeval(ltl.curry__(f.l)(a.l))(b => app(f)(mkProd__(a)(b)))))
 
   override def S[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
   EvalO[(A => B => C) => (A => B) => A => C] =

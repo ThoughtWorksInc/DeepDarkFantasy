@@ -3,27 +3,62 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Bool.FEvalBool
 import com.thoughtworks.DDF.Language.LangInfoG
+import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase, Gradient}
 
 trait FEvalDouble[G] extends
   Double[FEvalCase[G, ?], FEval[G, ?]] with
   FEvalArr[G] with
-  FEvalBool[G] {
+  FEvalBool[G] with
+  FEvalProd[G] {
   val grad: Gradient[G]
 
-  override def ltD: FEval[G, scala.Double => scala.Double => Boolean] = ???
+  override def ltD =
+    new FEval[G, scala.Double => scala.Double => Boolean] {
+      override val tm = aInfo(doubleInfo, aInfo(doubleInfo, boolInfo))
 
-  override def divD: FEval[G, scala.Double => scala.Double => scala.Double] = ???
+      override val deriv =
+        base.C_(base.B__(
+          base.C_(base.B__(base.ltD)(base.zro(base.doubleInfo, grad.GInfo)))
+        )(base.zro(base.doubleInfo, grad.GInfo)))
+    }
 
-  override def multD: FEval[G, scala.Double => scala.Double => scala.Double] = ???
+  override def divD = new FEval[G, scala.Double => scala.Double => scala.Double] {
+    override val tm = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-  override def expD: FEval[G, scala.Double => scala.Double] = ???
+    override val deriv = grad.div
+  }
 
-  override def sigD: FEval[G, scala.Double => scala.Double] = ???
+  override def multD = new FEval[G, scala.Double => scala.Double => scala.Double] {
+    override val tm = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-  override def plusD: FEval[G, scala.Double => scala.Double => scala.Double] = ???
+    override val deriv = grad.mult
+  }
 
-  override def litD: scala.Double => FEval[G, scala.Double] = ???
+  override def expD = new FEval[G, scala.Double => scala.Double] {
+    override val tm = aInfo(doubleInfo, doubleInfo)
+
+    override val deriv = grad.exp
+  }
+
+  override def sigD = new FEval[G, scala.Double => scala.Double] {
+    override val tm = aInfo(doubleInfo, doubleInfo)
+
+    override val deriv = grad.sig
+  }
+
+  override def plusD = new FEval[G, scala.Double => scala.Double => scala.Double] {
+    override val tm = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
+
+    override val deriv = grad.plus
+  }
+
+  override def litD: scala.Double => FEval[G, scala.Double] = d =>
+    new FEval[G, scala.Double] {
+      override val tm = doubleInfo
+
+      override val deriv = base.mkProd__(base.litD(d))(grad.constG)
+    }
 
   override implicit def doubleInfo: FEvalCase.Aux[G, scala.Double, (scala.Double, G)] =
     new FEvalCase[G, scala.Double] {
@@ -35,7 +70,7 @@ trait FEvalDouble[G] extends
 
       override def tmr: tm.ret = ()
 
-      override def lr: LangInfoG[(scala.Double, G)] = ???
+      override def lr: LangInfoG[(scala.Double, G)] = base.prodInfo(base.doubleInfo, grad.GInfo)
     }
 }
 
