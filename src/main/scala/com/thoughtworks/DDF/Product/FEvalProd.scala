@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 
 trait FEvalProd extends Prod[FEvalCase, FEval] with FEvalArr {
   override val base = LangTermLang
