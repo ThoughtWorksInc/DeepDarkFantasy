@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Combinators.EvalMComb
+import com.thoughtworks.DDF.Double.EvalMDouble
 import com.thoughtworks.DDF.List.EvalMList
 import com.thoughtworks.DDF.NoInfo
 
@@ -10,11 +11,8 @@ trait EvalMInterLang extends
   InterLang[NoInfo, Lambda[X => X]] with
   SimpleLang[Lambda[X => X]] with
   EvalMComb with
-  EvalMList {
-  override def divD: Double => Double => Double = l => r => l / r
-
-  override def ltD: Double => Double => Boolean = l => r => l < r
-
+  EvalMList with
+  EvalMDouble {
   override def none[A](implicit ai: NoInfo[A]): Option[A] = None
 
   override def some[A](implicit ai: NoInfo[A]): A => Option[A] = Some[A]
@@ -24,15 +22,7 @@ trait EvalMInterLang extends
     case Some(x) => _ => f => f(x)
   }
 
-  override def plusD: Double => Double => Double = l => r => l + r
-
   override def mkTop: Unit = Unit
-
-  override def sigD: Double => Double = x => 1 / (1 + Math.exp(-x))
-
-  override def multD: Double => Double => Double = l => r => l * r
-
-  override def litD: Double => Double = identity[Double]
 
   override def sumComm[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): Either[A, B] => Either[B, A] = _.swap
 
@@ -58,15 +48,6 @@ trait EvalMInterLang extends
   Either[A, B] => (A => C) => (B => C) => C = {
     case Left(x) => f => _ => f(x)
     case Right(x) => _ => f => f(x)
-  }
-
-  override def expD: Double => Double = Math.exp
-
-  override def litB: Boolean => Boolean = identity[Boolean]
-
-  override def ite[A](implicit ai: NoInfo[A]): Boolean => A => A => A = {
-    case true => x => _ => x
-    case false => _ => x => x
   }
 
   override def exfalso[A](implicit ai: NoInfo[A]): Nothing => A = x => x
