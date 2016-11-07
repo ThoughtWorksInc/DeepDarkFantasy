@@ -2,71 +2,70 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
-trait FEvalSum[G] extends Sum[FEvalCase[G, ?], FEval[G, ?]] with FEvalArr[G] {
-  override def sumAssocRL[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, Either[A, Either[B, C]] => Either[Either[A, B], C]] {
-      override val tm = aInfo(sumInfo(ai, sumInfo(bi, ci)), sumInfo(sumInfo(ai, bi), ci))
+trait FEvalSum extends Sum[FEvalCase, FEval] with FEvalArr {
+  override def sumAssocRL[A, B, C](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C]) =
+    new FEval[Either[A, Either[B, C]] => Either[Either[A, B], C]] {
+      override val fec = aInfo(sumInfo(ai, sumInfo(bi, ci)), sumInfo(sumInfo(ai, bi), ci))
 
-      override val deriv = base.sumAssocRL(ai.lr, bi.lr, ci.lr)
+      override def term[G: Gradient] = base.sumAssocRL(ai.wgi[G], bi.wgi[G], ci.wgi[G])
     }
 
-  override def sumMatch[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, Either[A, B] => (A => C) => (B => C) => C] {
-      override val tm = aInfo(sumInfo(ai, bi), aInfo(aInfo(ai, ci), aInfo(aInfo(bi, ci), ci)))
+  override def sumMatch[A, B, C](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C]) =
+    new FEval[Either[A, B] => (A => C) => (B => C) => C] {
+      override val fec = aInfo(sumInfo(ai, bi), aInfo(aInfo(ai, ci), aInfo(aInfo(bi, ci), ci)))
 
-      override val deriv: LangTerm[tm.ret] = base.sumMatch(ai.lr, bi.lr, ci.lr)
+      override def term[G: Gradient] = base.sumMatch(ai.wgi[G], bi.wgi[G], ci.wgi[G])
     }
 
-  override def left[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, A => Either[A, B]] {
-      override val tm = aInfo(ai, sumInfo(ai, bi))
+  override def left[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[A => Either[A, B]] {
+      override val fec = aInfo(ai, sumInfo(ai, bi))
 
-      override val deriv = base.left(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.left(ai.wgi[G], bi.wgi[G])
     }
 
-  override def sumComm[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, Either[A, B] => Either[B, A]] {
-      override val tm = aInfo(sumInfo(ai, bi), sumInfo(bi, ai))
+  override def sumComm[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[Either[A, B] => Either[B, A]] {
+      override val fec = aInfo(sumInfo(ai, bi), sumInfo(bi, ai))
 
-      override val deriv: LangTerm[tm.ret] = base.sumComm(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.sumComm(ai.wgi[G], bi.wgi[G])
     }
 
-  override implicit def sumInfo[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]):
-  FEvalCase.Aux[G, Either[A, B], Either[ai.ret, bi.ret]] = new FEvalCase[G, Either[A, B]] {
-    override type ret = Either[ai.ret, bi.ret]
+  override implicit def sumInfo[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]):
+  FEvalCase.Aux[Either[A, B], Lambda[G => Either[ai.WithGrad[G], bi.WithGrad[G]]]] =
+    new FEvalCase[Either[A, B]] {
+      override type WithGrad[G] = Either[ai.WithGrad[G], bi.WithGrad[G]]
 
-    override def lr: LangInfoG[Either[ai.ret, bi.ret]] = base.sumInfo(ai.lr, bi.lr)
+      override def wgi[G: Gradient] = base.sumInfo(ai.wgi[G], bi.wgi[G])
 
     override val tm = sfem[A, B]
 
     override def tmr: tm.ret = (ai, bi)
   }
 
-  override def sumLeftInfo[A, B]: FEvalCase[G, Either[A, B]] => FEvalCase[G, A] = _.get(sfem[A, B])._1
+  override def sumLeftInfo[A, B]: FEvalCase[Either[A, B]] => FEvalCase[A] = _.get(sfem[A, B])._1
 
-  override def sumRightInfo[A, B]: FEvalCase[G, Either[A, B]] => FEvalCase[G, B] = _.get(sfem[A, B])._2
+  override def sumRightInfo[A, B]: FEvalCase[Either[A, B]] => FEvalCase[B] = _.get(sfem[A, B])._2
 
-  override def right[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, B => Either[A, B]] {
-      override val tm = aInfo(bi, sumInfo(ai, bi))
+  override def right[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[B => Either[A, B]] {
+      override val fec = aInfo(bi, sumInfo(ai, bi))
 
-      override val deriv = base.right(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.right(ai.wgi[G], bi.wgi[G])
     }
 
-  def sfem[A, B] = new FEMMatch[G, Either[A, B]] {
-    override type ret = (FEvalCase[G, A], FEvalCase[G, B])
+  def sfem[A, B] = new FEvalMatch[Either[A, B]] {
+    override type ret = (FEvalCase[A], FEvalCase[B])
   }
 
-  override def sumAssocLR[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, Either[Either[A, B], C] => Either[A, Either[B, C]]] {
-      override val tm = aInfo(sumInfo(sumInfo(ai, bi), ci), sumInfo(ai, sumInfo(bi, ci)))
+  override def sumAssocLR[A, B, C](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C]) =
+    new FEval[Either[Either[A, B], C] => Either[A, Either[B, C]]] {
+      override val fec = aInfo(sumInfo(sumInfo(ai, bi), ci), sumInfo(ai, sumInfo(bi, ci)))
 
-      override val deriv = base.sumAssocLR(ai.lr, bi.lr, ci.lr)
+      override def term[G: Gradient] = base.sumAssocLR(ai.wgi[G], bi.wgi[G], ci.wgi[G])
     }
 }
 
-object FEvalSum {
-  implicit def apply[G]: FEvalSum[G] = new FEvalSum[G] { }
-}
+object FEvalSum extends FEvalSum

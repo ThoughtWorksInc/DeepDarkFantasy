@@ -1,33 +1,32 @@
 package com.thoughtworks.DDF.Top
 
 import com.thoughtworks.DDF.InfoBase.FEvalInfoBase
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.Language.LangTermLang
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
-trait FEvalTop[G] extends
-  Top[FEvalCase[G, ?], FEval[G, ?]] with
-  FEvalInfoBase[G] {
+trait FEvalTop extends
+  Top[FEvalCase, FEval] with
+  FEvalInfoBase {
   val base = LangTermLang
 
-  override implicit def topInfo: FEvalCase.Aux[G, Unit, Unit] = new FEvalCase[G, Unit] {
-    override type ret = Unit
+  override implicit def topInfo: FEvalCase.Aux[Unit, Lambda[G => Unit]] =
+    new FEvalCase[Unit] {
+      override type WithGrad[_] = Unit
 
-    override val tm: FEMMatch.Aux[G, Unit, Unit] = new FEMMatch[G, Unit] {
-      override type ret = Unit
-    }
+      override val tm = new FEvalMatch[Unit] {
+        override type ret = Unit
+      }
 
-    override def tmr: tm.ret = ()
+      override def tmr: tm.ret = ()
 
-    override def lr: LangInfoG[Unit] = base.topInfo
+      override def wgi[G: Gradient] = base.topInfo
   }
 
-  override def mkTop: FEval[G, Unit] = new FEval[G, Unit] {
-    override val tm = topInfo
+  override def mkTop: FEval[Unit] = new FEval[Unit] {
+    override val fec = topInfo
 
-    override val deriv: LangTerm[tm.ret] = base.mkTop
+    override def term[G: Gradient] = base.mkTop
   }
 }
 
-object FEvalTop {
-  implicit def apply[G]: FEvalTop[G] = new FEvalTop[G] { }
-}
+object FEvalTop extends FEvalTop

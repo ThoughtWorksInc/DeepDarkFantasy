@@ -2,32 +2,30 @@ package com.thoughtworks.DDF.Bot
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
-trait FEvalBotMin[G] extends
-  BotMin[FEvalCase[G, ?], FEval[G, ?]] with
-  FEvalArr[G] {
-  override implicit def botInfo: FEvalCase.Aux[G, Nothing, Nothing] =
-    new FEvalCase[G, Nothing] {
-      override type ret = Nothing
+trait FEvalBotMin extends
+  BotMin[FEvalCase, FEval] with
+  FEvalArr {
+  override implicit def botInfo: FEvalCase.Aux[Nothing, Lambda[X => Nothing]] =
+    new FEvalCase[Nothing] {
+      override type WithGrad[_] = Nothing
 
-      override def lr: LangInfoG[Nothing] = base.botInfo
+      override def wgi[G: Gradient]: LangInfoG[Nothing] = base.botInfo
 
-      override val tm = new FEMMatch[G, Nothing] {
+      override val tm = new FEvalMatch[Nothing] {
         override type ret = Unit
       }
 
       override def tmr: tm.ret = ()
     }
 
-  override def exfalso[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, Nothing => A] {
-      override val tm = aInfo[Nothing, A](botInfo, ai)
+  override def exfalso[A](implicit ai: FEvalCase[A]) =
+    new FEval[Nothing => A] {
+      override val fec = aInfo[Nothing, A](botInfo, ai)
 
-      override val deriv = base.exfalso(ai.lr)
+      override def term[G: Gradient] = base.exfalso(ai.wgi[G])
     }
 }
 
-object FEvalBotMin {
-  implicit def apply[G] = new FEvalBotMin[G] { }
-}
+object FEvalBotMin extends FEvalBotMin

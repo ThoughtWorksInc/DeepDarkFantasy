@@ -1,50 +1,47 @@
 package com.thoughtworks.DDF.Option
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
-trait FEvalOption[G] extends Option[FEvalCase[G, ?], FEval[G, ?]] with FEvalArr[G] {
-  override def none[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, scala.Option[A]] {
-      override val tm = optionInfo(ai)
+trait FEvalOption extends Option[FEvalCase, FEval] with FEvalArr {
+  override def none[A](implicit ai: FEvalCase[A]) =
+    new FEval[scala.Option[A]] {
+      override val fec = optionInfo(ai)
 
-      override val deriv = base.none(ai.lr)
+      override def term[G: Gradient] = base.none(ai.wgi[G])
     }
 
-  override def some[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, A => scala.Option[A]] {
-      override val tm = aInfo(ai, optionInfo(ai))
+  override def some[A](implicit ai: FEvalCase[A]) =
+    new FEval[A => scala.Option[A]] {
+      override val fec = aInfo(ai, optionInfo(ai))
 
-      override val deriv = base.some(ai.lr)
+      override def term[G: Gradient] = base.some(ai.wgi[G])
     }
 
-  override def optionMatch[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, scala.Option[A] => B => (A => B) => B] {
-      override val tm = aInfo(optionInfo(ai), aInfo(bi, aInfo(aInfo(ai, bi), bi)))
+  override def optionMatch[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[scala.Option[A] => B => (A => B) => B] {
+      override val fec = aInfo(optionInfo(ai), aInfo(bi, aInfo(aInfo(ai, bi), bi)))
 
-      override val deriv = base.optionMatch(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.optionMatch(ai.wgi[G], bi.wgi[G])
     }
 
-  override implicit def optionInfo[A](implicit ai: FEvalCase[G, A]):
-  FEvalCase.Aux[G, scala.Option[A], scala.Option[ai.ret]] =
-    new FEvalCase[G, scala.Option[A]] {
-      override type ret = scala.Option[ai.ret]
+  override implicit def optionInfo[A](implicit ai: FEvalCase[A]):
+  FEvalCase.Aux[scala.Option[A], Lambda[G => scala.Option[ai.WithGrad[G]]]] =
+    new FEvalCase[scala.Option[A]] {
+      override type WithGrad[G] = scala.Option[ai.WithGrad[G]]
 
       override val tm = ofem[A]
 
       override def tmr: tm.ret = ai
 
-      override def lr: LangInfoG[scala.Option[ai.ret]] = base.optionInfo(ai.lr)
+      override def wgi[G: Gradient] = base.optionInfo(ai.wgi[G])
     }
 
-  override def optionElmInfo[A]: FEvalCase[G, scala.Option[A]] => FEvalCase[G, A] = _.get(ofem[A])
+  override def optionElmInfo[A]: FEvalCase[scala.Option[A]] => FEvalCase[A] = _.get(ofem[A])
 
-  def ofem[A] = new FEMMatch[G, scala.Option[A]] {
-    override type ret = FEvalCase[G, A]
+  def ofem[A] = new FEvalMatch[scala.Option[A]] {
+    override type ret = FEvalCase[A]
   }
 }
 
-object FEvalOption {
-  implicit def apply[G] = new FEvalOption[G] { }
-}
+object FEvalOption extends FEvalOption

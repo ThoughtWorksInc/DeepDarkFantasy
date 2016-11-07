@@ -1,68 +1,66 @@
 package com.thoughtworks.DDF.Product
 
-import com.thoughtworks.DDF.Arrow.{Arr, FEvalArr}
+import com.thoughtworks.DDF.Arrow.FEvalArr
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
 
-trait FEvalProd[G] extends Prod[FEvalCase[G, ?], FEval[G, ?]] with FEvalArr[G] {
+trait FEvalProd extends Prod[FEvalCase, FEval] with FEvalArr {
   override val base = LangTermLang
 
-  def pfem[A, B] = new FEMMatch[G, (A, B)] {
-    override type ret = (FEvalCase[G, A], FEvalCase[G, B])
+  def pfem[A, B] = new FEvalMatch[(A, B)] {
+    override type ret = (FEvalCase[A], FEvalCase[B])
   }
 
-  override implicit def prodInfo[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]):
-  FEvalCase.Aux[G, (A, B), (ai.ret, bi.ret)] =
-    new FEvalCase[G, (A, B)] {
-      override type ret = (ai.ret, bi.ret)
+  override implicit def prodInfo[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]):
+  FEvalCase.Aux[(A, B), Lambda[G => (ai.WithGrad[G], bi.WithGrad[G])]] =
+    new FEvalCase[(A, B)] {
+      override type WithGrad[G] = (ai.WithGrad[G], bi.WithGrad[G])
 
-      override def lr: LangInfoG[(ai.ret, bi.ret)] = base.prodInfo(ai.lr, bi.lr)
+      override def wgi[G: Gradient]: LangInfoG[(ai.WithGrad[G], bi.WithGrad[G])] = base.prodInfo(ai.wgi[G], bi.wgi[G])
 
       override val tm = pfem[A, B]
 
       override def tmr: tm.ret = (ai, bi)
     }
 
-  override def prodZroInfo[A, B]: FEvalCase[G, (A, B)] => FEvalCase[G, A] = _.get(pfem[A, B])._1
+  override def prodZroInfo[A, B]: FEvalCase[(A, B)] => FEvalCase[A] = _.get(pfem[A, B])._1
 
-  override def prodFstInfo[A, B]: FEvalCase[G, (A, B)] => FEvalCase[G, B] = _.get(pfem[A, B])._2
+  override def prodFstInfo[A, B]: FEvalCase[(A, B)] => FEvalCase[B] = _.get(pfem[A, B])._2
 
-  override def mkProd[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, A => B => (A, B)] {
-      override val tm = aInfo(ai, aInfo(bi, prodInfo(ai, bi)))
+  override def mkProd[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[A => B => (A, B)] {
+      override val fec = aInfo(ai, aInfo(bi, prodInfo(ai, bi)))
 
-      override val deriv = base.mkProd(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.mkProd(ai.wgi[G], bi.wgi[G])
     }
 
-  override def uncurry[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, (A => B => C) => ((A, B)) => C] {
-      override val tm = aInfo(aInfo(ai, aInfo(bi, ci)), aInfo(prodInfo(ai, bi), ci))
+  override def uncurry[A, B, C](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C]) =
+    new FEval[(A => B => C) => ((A, B)) => C] {
+      override val fec = aInfo(aInfo(ai, aInfo(bi, ci)), aInfo(prodInfo(ai, bi), ci))
 
-      override val deriv = base.uncurry(ai.lr, bi.lr, ci.lr)
+      override def term[G: Gradient] = base.uncurry(ai.wgi[G], bi.wgi[G], ci.wgi[G])
     }
 
-  override def curry[A, B, C](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B], ci: FEvalCase[G, C]) =
-    new FEval[G, (((A, B)) => C) => A => B => C] {
-      override val tm = aInfo(aInfo(prodInfo(ai, bi), ci), aInfo(ai, aInfo(bi, ci)))
+  override def curry[A, B, C](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C]) =
+    new FEval[(((A, B)) => C) => A => B => C] {
+      override val fec = aInfo(aInfo(prodInfo(ai, bi), ci), aInfo(ai, aInfo(bi, ci)))
 
-      override val deriv = base.curry(ai.lr, bi.lr, ci.lr)
+      override def term[G: Gradient] = base.curry(ai.wgi[G], bi.wgi[G], ci.wgi[G])
     }
 
-  override def fst[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, ((A, B)) => B] {
-      override val tm = aInfo(prodInfo(ai, bi), bi)
+  override def fst[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[((A, B)) => B] {
+      override val fec = aInfo(prodInfo(ai, bi), bi)
 
-      override val deriv = base.fst(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.fst(ai.wgi[G], bi.wgi[G])
     }
 
-  override def zro[A, B](implicit ai: FEvalCase[G, A], bi: FEvalCase[G, B]) =
-    new FEval[G, ((A, B)) => A] {
-      override val tm = aInfo(prodInfo(ai, bi), ai)
+  override def zro[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
+    new FEval[((A, B)) => A] {
+      override val fec = aInfo(prodInfo(ai, bi), ai)
 
-      override val deriv = base.zro(ai.lr, bi.lr)
+      override def term[G: Gradient] = base.zro(ai.wgi[G], bi.wgi[G])
     }
 }
 
-object FEvalProd {
-  implicit def apply[G]: FEvalProd[G] = new FEvalProd[G] { }
-}
+object FEvalProd extends FEvalProd

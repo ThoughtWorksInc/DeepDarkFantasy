@@ -1,37 +1,35 @@
 package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEMMatch, FEval, FEvalCase}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
-trait FEvalBool[G] extends
-  Bool[FEvalCase[G, ?], FEval[G, ?]] with FEvalArr[G] {
-  override def ite[A](implicit ai: FEvalCase[G, A]) =
-    new FEval[G, Boolean => A => A => A] {
-      override val tm = aInfo(boolInfo, aInfo(ai, aInfo(ai, ai)))
+trait FEvalBool extends
+  Bool[FEvalCase, FEval] with FEvalArr {
+  override def ite[A](implicit ai: FEvalCase[A]) =
+    new FEval[Boolean => A => A => A] {
+      override val fec = aInfo(boolInfo, aInfo(ai, aInfo(ai, ai)))
 
-      override val deriv = base.ite(ai.lr)
+      override def term[G: Gradient] = base.ite(ai.wgi[G])
     }
 
-  override def litB: Boolean => FEval[G, Boolean] = b => new FEval[G, Boolean] {
-    override val tm = boolInfo
+  override def litB: Boolean => FEval[Boolean] = b => new FEval[Boolean] {
+    override val fec = boolInfo
 
-    override val deriv = base.litB(b)
+    override def term[G: Gradient] = base.litB(b)
   }
 
-  override implicit def boolInfo: FEvalCase.Aux[G, Boolean, Boolean] = new FEvalCase[G, Boolean] {
-    override type ret = Boolean
+  override implicit def boolInfo: FEvalCase.Aux[Boolean, Lambda[X => Boolean]] = new FEvalCase[Boolean] {
+    override type WithGrad[_] = Boolean
 
-    override val tm: FEMMatch.Aux[G, Boolean, Unit] = new FEMMatch[G, Boolean] {
+    override val tm = new FEvalMatch[Boolean] {
       override type ret = Unit
     }
 
     override def tmr: tm.ret = ()
 
-    override def lr: LangInfoG[Boolean] = base.boolInfo
+    override def wgi[G: Gradient]: LangInfoG[Boolean] = base.boolInfo
   }
 }
 
-object FEvalBool {
-  implicit def apply[G]: FEvalBool[G] = new FEvalBool[G] { }
-}
+object FEvalBool extends FEvalBool

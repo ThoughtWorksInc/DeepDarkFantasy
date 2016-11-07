@@ -2,29 +2,25 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bot.FEvalBotMin
 import com.thoughtworks.DDF.Combinators.FEvalComb
+import com.thoughtworks.DDF.{FEval, FEvalCase, Gradient}
 import com.thoughtworks.DDF.IO.FEvalIO
 import com.thoughtworks.DDF.List.FEvalList
 import com.thoughtworks.DDF.Option.FEvalOption
 import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.Sum.FEvalSum
 import com.thoughtworks.DDF.Top.FEvalTop
-import com.thoughtworks.DDF.{FEval, FEvalCase, Gradient}
 
-trait FEvalInterLang[G] extends
-  InterLang[FEvalCase[G, ?], FEval[G, ?]] with
-  FEvalProd[G] with
-  FEvalList[G] with
-  FEvalComb[G] with
-  FEvalSum[G] with
-  FEvalOption[G] with
-  FEvalBotMin[G] with
-  FEvalIO[G] with
-  FEvalTop[G] {
+trait FEvalInterLang extends
+  InterLang[FEvalCase, FEval] with
+  FEvalProd with
+  FEvalList with
+  FEvalComb with
+  FEvalSum with
+  FEvalOption with
+  FEvalBotMin with
+  FEvalIO with
+  FEvalTop {
   override val base = LangTermLang
 }
 
-object FEvalInterLang {
-  implicit def apply[G](implicit g: Gradient[G]): FEvalInterLang[G] = new FEvalInterLang[G] {
-    override val grad = g
-  }
-}
+object FEvalInterLang extends FEvalInterLang

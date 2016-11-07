@@ -2,10 +2,8 @@ package com.thoughtworks.DDF.InfoBase
 
 import com.thoughtworks.DDF.{FEval, FEvalCase}
 
-trait FEvalInfoBase[G] extends InfoBase[FEvalCase[G, ?], FEval[G, ?]] {
-  override def reprInfo[A]: FEval[G, A] => FEvalCase[G, A] = _.tm
+trait FEvalInfoBase extends InfoBase[FEvalCase, FEval] {
+  override def reprInfo[A]: FEval[A] => FEvalCase[A] = _.fec
 }
 
-object FEvalInfoBase {
-  implicit def apply[G]: FEvalInfoBase[G] = new FEvalInfoBase[G] { }
-}
+object FEvalInfoBase extends FEvalInfoBase
