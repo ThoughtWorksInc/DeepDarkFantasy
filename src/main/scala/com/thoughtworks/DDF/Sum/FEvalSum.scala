@@ -1,7 +1,6 @@
 package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
 import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
 
 trait FEvalSum extends Sum[FEvalCase, FEval] with FEvalArr {

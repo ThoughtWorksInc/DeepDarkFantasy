@@ -150,6 +150,16 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def IOElmInfo[A] = i.IOElmInfo[A]
 
+  override def streamNil[A](implicit ai: Info[A]): Repr[Stream[A]] = i.streamNil[A]
+
+  override def streamCons[A](implicit ai: Info[A]) = i.streamCons[A]
+
+  override def streamMatch[A, B](implicit ai: Info[A], bi: Info[B]) = i.streamMatch[A, B]
+
+  override implicit def streamInfo[A](implicit ai: Info[A]): Info[Stream[A]] = i.streamInfo[A]
+
+  override def streamElmInfo[A] = i.streamElmInfo[A]
+
   override def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
   Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]] = {
     val nLang = NextInterLang.apply[Info, Repr, Except[A, B]](i, exceptInfo(ai)(bi))

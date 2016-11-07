@@ -1,6 +1,8 @@
 package com.thoughtworks.DDF.Cont
 
-trait ContBind[Info[_], Repr[_]] extends ContBase[Info, Repr] {
+import com.thoughtworks.DDF.Arrow.ArrMin
+
+trait ContBind[Info[_], Repr[_]] extends ContInfo[Info, Repr] with ArrMin[Info, Repr] {
   def contBind[R, A, B](implicit ri: Info[R], ai: Info[A], bi: Info[B]):
   Repr[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]]
 

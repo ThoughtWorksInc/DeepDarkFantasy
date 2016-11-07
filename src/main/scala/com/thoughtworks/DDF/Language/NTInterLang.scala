@@ -140,6 +140,17 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
   override def IOInfo[A](implicit ai: Info[A]) = base.IOInfo[A]
 
   override def IOElmInfo[A]: Info[IO[A]] => Info[A] = base.IOElmInfo[A]
+
+  override def streamNil[A](implicit ai: Info[A]): F[Stream[A]] = NTF(base.streamNil[A])
+
+  override def streamCons[A](implicit ai: Info[A]) = NTF(base.streamCons[A])
+
+  override def streamMatch[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.streamMatch[A, B])
+
+  override implicit def streamInfo[A](implicit ai: Info[A]): Info[Stream[A]] = base.streamInfo[A]
+
+  override def streamElmInfo[A] = base.streamElmInfo[A]
+
 }
 
 object NTInterLang {

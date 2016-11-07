@@ -206,11 +206,6 @@ trait InterLangTermInterLang extends
         lang.sumMatch(ai(lang), bi(lang), ci(lang))
     }
 
-  override def reprInfo[A]: InterLangTerm[A] => InterLangInfoG[A] = x =>
-    new InterLangInfoG[A] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(x(lang))
-    }
-
   override def exfalso[A](implicit ai: InterLangInfoG[A]): InterLangTerm[Nothing => A] =
     new InterLangTerm[Nothing => A] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.exfalso(ai(lang))
@@ -237,13 +232,24 @@ trait InterLangTermInterLang extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.getDouble
   }
 
-  override def IOInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[IO[A]] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOInfo(ai(lang))
+  override def streamCons[A](implicit ai: InterLangInfoG[A]) =
+    new InterLangTerm[(A) => ((Unit) => Stream[A]) => Stream[A]] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamCons(ai(lang))
+    }
+
+  override def streamNil[A](implicit ai: InterLangInfoG[A]) = new InterLangTerm[Stream[A]] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamNil(ai(lang))
   }
 
-  override def IOElmInfo[A]: InterLangInfoG[IO[A]] => InterLangInfoG[A] = ioa => new InterLangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOElmInfo[A](ioa(lang))
-  }
+  override def streamMatch[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
+    new InterLangTerm[Stream[A] => B => (A => Stream[A] => B) => B] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamMatch(ai(lang), bi(lang))
+    }
+
+  override def reprInfo[A]: InterLangTerm[A] => InterLangInfoG[A] = a =>
+    new InterLangInfoG[A] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(a(lang))
+    }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

@@ -42,11 +42,13 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     aeval(ltl.scanLeft[A, B])(f => aeval(ltl.scanLeft_(f.l))(z => aeval(ltl.scanLeft__(f.l)(z.l))(l =>
       leval(getList(l).scanLeft(z)((x, y) => app(app(f)(x))(y))))))
 
-  override def listZip[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[List[A] => List[B] => List[(A, B)]] =
+  override def listZip[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[List[A] => List[B] => List[(A, B)]] =
     aeval(ltl.listZip[A, B])(l => aeval(ltl.listZip_[A, B](l.l))(r =>
       leval(getList(l).zip(getList(r)).map(p => mkProd__(p._1)(p._2)))))
 
-  override def foldRight[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[(A => B => B) => B => List[A] => B] =
+  override def foldRight[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[(A => B => B) => B => List[A] => B] =
     aeval(ltl.foldRight[A, B])(f => aeval(ltl.foldRight_(f.l))(z => aeval(ltl.foldRight__(f.l)(z.l))(l =>
       getList(l).foldRight(z)((x, y) => app(app(f)(x))(y)))))
 
@@ -71,7 +73,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
       override val tm = otm[A]
     })
 
-  override def optionMatch[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[Option[A] => B => (A => B) => B] =
+  override def optionMatch[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[Option[A] => B => (A => B) => B] =
     aeval(ltl.optionMatch[A, B])(_.get(otm[A]) match {
       case None => K[B, A => B]
       case Some(x) => K_[(A => B) => B, B](Let_[A, B](x))
@@ -79,11 +82,13 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def I[A](implicit ai: InterLangInfoG[A]): EvalO[A => A] = aeval(ltl.I[A])(identity[EvalO[A]])
 
-  override def foldLeft[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[(A => B => A) => A => List[B] => A] =
+  override def foldLeft[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[(A => B => A) => A => List[B] => A] =
     aeval(ltl.foldLeft[A, B])(f => aeval(ltl.foldLeft_(f.l))(z => aeval(ltl.foldLeft__(f.l)(z.l))(l =>
       getList(l).foldLeft(z)((x, y) => app(app(f)(x))(y)))))
 
-  override def listMap[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[(A => B) => List[A] => List[B]] =
+  override def listMap[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[(A => B) => List[A] => List[B]] =
     aeval(ltl.listMap[A, B])(f => aeval(ltl.listMap_(f.l))(l => leval(getList(l).map(app(f)))))
 
   override def reverse[A](implicit ai: InterLangInfoG[A]): EvalO[List[A] => List[A]] =
@@ -187,7 +192,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     override type ret = Either[EvalO[A], EvalO[B]]
   }
 
-  override def sumComm[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[Either[A, B] => Either[B, A]] =
+  override def sumComm[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[Either[A, B] => Either[B, A]] =
     aeval(ltl.sumComm[A, B])(_.get(stm[A, B]) match {
       case Left(x) => right_(x)
       case Right(x) => left_(x)
@@ -273,13 +279,9 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def reprInfo[A]: EvalO[A] => InterLangInfoG[A] = x => ltl.reprInfo(x.l)
 
-  override implicit def botInfo: InterLangInfoG[Nothing] = new InterLangInfoG[Nothing] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo
-  }
-
   override def exfalso[A](implicit ai: InterLangInfoG[A]): EvalO[Nothing => A] = aeval[Nothing, A](ltl.exfalso[A])(eval)
 
-  def ioeval[A]: InterLangTerm[IO[A]] => EvalO[IO[A]] = lio => new EvalO[IO[A]] {
+  def IOeval[A]: InterLangTerm[IO[A]] => EvalO[IO[A]] = lio => new EvalO[IO[A]] {
     override def l: InterLangTerm[IO[A]] = lio
 
     override val tm = new EvalOMatch[IO[A]] {
@@ -290,21 +292,47 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
   }
 
   override def putDouble: EvalO[Double => IO[Unit]] =
-    aeval(ltl.putDouble)(d => ioeval(ltl.putDouble_(ltl.litD(eval(d)))))
+    aeval(ltl.putDouble)(d => IOeval(ltl.putDouble_(ltl.litD(eval(d)))))
 
   override def IOBind[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
   EvalO[IO[A] => (A => IO[B]) => IO[B]] = aeval(ltl.IOBind[A, B])(ioa => aeval(ltl.IOBind_[A, B](ioa.l))(f =>
-    ioeval[B](ltl.IOBind__(ioa.l)(f.l))))
+    IOeval[B](ltl.IOBind__(ioa.l)(f.l))))
 
   override def IORet[A](implicit ai: InterLangInfoG[A]):
-  EvalO[A => IO[A]] = aeval(ltl.IORet[A])(a => ioeval(ltl.IORet_(a.l)))
+  EvalO[A => IO[A]] = aeval(ltl.IORet[A])(a => IOeval(ltl.IORet_(a.l)))
 
-  override def getDouble: EvalO[IO[Double]] = ioeval(ltl.getDouble)
+  override def getDouble: EvalO[IO[Double]] = IOeval(ltl.getDouble)
 
   override def IOInfo[A](implicit ai: InterLangInfoG[A]): InterLangInfoG[EvalOInterLang.IO[A]] = ltl.IOInfo[A]
 
   override def IOElmInfo[A]: InterLangInfoG[EvalOInterLang.IO[A]] => InterLangInfoG[A] = ltl.IOElmInfo[A]
 
+  def streamTM[A] = new EvalOMatch[Stream[A]] {
+    override type ret = Option[(EvalO[A], EvalO[Unit => Stream[A]])]
+  }
+
+  override def streamNil[A](implicit ai: InterLangInfoG[A]): EvalO[Stream[A]] = new EvalO[Stream[A]] {
+    override def l: InterLangTerm[Stream[A]] = ltl.streamNil[A]
+
+    override def tmr: tm.ret = None
+
+    override val tm = streamTM[A]
+  }
+
+  override def streamCons[A](implicit ai: InterLangInfoG[A]): EvalO[A => (Unit => Stream[A]) => Stream[A]] =
+    aeval(ltl.streamCons[A])(a => aeval(ltl.streamCons_(a.l))(ls => new EvalO[Stream[A]] {
+      override val tm = streamTM[A]
+
+      override def l: InterLangTerm[Stream[A]] = ltl.streamCons__(a.l)(ls.l)
+
+      override def tmr = Some((a, ls))
+    }))
+
+  override def streamMatch[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]):
+  EvalO[Stream[A] => B => (A => Stream[A] => B) => B] = aeval(ltl.streamMatch[A, B])(_.get(streamTM[A]) match {
+    case None => K[B, (A => Stream[A] => B)]
+    case Some((h, t)) => K_(B__(Let_[Stream[A], B](app(t)(mkTop)))(Let_[A, Stream[A] => B](h)))
+  })
 }
 
 object EvalOInterLang extends EvalOInterLang

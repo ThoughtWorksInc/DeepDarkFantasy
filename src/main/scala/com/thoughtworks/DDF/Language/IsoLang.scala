@@ -172,6 +172,16 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def IOInfo[A](implicit ai: NInfo[A]): NInfo[IO[A]] = iconv(l.IOInfo[A])
 
   override def IOElmInfo[A]: NInfo[IO[A]] => NInfo[A] = ioa => iconv(l.IOElmInfo(convi(ioa)))
+
+  override def streamNil[A](implicit ai: NInfo[A]): NRepr[Stream[A]] = rconv(l.streamNil[A])
+
+  override def streamCons[A](implicit ai: NInfo[A]) = rconv(l.streamCons[A])
+
+  override def streamMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.streamMatch[A, B])
+
+  override implicit def streamInfo[A](implicit ai: NInfo[A]): NInfo[Stream[A]] = iconv(l.streamInfo[A])
+
+  override def streamElmInfo[A]: NInfo[Stream[A]] => NInfo[A] = si => iconv(l.streamElmInfo(convi(si)))
 }
 
 object IsoLang {

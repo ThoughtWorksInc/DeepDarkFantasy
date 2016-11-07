@@ -11,6 +11,7 @@ import com.thoughtworks.DDF.Option.Option
 import com.thoughtworks.DDF.Product.Prod
 import com.thoughtworks.DDF.Sum.Sum
 import com.thoughtworks.DDF.Top.Top
+import com.thoughtworks.DDF.Stream.Stream
 
 trait InterLang[Info[_], Repr[_]] extends
   LangInfo[Info, Repr] with
@@ -24,4 +25,5 @@ trait InterLang[Info[_], Repr[_]] extends
   Sum[Info, Repr] with
   Comb[Info, Repr] with
   BotMin[Info, Repr] with
-  IO[Info, Repr]
+  IO[Info, Repr] with
+  Stream[Info, Repr]

@@ -1,6 +1,8 @@
 package com.thoughtworks.DDF.Cont
 
-trait ContRet[Info[_], Repr[_]] extends ContBase[Info, Repr] {
+import com.thoughtworks.DDF.Arrow.ArrMin
+
+trait ContRet[Info[_], Repr[_]] extends ContInfo[Info, Repr] with ArrMin[Info, Repr] {
   def contRet[R, A](implicit ri: Info[R], ai: Info[A]): Repr[A => Cont[R, A]]
 
   final def contRet_[R, A](a: Repr[A])(implicit ri: Info[R]): Repr[Cont[R, A]] =

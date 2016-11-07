@@ -86,6 +86,21 @@ trait LangTermLangInfo[R[_]] extends
   override def IOElmInfo[A]: InterLangInfoG[IO[A]] => InterLangInfoG[A] = ioa => new InterLangInfoG[A] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.IOElmInfo(ioa(lang))
   }
+
+  override implicit def streamInfo[A](implicit ai: InterLangInfoG[A]) =
+    new InterLangInfoG[Stream[A]] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamInfo(ai(lang))
+    }
+
+  override def streamElmInfo[A]: InterLangInfoG[Stream[A]] => InterLangInfoG[A] = sa =>
+    new InterLangInfoG[A] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.streamElmInfo(sa(lang))
+    }
+
+  override implicit def botInfo: InterLangInfoG[Nothing] =
+    new InterLangInfoG[Nothing] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo
+    }
 }
 
 object LangTermLangInfo {

@@ -116,6 +116,15 @@ trait EvalMInterLang extends InterLang[NoInfo, Lambda[X => X]] with SimpleLang[L
   override def IOInfo[A](implicit ai: NoInfo[A]): NoInfo[IO[A]] = NoInfo()
 
   override def IOElmInfo[A]: NoInfo[IO[A]] => NoInfo[A] = _ => NoInfo()
+
+  override def streamNil[A](implicit ai: NoInfo[A]): Stream[A] = Stream.empty
+
+  override def streamCons[A](implicit ai: NoInfo[A]) = a => ls => Stream.cons(a, ls(() : Unit))
+
+  override def streamMatch[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = {
+    case Stream.Empty => x => _ => x
+    case h #:: t => _ => f => f(h)(t)
+  }
 }
 
 object EvalMInterLang extends EvalMInterLang

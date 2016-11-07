@@ -7,6 +7,7 @@ import com.thoughtworks.DDF.IO.FEvalIO
 import com.thoughtworks.DDF.List.FEvalList
 import com.thoughtworks.DDF.Option.FEvalOption
 import com.thoughtworks.DDF.Product.FEvalProd
+import com.thoughtworks.DDF.Stream.FEvalStream
 import com.thoughtworks.DDF.Sum.FEvalSum
 import com.thoughtworks.DDF.Top.FEvalTop
 
@@ -19,7 +20,8 @@ trait FEvalInterLang extends
   FEvalOption with
   FEvalBotMin with
   FEvalIO with
-  FEvalTop {
+  FEvalTop with
+  FEvalStream {
   override val base = LangTermLang
 }
 
