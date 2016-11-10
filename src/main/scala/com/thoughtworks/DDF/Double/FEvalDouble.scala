@@ -2,9 +2,10 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Bool.FEvalBool
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangInfoG
 import com.thoughtworks.DDF.Product.FEvalProd
-import com.thoughtworks.DDF.{FEvalMatch, FEval, FEvalCase, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalDouble extends
   Double[FEvalCase, FEval] with

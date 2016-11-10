@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.List
 
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangTermLang
 import com.thoughtworks.DDF.Product.FEvalProd
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalList extends
   List[FEvalCase, FEval] with

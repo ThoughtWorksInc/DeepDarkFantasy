@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangTermLang
-import com.thoughtworks.DDF.{FEval, FEvalCase, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase}
 
 trait FEvalComb extends Comb[FEvalCase, FEval] with FEvalArr {
   override val base = LangTermLang

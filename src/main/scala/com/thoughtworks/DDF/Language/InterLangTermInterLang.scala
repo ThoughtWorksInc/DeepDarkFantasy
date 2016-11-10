@@ -38,11 +38,6 @@ trait InterLangTermInterLang extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.scanRight(ai(lang), bi(lang))
     }
 
-  override def uncurry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]) =
-    new InterLangTerm[(A => B => C) => ((A, B)) => C] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.uncurry(ai(lang), bi(lang), ci(lang))
-    }
-
   override def sumComm[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[Either[A, B] => Either[B, A]] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.sumComm(ai(lang), bi(lang))
@@ -79,11 +74,6 @@ trait InterLangTermInterLang extends
   override def I[A](implicit ai: InterLangInfoG[A]) = new InterLangTerm[A => A] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.I(ai(lang))
   }
-
-  override def curry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]) =
-    new InterLangTerm[(((A, B)) => C) => A => B => C] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.curry(ai(lang), bi(lang), ci(lang))
-    }
 
   override def App[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[(A => B) => A => B] {

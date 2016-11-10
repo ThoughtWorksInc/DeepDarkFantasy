@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
+import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
 
 trait FEvalProd extends Prod[FEvalCase, FEval] with FEvalArr {
   override val base = LangTermLang
@@ -60,6 +61,13 @@ trait FEvalProd extends Prod[FEvalCase, FEval] with FEvalArr {
       override val fec = aInfo(prodInfo(ai, bi), ai)
 
       override def term[G: Gradient] = base.zro(ai.wgi[G], bi.wgi[G])
+    }
+
+  override def ><[A, B, C, D](implicit ai: FEvalCase[A], bi: FEvalCase[B], ci: FEvalCase[C], di: FEvalCase[D]) =
+    new FEval[(A => C) => (B => D) => ((A, B)) => (C, D)] {
+      override val fec = aInfo(aInfo(ai, ci), aInfo(aInfo(bi, di), aInfo(prodInfo(ai, bi), prodInfo(ci, di))))
+
+      override def term[G: Gradient] = base.><(ai.wgi[G], bi.wgi[G], ci.wgi[G], di.wgi[G])
     }
 }
 

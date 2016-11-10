@@ -137,10 +137,6 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def App[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[(A => B) => A => B] = I[A => B]
 
-  override def uncurry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
-  EvalO[(A => B => C) => ((A, B)) => C] = aeval(ltl.uncurry[A, B, C])(f =>
-    aeval(ltl.uncurry_(f.l))(p => app(app(f)(zro_(p)))(fst_(p))))
-
   override def plusD: EvalO[Double => Double => Double] =
     aeval(ltl.plusD)(l => aeval(ltl.plusD_(l.l))(r => litD(eval(l) + eval(r))))
 
@@ -250,10 +246,6 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
 
   override def K[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[A => B => A] =
     aeval(ltl.K[A, B])(a => aeval(ltl.K_[A, B](a.l))(_ => a))
-
-  override def curry[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
-  EvalO[(((A, B)) => C) => A => B => C] = aeval(ltl.curry[A, B, C])(f =>
-    aeval(ltl.curry_(f.l))(a => aeval(ltl.curry__(f.l)(a.l))(b => app(f)(mkProd__(a)(b)))))
 
   override def S[A, B, C](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B], ci: InterLangInfoG[C]):
   EvalO[(A => B => C) => (A => B) => A => C] =

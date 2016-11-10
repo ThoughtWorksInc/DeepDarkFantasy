@@ -75,10 +75,6 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def foldRight[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.foldRight)
 
-  override def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = NTF(base.uncurry)
-
-  override def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = NTF(base.curry)
-
   override implicit def prodInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.prodInfo
 
   override def prodZroInfo[A, B] = base.prodZroInfo

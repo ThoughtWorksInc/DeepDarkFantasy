@@ -1,5 +1,6 @@
 package com.thoughtworks.DDF
 
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
 
 import scalaz.Leibniz._

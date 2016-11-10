@@ -1,9 +1,10 @@
 package com.thoughtworks.DDF.IO
 
 import com.thoughtworks.DDF.Double.FEvalDouble
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 import com.thoughtworks.DDF.Top.FEvalTop
-import com.thoughtworks.DDF.{FEvalMatch, FEval, FEvalCase, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalIO extends
   IO[FEvalCase, FEval] with

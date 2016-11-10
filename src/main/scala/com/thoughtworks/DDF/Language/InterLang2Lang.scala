@@ -25,7 +25,9 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def foldLeft[A, B](implicit ai: Info[A], bi: Info[B]) = i.foldLeft[A, B]
 
-  override def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = i.uncurry[A, B, C]
+  override def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) =
+    C_(S__(B__(C[A => B => C, B, C](aInfo(ai, aInfo(bi, ci)), bi, ci))(
+      B__(Let[A, B => C])(zro[A, B])))(fst[A, B]))
 
   override def plusD = i.plusD
 
@@ -95,7 +97,10 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def K[A, B](implicit ai: Info[A], bi: Info[B]) = i.K[A, B]
 
-  override def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = i.curry[A, B, C]
+  override def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) =
+    B__[((A, B)) => C, (B => (A, B)) => B => C, A => B => C](
+      C__(B[A, B => (A, B), B => C])(mkProd[A, B]))(
+      B[B, (A, B), C])
 
   override def left[A, B](implicit ai: Info[A], bi: Info[B]) = i.left[A, B]
 
@@ -184,6 +189,14 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def stateBind[S, A, B](implicit si: Info[S], ai: Info[A], bi: Info[B]):
   Repr[State[S, A] => (A => State[S, B]) => State[S, B]] = C_(B__(B[S, (A, S), (B, S)])(uncurry[A, S, (B, S)]))
+
+  override def ><[A, B, C, D](implicit ai: Info[A], bi: Info[B], ci: Info[C], di: Info[D]):
+  Repr[(A => C) => (B => D) => ((A, B)) => (C, D)] = {
+    val nLang = NextInterLang.apply[Info, Repr, A => C](i, aInfo(ai, ci))
+    val nNLang = NextInterLang.apply[Info, nLang.repr, B => D](nLang, aInfo(bi, di))
+    nLang.collapse(nNLang.collapse(nNLang.S__(nNLang.B__(nNLang.mkProd[C, D])(
+      nNLang.B__(nNLang.rconv(nLang.in))(nNLang.zro[A, B])))(nNLang.B__(nNLang.in)(nNLang.fst[A, B]))))
+  }
 }
 
 object InterLang2Lang {

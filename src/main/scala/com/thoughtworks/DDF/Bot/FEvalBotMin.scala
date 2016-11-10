@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Bot
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangInfoG
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalBotMin extends
   BotMin[FEvalCase, FEval] with

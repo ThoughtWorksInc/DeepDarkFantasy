@@ -8,14 +8,14 @@ import com.thoughtworks.DDF.Double.Double
 import com.thoughtworks.DDF.IO.IO
 import com.thoughtworks.DDF.List.List
 import com.thoughtworks.DDF.Option.Option
-import com.thoughtworks.DDF.Product.Prod
+import com.thoughtworks.DDF.Product.ProdMin
 import com.thoughtworks.DDF.Sum.Sum
 import com.thoughtworks.DDF.Top.Top
 import com.thoughtworks.DDF.Stream.Stream
 
 trait InterLang[Info[_], Repr[_]] extends
   LangInfo[Info, Repr] with
-  Prod[Info, Repr] with
+  ProdMin[Info, Repr] with
   Double[Info, Repr] with
   Option[Info, Repr] with
   Arr[Info, Repr] with

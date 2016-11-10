@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Bool
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalBool extends
   Bool[FEvalCase, FEval] with FEvalArr {

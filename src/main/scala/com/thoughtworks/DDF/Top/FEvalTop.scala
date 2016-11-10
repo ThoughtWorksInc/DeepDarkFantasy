@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Top
 
+import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.InfoBase.FEvalInfoBase
 import com.thoughtworks.DDF.Language.LangTermLang
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalTop extends
   Top[FEvalCase, FEval] with

@@ -1,7 +1,8 @@
 package com.thoughtworks.DDF.Option
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
 trait FEvalOption extends Option[FEvalCase, FEval] with FEvalArr {
   override def none[A](implicit ai: FEvalCase[A]) =

@@ -1,7 +1,8 @@
 package com.thoughtworks.DDF.Stream
 
 import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 import com.thoughtworks.DDF.Language.LangTermLang
 import com.thoughtworks.DDF.Top.FEvalTop
 

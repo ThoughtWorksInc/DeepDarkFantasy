@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Product.Prod
+import com.thoughtworks.DDF.Product.ProdMin
 
-trait ListZip[Info[_], Repr[_]] extends Prod[Info, Repr] with ListMin[Info, Repr] {
+trait ListZip[Info[_], Repr[_]] extends ProdMin[Info, Repr] with ListMin[Info, Repr] {
   def listZip[A, B](implicit ai: Info[A], bi: Info[B]): Repr[scala.List[A] => scala.List[B] => scala.List[(A, B)]]
 
   final def listZip_[A, B](la: Repr[scala.List[A]])(implicit bi: Info[B]): Repr[scala.List[B] => scala.List[(A, B)]] =

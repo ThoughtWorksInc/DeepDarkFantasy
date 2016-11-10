@@ -13,6 +13,8 @@ trait ShowProd extends Prod[NoInfo, Show] with ShowArr with SimpleProd[Show] {
   override def curry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("curry")
 
   override def uncurry[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("uncurry")
+
+  override def ><[A, B, C, D](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C], di: NoInfo[D]) = Show("><")
 }
 
 object ShowProd {

@@ -1,6 +1,7 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch, Gradient}
+import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 import com.thoughtworks.DDF.InfoBase.FEvalInfoBase
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
 

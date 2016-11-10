@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bot.FEvalBotMin
 import com.thoughtworks.DDF.Combinators.FEvalComb
-import com.thoughtworks.DDF.{FEval, FEvalCase, Gradient}
+import com.thoughtworks.DDF.{FEval, FEvalCase}
 import com.thoughtworks.DDF.IO.FEvalIO
 import com.thoughtworks.DDF.List.FEvalList
 import com.thoughtworks.DDF.Option.FEvalOption

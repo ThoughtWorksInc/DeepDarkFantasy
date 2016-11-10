@@ -1,15 +1,16 @@
 package com.thoughtworks.DDF.Language
+import com.thoughtworks.DDF.Combinators.Comb
+
 import scalaz.NaturalTransformation
 
 trait NextInterLang[Info[_], Repr[_], Arg] extends
+  InterLang[Info, Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
   NTInterLang[
     Info,
     Repr,
-    Lambda[X => Either[Repr[X], Repr[Arg => X]]]] {
-
-  type repr[X] = Either[Repr[X], Repr[Arg => X]]
-
-  implicit def argi: Info[Arg]
+    Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  NextBase[Info, Repr, Arg] {
+  override implicit def comb = base
 
   override def reprInfo[A]: repr[A] => Info[A] = {
     case Left(x) => base.reprInfo(x)
@@ -26,15 +27,6 @@ trait NextInterLang[Info[_], Repr[_], Arg] extends
     case (Left(f_), Right(_)) => app(Right(base.K_(f_)(argi)))(x)
     case (Right(_), Left(x_)) => app(f)(Right(base.K_(x_)(argi)))
   }
-
-  val in: repr[Arg] = Right(base.I(argi))
-
-  def collapse[A]: repr[A] => Repr[Arg => A] = {
-    case Left(x) => base.K_(x)(argi)
-    case Right(x) => x
-  }
-
-  def rconv[A]: Repr[A] => repr[A] = x => Left(x)
 }
 
 object NextInterLang {
