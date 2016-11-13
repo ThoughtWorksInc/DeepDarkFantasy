@@ -1,5 +1,5 @@
 package com.thoughtworks.DDF.Gradient
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, NextLang}
 
 trait GDouble extends Gradient[Double] {
   override implicit def GInfo: LangInfoG[Double] = ltl.doubleInfo
@@ -24,7 +24,13 @@ trait GDouble extends Gradient[Double] {
   override def plus: LangTerm[((Double, Double)) => ((Double, Double)) => (Double, Double)] =
     lift2(ltl.plusD)(ltl.B__(ltl.C_(ltl.B__(ltl.plusD)(ltl.fst[Double, Double])))(ltl.fst[Double, Double]))
 
-  override def mult: LangTerm[((Double, Double)) => ((Double, Double)) => (Double, Double)] = lift2(ltl.multD)(???)
+  override def mult: LangTerm[((Double, Double)) => ((Double, Double)) => (Double, Double)] =
+    lift2(ltl.multD)({
+      val l = NextLang.apply[LangInfoG, LangTerm, (Double, Double)](ltl, ltl.prodInfo(ltl.doubleInfo, ltl.doubleInfo))
+      val r = NextLang.apply[LangInfoG, l.repr, (Double, Double)](l, ltl.prodInfo(ltl.doubleInfo, ltl.doubleInfo))
+      l.collapse(r.collapse(
+        r.plusD__(r.multD__(r.zro_(r.rconv(l.in)))(r.fst_(r.in)))(r.multD__(r.zro_(r.in))(r.fst_(r.rconv(l.in))))))
+    })
 
   override def div: LangTerm[((Double, Double)) => ((Double, Double)) => (Double, Double)] = lift2(ltl.divD)(???)
 
