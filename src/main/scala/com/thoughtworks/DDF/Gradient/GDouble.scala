@@ -42,7 +42,16 @@ trait GDouble extends Gradient[Double] {
           r.multD__(r.litD(-1))(r.divD__(r.zro_(r.rconv(l.in)))(r.multD__(r.fst_(r.in))(r.fst_(r.in)))))))
     })
 
-  override def sig: LangTerm[((Double, Double)) => (Double, Double)] = lift(ltl.sigD)(???)
+  override def sig: LangTerm[((Double, Double)) => (Double, Double)] = {
+    val n = NextLang.apply[LangInfoG, LangTerm, (Double, Double)](ltl, ltl.prodInfo(ltl.doubleInfo, ltl.doubleInfo))
+    n.collapse(n.Let__(n.sigD_(n.zro_(n.in)))({
+      val m = NextLang.apply[LangInfoG, n.repr, Double](n, ltl.doubleInfo)
+      m.collapse(m.mkProd__(m.in)(
+        m.multD__(m.fst_(m.rconv(n.in)))(
+          m.multD__(m.in)(
+            m.plusD__(m.litD(1))(m.multD__(m.litD(-1))(m.in))))))
+    }))
+  }
 
   override def exp: LangTerm[((Double, Double)) => (Double, Double)] =
     lift(ltl.expD)(
