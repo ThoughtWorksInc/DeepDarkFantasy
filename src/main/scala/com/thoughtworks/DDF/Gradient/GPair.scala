@@ -2,10 +2,12 @@ package com.thoughtworks.DDF.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, NextLang}
 
 trait GPair[A, B] extends Gradient[(A, B)] {
-  def combine[C]: Stream[C] => Stream[C] => Stream[C] = l => r => (l, r) match {
-    case (Stream.Empty, _) => r
-    case (_, Stream.Empty) => l
-    case (lh #:: lt, rh #:: rt) => lh #:: (rh #:: combine(lt)(rt))
+  def combine[C]: Stream[C] => Stream[C] => Stream[C] = {
+    case Stream.Empty => r => r
+    case lh #:: lt => {
+      case Stream.Empty => lh #:: lt
+      case rh #:: rt => lh #:: rh #:: combine(lt)(rt)
+    }
   }
 
   implicit val AG: Gradient[A]
