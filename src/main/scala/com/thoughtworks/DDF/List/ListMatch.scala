@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.List
 
-import com.thoughtworks.DDF.Arrow.ArrMin
+import com.thoughtworks.DDF.Arrow.Arr
 
-trait ListMatch[Info[_], Repr[_]] extends ListInfo[Info, Repr] with ArrMin[Info, Repr] {
+trait ListMatch[Info[_], Repr[_]] extends ListInfo[Info, Repr] with Arr[Info, Repr] {
   def listMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[scala.List[A] => B => (A => scala.List[A] => B) => B]
 
   final def listMatch_[A, B](l: Repr[scala.List[A]])(implicit bi: Info[B]): Repr[B => (A => scala.List[A] => B) => B] =
