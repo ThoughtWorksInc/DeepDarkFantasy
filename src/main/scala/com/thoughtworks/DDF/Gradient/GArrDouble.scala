@@ -6,6 +6,12 @@ trait GArrDouble extends Gradient[Double => Double] {
 
   override def constG: LangTerm[Double => Double] = ltl.I(ltl.doubleInfo)
 
+  def lift: LangTerm[Double => Double] =>
+    LangTerm[((Double, Double => Double)) => Double => Double] =>
+      LangTerm[((Double, Double => Double)) => (Double, Double => Double)] = origf => gradf => {
+    ltl.S__(ltl.B__(ltl.mkProd[Double, Double => Double])(ltl.B__(origf)(ltl.zro[Double, Double => Double])))(gradf)
+  }
+
   override def plus:
   LangTerm[((Double, Double => Double)) => ((Double, Double => Double)) => (Double, Double => Double)] = ???
 
@@ -15,9 +21,9 @@ trait GArrDouble extends Gradient[Double => Double] {
   override def div:
   LangTerm[((Double, Double => Double)) => ((Double, Double => Double)) => (Double, Double => Double)] = ???
 
-  override def sig: LangTerm[((Double, Double => Double)) => (Double, Double => Double)] = ???
+  override def sig: LangTerm[((Double, Double => Double)) => (Double, Double => Double)] = lift(ltl.sigD)(???)
 
-  override def exp: LangTerm[((Double, Double => Double)) => (Double, Double => Double)] = ???
+  override def exp: LangTerm[((Double, Double => Double)) => (Double, Double => Double)] = lift(ltl.expD)(???)
 }
 
 object GArrDouble extends GArrDouble

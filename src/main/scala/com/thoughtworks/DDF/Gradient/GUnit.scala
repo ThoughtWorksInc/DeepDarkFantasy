@@ -1,5 +1,5 @@
 package com.thoughtworks.DDF.Gradient
-import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
 
 trait GUnit extends Gradient[Unit] {
   override implicit def GInfo: LangInfoG[Unit] = ltl.topInfo

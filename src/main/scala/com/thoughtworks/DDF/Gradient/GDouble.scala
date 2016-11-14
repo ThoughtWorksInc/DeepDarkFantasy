@@ -9,14 +9,14 @@ trait GDouble extends Gradient[Double] {
   def lift: LangTerm[Double => Double] =>
     LangTerm[((Double, Double)) => Double] =>
       LangTerm[((Double, Double)) => (Double, Double)] = origf => gradf => {
-    ltl.S__(ltl.B__(ltl.mkProd)(ltl.B__(origf)(ltl.zro[Double, Double])))(gradf)
+    ltl.S__(ltl.B__(ltl.mkProd[Double, Double])(ltl.B__(origf)(ltl.zro[Double, Double])))(gradf)
   }
 
   def lift2: LangTerm[Double => Double => Double] =>
     LangTerm[((Double, Double)) => ((Double, Double)) => Double] =>
       LangTerm[((Double, Double)) => ((Double, Double)) => (Double, Double)] = origf => gradf => {
     ltl.curry_(ltl.S__(
-      ltl.B__(ltl.mkProd)(
+      ltl.B__(ltl.mkProd[Double, Double])(
         ltl.uncurry_(ltl.C_(ltl.B__(ltl.C_(ltl.B__(origf)(ltl.zro[Double, Double])))(ltl.zro[Double, Double])))))(
       ltl.uncurry_(gradf)))
   }
