@@ -6,6 +6,8 @@ trait GUnit extends Gradient[Unit] {
 
   override def constG: LangTerm[Unit] = ltl.mkTop
 
+  override val GCDS: Stream[GCD] = Stream.Empty
+
   def lift: LangTerm[Double => Double] => LangTerm[((Double, Unit)) => (Double, Unit)] = f =>
     ltl.B__(
       ltl.C__[Double, Unit, (Double, Unit)](ltl.mkProd[Double, Unit])(ltl.mkTop))(

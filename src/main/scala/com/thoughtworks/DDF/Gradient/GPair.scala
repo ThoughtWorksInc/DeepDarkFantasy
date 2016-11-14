@@ -2,6 +2,12 @@ package com.thoughtworks.DDF.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, NextLang}
 
 trait GPair[A, B] extends Gradient[(A, B)] {
+  def combine[C]: Stream[C] => Stream[C] => Stream[C] = l => r => (l, r) match {
+    case (Stream.Empty, _) => r
+    case (_, Stream.Empty) => l
+    case (lh #:: lt, rh #:: rt) => lh #:: (rh #:: combine(lt)(rt))
+  }
+
   implicit val AG: Gradient[A]
 
   implicit val BG: Gradient[B]
@@ -13,6 +19,15 @@ trait GPair[A, B] extends Gradient[(A, B)] {
   implicit val ai = AG.GInfo
 
   implicit val bi = BG.GInfo
+
+  override val GCDS: Stream[GCD] =
+    combine(AG.GCDS.map(x => new GCD {
+      override val gc: LangTerm[Double => (A, B)] = ltl.B__(ltl.C__(ltl.mkProd[A, B])(BG.constG))(x.gc)
+      override val gd: LangTerm[((A, B)) => Double] = ltl.B__(x.gd)(ltl.zro[A, B])
+    }))(BG.GCDS.map(x => new GCD {
+      override val gc: LangTerm[Double => (A, B)] = ltl.B__(ltl.mkProd_[A, B](AG.constG))(x.gc)
+      override val gd: LangTerm[((A, B)) => Double] = ltl.B__(x.gd)(ltl.fst[A, B])
+    }))
 
   import ltl.{prodInfo => lpinfo}
 

@@ -4,6 +4,16 @@ import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang}
 
 package object Gradient {
   trait Gradient[G] {
+    trait GCD {
+      def gc: LangTerm[Double => G]
+
+      def gd: LangTerm[G => Double]
+
+      def law(x: SemEq[Double => Double]): Prop = x.semEq(ltl.B__(gd)(gc))(ltl.I(di))
+    }
+
+    val GCDS: Stream[GCD]
+
     implicit val ltl = LangTermLang
 
     implicit val ti = ltl.topInfo
