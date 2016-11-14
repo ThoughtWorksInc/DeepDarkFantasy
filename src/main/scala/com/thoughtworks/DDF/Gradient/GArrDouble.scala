@@ -36,7 +36,15 @@ trait GArrDouble extends Gradient[Double => Double] {
 
   override def mult:
   LangTerm[((Double, Double => Double)) => ((Double, Double => Double)) => (Double, Double => Double)] =
-    lift2(ltl.multD)(???)
+    lift2(ltl.multD)({
+      implicit val l = NextLang.apply[LangInfoG, LangTerm, (Double, Double => Double)]
+      val r = NextLang.apply[LangInfoG, l.repr, (Double, Double => Double)]
+      val grad = NextLang.apply[LangInfoG, r.repr, Double]
+      l.collapse(r.collapse(grad.collapse(
+        grad.plusD__(
+          grad.app(grad.fst_(grad.rconv(r.rconv(l.in))))(grad.multD__(grad.in)(grad.zro_(grad.rconv(r.in)))))(
+          grad.app(grad.fst_(grad.rconv(r.in)))(grad.multD__(grad.in)(grad.zro_(grad.rconv(r.rconv(l.in)))))))))
+    })
 
   override def div:
   LangTerm[((Double, Double => Double)) => ((Double, Double => Double)) => (Double, Double => Double)] =
