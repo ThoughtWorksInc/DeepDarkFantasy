@@ -6,6 +6,12 @@ package object Gradient {
   trait Gradient[G] {
     implicit val ltl = LangTermLang
 
+    implicit val ti = ltl.topInfo
+
+    implicit val di = ltl.doubleInfo
+
+    implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = ltl.prodInfo(ai, bi)
+
     implicit def GInfo: LangInfoG[G]
 
     def constG: LangTerm[G]

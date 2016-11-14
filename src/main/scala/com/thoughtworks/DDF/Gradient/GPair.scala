@@ -10,8 +10,6 @@ trait GPair[A, B] extends Gradient[(A, B)] {
 
   override def constG: LangTerm[(A, B)] = ltl.mkProd__(AG.constG)(BG.constG)
 
-  implicit val di = ltl.doubleInfo
-
   implicit val ai = AG.GInfo
 
   implicit val bi = BG.GInfo

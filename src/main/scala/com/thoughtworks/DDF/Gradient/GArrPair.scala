@@ -6,10 +6,6 @@ trait GArrPair[A, B, C] extends Gradient[A => (B, C)] {
 
   implicit val arrCG: Gradient[A => C]
 
-  import ltl.{prodInfo => lpinfo}
-
-  implicit val di = ltl.doubleInfo
-
   implicit val ai = ltl.domInfo(arrBG.GInfo)
 
   implicit val bi = ltl.rngInfo(arrBG.GInfo)
@@ -25,7 +21,7 @@ trait GArrPair[A, B, C] extends Gradient[A => (B, C)] {
   LangTerm[((Double, A => B)) => (Double, A => B)] =>
     LangTerm[((Double, A => C)) => (Double, A => C)] =>
       LangTerm[((Double, A => (B, C))) => (Double, A => (B, C))] = af => bf => {
-    val nLang = NextLang.apply[LangInfoG, LangTerm, (Double, A => (B, C))](ltl, lpinfo(di, GInfo))
+    val nLang = NextLang.apply[LangInfoG, LangTerm, (Double, A => (B, C))](ltl, pi(di, GInfo))
     import nLang._
     val a = app(rconv(af))(mkProd__(zro_(in))(B__(zro[B, C])(fst_(in))))
     val b = app(rconv(bf))(mkProd__(zro_(in))(B__(fst[B, C])(fst_(in))))
