@@ -20,15 +20,27 @@ trait GParIso[A, B] extends Gradient[B] {
 
   override def constG: LangTerm[B] = ltl.app(ab)(ga.constG)
 
-  override def plus: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = ???
+  def dadb: LangTerm[((Double, A)) => (Double, B)] = ltl.`>__<`(ltl.I[Double])(ab)
 
-  override def mult: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = ???
+  def dbda: LangTerm[((Double, B)) => (Double, A)] = ltl.`>__<`(ltl.I[Double])(ba)
 
-  override def div: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = ???
+  def lift: LangTerm[((Double, A)) => (Double, A)] => LangTerm[((Double, B)) => (Double, B)] = f =>
+    ltl.B__(dadb)(ltl.B__(f)(dbda))
 
-  override def sig: LangTerm[((Double, B)) => (Double, B)] = ???
+  def lift2:
+  LangTerm[((Double, A)) => ((Double, A)) => (Double, A)] =>
+    LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = f =>
+    ltl.curry_(ltl.B__(dadb)(ltl.uncurry_(ltl.C_(ltl.B__(ltl.C_(ltl.B__(f)(dbda)))(dbda)))))
 
-  override def exp: LangTerm[((Double, B)) => (Double, B)] = ???
+  override def plus: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = lift2(ga.plus)
+
+  override def mult: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = lift2(ga.mult)
+
+  override def div: LangTerm[((Double, B)) => ((Double, B)) => (Double, B)] = lift2(ga.div)
+
+  override def sig: LangTerm[((Double, B)) => (Double, B)] = lift(ga.sig)
+
+  override def exp: LangTerm[((Double, B)) => (Double, B)] = lift(ga.exp)
 }
 
 object GParIso {
