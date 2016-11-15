@@ -25,31 +25,31 @@ trait FEvalDouble extends
   override def divD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-    override def term[G: Gradient] = implicitly[Gradient[G]].div
+    override def term[G: Gradient] = ???
   }
 
   override def multD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-    override def term[G: Gradient] = implicitly[Gradient[G]].mult
+    override def term[G: Gradient] = ???
   }
 
   override def expD = new FEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
-    override def term[G: Gradient] = implicitly[Gradient[G]].exp
+    override def term[G: Gradient] = ???
   }
 
   override def sigD = new FEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
-    override def term[G: Gradient] = implicitly[Gradient[G]].sig
+    override def term[G: Gradient] = ???
   }
 
   override def plusD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-    override def term[G: Gradient] = implicitly[Gradient[G]].plus
+    override def term[G: Gradient] = ???
   }
 
   override def litD: scala.Double => FEval[scala.Double] = d =>
