@@ -19,6 +19,11 @@ trait GParIso[A, B] extends Gradient[B] {
   override implicit def GInfo: LangInfoG[B] = ltl.rngInfo(ltl.reprInfo(ab))
 
   override def constG: LangTerm[B] = ltl.app(ab)(ga.constG)
+
+  override def mult: LangTerm[Double => B => B] = ???
+
+  override def plus: LangTerm[B => B => B] =
+    ltl.B__[B, B => A, B => B](ltl.B_(ab))(ltl.C_(ltl.B__(ltl.C_(ltl.B__(ga.plus)(ba)))(ba)))
 }
 
 object GParIso {

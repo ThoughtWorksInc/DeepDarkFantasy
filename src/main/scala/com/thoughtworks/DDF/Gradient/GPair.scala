@@ -30,6 +30,10 @@ trait GPair[A, B] extends Gradient[(A, B)] {
       override val gc: LangTerm[Double => (A, B)] = ltl.B__(ltl.mkProd_[A, B](AG.constG))(x.gc)
       override val gd: LangTerm[((A, B)) => Double] = ltl.B__(x.gd)(ltl.fst[A, B])
     }))
+
+  override def mult: LangTerm[(Double) => ((A, B)) => (A, B)] = ???
+
+  override def plus: LangTerm[((A, B)) => ((A, B)) => (A, B)] = ???
 }
 
 object GPair {

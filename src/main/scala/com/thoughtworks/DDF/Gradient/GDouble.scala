@@ -11,6 +11,10 @@ trait GDouble extends Gradient[Double] {
   override implicit def GInfo: LangInfoG[Double] = ltl.doubleInfo
 
   override def constG: LangTerm[Double] = ltl.litD(0)
+
+  override def plus: LangTerm[Double => Double => Double] = ltl.plusD
+
+  override def mult: LangTerm[Double => Double => Double] = ltl.multD
 }
 
 object GDouble extends GDouble

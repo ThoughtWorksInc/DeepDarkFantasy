@@ -25,6 +25,10 @@ package object Gradient {
     implicit def GInfo: LangInfoG[G]
 
     def constG: LangTerm[G]
+
+    def mult: LangTerm[Double => G => G]
+
+    def plus: LangTerm[G => G => G]
   }
 
 }
