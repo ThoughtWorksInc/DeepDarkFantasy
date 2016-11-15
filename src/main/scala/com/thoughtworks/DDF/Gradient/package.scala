@@ -28,7 +28,15 @@ package object Gradient {
 
     def mult: LangTerm[Double => G => G]
 
+    final def mult_ : LangTerm[Double] => LangTerm[G => G] = ltl.app(mult)
+
+    final def mult__ : LangTerm[Double] => LangTerm[G] => LangTerm[G] = d => ltl.app(mult_(d))
+
     def plus: LangTerm[G => G => G]
+
+    final def plus_ : LangTerm[G] => LangTerm[G => G] = ltl.app(plus)
+
+    final def plus__ : LangTerm[G] => LangTerm[G] => LangTerm[G] = l => ltl.app(plus_(l))
   }
 
 }
