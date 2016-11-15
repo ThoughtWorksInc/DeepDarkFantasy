@@ -20,7 +20,8 @@ trait GParIso[A, B] extends Gradient[B] {
 
   override def constG: LangTerm[B] = ltl.app(ab)(ga.constG)
 
-  override def mult: LangTerm[Double => B => B] = ???
+  override def mult: LangTerm[Double => B => B] =
+    ltl.B__[Double, B => A, B => B](ltl.B_(ab))(ltl.C_(ltl.B__(ltl.C_(ga.mult))(ba)))
 
   override def plus: LangTerm[B => B => B] =
     ltl.B__[B, B => A, B => B](ltl.B_(ab))(ltl.C_(ltl.B__(ltl.C_(ltl.B__(ga.plus)(ba)))(ba)))
