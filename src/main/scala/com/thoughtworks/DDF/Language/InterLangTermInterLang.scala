@@ -161,10 +161,6 @@ trait InterLangTermInterLang extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.optionMatch(ai(lang), bi(lang))
     }
 
-  override def divD = new InterLangTerm[Double => Double => Double] {
-    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.divD
-  }
-
   override def foldLeft[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[(A => B => A) => A => List[B] => A] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.foldLeft(ai(lang), bi(lang))
@@ -240,6 +236,10 @@ trait InterLangTermInterLang extends
     new InterLangInfoG[A] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(a(lang))
     }
+
+  override val recipD = new InterLangTerm[Double => Double] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.recipD
+  }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

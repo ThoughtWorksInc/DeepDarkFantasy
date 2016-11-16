@@ -31,9 +31,6 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     aeval(ltl.scanRight[A, B])(f => aeval(ltl.scanRight_(f.l))(z => aeval(ltl.scanRight__(f.l)(z.l))(l =>
       leval(getList(l).scanRight(z)((x, y) => app(app(f)(x))(y))))))
 
-  override def divD: EvalO[Double => Double => Double] =
-    aeval(ltl.divD)(l => aeval(ltl.divD_(l.l))(r => litD(eval(l) / eval(r))))
-
   override def ltD: EvalO[Double => Double => Boolean] =
     aeval(ltl.ltD)(l => aeval(ltl.ltD_(l.l))(r => litB(eval(l) < eval(r))))
 
@@ -325,6 +322,8 @@ trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangI
     case None => K[B, (A => Stream[A] => B)]
     case Some((h, t)) => K_(B__(Let_[Stream[A], B](app(t)(mkTop)))(Let_[A, Stream[A] => B](h)))
   })
+
+  override def recipD: EvalO[Double => Double] = aeval(ltl.recipD)(x => litD(1 / eval(x)))
 }
 
 object EvalOInterLang extends EvalOInterLang

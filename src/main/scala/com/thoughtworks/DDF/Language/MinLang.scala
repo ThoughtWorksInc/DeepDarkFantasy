@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Language
 import com.thoughtworks.DDF.Bool.Bool
 import com.thoughtworks.DDF.Bot.BotMin
 import com.thoughtworks.DDF.Combinators.{SKI, Y}
-import com.thoughtworks.DDF.Double.Double
+import com.thoughtworks.DDF.Double.DoubleMin
 import com.thoughtworks.DDF.List.ListMin
 import com.thoughtworks.DDF.Option.Option
 import com.thoughtworks.DDF.Product.ProdMin
@@ -15,7 +15,7 @@ trait MinLang[Info[_], Repr[_]] extends
   ProdMin[Info, Repr] with
   LangInfo[Info, Repr] with
   ListMin[Info, Repr] with
-  Double[Info, Repr] with
+  DoubleMin[Info, Repr] with
   Option[Info, Repr] with
   Top[Info, Repr] with
   Bool[Info, Repr] with

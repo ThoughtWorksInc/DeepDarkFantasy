@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.Arr
 import com.thoughtworks.DDF.Bool.Bool
 import com.thoughtworks.DDF.Bot.BotMin
 import com.thoughtworks.DDF.Combinators.Comb
-import com.thoughtworks.DDF.Double.Double
+import com.thoughtworks.DDF.Double.DoubleMin
 import com.thoughtworks.DDF.IO.IO
 import com.thoughtworks.DDF.List.List
 import com.thoughtworks.DDF.Option.Option
@@ -16,7 +16,7 @@ import com.thoughtworks.DDF.Stream.Stream
 trait InterLang[Info[_], Repr[_]] extends
   LangInfo[Info, Repr] with
   ProdMin[Info, Repr] with
-  Double[Info, Repr] with
+  DoubleMin[Info, Repr] with
   Option[Info, Repr] with
   Arr[Info, Repr] with
   Top[Info, Repr] with

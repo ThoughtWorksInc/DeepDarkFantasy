@@ -31,8 +31,6 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
 
   override def listZip[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.listZip[A, B])
 
-  override def divD = rconv(l.divD)
-
   override def foldRight[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.foldRight[A, B])
 
   override def none[A](implicit ai: NInfo[A]) = rconv(l.none[A])
@@ -184,6 +182,14 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends Lang[NInfo, NRepr]
   override def streamElmInfo[A]: NInfo[Stream[A]] => NInfo[A] = si => iconv(l.streamElmInfo(convi(si)))
 
   override def ><[A, B, C, D](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C], di: NInfo[D]) = rconv(l.><[A, B, C, D])
+
+  override def recipD = rconv(l.recipD)
+
+  override def negD = rconv(l.negD)
+
+  override def divD = rconv(l.divD)
+
+  override def minusD = rconv(l.minusD)
 }
 
 object IsoLang {

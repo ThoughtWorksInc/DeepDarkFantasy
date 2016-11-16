@@ -61,8 +61,6 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def plusD = NTF(base.plusD)
 
-  override def divD = NTF(base.divD)
-
   override def none[A](implicit ai: Info[A]) = NTF(base.none)
 
   override def some[A](implicit ai: Info[A]) = NTF(base.some)
@@ -147,6 +145,7 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def streamElmInfo[A] = base.streamElmInfo[A]
 
+  override def recipD = NTF(base.recipD)
 }
 
 object NTInterLang {

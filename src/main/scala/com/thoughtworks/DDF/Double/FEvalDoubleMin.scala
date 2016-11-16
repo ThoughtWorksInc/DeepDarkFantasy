@@ -7,8 +7,8 @@ import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang, NextLan
 import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
-trait FEvalDouble extends
-  Double[FEvalCase, FEval] with
+trait FEvalDoubleMin extends
+  DoubleMin[FEvalCase, FEval] with
   FEvalArr with
   FEvalBool with
   FEvalProd {
@@ -27,25 +27,6 @@ trait FEvalDouble extends
           base.C_(base.B__(base.ltD)(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo)))
         )(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo)))
     }
-
-  override def divD = new FEval[scala.Double => scala.Double => scala.Double] {
-    override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
-
-    override def term[G: Gradient] = {
-      implicit val gi = implicitly[Gradient[G]].GInfo
-      implicit val l = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
-      val r = NextLang.apply[LangInfoG, l.repr, (scala.Double, G)]
-      l.collapse(r.collapse(r.mkProd__(
-        r.divD__(r.rconv(l.zro_(l.in)))(r.zro_(r.in)))(
-        r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].plus)))(
-          r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].mult)))(
-            r.multD__(r.litD(-1))(r.divD__(r.rconv(l.zro_(l.in)))(r.multD__(r.zro_(r.in))(r.zro_(r.in))))))(
-            r.fst_(r.in))))(
-          r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].mult)))(
-            r.divD__(r.litD(1))(r.zro_(r.in))))(
-            r.rconv(l.fst_(l.in)))))))
-    }
-  }
 
   override def multD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
@@ -77,13 +58,26 @@ trait FEvalDouble extends
     }
   }
 
+  override def recipD = new FEval[scala.Double => scala.Double] {
+    override val fec = aInfo(doubleInfo, doubleInfo)
+
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      implicit val p = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
+      p.collapse(p.mkProd__(p.recipD_(p.zro_(p.in)))(
+        p.app(p.app(p.rconv(implicitly[Gradient[G]].mult))(
+          p.multD__(p.litD(-1))(p.recipD_(p.multD__(p.zro_(p.in))(p.zro_(p.in))))))(
+          p.fst_(p.in))))
+    }
+  }
+
   override def sigD = new FEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
     override def term[G: Gradient] = {
       implicit val gi = implicitly[Gradient[G]].GInfo
       implicit val p = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
-      p.collapse(p.Let__(p.divD__(p.litD(1))(p.plusD__(p.litD(1))(p.expD_(p.multD__(p.litD(-1))(p.zro_(p.in))))))({
+      p.collapse(p.Let__(p.recipD_(p.plusD__(p.litD(1))(p.expD_(p.multD__(p.litD(-1))(p.zro_(p.in))))))({
         implicit val ret = NextLang.apply[LangInfoG, p.repr, scala.Double]
         ret.collapse(ret.mkProd__(
           ret.in)(
@@ -130,4 +124,4 @@ trait FEvalDouble extends
     }
 }
 
-object FEvalDouble extends FEvalDouble
+object FEvalDoubleMin extends FEvalDoubleMin

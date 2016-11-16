@@ -4,14 +4,14 @@ import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.Bool.ShowBool
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowDouble extends Double[NoInfo, Show] with ShowArr with SimpleDouble[Show] with ShowBool {
+trait ShowDoubleMin extends DoubleMin[NoInfo, Show] with ShowArr with SimpleDouble[Show] with ShowBool {
   override def litD = d => Show(d.toString)
 
   override def plusD = Show("+")
 
   override def multD = Show("*")
 
-  override def divD = Show("/")
+  override def recipD = Show("recipD")
 
   override def expD = Show("expD")
 
@@ -20,6 +20,6 @@ trait ShowDouble extends Double[NoInfo, Show] with ShowArr with SimpleDouble[Sho
   override def ltD = Show("<")
 }
 
-object ShowDouble {
-  implicit def apply = new ShowDouble {}
+object ShowDoubleMin {
+  implicit def apply = new ShowDoubleMin {}
 }

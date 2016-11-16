@@ -5,8 +5,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def scanRight[A, B](implicit ai: Info[A], bi: Info[B]) = i.scanRight[A, B]
 
-  override def divD = i.divD
-
   override def scanLeft[A, B](implicit ai: Info[A], bi: Info[B]) = i.scanLeft[A, B]
 
   override def zro[A, B](implicit ai: Info[A], bi: Info[B]) = i.zro[A, B]
@@ -197,6 +195,14 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
     nLang.collapse(nNLang.collapse(nNLang.S__(nNLang.B__(nNLang.mkProd[C, D])(
       nNLang.B__(nNLang.rconv(nLang.in))(nNLang.zro[A, B])))(nNLang.B__(nNLang.in)(nNLang.fst[A, B]))))
   }
+
+  override def recipD = i.recipD
+
+  override def negD = multD_(litD(-1))
+
+  override def minusD = C_(B__(plusD)(negD))
+
+  override def divD = C_(B__(multD)(recipD))
 }
 
 object InterLang2Lang {
