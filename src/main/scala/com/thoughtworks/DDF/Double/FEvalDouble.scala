@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.Arrow.FEvalArr
 import com.thoughtworks.DDF.Bool.FEvalBool
 import com.thoughtworks.DDF.Gradient.Gradient
-import com.thoughtworks.DDF.Language.LangInfoG
+import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang, NextLang}
 import com.thoughtworks.DDF.Product.FEvalProd
 import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
 
@@ -12,6 +12,12 @@ trait FEvalDouble extends
   FEvalArr with
   FEvalBool with
   FEvalProd {
+  implicit val ltl = LangTermLang
+
+  implicit val di = ltl.doubleInfo
+
+  implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = ltl.prodInfo(ai, bi)
+
   override def ltD =
     new FEval[scala.Double => scala.Double => Boolean] {
       override val fec = aInfo(doubleInfo, aInfo(doubleInfo, boolInfo))
@@ -49,7 +55,14 @@ trait FEvalDouble extends
   override def plusD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-    override def term[G: Gradient] = ???
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      implicit val l = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
+      val r = NextLang.apply[LangInfoG, l.repr, (scala.Double, G)]
+      l.collapse(r.collapse(r.mkProd__(
+        r.plusD__(r.rconv(l.zro_(l.in)))(r.zro_(r.in)))(
+        r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].plus)))(r.rconv(l.fst_(l.in))))(r.fst_(r.in)))))
+    }
   }
 
   override def litD: scala.Double => FEval[scala.Double] = d =>
