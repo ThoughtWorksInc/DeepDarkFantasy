@@ -27,7 +27,7 @@ trait IsoList[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
 
   override def listMap[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.listMap[A, B])
 
-  override implicit def listInfo[A](implicit ai: NInfo[A]) = iconv(l.listInfo[A])
+  override implicit def listInfo[A](implicit ai: NInfo[A]) = iconv(l.listInfo[A](convi))
 
   override def listElmInfo[A] = li => iconv(l.listElmInfo(convi(li)))
 
