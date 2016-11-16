@@ -37,13 +37,31 @@ trait FEvalDouble extends
   override def multD = new FEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
-    override def term[G: Gradient] = ???
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      implicit val l = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
+      val r = NextLang.apply[LangInfoG, l.repr, (scala.Double, G)]
+      l.collapse(r.collapse(r.mkProd__(
+        r.multD__(r.rconv(l.zro_(l.in)))(r.zro_(r.in)))(
+        r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].plus)))(
+          r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].mult)))(r.rconv(l.zro_(l.in))))(r.fst_(r.in))))(
+          r.app(r.app(r.rconv(l.rconv(implicitly[Gradient[G]].mult)))(r.zro_(r.in)))(r.rconv(l.fst_(l.in)))))))
+    }
   }
 
   override def expD = new FEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
-    override def term[G: Gradient] = ???
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      implicit val p = NextLang.apply[LangInfoG, LangTerm, (scala.Double, G)]
+      p.collapse(p.Let__(p.expD_(p.zro_(p.in)))({
+        implicit val ret = NextLang.apply[LangInfoG, p.repr, scala.Double]
+        ret.collapse(ret.mkProd__(
+          ret.in)(
+          ret.app(ret.app(ret.rconv(p.rconv(implicitly[Gradient[G]].mult)))(ret.in))(ret.rconv(p.fst_(p.in)))))
+      }))
+    }
   }
 
   override def sigD = new FEval[scala.Double => scala.Double] {
