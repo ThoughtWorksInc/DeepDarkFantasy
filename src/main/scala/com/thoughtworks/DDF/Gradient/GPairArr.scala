@@ -57,3 +57,22 @@ trait GPairArr[A, B, C] extends Gradient[((A, B)) => C] {
           p.app(rconv(abcbc))(p.rconv(r.in))))(p.fst_(p.in))))))
   }
 }
+
+object GPairArr {
+  implicit def apply[A, B, C](implicit
+                              GAC: Gradient[A => C],
+                              GBC: Gradient[B => C],
+                              GA: Gradient[A],
+                              GB: Gradient[B],
+                              GC: Gradient[C]) = new GPairArr[A, B, C] {
+    override implicit def gac: Gradient[A => C] = GAC
+
+    override implicit def gbc: Gradient[B => C] = GBC
+
+    override implicit def ga: Gradient[A] = GA
+
+    override implicit def gb: Gradient[B] = GB
+
+    override implicit def gc: Gradient[C] = GC
+  }
+}
