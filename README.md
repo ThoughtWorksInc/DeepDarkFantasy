@@ -51,10 +51,6 @@ Q: How is the speed?
 
 A: Unoptimized. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
 
-Q: Where is back propagation?
-
-A: It was [deprecated](https://github.com/ThoughtWorksInc/DeepDarkFantasy/tree/With-Backward-Ad) because I am unable to fina a clean/efficent implementation of it. Forward mode ad is used instead. If you found a foundation for backward mode that generalize well on typed function please let me know.
-
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
