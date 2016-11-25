@@ -1,20 +1,20 @@
 package com.thoughtworks.DDF.Top
 
 import com.thoughtworks.DDF.Gradient.Gradient
-import com.thoughtworks.DDF.InfoBase.FEvalInfoBase
+import com.thoughtworks.DDF.InfoBase.ADEvalInfoBase
 import com.thoughtworks.DDF.Language.LangTermLang
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
+import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 
-trait FEvalTop extends
-  Top[FEvalCase, FEval] with
-  FEvalInfoBase {
+trait ADEvalTop extends
+  Top[ADEvalCase, ADEval] with
+  ADEvalInfoBase {
   val base = LangTermLang
 
-  override implicit def topInfo: FEvalCase.Aux[Unit, Lambda[G => Unit]] =
-    new FEvalCase[Unit] {
+  override implicit def topInfo: ADEvalCase.Aux[Unit, Lambda[G => Unit]] =
+    new ADEvalCase[Unit] {
       override type WithGrad[_] = Unit
 
-      override val tm = new FEvalMatch[Unit] {
+      override val tm = new ADEvalMatch[Unit] {
         override type ret = Unit
       }
 
@@ -23,11 +23,11 @@ trait FEvalTop extends
       override def wgi[G: Gradient] = base.topInfo
   }
 
-  override def mkTop: FEval[Unit] = new FEval[Unit] {
+  override def mkTop: ADEval[Unit] = new ADEval[Unit] {
     override val fec = topInfo
 
     override def term[G: Gradient] = base.mkTop
   }
 }
 
-object FEvalTop extends FEvalTop
+object ADEvalTop extends ADEvalTop

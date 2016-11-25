@@ -1,39 +1,39 @@
 package com.thoughtworks.DDF.IO
 
-import com.thoughtworks.DDF.Double.FEvalDoubleMin
+import com.thoughtworks.DDF.Double.ADEvalDoubleMin
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
-import com.thoughtworks.DDF.Top.FEvalTop
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
+import com.thoughtworks.DDF.Top.ADEvalTop
+import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 
-trait FEvalIO extends
-  IO[FEvalCase, FEval] with
-  FEvalDoubleMin with
-  FEvalTop {
+trait ADEvalIO extends
+  IO[ADEvalCase, ADEval] with
+  ADEvalDoubleMin with
+  ADEvalTop {
   override val base = LangTermLang
 
-  override def putDouble: FEval[Double => IO[Unit]] = new FEval[Double => IO[Unit]] {
+  override def putDouble: ADEval[Double => IO[Unit]] = new ADEval[Double => IO[Unit]] {
     override val fec = aInfo(doubleInfo, IOInfo(topInfo))
 
     override def term[G: Gradient] = base.B__(base.putDouble)(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo))
   }
 
-  override def IOBind[A, B](implicit ai: FEvalCase[A], bi: FEvalCase[B]) =
-    new FEval[IO[A] => (A => IO[B]) => IO[B]] {
+  override def IOBind[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
+    new ADEval[IO[A] => (A => IO[B]) => IO[B]] {
       override val fec = aInfo(IOInfo(ai), aInfo(aInfo(ai, IOInfo(bi)), IOInfo(bi)))
 
       override def term[G: Gradient] = base.IOBind(ai.wgi[G], bi.wgi[G])
     }
 
-  override def IORet[A](implicit ai: FEvalCase[A]): FEval[A => IO[A]] =
-    new FEval[A => IO[A]] {
+  override def IORet[A](implicit ai: ADEvalCase[A]): ADEval[A => IO[A]] =
+    new ADEval[A => IO[A]] {
       override val fec = aInfo(ai, IOInfo(ai))
 
       override def term[G: Gradient] = base.IORet(ai.wgi[G])
     }
 
-  override def getDouble: FEval[IO[Double]] =
-    new FEval[IO[Double]] {
+  override def getDouble: ADEval[IO[Double]] =
+    new ADEval[IO[Double]] {
       override val fec = IOInfo(doubleInfo)
 
       override def term[G: Gradient] =
@@ -43,12 +43,12 @@ trait FEvalIO extends
             base.C__(base.mkProd(base.doubleInfo, implicitly[Gradient[G]].GInfo))(implicitly[Gradient[G]].constG)))
     }
 
-  def iofem[A] = new FEvalMatch[IO[A]] {
-    override type ret = FEvalCase[A]
+  def iofem[A] = new ADEvalMatch[IO[A]] {
+    override type ret = ADEvalCase[A]
   }
 
-  override def IOInfo[A](implicit ai: FEvalCase[A]): FEvalCase.Aux[IO[A], Lambda[G => IO[ai.WithGrad[G]]]] =
-    new FEvalCase[IO[A]] {
+  override def IOInfo[A](implicit ai: ADEvalCase[A]): ADEvalCase.Aux[IO[A], Lambda[G => IO[ai.WithGrad[G]]]] =
+    new ADEvalCase[IO[A]] {
       override def wgi[G: Gradient]: LangInfoG[IO[ai.WithGrad[G]]] = base.IOInfo(ai.wgi[G])
 
       override type WithGrad[G] = IO[ai.WithGrad[G]]
@@ -58,7 +58,7 @@ trait FEvalIO extends
       override def tmr: tm.ret = ai
     }
 
-  override def IOElmInfo[A]: FEvalCase[IO[A]] => FEvalCase[A] = _.get(iofem[A])
+  override def IOElmInfo[A]: ADEvalCase[IO[A]] => ADEvalCase[A] = _.get(iofem[A])
 }
 
-object FEvalIO extends FEvalIO
+object ADEvalIO extends ADEvalIO

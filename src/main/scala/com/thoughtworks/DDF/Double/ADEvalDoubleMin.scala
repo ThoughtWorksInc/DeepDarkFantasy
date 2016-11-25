@@ -1,17 +1,17 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.FEvalArr
-import com.thoughtworks.DDF.Bool.FEvalBool
+import com.thoughtworks.DDF.Arrow.ADEvalArr
+import com.thoughtworks.DDF.Bool.ADEvalBool
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang, NextLang}
-import com.thoughtworks.DDF.Product.FEvalProd
-import com.thoughtworks.DDF.{FEval, FEvalCase, FEvalMatch}
+import com.thoughtworks.DDF.Product.ADEvalProd
+import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 
-trait FEvalDoubleMin extends
-  DoubleMin[FEvalCase, FEval] with
-  FEvalArr with
-  FEvalBool with
-  FEvalProd {
+trait ADEvalDoubleMin extends
+  DoubleMin[ADEvalCase, ADEval] with
+  ADEvalArr with
+  ADEvalBool with
+  ADEvalProd {
   implicit val ltl = LangTermLang
 
   implicit val di = ltl.doubleInfo
@@ -19,7 +19,7 @@ trait FEvalDoubleMin extends
   implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = ltl.prodInfo(ai, bi)
 
   override def ltD =
-    new FEval[scala.Double => scala.Double => Boolean] {
+    new ADEval[scala.Double => scala.Double => Boolean] {
       override val fec = aInfo(doubleInfo, aInfo(doubleInfo, boolInfo))
 
       override def term[G: Gradient] =
@@ -28,7 +28,7 @@ trait FEvalDoubleMin extends
         )(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo)))
     }
 
-  override def multD = new FEval[scala.Double => scala.Double => scala.Double] {
+  override def multD = new ADEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
     override def term[G: Gradient] = {
@@ -43,7 +43,7 @@ trait FEvalDoubleMin extends
     }
   }
 
-  override def expD = new FEval[scala.Double => scala.Double] {
+  override def expD = new ADEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
     override def term[G: Gradient] = {
@@ -58,7 +58,7 @@ trait FEvalDoubleMin extends
     }
   }
 
-  override def recipD = new FEval[scala.Double => scala.Double] {
+  override def recipD = new ADEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
     override def term[G: Gradient] = {
@@ -71,7 +71,7 @@ trait FEvalDoubleMin extends
     }
   }
 
-  override def sigD = new FEval[scala.Double => scala.Double] {
+  override def sigD = new ADEval[scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, doubleInfo)
 
     override def term[G: Gradient] = {
@@ -89,7 +89,7 @@ trait FEvalDoubleMin extends
     }
   }
 
-  override def plusD = new FEval[scala.Double => scala.Double => scala.Double] {
+  override def plusD = new ADEval[scala.Double => scala.Double => scala.Double] {
     override val fec = aInfo(doubleInfo, aInfo(doubleInfo, doubleInfo))
 
     override def term[G: Gradient] = {
@@ -102,18 +102,18 @@ trait FEvalDoubleMin extends
     }
   }
 
-  override def litD: scala.Double => FEval[scala.Double] = d =>
-    new FEval[scala.Double] {
+  override def litD: scala.Double => ADEval[scala.Double] = d =>
+    new ADEval[scala.Double] {
       override val fec = doubleInfo
 
       override def term[G: Gradient] = base.mkProd__(base.litD(d))(implicitly[Gradient[G]].constG)
     }
 
-  override implicit def doubleInfo: FEvalCase.Aux[scala.Double, Lambda[X => (scala.Double, X)]] =
-    new FEvalCase[scala.Double] {
+  override implicit def doubleInfo: ADEvalCase.Aux[scala.Double, Lambda[X => (scala.Double, X)]] =
+    new ADEvalCase[scala.Double] {
       override type WithGrad[G] = (scala.Double, G)
 
-      override val tm = new FEvalMatch[scala.Double] {
+      override val tm = new ADEvalMatch[scala.Double] {
         override type ret = Unit
       }
 
@@ -124,4 +124,4 @@ trait FEvalDoubleMin extends
     }
 }
 
-object FEvalDoubleMin extends FEvalDoubleMin
+object ADEvalDoubleMin extends ADEvalDoubleMin
