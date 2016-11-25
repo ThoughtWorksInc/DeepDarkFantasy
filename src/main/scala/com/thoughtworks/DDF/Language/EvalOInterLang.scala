@@ -1,12 +1,8 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.{EvalO, EvalOMatch, NoInfo}
+import com.thoughtworks.DDF.{EvalO, EvalOBase, EvalOMatch, NoInfo}
 
-trait EvalOInterLang extends InterLang[InterLangInfoG, EvalO] with LangTermLangInfo[EvalO] {
-  val ltl = InterLangTermInterLang
-
-  def eval[X]: EvalO[X] => X = x => x.l.apply[NoInfo, Lambda[X => X]](EvalMInterLang)
-
+trait EvalOInterLang extends EvalOBase with InterLang[InterLangInfoG, EvalO] with ILIGLangInfo[EvalO] {
   def aeval[A, B]: InterLangTerm[A => B] => (EvalO[A] => EvalO[B]) => EvalO[A => B] = la => f =>
     new EvalO[A => B] {
       override def l: InterLangTerm[A => B] = la

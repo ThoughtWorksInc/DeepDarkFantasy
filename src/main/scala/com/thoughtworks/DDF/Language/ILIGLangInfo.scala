@@ -1,8 +1,10 @@
 package com.thoughtworks.DDF.Language
 
+import com.thoughtworks.DDF.Arrow.ArrInfo
+
 import scalaz.NaturalTransformation
 
-trait LangTermLangInfo[R[_]] extends
+trait ILIGLangInfo[R[_]] extends
   LangInfo[InterLangInfoG, R] {
   override implicit def prodInfo[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangInfoG[(A, B)] {
@@ -103,9 +105,9 @@ trait LangTermLangInfo[R[_]] extends
     }
 }
 
-object LangTermLangInfo {
-  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => LangTermLangInfo[Repr] =
-    nt => new LangTermLangInfo[Repr] {
+object ILIGLangInfo {
+  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => ILIGLangInfo[Repr] =
+    nt => new ILIGLangInfo[Repr] {
       override def reprInfo[A]: Repr[A] => InterLangInfoG[A] = nt.apply
     }
 }

@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Language
 
 trait InterLangTermInterLang extends
   InterLang[InterLangInfoG, InterLangTerm] with
-  LangTermLangInfo[InterLangTerm] {
+  ILIGLangInfo[InterLangTerm] {
 
   override def K[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[A => B => A] {
