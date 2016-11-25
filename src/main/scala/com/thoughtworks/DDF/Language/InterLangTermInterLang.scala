@@ -219,7 +219,7 @@ trait InterLangTermInterLang extends
   }
 
   override def streamCons[A](implicit ai: InterLangInfoG[A]) =
-    new InterLangTerm[(A) => ((Unit) => Stream[A]) => Stream[A]] {
+    new InterLangTerm[A => (Unit => Stream[A]) => Stream[A]] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamCons(ai(lang))
     }
 
