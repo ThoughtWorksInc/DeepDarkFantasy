@@ -51,6 +51,10 @@ Q: How is the speed?
 
 A: Unoptimized. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
 
+Q: Why does this work theoretically?
+
+A: See [DDFADC](https://github.com/MarisaKirisame/DDFADC)
+
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
