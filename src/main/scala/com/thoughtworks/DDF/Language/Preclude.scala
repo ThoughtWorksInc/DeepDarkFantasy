@@ -52,6 +52,21 @@ object Preclude {
     nLang.collapse(softMax_[Info, nLang.repr](nLang.in)(nLang))
   }
 
+  def min__[Info[_], Repr[_]](l: Repr[Double])(r: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] = {
+    import lang._
+    ite___(ltD__(l)(r))(l)(r)
+  }
+
+  def min_[Info[_], Repr[_]](l: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
+    val nLang = NextLang(lang, lang.doubleInfo)
+    nLang.collapse(min__[Info, nLang.repr](nLang.rconv(l))(nLang.in)(nLang))
+  }
+
+  def min[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double => Double] = {
+    val nLang = NextLang(lang, lang.doubleInfo)
+    nLang.collapse(min_[Info, nLang.repr](nLang.in)(nLang))
+  }
+
   def max__[Info[_], Repr[_]](l: Repr[Double])(r: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] = {
     import lang._
     ite___(ltD__(l)(r))(r)(l)
