@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, NextLang}
 import com.thoughtworks.DDF.Util
 
-trait GPairArr[A, B, C] extends Gradient[((A, B)) => C] {
+trait GProdArr[A, B, C] extends Gradient[((A, B)) => C] {
   implicit def gac: Gradient[A => C]
 
   implicit def gbc: Gradient[B => C]
@@ -39,7 +39,7 @@ trait GPairArr[A, B, C] extends Gradient[((A, B)) => C] {
   override val mult: LangTerm[Double => (((A, B)) => C) => ((A, B)) => C] = {
     implicit val d = NextLang.apply[LangInfoG, LangTerm, Double]
     val f = NextLang.apply[LangInfoG, d.repr, (((A, B)) => C)]
-    d.collapse(f.collapse(f.B__(f.in)(f.rconv(d.app(d.rconv(GPair.apply(ga, gb).mult))(d.in)))))
+    d.collapse(f.collapse(f.B__(f.in)(f.rconv(d.app(d.rconv(GProd.apply(ga, gb).mult))(d.in)))))
   }
 
   override val plus: LangTerm[(((A, B)) => C) => (((A, B)) => C) => ((A, B)) => C] = {
@@ -58,13 +58,13 @@ trait GPairArr[A, B, C] extends Gradient[((A, B)) => C] {
   }
 }
 
-object GPairArr {
+object GProdArr {
   implicit def apply[A, B, C](implicit
                               GAC: Gradient[A => C],
                               GBC: Gradient[B => C],
                               GA: Gradient[A],
                               GB: Gradient[B],
-                              GC: Gradient[C]) = new GPairArr[A, B, C] {
+                              GC: Gradient[C]) = new GProdArr[A, B, C] {
     override implicit def gac: Gradient[A => C] = GAC
 
     override implicit def gbc: Gradient[B => C] = GBC

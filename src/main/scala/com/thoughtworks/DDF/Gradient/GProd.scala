@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang, NextLang}
 import com.thoughtworks.DDF.Util
 
-trait GPair[A, B] extends Gradient[(A, B)] {
+trait GProd[A, B] extends Gradient[(A, B)] {
   implicit val AG: Gradient[A]
 
   implicit val BG: Gradient[B]
@@ -42,8 +42,8 @@ trait GPair[A, B] extends Gradient[(A, B)] {
   }
 }
 
-object GPair {
-  implicit def apply[A, B](implicit ag: Gradient[A], bg: Gradient[B]) = new GPair[A, B] {
+object GProd {
+  implicit def apply[A, B](implicit ag: Gradient[A], bg: Gradient[B]) = new GProd[A, B] {
     override implicit val AG: Gradient[A] = ag
 
     override implicit val BG: Gradient[B] = bg
