@@ -26,6 +26,10 @@
 
 12. [Pair](src/main/scala/com/thoughtworks/DDF/Product/Prod.scala)
 
+13. IO
+
+14. Stream
+
 ## Machine Learning Feature
 1. [Symbolic Automatic Differentiation](src/main/scala/com/thoughtworks/DDF/Language/FEvalInterLang.scala)
 
