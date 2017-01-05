@@ -240,6 +240,14 @@ trait InterLangTermInterLang extends
   override val recipD = new InterLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.recipD
   }
+
+  override def litString: (String) => InterLangTerm[String] = str => new InterLangTerm[String] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[String] = lang.litString(str)
+  }
+
+  override def stringInfo: InterLangInfoG[String] = new InterLangInfoG[String] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[String] = lang.stringInfo
+  }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

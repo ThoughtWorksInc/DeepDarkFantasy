@@ -146,6 +146,10 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
   override def streamElmInfo[A] = base.streamElmInfo[A]
 
   override def recipD = NTF(base.recipD)
+
+  override def litString: (String) => F[String] = str => NTF(base.litString(str))
+
+  override def stringInfo: Info[String] = base.stringInfo
 }
 
 object NTInterLang {

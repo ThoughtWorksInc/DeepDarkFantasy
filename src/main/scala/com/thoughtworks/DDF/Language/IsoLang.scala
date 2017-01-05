@@ -23,7 +23,12 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   IsoReader[OInfo, NInfo, ORepr, NRepr] with
   IsoState[OInfo, NInfo, ORepr, NRepr] with
   IsoIO[OInfo, NInfo, ORepr, NRepr] with
-  IsoStream[OInfo, NInfo, ORepr, NRepr]
+  IsoStream[OInfo, NInfo, ORepr, NRepr] {
+  override def stringInfo: NInfo[String] = iconv[String](l.stringInfo)
+
+  override def litString: (String) => NRepr[String] = x => rconv[String](l.litString(x))
+
+}
 
 object IsoLang {
   def apply[OInfo[_], NInfo[_], ORepr[_], NRepr[_]](implicit
