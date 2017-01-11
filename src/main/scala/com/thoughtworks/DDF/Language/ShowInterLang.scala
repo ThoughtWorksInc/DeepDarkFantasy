@@ -28,6 +28,8 @@ trait ShowInterLang extends
   ShowBotMin with
   ShowArr with
   ShowStream with
-  ShowIO
+  ShowIO {
+  override def litString: (String) => Show[String] = str => Show("str: " + str)
+}
 
 object ShowInterLang extends ShowInterLang

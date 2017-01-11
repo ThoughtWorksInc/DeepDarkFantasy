@@ -40,9 +40,9 @@ trait ADEvalSum extends Sum[ADEvalCase, ADEval] with ADEvalArr {
 
       override def wgi[G: Gradient] = base.sumInfo(ai.wgi[G], bi.wgi[G])
 
-    override val tm = sfem[A, B]
+      override val tm = sfem[A, B]
 
-    override def tmr: tm.ret = (ai, bi)
+      override def tmr: tm.ret = (ai, bi)
   }
 
   override def sumLeftInfo[A, B]: ADEvalCase[Either[A, B]] => ADEvalCase[A] = _.get(sfem[A, B])._1

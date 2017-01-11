@@ -203,6 +203,10 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def minusD = C_(B__(plusD)(negD))
 
   override def divD = C_(B__(multD)(recipD))
+
+  override def stringInfo: Info[String] = i.stringInfo
+
+  override def litString: (String) => Repr[String] = i.litString
 }
 
 object InterLang2Lang {

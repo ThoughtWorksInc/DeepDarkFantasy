@@ -193,6 +193,18 @@ trait EvalOInterLang extends
   })
 
   override def recipD: EvalO[Double => Double] = aeval(ltl.recipD)(x => litD(1 / eval(x)))
+
+  override def stringInfo: InterLangInfoG[String] = ltl.stringInfo
+
+  override def litString: String => EvalO[String] = str => new EvalO[String] {
+    override def l: InterLangTerm[String] = ltl.litString(str)
+
+    override def tmr: tm.ret = ()
+
+    override val tm: EvalOMatch.Aux[String, Unit] = new EvalOMatch[String] {
+      override type ret = Unit
+    }
+  }
 }
 
 object EvalOInterLang extends EvalOInterLang

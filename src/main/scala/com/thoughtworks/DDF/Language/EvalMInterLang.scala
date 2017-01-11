@@ -20,6 +20,8 @@ trait EvalMInterLang extends
   EvalMIO with
   EvalMSum with
   EvalMStream with
-  EvalMBotMin
+  EvalMBotMin {
+  override def litString: (String) => String = identity[String]
+}
 
 object EvalMInterLang extends EvalMInterLang
