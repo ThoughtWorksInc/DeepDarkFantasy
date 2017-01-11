@@ -24,8 +24,8 @@ trait NextInterLang[Info[_], Repr[_], Arg] extends
   override def app[A, B]: repr[A => B] => repr[A] => repr[B] = f => x => (f, x) match {
     case (Left(f_), Left(x_)) => Left(base.app(f_)(x_))
     case (Right(f_), Right(x_)) => Right(base.S__(f_)(x_))
-    case (Left(f_), Right(_)) => app(Right(base.K_(f_)(argi)))(x)
-    case (Right(_), Left(x_)) => app(f)(Right(base.K_(x_)(argi)))
+    case (Left(f_), Right(x_)) => Right(base.B__(f_)(x_))
+    case (Right(f_), Left(x_)) => Right(base.C__(f_)(x_))
   }
 }
 
