@@ -14,7 +14,7 @@ trait NextBase[Info[_], Repr[_], Arg] {
     case Right(x) => x
   }
 
-  val in: repr[Arg] = Right(comb.I(argi))
+  lazy val in: repr[Arg] = Right(comb.I(argi))
 
   def rconv[A]: Repr[A] => repr[A] = x => Left(x)
 }
