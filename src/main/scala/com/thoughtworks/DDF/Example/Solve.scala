@@ -14,7 +14,7 @@ object Solve {
 
     val train = l.B__(loss)(exp)
     var weight : Double = 0
-    println(l.minusD__(l.litD(100))(l.litD(200))(ADEvalInterLang).term[Double](GDouble)(ShowLang).s)
+    println(l.multD__(l.litD(100))(l.litD(200))(ADEvalInterLang).term[Double](GDouble)(ShowLang).s)
     //run, just very slow and large
     for (_ <- Range(0, 100)) {
       for (_ <- Range(0, 10)) {

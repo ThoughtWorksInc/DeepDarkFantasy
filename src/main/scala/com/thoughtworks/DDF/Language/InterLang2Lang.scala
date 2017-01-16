@@ -212,6 +212,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 object InterLang2Lang {
   implicit def apply[Info[_], Repr[_]](implicit il: InterLang[Info, Repr]): InterLang2Lang[Info, Repr] =
     new InterLang2Lang[Info, Repr] {
-      override def i: InterLang[Info, Repr] = il
+      override val i: InterLang[Info, Repr] = il
     }
 }

@@ -237,7 +237,7 @@ trait InterLangTermInterLang extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(a(lang))
     }
 
-  override lazy val recipD = new InterLangTerm[Double => Double] {
+  override def recipD = new InterLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.recipD
   }
 
@@ -245,7 +245,7 @@ trait InterLangTermInterLang extends
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Repr[String] = lang.litString(str)
   }
 
-  override lazy val stringInfo: InterLangInfoG[String] = new InterLangInfoG[String] {
+  override def stringInfo: InterLangInfoG[String] = new InterLangInfoG[String] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[String] = lang.stringInfo
   }
 }
