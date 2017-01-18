@@ -1,11 +1,13 @@
 package com.thoughtworks.DDF.Top
 
 import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.InfoBase.ADEvalInfoBase
 import com.thoughtworks.DDF.Language.LangTermLang
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 
 trait ADEvalTop extends
-  Top[ADEvalCase, ADEval] {
+  Top[ADEvalCase, ADEval] with
+  ADEvalInfoBase {
   val base = LangTermLang
 
   override implicit def topInfo: ADEvalCase.Aux[Unit, Lambda[G => Unit]] =

@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Language
 
 import com.thoughtworks.DDF.Bool.Bool
 import com.thoughtworks.DDF.Bot.BotMin
-import com.thoughtworks.DDF.Combinators.{SKI, Z}
+import com.thoughtworks.DDF.Combinators.{SKI, Y}
 import com.thoughtworks.DDF.Double.DoubleMin
 import com.thoughtworks.DDF.List.ListMin
 import com.thoughtworks.DDF.Option.Option
@@ -22,5 +22,5 @@ trait MinLang[Info[_], Repr[_]] extends
   Sum[Info, Repr] with
   BotMin[Info, Repr] with
   SKI[Info, Repr] with
-  Z[Info, Repr] with
+  Y[Info, Repr] with
   Stream[Info, Repr]

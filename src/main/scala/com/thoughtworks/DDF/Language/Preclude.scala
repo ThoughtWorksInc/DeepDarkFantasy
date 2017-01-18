@@ -1,16 +1,12 @@
 package com.thoughtworks.DDF.Language
 
 object Preclude {
-  def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
-    import lang._
-    lang.W_(lang.multD)
-  }
+  def square[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = lang.W_(lang.multD)
 
   def square_[Info[_], Repr[_]](r: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] =
     lang.app(square(lang))(r)
 
   def sumList[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(sumList_[Info, nLang.repr](nLang.in)(nLang))
   }
@@ -27,13 +23,11 @@ object Preclude {
   }
 
   def dot_[Info[_], Repr[_]](l: Repr[List[Double]])(implicit lang: Lang[Info, Repr]): Repr[List[Double] => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(dot__[Info, nLang.repr](nLang.rconv(l))(nLang.in)(nLang))
   }
 
   def dot[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double] => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(dot_[Info, nLang.repr](nLang.in)(nLang))
   }
@@ -44,7 +38,6 @@ object Preclude {
   }
 
   def divAvg[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double]] = {
-    import lang._
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(divAvg_[Info, nLang.repr](nLang.in)(nLang))
   }
@@ -55,7 +48,6 @@ object Preclude {
   }
 
   def softMax[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[Double] => List[Double]] = {
-    import lang._
     val nLang = NextLang(lang, lang.listInfo(lang.doubleInfo))
     nLang.collapse(softMax_[Info, nLang.repr](nLang.in)(nLang))
   }
@@ -66,13 +58,11 @@ object Preclude {
   }
 
   def min_[Info[_], Repr[_]](l: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.doubleInfo)
     nLang.collapse(min__[Info, nLang.repr](nLang.rconv(l))(nLang.in)(nLang))
   }
 
   def min[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.doubleInfo)
     nLang.collapse(min_[Info, nLang.repr](nLang.in)(nLang))
   }
@@ -98,7 +88,6 @@ object Preclude {
   }
 
   def relu[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
-    import lang._
     val nLang = NextLang(lang, lang.doubleInfo)
     nLang.collapse(relu_[Info, nLang.repr](nLang.in)(nLang))
   }

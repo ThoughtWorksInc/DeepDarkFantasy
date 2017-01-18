@@ -11,8 +11,15 @@ trait ILIGOptionInfo[R[_]] extends
   override implicit def optionInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[scala.Option[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.optionInfo(ai(lang))
   }
+
+  override def optionElmInfo[A]: InterLangInfoG[scala.Option[A]] => InterLangInfoG[A] = i => new InterLangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.optionElmInfo(i(lang))
+  }
 }
 
 object ILIGOptionInfo {
-  def apply[Repr[_]]: ILIGOptionInfo[Repr] = new ILIGOptionInfo[Repr] { }
+  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => ILIGOptionInfo[Repr] =
+    nt => new ILIGOptionInfo[Repr] {
+      override def reprInfo[A]: Repr[A] => InterLangInfoG[A] = nt.apply
+    }
 }

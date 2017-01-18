@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 
 trait ADEvalProd extends Prod[ADEvalCase, ADEval] with ADEvalArr {
-  override implicit val base = LangTermLang
+  override val base = LangTermLang
 
   def pfem[A, B] = new ADEvalMatch[(A, B)] {
     override type ret = (ADEvalCase[A], ADEvalCase[B])

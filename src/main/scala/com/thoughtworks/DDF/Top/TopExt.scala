@@ -6,6 +6,8 @@ trait TopExt[Info[_], Repr[_]] extends Top[Info, Repr] {
   override def mkTop = unit.mkTop
 
   override implicit def topInfo = unit.topInfo
+
+  override def reprInfo[A] = unit.reprInfo[A]
 }
 
 object TopExt {

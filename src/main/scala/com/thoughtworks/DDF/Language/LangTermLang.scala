@@ -163,6 +163,10 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.optionInfo(ai(lang))
   }
 
+  override def optionElmInfo[A]: LangInfoG[Option[A]] => LangInfoG[A] = ai => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.optionElmInfo(ai(lang))
+  }
+
   override implicit def topInfo: LangInfoG[Unit] = new LangInfoG[Unit] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Unit] = lang.topInfo
   }
@@ -192,6 +196,14 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
 
   override implicit def prodInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangInfoG[(A, B)] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.prodInfo[A, B](ai(lang), bi(lang))
+  }
+
+  override def prodZroInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[A] = x => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.prodZroInfo(x(lang))
+  }
+
+  override def prodFstInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[B] = x => new LangInfoG[B] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.prodFstInfo(x(lang))
   }
 
   override def nil[A](implicit ai: LangInfoG[A]): LangTerm[List[A]] = new LangTerm[List[A]] {
@@ -296,8 +308,8 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.IORet[A](ai(lang))
   }
 
-  override def Z[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[((A => B) => A => B) => A => B] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.Z[A, B](ai(lang), bi(lang))
+  override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[((A => B) => A => B) => A => B] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.Y[A, B](ai(lang), bi(lang))
   }
 
   override def mkTop: LangTerm[Unit] = new LangTerm[Unit] {
@@ -327,6 +339,10 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Stream[A]] = lang.streamInfo(ai(lang))
   }
 
+  override def streamElmInfo[A]: LangInfoG[Stream[A]] => LangInfoG[A] = x => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.streamElmInfo(x(lang))
+  }
+
   override def scanLeft[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
     new LangTerm[(B => A => B) => B => List[A] => List[B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.scanLeft(ai(lang), bi(lang))
@@ -340,6 +356,14 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumInfo(ai(lang), bi(lang))
   }
 
+  override def sumLeftInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[A] = x => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumLeftInfo(x(lang))
+  }
+
+  override def sumRightInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[B] = x => new LangInfoG[B] {
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumRightInfo(x(lang))
+    }
+
   override def C[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
     new LangTerm[(A => B => C) => B => A => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.C(ai(lang), bi(lang), ci(lang))
@@ -352,6 +376,18 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
 
   override implicit def aInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangInfoG[A => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.aInfo(ai(lang), bi(lang))
+  }
+
+  override def domInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = x => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.domInfo(x(lang))
+  }
+
+  override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = x => new LangInfoG[B] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.rngInfo(x(lang))
+  }
+
+  override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = x => new LangInfoG[A] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.reprInfo(x(lang))
   }
 }
 

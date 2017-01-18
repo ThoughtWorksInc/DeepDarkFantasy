@@ -7,8 +7,8 @@ trait EvalMComb extends Comb[NoInfo, Lambda[X => X]] with EvalMArr {
   override def S[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]):
   (A => B => C) => (A => B) => A => C = f => x => a => f(a)(x(a))
 
-  override def Z[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A => B) => A => B) => A => B = f => x =>
-    f(Z[A, B](NoInfo(), NoInfo())(f))(x)
+  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): ((A => B) => A => B) => A => B = f => x =>
+    f(Y[A, B](NoInfo(), NoInfo())(f))(x)
 
   override def Let[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]): A => (A => B) => B = x => f => f(x)
 

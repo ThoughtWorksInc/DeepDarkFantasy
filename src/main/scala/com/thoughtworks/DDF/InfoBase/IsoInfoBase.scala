@@ -1,26 +1,22 @@
-package com.thoughtworks.DDF.Top
+package com.thoughtworks.DDF.InfoBase
 
-import com.thoughtworks.DDF.InfoBase.IsoInfoBase
 import com.thoughtworks.DDF.IsoBase
 import com.thoughtworks.DDF.Language.Lang
 import scalaz.Isomorphism._
 
-trait IsoTop[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
-  Top[NInfo, NRepr] with
-  IsoBase[OInfo, NInfo, ORepr, NRepr] with
-  IsoInfoBase[OInfo, NInfo, ORepr, NRepr] {
-  override implicit def topInfo = iconv(l.topInfo)
-
-  override def mkTop: NRepr[Unit] = rconv(l.mkTop)
+trait IsoInfoBase[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
+  InfoBase[NInfo, NRepr] with
+  IsoBase[OInfo, NInfo, ORepr, NRepr] {
+  override def reprInfo[A]: NRepr[A] => NInfo[A] = r => iconv(l.reprInfo(convr(r)))
 }
 
-object IsoTop {
+object IsoInfoBase {
   def apply[OInfo[_], NInfo[_], ORepr[_], NRepr[_]](implicit
                                                     ii: OInfo <~> NInfo,
                                                     ri: ORepr <~> NRepr,
                                                     lang: Lang[OInfo, ORepr]):
-  IsoTop[OInfo, NInfo, ORepr, NRepr] =
-    new IsoTop[OInfo, NInfo, ORepr, NRepr] {
+  IsoInfoBase[OInfo, NInfo, ORepr, NRepr] =
+    new IsoInfoBase[OInfo, NInfo, ORepr, NRepr] {
       override val infoIso: OInfo <~> NInfo = ii
 
       override val reprIso: ORepr <~> NRepr = ri

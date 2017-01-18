@@ -19,6 +19,8 @@ trait IsoStream[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   override def streamMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.streamMatch[A, B])
 
   override implicit def streamInfo[A](implicit ai: NInfo[A]) = iconv(l.streamInfo[A](convi))
+
+  override def streamElmInfo[A]: NInfo[scala.Stream[A]] => NInfo[A] = si => iconv(l.streamElmInfo(convi(si)))
 }
 
 object IsoStream {

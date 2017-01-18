@@ -1,9 +1,12 @@
 package com.thoughtworks.DDF.Top
 
+import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
 import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowTop extends Top[NoInfo, Show] with SimpleTop[Show] {
-  override def mkTop = Show("mkTop")
+trait ShowTop extends Top[NoInfo, Show] with SimpleTop[Show] with SimpleInfoBase[Show] {
+  override def mkTop = Show("mkUnit")
 }
 
-object ShowTop extends ShowTop
+object ShowTop {
+  implicit def apply = new ShowTop {}
+}

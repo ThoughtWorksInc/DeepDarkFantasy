@@ -16,6 +16,8 @@ trait IsoOption[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   override def optionMatch[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.optionMatch[A, B])
 
   override implicit def optionInfo[A](implicit ai: NInfo[A]) = iconv(l.optionInfo[A](convi[A]))
+
+  override def optionElmInfo[A] = oi => iconv(l.optionElmInfo[A](convi(oi)))
 }
 
 object IsoOption {

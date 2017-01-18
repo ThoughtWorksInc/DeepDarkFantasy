@@ -14,8 +14,16 @@ trait ILIGStreamInfo[R[_]] extends
     new InterLangInfoG[scala.Stream[A]] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamInfo(ai(lang))
     }
+
+  override def streamElmInfo[A]: InterLangInfoG[scala.Stream[A]] => InterLangInfoG[A] = sa =>
+    new InterLangInfoG[A] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.streamElmInfo(sa(lang))
+    }
 }
 
 object ILIGStreamInfo {
-  def apply[Repr[_]]: ILIGStreamInfo[Repr] = new ILIGStreamInfo[Repr] { }
+  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => ILIGStreamInfo[Repr] =
+    nt => new ILIGStreamInfo[Repr] {
+      override def reprInfo[A]: Repr[A] => InterLangInfoG[A] = nt.apply
+    }
 }

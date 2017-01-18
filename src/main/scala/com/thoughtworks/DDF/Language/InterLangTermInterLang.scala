@@ -106,9 +106,9 @@ trait InterLangTermInterLang extends
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.S(ai(lang), bi(lang), ci(lang))
     }
 
-  override def Z[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
+  override def Y[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[((A => B) => (A => B)) => A => B] {
-      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.Z(ai(lang), bi(lang))
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.Y(ai(lang), bi(lang))
     }
 
   override def scanLeft[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
@@ -230,6 +230,11 @@ trait InterLangTermInterLang extends
   override def streamMatch[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangTerm[Stream[A] => B => (A => Stream[A] => B) => B] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.streamMatch(ai(lang), bi(lang))
+    }
+
+  override def reprInfo[A]: InterLangTerm[A] => InterLangInfoG[A] = a =>
+    new InterLangInfoG[A] {
+      override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[A] = lang.reprInfo(a(lang))
     }
 
   override def recipD = new InterLangTerm[Double => Double] {

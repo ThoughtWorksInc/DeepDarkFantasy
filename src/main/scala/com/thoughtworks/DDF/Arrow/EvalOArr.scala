@@ -1,12 +1,14 @@
 package com.thoughtworks.DDF.Arrow
 
+import com.thoughtworks.DDF.InfoBase.EvalOInfoBase
 import com.thoughtworks.DDF.Language.{InterLangInfoG, InterLangTerm}
 import com.thoughtworks.DDF.{EvalO, EvalOBase, EvalOMatch}
 
 trait EvalOArr extends
   EvalOBase with
   Arr[InterLangInfoG, EvalO] with
-  ILIGArrInfo[EvalO] {
+  ILIGArrInfo[EvalO] with
+  EvalOInfoBase {
   def aeval[A, B]: InterLangTerm[A => B] => (EvalO[A] => EvalO[B]) => EvalO[A => B] = la => f =>
     new EvalO[A => B] {
       override def l: InterLangTerm[A => B] = la

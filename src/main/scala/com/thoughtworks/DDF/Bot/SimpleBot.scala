@@ -1,8 +1,9 @@
 package com.thoughtworks.DDF.Bot
 
+import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleBot[Repr[_]] extends BotInfo[NoInfo, Repr] {
+trait SimpleBot[Repr[_]] extends BotInfo[NoInfo, Repr] with SimpleInfoBase[Repr] {
   override implicit def botInfo = NoInfo()
 }
 

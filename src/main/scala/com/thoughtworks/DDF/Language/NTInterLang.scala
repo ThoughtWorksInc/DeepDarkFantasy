@@ -15,6 +15,10 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override implicit def sumInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.sumInfo
 
+  override def sumLeftInfo[A, B] = base.sumLeftInfo
+
+  override def sumRightInfo[A, B] = base.sumRightInfo
+
   override def scanRight[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.scanRight)
 
   override def W[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.W)
@@ -35,9 +39,15 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.aInfo
 
+  override def domInfo[A, B] = base.domInfo
+
+  override def rngInfo[A, B] = base.rngInfo
+
   override def mkTop = NTF(base.mkTop)
 
   override implicit def optionInfo[A](implicit ai: Info[A]) = base.optionInfo
+
+  override def optionElmInfo[A] = base.optionElmInfo
 
   override def listZip[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.listZip)
 
@@ -64,6 +74,10 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
   override def foldRight[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.foldRight)
 
   override implicit def prodInfo[A, B](implicit ai: Info[A], bi: Info[B]) = base.prodInfo
+
+  override def prodZroInfo[A, B] = base.prodZroInfo
+
+  override def prodFstInfo[A, B] = base.prodFstInfo
 
   override def litD = d => NTF(base.litD(d))
 
@@ -95,7 +109,7 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override def fst[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.fst)
 
-  override def Z[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.Z)
+  override def Y[A, B](implicit ai: Info[A], bi: Info[B]) = NTF(base.Y)
 
   override def nil[A](implicit ai: Info[A]) = NTF(base.nil)
 
@@ -129,6 +143,8 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
 
   override implicit def streamInfo[A](implicit ai: Info[A]): Info[Stream[A]] = base.streamInfo[A]
 
+  override def streamElmInfo[A] = base.streamElmInfo[A]
+
   override def recipD = NTF(base.recipD)
 
   override def litString: (String) => F[String] = str => NTF(base.litString(str))
@@ -148,5 +164,7 @@ object NTInterLang {
       override def NTF: NaturalTransformation[Repr, F] = n
 
       override def app[A, B] = ap.apply[A].apply[B]
+
+      override def reprInfo[A] = r.apply[A]
     }
 }

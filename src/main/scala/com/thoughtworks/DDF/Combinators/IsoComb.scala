@@ -25,7 +25,7 @@ trait IsoComb[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
 
   override def I[A](implicit ai: NInfo[A]) = rconv(l.I[A])
 
-  override def Z[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.Z[A, B])
+  override def Y[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.Y[A, B])
 }
 
 object IsoComb {
