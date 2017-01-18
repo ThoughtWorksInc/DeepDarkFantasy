@@ -13,14 +13,16 @@ object Solve {
     val loss = nl.collapse(nl.Let__(nl.minusD__(nl.litD(27))(nl.in))(nl.W_(nl.multD)))
 
     val train = l.B__(loss)(exp)
-    var weight : Double = 0
-    println(l.multD__(l.litD(100))(l.litD(200))(ADEvalInterLang).term[Double](GDouble)(ShowLang).s)
-    //run, just very slow and large
+    var weight: Double = 0
+    val train_it: LangTerm[((Double, Double)) => (Double, Double)] =
+      train(ADEvalInterLang).get[Double](
+        ADEvalInterLang.aInfo(ADEvalInterLang.doubleInfo, ADEvalInterLang.doubleInfo))(GDouble)
+    println(train_it(ShowLang).s)
     for (_ <- Range(0, 100)) {
-      for (_ <- Range(0, 10)) {
-        //loss(ADEvalInterLang).term[Double](GDouble)(InterLangTermLang)[NoInfo, Lambda[X => X]](EvalMInterLang)
+      for (_ <- Range(0, 2)) {
+        weight -= 0.01 * train_it(InterLangTermLang)[NoInfo, Lambda[X => X]](EvalMInterLang)((weight, 1))._2
       }
-      //println(weight)
+      println(weight)
     }
   }
 }

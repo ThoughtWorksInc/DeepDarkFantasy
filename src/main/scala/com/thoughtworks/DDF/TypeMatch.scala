@@ -7,4 +7,3 @@ trait TypeMatch[Self[Y] <: TypeMatch[Self, Y], X] {
 
   def unique(tc: Self[X]): ret === tc.ret = /*enforce by user*/ force[Nothing, Any, ret, tc.ret]
 }
-

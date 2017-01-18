@@ -46,5 +46,4 @@ trait ADEvalInterLang extends
   }
 }
 
-object ADEvalInterLang extends ADEvalInterLang {
-}
+object ADEvalInterLang extends ADEvalInterLang

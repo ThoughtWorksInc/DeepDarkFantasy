@@ -5,21 +5,6 @@ import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm}
 
 import scalaz.Leibniz._
 
-trait ADEvalMatch[X] extends TypeMatch[ADEvalMatch, X]
-
-trait ADEvalCase[X] extends TypeCase[ADEvalMatch, X] {
-  type WithGrad[_]
-
-  def unique[G](r: ADEvalCase[X]): WithGrad[G] === r.WithGrad[G] =
-  /*enforced by user*/ force[Nothing, Any, WithGrad[G], r.WithGrad[G]]
-
-  def wgi[G: Gradient]: LangInfoG[WithGrad[G]]
-}
-
-object ADEvalCase {
-  type Aux[X, XM[_]] = ADEvalCase[X] {type WithGrad[Y] = XM[Y]}
-}
-
 trait ADEval[X] {
   val fec: ADEvalCase[X]
 

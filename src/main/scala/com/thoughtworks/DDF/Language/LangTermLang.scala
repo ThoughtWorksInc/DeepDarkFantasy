@@ -1,394 +1,464 @@
 package com.thoughtworks.DDF.Language
 
 trait LangTermLang extends Lang[LangInfoG, LangTerm] {
-  override def ite[A](implicit ai: LangInfoG[A]) = new LangTerm[Boolean => A => A => A] {
+  override implicit def botInfo = new LangInfoG[Nothing] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Nothing] = lang.botInfo
+
+    override val tm: LangInfoGMatch.Aux[Nothing, Unit] = new LangInfoGMatch[Nothing] {
+      override type ret = Unit
+    }
+
+    override def tmr: tm.ret = ()
+  }
+
+  override def ite[A](implicit ai: LangInfoG[A]) = new RawLangTerm[Boolean => A => A => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.ite[A](ai(lang))
-  }
+  }.convert
 
-  override def K[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[A => B => A] {
+  override def K[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => B => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.K[A, B](ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def multD = new LangTerm[Double => Double => Double] {
+  override def multD = new RawLangTerm[Double => Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.multD
-  }
+  }.convert
 
-  override def some[A](implicit ai: LangInfoG[A]) = new LangTerm[A => Option[A]] {
+  override def some[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => Option[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.some[A](ai(lang))
-  }
+  }.convert
 
-  override def reverse[A](implicit ai: LangInfoG[A]) = new LangTerm[List[A] => List[A]] {
+  override def reverse[A](implicit ai: LangInfoG[A]) = new RawLangTerm[List[A] => List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.reverse[A](ai(lang))
-  }
+  }.convert
 
   override def foldLeft[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[(A => B => A) => A => List[B] => A] {
+    new RawLangTerm[(A => B => A) => A => List[B] => A] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.foldLeft[A, B](ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def cons[A](implicit ai: LangInfoG[A]) = new LangTerm[A => List[A] => List[A]] {
+  override def cons[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => List[A] => List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.cons[A](ai(lang))
-  }
+  }.convert
 
-  override def expD = new LangTerm[Double => Double] {
+  override def expD = new RawLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.expD
-  }
+  }.convert
 
   override def exceptBind[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[Except[A, B] => (B => Except[A, C]) => Except[A, C]] {
+    new RawLangTerm[Except[A, B] => (B => Except[A, C]) => Except[A, C]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.exceptBind(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
-  override def mkProd[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[A => B => (A, B)] {
+  override def mkProd[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => B => (A, B)] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.mkProd(ai(lang), bi(lang))
-  }
+  }.convert
 
   override def app[A, B]: LangTerm[A => B] => LangTerm[A] => LangTerm[B] = f => x => new LangTerm[B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[B] = lang.app(f(lang))(x(lang))
+
+    override def info: LangInfoG[B] = rngInfo(f.info)
+  }
+
+  def ltm[A]: LangInfoGMatch.Aux[List[A], LangInfoG[A]] = new LangInfoGMatch[List[A]] {
+    override type ret = LangInfoG[A]
   }
 
   override implicit def listInfo[A](implicit ai: LangInfoG[A]) = new LangInfoG[List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[List[A]] = lang.listInfo(ai(lang))
+
+    override val tm = ltm[A]
+
+    override def tmr: tm.ret = ai
   }
 
-  override def listElmInfo[A]: LangInfoG[List[A]] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.listElmInfo(x(lang))
-  }
+  override def listElmInfo[A]: LangInfoG[List[A]] => LangInfoG[A] = _.get(ltm[A])
 
   override def impossible = new LangTerm[Unit => Nothing] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.impossible
+
+    override def info: LangInfoG[Unit => Nothing] = aInfo[Unit, Nothing]
   }
 
   override def contBind[R, A, B](implicit ri: LangInfoG[R], ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]] {
+    new RawLangTerm[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.contBind(ri(lang), ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def putDouble = new LangTerm[Double => IO[Unit]] {
+  override def putDouble = new RawLangTerm[Double => IO[Unit]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.putDouble
-  }
+  }.convert
 
-  override def I[A](implicit ai: LangInfoG[A]) = new LangTerm[A => A] {
+  override def I[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.I[A](ai(lang))
-  }
+  }.convert
 
   override def listMap[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[(A => B) => List[A] => List[B]] {
+    new RawLangTerm[(A => B) => List[A] => List[B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.listMap(ai(lang), bi(lang))
-    }
+    }.convert
 
   override def scanRight[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[(A => B => B) => B => List[A] => List[B]] {
+    new RawLangTerm[(A => B => B) => B => List[A] => List[B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.scanRight(ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def litString: String => LangTerm[String] = str => new LangTerm[String] {
+  override def litString: String => LangTerm[String] = str => new RawLangTerm[String] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[String] = lang.litString(str)
-  }
+  }.convert
 
-  override def imfalso[A](implicit ai: LangInfoG[A]) = new LangTerm[Unit => A] {
+  override def imfalso[A](implicit ai: LangInfoG[A]) = new RawLangTerm[Unit => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.imfalso[A](ai(lang))
-  }
+  }.convert
 
   override def sumMatch[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[Either[A, B] => (A => C) => (B => C) => C] {
+    new RawLangTerm[Either[A, B] => (A => C) => (B => C) => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.sumMatch(ai(lang), bi(lang), ci(lang))
+    }.convert
+
+  override def left[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => Either[A, B]] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.left[A, B](ai(lang), bi(lang))
+  }.convert
+
+  override implicit def stringInfo: LangInfoG[String] = new LangInfoG[String] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[String] = lang.stringInfo
+
+    override val tm: LangInfoGMatch.Aux[String, Unit] = new LangInfoGMatch[String] {
+      override type ret = Unit
     }
 
-  override def left[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[A => Either[A, B]] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.left[A, B](ai(lang), bi(lang))
-  }
-
-  override def stringInfo: LangInfoG[String] = new LangInfoG[String] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[String] = lang.stringInfo
+    override def tmr: tm.ret = ()
   }
 
   override def stateBind[S, A, B](implicit si: LangInfoG[S], ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[State[S, A] => (A => State[S, B]) => State[S, B]] {
+    new RawLangTerm[State[S, A] => (A => State[S, B]) => State[S, B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.stateBind(si(lang), ai(lang), bi(lang))
-    }
+    }.convert
 
   override def exfalso[A](implicit ai: LangInfoG[A]) = new LangTerm[Nothing => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.exfalso[A](ai(lang))
+
+    override def info: LangInfoG[Nothing => A] = aInfo[Nothing, A]
   }
 
-  override def zro[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[((A, B)) => A] {
+  override def zro[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[((A, B)) => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.zro(ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def plusD = new LangTerm[Double => Double => Double] {
+  override def plusD = new RawLangTerm[Double => Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.plusD
-  }
+  }.convert
 
   override def streamMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[Stream[A] => B => (A => Stream[A] => B) => B] {
+    new RawLangTerm[Stream[A] => B => (A => Stream[A] => B) => B] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.streamMatch(ai(lang), bi(lang))
-    }
+    }.convert
 
   override def ><[A, B, C, D](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C], di: LangInfoG[D]) =
-    new LangTerm[(A => C) => (B => D) => ((A, B)) => (C, D)] {
+    new RawLangTerm[(A => C) => (B => D) => ((A, B)) => (C, D)] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.`><`(ai(lang), bi(lang), ci(lang), di(lang))
-    }
+    }.convert
 
   override def readerBind[E, A, B](implicit ei: LangInfoG[E], ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[Reader[E, A] => (A => Reader[E, B]) => Reader[E, B]] {
+    new RawLangTerm[Reader[E, A] => (A => Reader[E, B]) => Reader[E, B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.readerBind(ei(lang), ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def none[A](implicit ai: LangInfoG[A]): LangTerm[Option[A]] = new LangTerm[Option[A]] {
+  override def none[A](implicit ai: LangInfoG[A]): LangTerm[Option[A]] = new RawLangTerm[Option[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Option[A]] = lang.none[A](ai(lang))
-  }
+  }.convert
 
   override def foldRight[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[(A => B => B) => B => List[A] => B] {
+    new RawLangTerm[(A => B => B) => B => List[A] => B] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.foldRight[A, B](ai(lang), bi(lang))
-    }
+    }.convert
 
   override def IOBind[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[IO[A] => (A => IO[B]) => IO[B]] {
+    new RawLangTerm[IO[A] => (A => IO[B]) => IO[B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.IOBind(ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def fst[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[((A, B)) => B] {
+  override def fst[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[((A, B)) => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.fst(ai(lang), bi(lang))
+  }.convert
+
+  def otm[A]: LangInfoGMatch.Aux[Option[A], LangInfoG[A]] = new LangInfoGMatch[Option[A]] {
+    override type ret = LangInfoG[A]
   }
 
   override implicit def optionInfo[A](implicit ai: LangInfoG[A]) = new LangInfoG[Option[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.optionInfo(ai(lang))
+
+    override val tm = otm[A]
+
+    override def tmr: tm.ret = ai
   }
 
-  override def optionElmInfo[A]: LangInfoG[Option[A]] => LangInfoG[A] = ai => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.optionElmInfo(ai(lang))
-  }
+  override def optionElmInfo[A]: LangInfoG[Option[A]] => LangInfoG[A] = _.get(otm[A])
 
   override implicit def topInfo: LangInfoG[Unit] = new LangInfoG[Unit] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Unit] = lang.topInfo
+
+    override val tm: LangInfoGMatch.Aux[Unit, Unit] = new LangInfoGMatch[Unit] {
+      override type ret = Unit
+    }
+
+    override def tmr: tm.ret = ()
   }
 
   override def sumAssocRL[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[Either[A, Either[B, C]] => Either[Either[A, B], C]] {
+    new RawLangTerm[Either[A, Either[B, C]] => Either[Either[A, B], C]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.sumAssocRL(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
-  override def getDouble: LangTerm[IO[Double]] = new LangTerm[IO[Double]] {
+  override def getDouble: LangTerm[IO[Double]] = new RawLangTerm[IO[Double]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[IO[Double]] = lang.getDouble
-  }
+  }.convert
 
-  override def recipD: LangTerm[Double => Double] = new LangTerm[Double => Double] {
+  override def recipD: LangTerm[Double => Double] = new RawLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.recipD
-  }
+  }.convert
 
-  override def litD: Double => LangTerm[Double] = d => new LangTerm[Double] {
+  override def litD: Double => LangTerm[Double] = d => new RawLangTerm[Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double] = lang.litD(d)
-  }
+  }.convert
 
   override def curry[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[(((A, B)) => C) => A => B => C] {
+    new RawLangTerm[(((A, B)) => C) => A => B => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.curry(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
+
+  def ptm[A, B]: LangInfoGMatch.Aux[(A, B), (LangInfoG[A], LangInfoG[B])] = new LangInfoGMatch[(A, B)] {
+    override type ret = (LangInfoG[A], LangInfoG[B])
+  }
 
   override implicit def prodInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangInfoG[(A, B)] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.prodInfo[A, B](ai(lang), bi(lang))
+
+    override val tm = ptm[A, B]
+
+    override def tmr: tm.ret = (ai, bi)
   }
 
-  override def prodZroInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.prodZroInfo(x(lang))
-  }
+  override def prodZroInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[A] = _.get(ptm[A, B])._1
 
-  override def prodFstInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[B] = x => new LangInfoG[B] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.prodFstInfo(x(lang))
-  }
+  override def prodFstInfo[A, B]: LangInfoG[(A, B)] => LangInfoG[B] = _.get(ptm[A, B])._2
 
-  override def nil[A](implicit ai: LangInfoG[A]): LangTerm[List[A]] = new LangTerm[List[A]] {
+  override def nil[A](implicit ai: LangInfoG[A]): LangTerm[List[A]] = new RawLangTerm[List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[List[A]] = lang.nil(ai(lang))
-  }
+  }.convert
 
   override def listMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[List[A] => B => (A => List[A] => B) => B] {
+    new RawLangTerm[List[A] => B => (A => List[A] => B) => B] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.listMatch(ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def App[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[(A => B) => A => B] {
+  override def App[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[(A => B) => A => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.App(ai(lang), bi(lang))
-  }
+  }.convert
 
   override def uncurry[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[(A => B => C) => ((A, B)) => C] {
+    new RawLangTerm[(A => B => C) => ((A, B)) => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.uncurry(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
   override def optionMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[Option[A] => B => (A => B) => B] {
+    new RawLangTerm[Option[A] => B => (A => B) => B] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.optionMatch(ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def readerRet[E, A](implicit ei: LangInfoG[E], ai: LangInfoG[A]) = new LangTerm[A => Reader[E, A]] {
+  override def readerRet[E, A](implicit ei: LangInfoG[E], ai: LangInfoG[A]) = new RawLangTerm[A => Reader[E, A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.readerRet(ei(lang), ai(lang))
-  }
+  }.convert
 
-  override def Let[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[A => (A => B) => B] {
+  override def Let[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => (A => B) => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.Let(ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def minusD = new LangTerm[Double => Double => Double] {
+  override def minusD = new RawLangTerm[Double => Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.minusD
-  }
+  }.convert
 
-  override def litB: Boolean => LangTerm[Boolean] = b => new LangTerm[Boolean] {
+  override def litB: Boolean => LangTerm[Boolean] = b => new RawLangTerm[Boolean] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.litB(b)
-  }
+  }.convert
 
-  override def negD = new LangTerm[Double => Double] {
+  override def negD = new RawLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.negD
-  }
+  }.convert
 
-  override implicit def botInfo = new LangInfoG[Nothing] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Nothing] = lang.botInfo
-  }
-
-  override def ltD: LangTerm[Double => Double => Boolean] = new LangTerm[(Double) => (Double) => Boolean] {
+  override def ltD: LangTerm[Double => Double => Boolean] = new RawLangTerm[(Double) => (Double) => Boolean] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.ltD
+  }.convert
+
+  def iotm[A]: LangInfoGMatch.Aux[IO[A], LangInfoG[A]] = new LangInfoGMatch[IO[A]] {
+    override type ret = LangInfoG[A]
   }
 
-  override def IOInfo[A](implicit ai: LangInfoG[A]): LangInfoG[IO[A]] = new LangInfoG[IO[A]] {
+  override implicit def IOInfo[A](implicit ai: LangInfoG[A]): LangInfoG[IO[A]] = new LangInfoG[IO[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[IO[A]] = lang.IOInfo(ai(lang))
+
+    override val tm = iotm[A]
+
+    override def tmr: tm.ret = ai
   }
 
-  override def IOElmInfo[A]: LangInfoG[IO[A]] => LangInfoG[A] = ioai => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.IOElmInfo(ioai(lang))
-  }
+  override def IOElmInfo[A]: LangInfoG[IO[A]] => LangInfoG[A] = _.get(iotm[A])
 
-  override def sigD: LangTerm[Double => Double] = new LangTerm[Double => Double] {
+  override def sigD: LangTerm[Double => Double] = new RawLangTerm[Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sigD
-  }
+  }.convert
 
   override implicit def boolInfo: LangInfoG[Boolean] = new LangInfoG[Boolean] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Boolean] = lang.boolInfo
+
+    override val tm: LangInfoGMatch.Aux[Boolean, Unit] = new LangInfoGMatch[Boolean] {
+      override type ret = Unit
+    }
+
+    override def tmr: tm.ret = ()
   }
 
   override implicit def doubleInfo: LangInfoG[Double] = new LangInfoG[Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Double] = lang.doubleInfo
+
+    override val tm: LangInfoGMatch.Aux[Double, Unit] = new LangInfoGMatch[Double] {
+      override type ret = Unit
+    }
+
+    override def tmr: tm.ret = ()
   }
 
-  override def stateRet[S, A](implicit si: LangInfoG[S], ai: LangInfoG[A]) = new LangTerm[A => State[S, A]] {
+  override def stateRet[S, A](implicit si: LangInfoG[S], ai: LangInfoG[A]) = new RawLangTerm[A => State[S, A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.stateRet[S, A](si(lang), ai(lang))
-  }
+  }.convert
 
   override def B[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[(B => C) => (A => B) => A => C] {
+    new RawLangTerm[(B => C) => (A => B) => A => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.B(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
   override def listZip[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[List[A] => List[B] => List[(A, B)]] {
+    new RawLangTerm[List[A] => List[B] => List[(A, B)]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.listZip[A, B](ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def W[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[(A => A => B) => A => B] {
+  override def W[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[(A => A => B) => A => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.W[A, B](ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def divD = new LangTerm[Double => Double => Double] {
+  override def divD = new RawLangTerm[Double => Double => Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.divD
-  }
+  }.convert
 
   override def sumComm[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[Either[A, B] => Either[B, A]] {
+    new RawLangTerm[Either[A, B] => Either[B, A]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumComm[A, B](ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def IORet[A](implicit ai: LangInfoG[A]) = new LangTerm[A => IO[A]] {
+  override def IORet[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => IO[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.IORet[A](ai(lang))
-  }
+  }.convert
 
-  override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangTerm[((A => B) => A => B) => A => B] {
+  override def Y[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[((A => B) => A => B) => A => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.Y[A, B](ai(lang), bi(lang))
-  }
+  }.convert
 
-  override def mkTop: LangTerm[Unit] = new LangTerm[Unit] {
+  override def mkTop: LangTerm[Unit] = new RawLangTerm[Unit] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.mkTop
-  }
+  }.convert
 
-  override def streamNil[A](implicit ai: LangInfoG[A]): LangTerm[Stream[A]] = new LangTerm[Stream[A]] {
+  override def streamNil[A](implicit ai: LangInfoG[A]): LangTerm[Stream[A]] = new RawLangTerm[Stream[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Stream[A]] = lang.streamNil(ai(lang))
-  }
+  }.convert
 
-  override def streamCons[A](implicit ai: LangInfoG[A]) = new LangTerm[A => (Unit => Stream[A]) => Stream[A]] {
+  override def streamCons[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => (Unit => Stream[A]) => Stream[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.streamCons[A](ai(lang))
-  }
+  }.convert
 
   override def sumAssocLR[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[Either[Either[A, B], C] => Either[A, Either[B, C]]] {
+    new RawLangTerm[Either[Either[A, B], C] => Either[A, Either[B, C]]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.sumAssocLR(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
   override def right[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangTerm[B => Either[A, B]] =
-    new LangTerm[B => Either[A, B]] {
+    new RawLangTerm[B => Either[A, B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.right[A, B](ai(lang), bi(lang))
+  }.convert
+
+  def sttm[A]: LangInfoGMatch.Aux[Stream[A], LangInfoG[A]] = new LangInfoGMatch[Stream[A]] {
+    override type ret = LangInfoG[A]
   }
 
   override implicit def streamInfo[A](implicit ai: LangInfoG[A]): LangInfoG[Stream[A]] = new LangInfoG[Stream[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Stream[A]] = lang.streamInfo(ai(lang))
+
+    override val tm = sttm[A]
+
+    override def tmr: tm.ret = ai
   }
 
-  override def streamElmInfo[A]: LangInfoG[Stream[A]] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.streamElmInfo(x(lang))
-  }
+  override def streamElmInfo[A]: LangInfoG[Stream[A]] => LangInfoG[A] = _.get(sttm[A])
 
   override def scanLeft[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangTerm[(B => A => B) => B => List[A] => List[B]] {
+    new RawLangTerm[(B => A => B) => B => List[A] => List[B]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.scanLeft(ai(lang), bi(lang))
-    }
+    }.convert
 
-  override def contRet[R, A](implicit ri: LangInfoG[R], ai: LangInfoG[A]) = new LangTerm[A => Cont[R, A]] {
+  override def contRet[R, A](implicit ri: LangInfoG[R], ai: LangInfoG[A]) = new RawLangTerm[A => Cont[R, A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.contRet(ri(lang), ai(lang))
+  }.convert
+
+  def stm[A, B]: LangInfoGMatch.Aux[Either[A, B], (LangInfoG[A], LangInfoG[B])] = new LangInfoGMatch[Either[A, B]] {
+    override type ret = (LangInfoG[A], LangInfoG[B])
   }
 
   override implicit def sumInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangInfoG[Either[A, B]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumInfo(ai(lang), bi(lang))
+
+    override val tm = stm[A, B]
+
+    override def tmr: tm.ret = (ai, bi)
   }
 
-  override def sumLeftInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumLeftInfo(x(lang))
-  }
+  override def sumLeftInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[A] = _.get(stm[A, B])._1
 
-  override def sumRightInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[B] = x => new LangInfoG[B] {
-      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.sumRightInfo(x(lang))
-    }
+  override def sumRightInfo[A, B]: LangInfoG[Either[A, B]] => LangInfoG[B] = _.get(stm[A, B])._2
 
   override def C[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[(A => B => C) => B => A => C] {
+    new RawLangTerm[(A => B => C) => B => A => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.C(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
 
   override def S[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
-    new LangTerm[(A => B => C) => (A => B) => A => C] {
+    new RawLangTerm[(A => B => C) => (A => B) => A => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.S(ai(lang), bi(lang), ci(lang))
-    }
+    }.convert
+
+  def atm[A, B]: LangInfoGMatch.Aux[A => B, (LangInfoG[A], LangInfoG[B])] = new LangInfoGMatch[A => B] {
+    override type ret = (LangInfoG[A], LangInfoG[B])
+  }
 
   override implicit def aInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new LangInfoG[A => B] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.aInfo(ai(lang), bi(lang))
+
+    override val tm = atm[A, B]
+
+    override def tmr: tm.ret = (ai, bi)
   }
 
-  override def domInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.domInfo(x(lang))
-  }
+  override def domInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = _.get(atm[A, B])._1
 
-  override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = x => new LangInfoG[B] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[B] = lang.rngInfo(x(lang))
-  }
+  override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = _.get(atm[A, B])._2
 
-  override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = x => new LangInfoG[A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[A] = lang.reprInfo(x(lang))
-  }
+  override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = _.info
 }
 
 object LangTermLang extends LangTermLang
