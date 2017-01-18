@@ -3,15 +3,14 @@ package com.thoughtworks.DDF.Cont
 import com.thoughtworks.DDF.Arrow.Arr
 
 trait ContBind[Info[_], Repr[_]] extends ContInfo[Info, Repr] with Arr[Info, Repr] {
-  def contBind[R, A, B](implicit ri: Info[R], ai: Info[A], bi: Info[B]):
-  Repr[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]]
+  def contBind[R: Info, A: Info, B: Info]: Repr[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]]
 
-  final def contBind_[R, A, B](ma: Repr[Cont[R, A]])(implicit bi: Info[B]): Repr[(A => Cont[R, B]) => Cont[R, B]] =
-    app(contBind(contInfoR(reprInfo(ma)), contInfoA(reprInfo(ma)), bi))(ma)
+  final def contBind_[R: Info, A: Info, B: Info](ma: Repr[Cont[R, A]]): Repr[(A => Cont[R, B]) => Cont[R, B]] =
+    app(contBind[R, A, B])(ma)
 
-  final def contBind__[R, A, B]: Repr[Cont[R, A]] => Repr[A => Cont[R, B]] => Repr[Cont[R, B]] = ma => f =>
-    app(contBind_(ma)(contInfoA(rngInfo(reprInfo(f)))))(f)
+  final def contBind__[R: Info, A: Info, B: Info](ma: Repr[Cont[R, A]])(f: Repr[A => Cont[R, B]]): Repr[Cont[R, B]] =
+    app(contBind_[R, A, B](ma))(f)
 
-  final def contBind___[R, A, B]: Repr[Cont[R, A]] => Repr[A => Cont[R, B]] => Repr[B => R] => Repr[R] = ma => f =>
-    app(contBind__(ma)(f))
+  final def contBind___[R: Info, A: Info, B: Info](ma: Repr[Cont[R, A]])(f: Repr[A => Cont[R, B]])(x: Repr[B => R]):
+  Repr[R] = app(contBind__(ma)(f))(x)
 }

@@ -13,11 +13,11 @@ trait GProdArr[A, B, C] extends Gradient[((A, B)) => C] {
 
   implicit def gc: Gradient[C]
 
-  implicit val ai = ga.GInfo
+  implicit val agi = ga.GInfo
 
-  implicit val bi = gb.GInfo
+  implicit val bgi = gb.GInfo
 
-  implicit val ci = gc.GInfo
+  implicit val cgi = gc.GInfo
 
   val abcac: LangTerm[(((A, B)) => C) => A => C] = ltl.C__(ltl.B[A, (A, B), C])(ltl.C__(ltl.mkProd[A, B])(gb.constG))
 

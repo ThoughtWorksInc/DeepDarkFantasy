@@ -32,8 +32,8 @@ trait EvalOComb extends
 
   override def I[A](implicit ai: InterLangInfoG[A]): EvalO[A => A] = aeval(ltl.I[A])(identity[EvalO[A]])
 
-  override def Y[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]): EvalO[((A => B) => A => B) => A => B] =
-    aeval(ltl.Y[A, B])(f => aeval(ltl.Y_(f.l))(a => app(app(f)(Y_(f)))(a)))
+  override def Z[A : InterLangInfoG, B : InterLangInfoG]: EvalO[((A => B) => A => B) => A => B] =
+    aeval(ltl.Z[A, B])(f => aeval(ltl.Z_[A, B](f.l))(a => app(app(f)(Z_[A, B](f)))(a)))
 }
 
 object EvalOComb extends EvalOComb

@@ -1,9 +1,8 @@
 package com.thoughtworks.DDF.Top
 
-import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleTop[Repr[_]] extends TopInfo[NoInfo, Repr] with SimpleInfoBase[Repr] {
+trait SimpleTop[Repr[_]] extends TopInfo[NoInfo, Repr] {
   override implicit def topInfo = NoInfo()
 }
 

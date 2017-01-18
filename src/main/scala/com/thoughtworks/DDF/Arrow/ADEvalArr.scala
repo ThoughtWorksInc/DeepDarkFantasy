@@ -2,10 +2,9 @@ package com.thoughtworks.DDF.Arrow
 
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
-import com.thoughtworks.DDF.InfoBase.ADEvalInfoBase
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 
-trait ADEvalArr extends Arr[ADEvalCase, ADEval] with ADEvalInfoBase {
+trait ADEvalArr extends Arr[ADEvalCase, ADEval] {
   val base = LangTermLang
 
   override def app[A, B]: ADEval[A => B] => ADEval[A] => ADEval[B] = f => x => new ADEval[B] {
@@ -15,7 +14,12 @@ trait ADEvalArr extends Arr[ADEvalCase, ADEval] with ADEvalInfoBase {
 
     override val fec : ADEvalCase.Aux[B, rng.WithGrad] = rng
 
-    override def term[G: Gradient] = base.app(f.get[G](aInfo(dom, rng)))(x.get[G](dom))
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      implicit val domgi = dom.wgi[G]
+      implicit val rnggi = rng.wgi[G]
+      base.app(f.get[G](aInfo(dom, rng)))(x.get[G](dom))
+    }
   }
 
   def afem[A, B] = new ADEvalMatch[A => B] {
@@ -34,9 +38,9 @@ trait ADEvalArr extends Arr[ADEvalCase, ADEval] with ADEvalInfoBase {
       override def tmr = (ai, bi)
     }
 
-  override def domInfo[A, B]: ADEvalCase[A => B] => ADEvalCase[A] = _.get(afem[A, B])._1
+  def domInfo[A, B]: ADEvalCase[A => B] => ADEvalCase[A] = _.get(afem[A, B])._1
 
-  override def rngInfo[A, B]: ADEvalCase[A => B] => ADEvalCase[B] = _.get(afem[A, B])._2
+  def rngInfo[A, B]: ADEvalCase[A => B] => ADEvalCase[B] = _.get(afem[A, B])._2
 }
 
 object ADEvalArr extends ADEvalArr

@@ -21,10 +21,6 @@ trait IsoSum[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
 
   override implicit def sumInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = iconv(l.sumInfo[A, B])
 
-  override def sumLeftInfo[A, B] = si => iconv(l.sumLeftInfo(convi(si)))
-
-  override def sumRightInfo[A, B] = si => iconv(l.sumRightInfo(convi(si)))
-
   override def sumMatch[A, B, C](implicit ai: NInfo[A], bi: NInfo[B], ci: NInfo[C]) = rconv(l.sumMatch[A, B, C])
 }
 

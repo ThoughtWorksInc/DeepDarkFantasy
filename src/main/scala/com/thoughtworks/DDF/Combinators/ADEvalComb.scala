@@ -62,11 +62,11 @@ trait ADEvalComb extends Comb[ADEvalCase, ADEval] with ADEvalArr {
     override def term[G: Gradient] = base.I(ai.wgi[G])
   }
 
-  override def Y[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
+  override def Z[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
     new ADEval[((A => B) => A => B) => A => B] {
       override val fec = aInfo(aInfo(aInfo(ai, bi), aInfo(ai, bi)), aInfo(ai, bi))
 
-      override def term[G: Gradient] = base.Y(ai.wgi[G], bi.wgi[G])
+      override def term[G: Gradient] = base.Z(ai.wgi[G], bi.wgi[G])
     }
 }
 

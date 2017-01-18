@@ -21,10 +21,6 @@ trait IsoProd[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
 
   override implicit def prodInfo[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = iconv(l.prodInfo[A, B])
 
-  override def prodZroInfo[A, B] = pi => iconv(l.prodZroInfo(convi(pi)))
-
-  override def prodFstInfo[A, B] = pi => iconv(l.prodFstInfo(convi(pi)))
-
   override def mkProd[A, B](implicit ai: NInfo[A], bi: NInfo[B]) = rconv(l.mkProd[A, B])
 }
 

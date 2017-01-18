@@ -1,7 +1,5 @@
 package com.thoughtworks.DDF.Top
 
-import com.thoughtworks.DDF.InfoBase.InfoBase
-
-trait TopInfo[Info[_], Repr[_]] extends InfoBase[Info, Repr] {
+trait TopInfo[Info[_], Repr[_]] {
   implicit def topInfo: Info[Unit]
 }

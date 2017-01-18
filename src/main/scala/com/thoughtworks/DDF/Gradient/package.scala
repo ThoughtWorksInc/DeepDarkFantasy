@@ -20,7 +20,9 @@ package object Gradient {
 
     implicit val di = ltl.doubleInfo
 
-    implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = ltl.prodInfo(ai, bi)
+    implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangInfoG[(A, B)] = ltl.prodInfo(ai, bi)
+
+    implicit def ai[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]): LangInfoG[A => B] = ltl.aInfo(ai, bi)
 
     implicit def GInfo: LangInfoG[G]
 

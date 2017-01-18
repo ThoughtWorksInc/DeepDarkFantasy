@@ -1,14 +1,9 @@
 package com.thoughtworks.DDF.Arrow
 
-import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
-import com.thoughtworks.DDF.{NoInfo, Show}
+import com.thoughtworks.DDF.NoInfo
 
-trait SimpleArr[Repr[_]] extends ArrInfo[NoInfo, Repr] with SimpleInfoBase[Repr] {
-  override def domInfo[A, B] = _ => NoInfo()
-
+trait SimpleArr[Repr[_]] extends ArrInfo[NoInfo, Repr] {
   override implicit def aInfo[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = NoInfo()
-
-  override def rngInfo[A, B] = _ => NoInfo()
 }
 
 object SimpleArr {

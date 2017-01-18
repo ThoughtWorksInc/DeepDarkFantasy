@@ -19,18 +19,11 @@ trait CombExt[Info[_], Repr[_]] extends Comb[Info, Repr] {
 
   override def Let[A, B](implicit ai: Info[A], bi: Info[B]) = comb.Let
 
-  override def Y[A, B](implicit ai: Info[A], bi: Info[B]) = comb.Y
+  override def Z[A, B](implicit ai: Info[A], bi: Info[B]) = comb.Z
 
-  override def app[A, B] = comb.app
+  override def app[A: Info, B: Info](f: Repr[A => B])(x: Repr[A]): Repr[B] = comb.app[A, B](f)(x)
 
   override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = comb.aInfo
-
-  override def domInfo[A, B] = comb.domInfo
-
-  override def rngInfo[A, B] = comb.rngInfo
-
-  override def reprInfo[A] = comb.reprInfo
-
 }
 
 object CombExt {

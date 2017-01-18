@@ -4,24 +4,19 @@ import com.thoughtworks.DDF.Combinators.Comb
 import scalaz.NaturalTransformation
 
 trait NextInterLang[Info[_], Repr[_], Arg] extends
-  InterLang[Info, Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+  InterLang[Info, Lambda[X => (Info[X], Either[Repr[X], Repr[Arg => X]])]] with
   NTInterLang[
     Info,
     Repr,
-    Lambda[X => Either[Repr[X], Repr[Arg => X]]]] with
+    Lambda[X => (Info[X], Either[Repr[X], Repr[Arg => X]])]] with
   NextBase[Info, Repr, Arg] {
   override implicit def comb = base
-
-  override def reprInfo[A]: repr[A] => Info[A] = {
-    case Left(x) => base.reprInfo(x)
-    case Right(x) => base.rngInfo(base.reprInfo(x))
-  }
 
   override def NTF = new NaturalTransformation[Repr, repr] {
     override def apply[A](fa: Repr[A]): Either[Repr[A], Repr[Arg => A]] = Left(fa)
   }
 
-  override def app[A, B]: repr[A => B] => repr[A] => repr[B] = f => x => (f, x) match {
+  override def app[A, B]: repr[A => B] => repr[A] => repr[B] = f => x => (f._2, x._2) match {
     case (Left(f_), Left(x_)) => Left(base.app(f_)(x_))
     case (Right(f_), Right(x_)) => Right(base.S__(f_)(x_))
     case (Left(f_), Right(x_)) => Right(base.B__(f_)(x_))

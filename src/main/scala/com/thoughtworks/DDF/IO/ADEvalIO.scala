@@ -10,12 +10,14 @@ trait ADEvalIO extends
   IO[ADEvalCase, ADEval] with
   ADEvalDoubleMin with
   ADEvalTop {
-  override val base = LangTermLang
 
   override def putDouble: ADEval[Double => IO[Unit]] = new ADEval[Double => IO[Unit]] {
     override val fec = aInfo(doubleInfo, IOInfo(topInfo))
 
-    override def term[G: Gradient] = base.B__(base.putDouble)(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo))
+    override def term[G: Gradient] = {
+      implicit val gi = implicitly[Gradient[G]].GInfo
+      base.B__(base.putDouble)(base.zro(base.doubleInfo, gi))
+    }
   }
 
   override def IOBind[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
@@ -36,11 +38,13 @@ trait ADEvalIO extends
     new ADEval[IO[Double]] {
       override val fec = IOInfo(doubleInfo)
 
-      override def term[G: Gradient] =
+      override def term[G: Gradient] = {
+        implicit val gi = implicitly[Gradient[G]].GInfo
         base.IOBind__(
           base.getDouble)(
           base.B__(base.IORet(doubleInfo.wgi[G]))(
             base.C__(base.mkProd(base.doubleInfo, implicitly[Gradient[G]].GInfo))(implicitly[Gradient[G]].constG)))
+      }
     }
 
   def iofem[A] = new ADEvalMatch[IO[A]] {

@@ -10,7 +10,7 @@ trait ShowComb extends Comb[NoInfo, Show] with ShowArr {
 
   override def I[A](implicit ai: NoInfo[A]) = Show("I")
 
-  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("Y")
+  override def Z[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("Y")
 
   override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("B")
 

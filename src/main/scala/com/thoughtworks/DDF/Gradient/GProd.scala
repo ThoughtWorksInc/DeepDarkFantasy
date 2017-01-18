@@ -9,11 +9,11 @@ trait GProd[A, B] extends Gradient[(A, B)] {
 
   override implicit def GInfo: LangInfoG[(A, B)] = ltl.prodInfo(AG.GInfo, BG.GInfo)
 
+  implicit val agi = AG.GInfo
+
+  implicit val bgi = BG.GInfo
+
   override def constG: LangTerm[(A, B)] = ltl.mkProd__(AG.constG)(BG.constG)
-
-  implicit val ai = AG.GInfo
-
-  implicit val bi = BG.GInfo
 
   override val GCDS: Stream[GCD] =
     Util.combine(AG.GCDS.map(x => new GCD {
@@ -29,7 +29,7 @@ trait GProd[A, B] extends Gradient[(A, B)] {
       val p = NextLang.apply[LangInfoG, LangTerm, (A, B)]
       p.collapse(
         p.S__[Double, B, (A, B)](
-          p.B__(p.mkProd[A, B])(p.B__(p.Let_[A, A](p.zro_(p.in)): p.repr[(A => A) => A])(p.rconv(AG.mult))))(
+          p.B__(p.mkProd[A, B])(p.B__(p.Let_[A, A](p.zro_[A, B](p.in)))(p.rconv(AG.mult))))(
           p.B__(p.Let_[B, B](p.fst_(p.in)))(p.rconv(BG.mult))))
     })
 

@@ -3,6 +3,12 @@ package com.thoughtworks.DDF.Language
 trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   def i: InterLang[Info, Repr]
 
+  override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.aInfo[A, B]
+
+  override implicit def boolInfo = i.boolInfo
+
+  override implicit def topInfo = i.topInfo
+
   override def scanRight[A, B](implicit ai: Info[A], bi: Info[B]) = i.scanRight[A, B]
 
   override def scanLeft[A, B](implicit ai: Info[A], bi: Info[B]) = i.scanLeft[A, B]
@@ -24,7 +30,8 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def foldLeft[A, B](implicit ai: Info[A], bi: Info[B]) = i.foldLeft[A, B]
 
   override def uncurry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) =
-    C_(S__(B__(C[A => B => C, B, C](aInfo(ai, aInfo(bi, ci)), bi, ci))(
+    C_(S__(
+      B__(C[A => B => C, B, C](aInfo(ai, aInfo(bi, ci)), bi, ci))(
       B__(Let[A, B => C])(zro[A, B])))(fst[A, B]))
 
   override def plusD = i.plusD
@@ -34,8 +41,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def app[A, B] = i.app[A, B]
 
   override implicit def optionInfo[A](implicit ai: Info[A]) = i.optionInfo[A]
-
-  override def optionElmInfo[A] = i.optionElmInfo[A]
 
   override def listMap[A, B](implicit ai: Info[A], bi: Info[B]) = i.listMap[A, B]
 
@@ -48,16 +53,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def optionMatch[A, B](implicit ai: Info[A], bi: Info[B]) = i.optionMatch[A, B]
 
   override def cons[A](implicit ai: Info[A]) = i.cons[A]
-
-  override implicit def aInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.aInfo[A, B]
-
-  override def domInfo[A, B] = i.domInfo[A, B]
-
-  override def rngInfo[A, B] = i.rngInfo[A, B]
-
-  override implicit def boolInfo = i.boolInfo
-
-  override implicit def topInfo = i.topInfo
 
   override def foldRight[A, B](implicit ai: Info[A], bi: Info[B]) = i.foldRight[A, B]
 
@@ -75,11 +70,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override implicit def sumInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.sumInfo[A, B]
 
-  override def sumLeftInfo[A, B] = i.sumLeftInfo[A, B]
-
-  override def sumRightInfo[A, B] = i.sumRightInfo[A, B]
-
-  override def Y[A, B](implicit ai: Info[A], bi: Info[B]) = i.Y[A, B]
+  override def Z[A, B](implicit ai: Info[A], bi: Info[B]) = i.Z[A, B]
 
   override def I[A](implicit ai: Info[A]) = i.I[A]
 
@@ -95,7 +86,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def K[A, B](implicit ai: Info[A], bi: Info[B]) = i.K[A, B]
 
-  override def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) =
+  override def curry[A: Info, B: Info, C: Info] =
     B__[((A, B)) => C, (B => (A, B)) => B => C, A => B => C](
       C__(B[A, B => (A, B), B => C])(mkProd[A, B]))(
       B[B, (A, B), C])
@@ -117,10 +108,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override implicit def prodInfo[A, B](implicit ai: Info[A], bi: Info[B]) = i.prodInfo[A, B]
 
-  override def prodZroInfo[A, B] = i.prodZroInfo[A, B]
-
-  override def prodFstInfo[A, B] = i.prodFstInfo[A, B]
-
   override def sumAssocLR[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]) = i.sumAssocLR[A, B, C]
 
   override def contRet[R, A](implicit ri: Info[R], ai: Info[A]): Repr[A => Cont[R, A]] = i.Let[A, R]
@@ -138,8 +125,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
   override def mkProd[A, B](implicit ai: Info[A], bi: Info[B]) = i.mkProd[A, B]
 
   override def mkTop = i.mkTop
-
-  override def reprInfo[A] = i.reprInfo[A]
 
   override def putDouble = i.putDouble
 
@@ -161,8 +146,6 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override implicit def streamInfo[A](implicit ai: Info[A]): Info[Stream[A]] = i.streamInfo[A]
 
-  override def streamElmInfo[A] = i.streamElmInfo[A]
-
   override def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
   Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]] = {
     val nLang = NextInterLang.apply[Info, Repr, Except[A, B]](i, exceptInfo(ai)(bi))
@@ -176,7 +159,7 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def imfalso[A](implicit ai: Info[A]): Repr[Unit => A] = B__[Unit, Nothing, A](exfalso[A])(impossible)
 
-  override def impossible: Repr[Unit => Nothing] = Y_[Unit, Nothing](I[Unit => Nothing](aInfo[Unit, Nothing]))
+  override def impossible: Repr[Unit => Nothing] = Z_[Unit, Nothing](I[Unit => Nothing](aInfo[Unit, Nothing]))
 
   override def readerRet[E, A](implicit ei: Info[E], ai: Info[A]): Repr[A => Reader[E, A]] = K[A, E]
 

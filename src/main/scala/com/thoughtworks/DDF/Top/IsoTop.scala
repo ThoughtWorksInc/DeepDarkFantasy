@@ -1,14 +1,12 @@
 package com.thoughtworks.DDF.Top
 
-import com.thoughtworks.DDF.InfoBase.IsoInfoBase
 import com.thoughtworks.DDF.IsoBase
 import com.thoughtworks.DDF.Language.Lang
 import scalaz.Isomorphism._
 
 trait IsoTop[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   Top[NInfo, NRepr] with
-  IsoBase[OInfo, NInfo, ORepr, NRepr] with
-  IsoInfoBase[OInfo, NInfo, ORepr, NRepr] {
+  IsoBase[OInfo, NInfo, ORepr, NRepr] {
   override implicit def topInfo = iconv(l.topInfo)
 
   override def mkTop: NRepr[Unit] = rconv(l.mkTop)

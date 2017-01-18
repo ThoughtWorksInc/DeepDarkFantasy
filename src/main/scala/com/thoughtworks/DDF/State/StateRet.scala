@@ -1,9 +1,9 @@
 package com.thoughtworks.DDF.State
 
 trait StateRet[Info[_], Repr[_]] extends StateBase[Info, Repr] {
-  def stateRet[S, A](implicit si: Info[S], ai: Info[A]): Repr[A => State[S, A]]
+  def stateRet[S: Info, A: Info]: Repr[A => State[S, A]]
 
-  final def stateRet_[S, A](a: Repr[A])(implicit si: Info[S]): Repr[State[S, A]] = app(stateRet(si, reprInfo(a)))(a)
+  final def stateRet_[S: Info, A: Info](a: Repr[A]): Repr[State[S, A]] = app(stateRet[S, A])(a)
 
-  final def stateRet__[S, A]: Repr[A] => Repr[S] => Repr[(A, S)] = a => s => app(stateRet_(a)(reprInfo(s)))(s)
+  final def stateRet__[S: Info, A: Info](a: Repr[A])(s: Repr[S]): Repr[(A, S)] = app(stateRet_[S, A](a))(s)
 }

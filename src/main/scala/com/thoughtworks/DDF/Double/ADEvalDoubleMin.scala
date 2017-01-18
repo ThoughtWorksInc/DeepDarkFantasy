@@ -12,20 +12,28 @@ trait ADEvalDoubleMin extends
   ADEvalArr with
   ADEvalBool with
   ADEvalProd {
-  implicit val ltl = LangTermLang
+  implicit val ti = base.topInfo
 
-  implicit val di = ltl.doubleInfo
+  implicit val di = base.doubleInfo
 
-  implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = ltl.prodInfo(ai, bi)
+  implicit val bi = base.boolInfo
+
+  implicit def pi[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = base.prodInfo(ai, bi)
+
+  implicit def ioi[A, B](implicit ai: LangInfoG[A]) = base.IOInfo(ai)
+
+  implicit def ai[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = base.aInfo(ai, bi)
 
   override def ltD =
     new ADEval[scala.Double => scala.Double => Boolean] {
       override val fec = aInfo(doubleInfo, aInfo(doubleInfo, boolInfo))
 
-      override def term[G: Gradient] =
+      override def term[G: Gradient] = {
+        implicit val GI = implicitly[Gradient[G]].GInfo
         base.C_(base.B__(
-          base.C_(base.B__(base.ltD)(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo)))
+          base.C_(base.B__(base.ltD)(base.zro(base.doubleInfo, GI)))
         )(base.zro(base.doubleInfo, implicitly[Gradient[G]].GInfo)))
+      }
     }
 
   override def multD = new ADEval[scala.Double => scala.Double => scala.Double] {
@@ -106,7 +114,10 @@ trait ADEvalDoubleMin extends
     new ADEval[scala.Double] {
       override val fec = doubleInfo
 
-      override def term[G: Gradient] = base.mkProd__(base.litD(d))(implicitly[Gradient[G]].constG)
+      override def term[G: Gradient] = {
+        implicit val gi = implicitly[Gradient[G]].GInfo
+        base.mkProd__(base.litD(d))(implicitly[Gradient[G]].constG)
+      }
     }
 
   override implicit def doubleInfo: ADEvalCase.Aux[scala.Double, Lambda[X => (scala.Double, X)]] =
