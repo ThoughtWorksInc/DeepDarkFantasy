@@ -54,6 +54,10 @@ Q: Why does this work theoretically?
 
 A: See [DDFADC](https://github.com/MarisaKirisame/DDFADC)
 
+Q: You seems to have a space in FAQ.
+
+A: I like it that way.
+
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
