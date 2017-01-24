@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Language.LangInfoG
 
 import scalaz.Leibniz._
 
-trait ADEvalCase[X] extends TypeCase[ADEvalMatch, X] {
+trait ADEvalCase[X] extends TypeCase[ADEvalMatch[X]] {
   type WithGrad[_]
 
   def unique[G](r: ADEvalCase[X]): WithGrad[G] === r.WithGrad[G] =
