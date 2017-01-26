@@ -1,10 +1,11 @@
 package com.thoughtworks.DDF.Top
 
 import com.thoughtworks.DDF.InfoBase.SimpleInfoBase
-import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
+import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowTop extends Top[NoInfo, ShowLeaf] with SimpleTop[ShowLeaf] with SimpleInfoBase[ShowLeaf] {
-  override def mkTop = ShowLeaf("mkTop")
+trait ShowTop extends
+  Top[NoInfo, Lambda[X => Show]] with SimpleTop[Lambda[X => Show]] with SimpleInfoBase[Lambda[X => Show]] {
+  override def mkTop = Show("mkTop")
 }
 
 object ShowTop extends ShowTop

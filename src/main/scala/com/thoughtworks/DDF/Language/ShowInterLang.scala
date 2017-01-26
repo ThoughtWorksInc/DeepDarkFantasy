@@ -7,16 +7,16 @@ import com.thoughtworks.DDF.Combinators.ShowComb
 import com.thoughtworks.DDF.Double.ShowDoubleMin
 import com.thoughtworks.DDF.IO.ShowIO
 import com.thoughtworks.DDF.List.ShowList
+import com.thoughtworks.DDF.{NoInfo, Show}
 import com.thoughtworks.DDF.Option.ShowOption
 import com.thoughtworks.DDF.Product.ShowProd
 import com.thoughtworks.DDF.Stream.ShowStream
 import com.thoughtworks.DDF.Sum.ShowSum
 import com.thoughtworks.DDF.Top.ShowTop
-import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
 
 trait ShowInterLang extends
-  InterLang[NoInfo, ShowLeaf] with
-  SimpleLang[ShowLeaf] with
+  InterLang[NoInfo, Lambda[X => Show]] with
+  SimpleLang[Lambda[X => Show]] with
   ShowComb with
   ShowDoubleMin with
   ShowProd with
@@ -29,7 +29,7 @@ trait ShowInterLang extends
   ShowArr with
   ShowStream with
   ShowIO {
-  override def litString: (String) => ShowLeaf[String] = str => ShowLeaf("str: " + str)
+  override def litString: String => Show = str => Show("str: " + str)
 }
 
 object ShowInterLang extends ShowInterLang

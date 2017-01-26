@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
+import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowLang extends Lang[NoInfo, ShowLeaf] with InterLang2Lang[NoInfo, ShowLeaf] {
+trait ShowLang extends Lang[NoInfo, Lambda[X => Show]] with InterLang2Lang[NoInfo, Lambda[X => Show]] {
   override def i = ShowInterLang
 }
 

@@ -2,30 +2,28 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.Product.ShowProd
-import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
+import com.thoughtworks.DDF.{NoInfo, Show}
 
-trait ShowList extends List[NoInfo, ShowLeaf] with ShowArr with SimpleList[ShowLeaf] with ShowProd {
-  override def cons[A](implicit ai: NoInfo[A]) = ShowLeaf("Cons")
+trait ShowList extends List[NoInfo, Lambda[X => Show]] with ShowArr with SimpleList[Lambda[X => Show]] with ShowProd {
+  override def cons[A](implicit ai: NoInfo[A]) = Show("Cons")
 
-  override def listMatch[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("listMatch")
+  override def listMatch[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMatch")
 
-  override def nil[A](implicit ai: NoInfo[A]) = ShowLeaf("Nil")
+  override def nil[A](implicit ai: NoInfo[A]) = Show("Nil")
 
-  override def listMap[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("listMap")
+  override def listMap[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listMap")
 
-  override def reverse[A](implicit ai: NoInfo[A]) = ShowLeaf("reverse")
+  override def reverse[A](implicit ai: NoInfo[A]) = Show("reverse")
 
-  override def foldRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("foldRight")
+  override def foldRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("foldRight")
 
-  override def foldLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("foldLeft")
+  override def foldLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("foldLeft")
 
-  override def listZip[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("listZip")
+  override def listZip[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("listZip")
 
-  override def scanLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("scanLeft")
+  override def scanLeft[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("scanLeft")
 
-  override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("scanRight")
+  override def scanRight[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("scanRight")
 }
 
-object ShowList {
-  implicit def apply = new ShowList {}
-}
+object ShowList extends ShowList
