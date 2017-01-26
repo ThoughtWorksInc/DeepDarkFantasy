@@ -1,10 +1,10 @@
 package com.thoughtworks.DDF.Bot
 
 import com.thoughtworks.DDF.Arrow.ShowArr
-import com.thoughtworks.DDF.{NoInfo, Show}
+import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
 
-trait ShowBotMin extends BotMin[NoInfo, Show] with SimpleBot[Show] with ShowArr {
-  override def exfalso[A](implicit ai: NoInfo[A]) = Show("Exfalso!")
+trait ShowBotMin extends BotMin[NoInfo, ShowLeaf] with SimpleBot[ShowLeaf] with ShowArr {
+  override def exfalso[A](implicit ai: NoInfo[A]) = ShowLeaf("Exfalso!")
 }
 
 object ShowBotMin extends ShowBotMin

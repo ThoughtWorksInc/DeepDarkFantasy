@@ -1,26 +1,26 @@
 package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow.ShowArr
-import com.thoughtworks.DDF.{NoInfo, Show}
+import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
 
-trait ShowComb extends Comb[NoInfo, Show] with ShowArr {
-  override def S[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("S")
+trait ShowComb extends Comb[NoInfo, ShowLeaf] with ShowArr {
+  override def S[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = ShowLeaf("S")
 
-  override def K[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("K")
+  override def K[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("K")
 
-  override def I[A](implicit ai: NoInfo[A]) = Show("I")
+  override def I[A](implicit ai: NoInfo[A]) = ShowLeaf("I")
 
-  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("Y")
+  override def Y[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("Y")
 
-  override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("B")
+  override def B[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = ShowLeaf("B")
 
-  override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("W")
+  override def W[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("W")
 
-  override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = Show("C")
+  override def C[A, B, C](implicit ai: NoInfo[A], bi: NoInfo[B], ci: NoInfo[C]) = ShowLeaf("C")
 
-  override def Let[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("Let")
+  override def Let[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("Let")
 
-  override def App[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = Show("App")
+  override def App[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = ShowLeaf("App")
 }
 
 object ShowComb {

@@ -2,22 +2,22 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.ShowArr
 import com.thoughtworks.DDF.Bool.ShowBool
-import com.thoughtworks.DDF.{NoInfo, Show}
+import com.thoughtworks.DDF.{NoInfo, ShowLeaf}
 
-trait ShowDoubleMin extends DoubleMin[NoInfo, Show] with ShowArr with SimpleDouble[Show] with ShowBool {
-  override def litD = d => Show(d.toString)
+trait ShowDoubleMin extends DoubleMin[NoInfo, ShowLeaf] with ShowArr with SimpleDouble[ShowLeaf] with ShowBool {
+  override def litD = d => ShowLeaf(d.toString)
 
-  override def plusD = Show("+")
+  override def plusD = ShowLeaf("+")
 
-  override def multD = Show("*")
+  override def multD = ShowLeaf("*")
 
-  override def recipD = Show("recipD")
+  override def recipD = ShowLeaf("recipD")
 
-  override def expD = Show("expD")
+  override def expD = ShowLeaf("expD")
 
-  override def sigD = Show("sigmoidD")
+  override def sigD = ShowLeaf("sigmoidD")
 
-  override def ltD = Show("<")
+  override def ltD = ShowLeaf("<")
 }
 
 object ShowDoubleMin {
