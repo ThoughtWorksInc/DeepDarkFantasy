@@ -1,4 +1,4 @@
-#####This example use gradient descent to find a best value.
+#####Using gradient descent to solve x*x+2x+3=27.
 Let's first import some stuff:
 ```tut
 import com.thoughtworks.DDF.Gradient.GDouble
@@ -65,11 +65,14 @@ EvalMInterLang is the intepreter that evaluate it in MetaLanguage(scala).
 
 We can also evaluate it in ObjectLanguage(DDF) but we dont need that.
 ```tut
-for (_ <- Range(0, 100)) {
-  for (_ <- Range(0, 2)) {
+for (i <- Range(0, 50)) {
+  for (_ <- Range(0, i + 1)) {
     weight -= 0.01 * train_it(InterLangTermLang)[NoInfo, Lambda[X => X]](EvalMInterLang)((weight, 1))._2
   }
   println(weight)
 }
 ```
 As you can see, weight approach 4, because 4 * 4 + 2 * 4 + 3 = 27.
+
+Note: Weights are printed with nonconstant iteration between them,
+so initally(where they change quicker) more weight will be shown.

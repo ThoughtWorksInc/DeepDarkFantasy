@@ -12,3 +12,4 @@ libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.2.7"
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 tutSettings
+tutTargetDirectory := (baseDirectory.value / "doc")
