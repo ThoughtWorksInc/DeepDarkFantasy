@@ -37,9 +37,9 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 # Patchouli Go!
 
-Document is coming up. For now you can only read the code.
+We have an [annotated example](doc/poly.md) on how to use our code. More documentation is coming up.
 
-Example is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala) [here](src/main/scala/com/thoughtworks/DDF/Example/Solve.scala)
+Example is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
 Lang is the default language that is usable right off the shelf. 
 
 FEvalInterLang provide the capability to Evaluate a term and it's derivative, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
