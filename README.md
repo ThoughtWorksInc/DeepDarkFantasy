@@ -55,7 +55,7 @@ Q: Why does this work theoretically?
 
 A: See [DDFADC](https://github.com/MarisaKirisame/DDFADC)
 
-Q: What does this have to do with [Atry](https://github.com/Atry)'s [DeepLearning.scala](https://github.com/ThoughtWorksInc/DeepLearning.scala/)?
+Q: What does this have to do with [Yang Bo](https://github.com/Atry)'s [DeepLearning.scala](https://github.com/ThoughtWorksInc/DeepLearning.scala/)?
 
 A: We work on a prototype for 2-3 months, and split apart.
 
@@ -65,4 +65,4 @@ A: I like it that way.
 
 # Thank You Sir
 
-This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Atry](https://github.com/Atry)
+This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry)
