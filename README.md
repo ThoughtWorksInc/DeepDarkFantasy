@@ -15,7 +15,8 @@ Of course, I must still be able to train the network.
 
 They all had their own special gradient structure to propagate loss accordingly. 
 
-However, in the end of the day, what is updated is only container of double (or other representation of real). Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
+However, in the end of the day, what is updated is only container of double (or other representation of real).
+Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
 
 The full list of features implemented can be seen [here](FEATURES.md)
 
@@ -37,13 +38,13 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 # Patchouli Go!
 
+You should read the [blog](http://marisa.moe/DLPL.html) before anything.
+
 We have an [annotated example](doc/poly.md) on how to use our code. More documentation is coming up.
 
-Example is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala)
-Lang is the default language that is usable right off the shelf. 
+Another good starting point is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala).
 
-FEvalInterLang provide the capability to Evaluate a term and it's derivative, ShowLang can pretty print stuff, and NextLang provide syntax sugar for Lambda Expression in the Network.
-
+If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf)
 # FA Q
 
 Q: How is the speed?
@@ -53,6 +54,10 @@ A: Unoptimized. This is more of a proof of concept that we can use function in n
 Q: Why does this work theoretically?
 
 A: See [DDFADC](https://github.com/MarisaKirisame/DDFADC)
+
+Q: What does this have to do with [Atry](https://github.com/Atry)'s [DeepLearning.scala](https://github.com/ThoughtWorksInc/DeepLearning.scala/)?
+
+A: We work on a prototype for 2-3 months, and split apart.
 
 Q: You seems to have a space in FAQ.
 

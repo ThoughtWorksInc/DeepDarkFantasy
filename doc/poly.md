@@ -13,12 +13,12 @@ import com.thoughtworks.DDF.{NoInfo, Show}
 Now we make a shorthand to declare AST:
 ```scala
 scala> val l = InterLangTermLang
-l: com.thoughtworks.DDF.Language.InterLangTermLang.type = com.thoughtworks.DDF.Language.InterLangTermLang$@4171bd81
+l: com.thoughtworks.DDF.Language.InterLangTermLang.type = com.thoughtworks.DDF.Language.InterLangTermLang$@155fc2c
 ```
 We then introduce a variable. Let's called it x.
 ```scala
 scala> val nl = NextLang(l, l.doubleInfo)
-nl: com.thoughtworks.DDF.Language.Lang[com.thoughtworks.DDF.Language.InterLangInfoG,[X]scala.util.Either[com.thoughtworks.DDF.Language.InterLangTerm[X],com.thoughtworks.DDF.Language.InterLangTerm[Double => X]]] with com.thoughtworks.DDF.Language.NextBase[com.thoughtworks.DDF.Language.InterLangInfoG,com.thoughtworks.DDF.Language.InterLangTerm,Double] = com.thoughtworks.DDF.Language.NextLang$$anon$1@5c85f338
+nl: com.thoughtworks.DDF.Language.Lang[com.thoughtworks.DDF.Language.InterLangInfoG,[X]scala.util.Either[com.thoughtworks.DDF.Language.InterLangTerm[X],com.thoughtworks.DDF.Language.InterLangTerm[Double => X]]] with com.thoughtworks.DDF.Language.NextBase[com.thoughtworks.DDF.Language.InterLangInfoG,com.thoughtworks.DDF.Language.InterLangTerm,Double] = com.thoughtworks.DDF.Language.NextLang$$anon$1@be2051
 ```
 We build the AST representing "x * x + 2 * x + 3".
 
@@ -30,9 +30,9 @@ Now the AST does not contain a free variable "x", and become a AST that represen
 returning a double
 ```scala
 scala> val exp = nl.collapse(nl.plusD__(nl.multD__(nl.in)(nl.in))(nl.plusD__(nl.multD__(nl.litD(2))(nl.in))(nl.litD(3))))
-exp: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@22e2e11f
+exp: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@1460b53
 ```
-We then build "(x - 27) * (x - 27)".
+We then build the loss function, "(x - 27) * (x - 27)", a L2 Loss.
 
 Let is of type A => (A => B) => B, with A, B specialize to double
 
@@ -41,22 +41,22 @@ W (W = f => x => f(x)(x)) is of type (A => A => B) => (A => B).
 W(mult) take a double x, and return x * x. It is just square. 
 ```scala
 scala> val loss = nl.collapse(nl.Let__(nl.minusD__(nl.litD(27))(nl.in))(nl.W_(nl.multD)))
-loss: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@3e39a59c
+loss: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@199d5c8
 ```
 Now we use B: (B => C) => (A => B) => (A => C) to compose loss after exp, 
 so for a x, we can measure how close it is to 27.
 ```scala
 scala> val train = l.B__(loss)(exp)
-train: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@41c1fefb
+train: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@769e4d
 ```
-We do find the AST representing the derivative of the whole pass:
+We find the AST representing the derivative of the whole pass:
 
 ADEvalInterLang is a intepreter of the AST: it just return a new AST representing the derivative.
 ```scala
 scala> val train_it: LangTerm[((Double, Double)) => (Double, Double)] =
      |   train(ADEvalInterLang).get[Double](
      |     ADEvalInterLang.aInfo(ADEvalInterLang.doubleInfo, ADEvalInterLang.doubleInfo))(GDouble)
-train_it: com.thoughtworks.DDF.Language.LangTerm[((Double, Double)) => (Double, Double)] = com.thoughtworks.DDF.Language.LangTermLang$$anon$50@539df7f3
+train_it: com.thoughtworks.DDF.Language.LangTerm[((Double, Double)) => (Double, Double)] = com.thoughtworks.DDF.Language.LangTermLang$$anon$50@b67a97
 ```
 We set inital weight(x) to 0. 
 This shouldnt be done to neural network in general, but it has non zero derivative so we will do so.
@@ -74,7 +74,7 @@ res0: com.thoughtworks.DDF.Show = (B (C (B Let (B (C (B (S (B S (B (B mkPair) (C
 ```
 Here's the standard gradient descend.
 
-EvalMInterLang is the intepreter that evaluate it in MetaLanguage(scala).
+EvalMInterLang is the intepreter that evaluate the AST in MetaLanguage(Scala).
 
 We can also evaluate it in ObjectLanguage(DDF) but we dont need that.
 ```scala

@@ -24,7 +24,7 @@ returning a double
 ```tut
 val exp = nl.collapse(nl.plusD__(nl.multD__(nl.in)(nl.in))(nl.plusD__(nl.multD__(nl.litD(2))(nl.in))(nl.litD(3))))
 ```
-We then build "(x - 27) * (x - 27)".
+We then build the loss function, "(x - 27) * (x - 27)", a L2 Loss.
 
 Let is of type A => (A => B) => B, with A, B specialize to double
 
@@ -39,7 +39,7 @@ so for a x, we can measure how close it is to 27.
 ```tut
 val train = l.B__(loss)(exp)
 ```
-We do find the AST representing the derivative of the whole pass:
+We find the AST representing the derivative of the whole pass:
 
 ADEvalInterLang is a intepreter of the AST: it just return a new AST representing the derivative.
 ```tut
@@ -61,7 +61,7 @@ train_it[NoInfo, Lambda[X => Show]](ShowLang)
 ```
 Here's the standard gradient descend.
 
-EvalMInterLang is the intepreter that evaluate it in MetaLanguage(scala).
+EvalMInterLang is the intepreter that evaluate the AST in MetaLanguage(Scala).
 
 We can also evaluate it in ObjectLanguage(DDF) but we dont need that.
 ```tut
