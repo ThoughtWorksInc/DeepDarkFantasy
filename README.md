@@ -63,6 +63,9 @@ Q: You seems to have a space in FAQ.
 
 A: I like it that way.
 
+Q: What are you currently working on?
+
+A: I am trying to formalize a core subset of the language, to demonstrate what does derivative in our context mean (and why it is correct).
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry)
