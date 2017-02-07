@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Language
 
-import com.thoughtworks.DDF.TypeMatch
+import com.thoughtworks.DDF.RecursiveInfoMatch
 
-trait LangInfoGMatch[X] extends TypeMatch[LangInfoGMatch[X]]
+trait LangInfoGMatch[X] extends RecursiveInfoMatch[LangInfoGMatch, X]
 
 object LangInfoGMatch {
   type Aux[X, Y] = LangInfoGMatch[X] { type ret = Y }
