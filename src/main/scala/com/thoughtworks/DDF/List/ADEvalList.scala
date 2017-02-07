@@ -4,6 +4,7 @@ import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangTermLang
 import com.thoughtworks.DDF.Product.ADEvalProd
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalList extends
   List[ADEvalCase, ADEval] with
@@ -23,10 +24,6 @@ trait ADEvalList extends
 
       override def term[G: Gradient] = base.listZip(ai.wgi[G], bi.wgi[G])
     }
-
-  def lfem[A] = new ADEvalMatch[scala.List[A]] {
-    override type ret = ADEvalCase[A]
-  }
 
   override def listMap[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
     new ADEval[(A => B) => scala.List[A] => scala.List[B]] {
@@ -51,17 +48,15 @@ trait ADEvalList extends
 
   override implicit def listInfo[A](implicit ai: ADEvalCase[A]):
   ADEvalCase.Aux[scala.List[A], Lambda[G => scala.List[ai.WithGrad[G]]]] =
-    new ADEvalCase[scala.List[A]] {
+    new ADEvalCase[scala.List[A]] with ListRI[ADEvalMatch, ADEvalCase, A] {
       override type WithGrad[G] = scala.List[ai.WithGrad[G]]
 
       override def wgi[G: Gradient] = base.listInfo(ai.wgi[G])
 
-      override val tm = lfem[A]
-
       override def tmr = ai
     }
 
-  override def listElmInfo[A]: ADEvalCase[scala.List[A]] => ADEvalCase[A] = _.get(lfem[A])
+  override def listElmInfo[A]: ADEvalCase[scala.List[A]] => ADEvalCase[A] = _.get(LM[ADEvalMatch, ADEvalCase, A])
 
   override def foldRight[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
     new ADEval[(A => B => B) => B => scala.List[A] => B] {

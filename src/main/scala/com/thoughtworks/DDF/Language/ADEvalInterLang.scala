@@ -11,6 +11,8 @@ import com.thoughtworks.DDF.Product.ADEvalProd
 import com.thoughtworks.DDF.Stream.ADEvalStream
 import com.thoughtworks.DDF.Sum.ADEvalSum
 import com.thoughtworks.DDF.Top.ADEvalTop
+import com.thoughtworks.DDF.RecursiveInfoMatch._
+import com.thoughtworks.DDF.String.ADEvalString
 
 trait ADEvalInterLang extends
   InterLang[ADEvalCase, ADEval] with
@@ -22,28 +24,9 @@ trait ADEvalInterLang extends
   ADEvalBotMin with
   ADEvalIO with
   ADEvalTop with
-  ADEvalStream {
+  ADEvalStream with
+  ADEvalString {
   override val base = LangTermLang
-  override def stringInfo: ADEvalCase.Aux[String, Lambda[X => String]] = new ADEvalCase[String] {
-    override def wgi[G: Gradient] = base.stringInfo
-
-    override type WithGrad[_] = String
-
-    override def tmr = ()
-
-    override val tm = sem
-  }
-
-  override def litString: String => ADEval[String] = str =>
-    new ADEval[String] {
-      override def term[G: Gradient] = base.litString(str)
-
-      override val fec = stringInfo
-    }
-
-  def sem[A, B] = new ADEvalMatch[String] {
-    override type ret = Unit
-  }
 }
 
 object ADEvalInterLang extends ADEvalInterLang

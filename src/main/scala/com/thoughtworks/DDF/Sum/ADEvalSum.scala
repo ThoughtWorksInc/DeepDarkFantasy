@@ -2,6 +2,7 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.ADEvalArr
 import com.thoughtworks.DDF.Gradient.Gradient
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 
 trait ADEvalSum extends Sum[ADEvalCase, ADEval] with ADEvalArr {
@@ -35,19 +36,17 @@ trait ADEvalSum extends Sum[ADEvalCase, ADEval] with ADEvalArr {
 
   override implicit def sumInfo[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]):
   ADEvalCase.Aux[Either[A, B], Lambda[G => Either[ai.WithGrad[G], bi.WithGrad[G]]]] =
-    new ADEvalCase[Either[A, B]] {
+    new ADEvalCase[Either[A, B]] with SumRI[ADEvalMatch, ADEvalCase, A, B] {
       override type WithGrad[G] = Either[ai.WithGrad[G], bi.WithGrad[G]]
 
       override def wgi[G: Gradient] = base.sumInfo(ai.wgi[G], bi.wgi[G])
 
-      override val tm = sfem[A, B]
-
-      override def tmr: tm.ret = (ai, bi)
+      override def tmr = (ai, bi)
   }
 
-  override def sumLeftInfo[A, B]: ADEvalCase[Either[A, B]] => ADEvalCase[A] = _.get(sfem[A, B])._1
+  override def sumLeftInfo[A, B]: ADEvalCase[Either[A, B]] => ADEvalCase[A] = _.get(SM[ADEvalMatch, ADEvalCase, A, B])._1
 
-  override def sumRightInfo[A, B]: ADEvalCase[Either[A, B]] => ADEvalCase[B] = _.get(sfem[A, B])._2
+  override def sumRightInfo[A, B]: ADEvalCase[Either[A, B]] => ADEvalCase[B] = _.get(SM[ADEvalMatch, ADEvalCase, A, B])._2
 
   override def right[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
     new ADEval[B => Either[A, B]] {
@@ -55,10 +54,6 @@ trait ADEvalSum extends Sum[ADEvalCase, ADEval] with ADEvalArr {
 
       override def term[G: Gradient] = base.right(ai.wgi[G], bi.wgi[G])
     }
-
-  def sfem[A, B] = new ADEvalMatch[Either[A, B]] {
-    override type ret = (ADEvalCase[A], ADEvalCase[B])
-  }
 
   override def sumAssocLR[A, B, C](implicit ai: ADEvalCase[A], bi: ADEvalCase[B], ci: ADEvalCase[C]) =
     new ADEval[Either[Either[A, B], C] => Either[A, Either[B, C]]] {

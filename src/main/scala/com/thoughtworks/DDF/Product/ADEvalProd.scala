@@ -4,29 +4,24 @@ import com.thoughtworks.DDF.Arrow.ADEvalArr
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalProd extends Prod[ADEvalCase, ADEval] with ADEvalArr {
   override val base = LangTermLang
 
-  def pfem[A, B] = new ADEvalMatch[(A, B)] {
-    override type ret = (ADEvalCase[A], ADEvalCase[B])
-  }
-
   override implicit def prodInfo[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]):
   ADEvalCase.Aux[(A, B), Lambda[G => (ai.WithGrad[G], bi.WithGrad[G])]] =
-    new ADEvalCase[(A, B)] {
+    new ADEvalCase[(A, B)] with ProductRI[ADEvalMatch, ADEvalCase, A, B] {
       override type WithGrad[G] = (ai.WithGrad[G], bi.WithGrad[G])
 
       override def wgi[G: Gradient]: LangInfoG[(ai.WithGrad[G], bi.WithGrad[G])] = base.prodInfo(ai.wgi[G], bi.wgi[G])
 
-      override val tm = pfem[A, B]
-
-      override def tmr: tm.ret = (ai, bi)
+      override def tmr = (ai, bi)
     }
 
-  override def prodZroInfo[A, B]: ADEvalCase[(A, B)] => ADEvalCase[A] = _.get(pfem[A, B])._1
+  override def prodZroInfo[A, B]: ADEvalCase[(A, B)] => ADEvalCase[A] = _.get(PM[ADEvalMatch, ADEvalCase, A, B])._1
 
-  override def prodFstInfo[A, B]: ADEvalCase[(A, B)] => ADEvalCase[B] = _.get(pfem[A, B])._2
+  override def prodFstInfo[A, B]: ADEvalCase[(A, B)] => ADEvalCase[B] = _.get(PM[ADEvalMatch, ADEvalCase, A, B])._2
 
   override def mkProd[A, B](implicit ai: ADEvalCase[A], bi: ADEvalCase[B]) =
     new ADEval[A => B => (A, B)] {

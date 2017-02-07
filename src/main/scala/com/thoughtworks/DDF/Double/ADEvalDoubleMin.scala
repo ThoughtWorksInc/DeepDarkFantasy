@@ -6,6 +6,7 @@ import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTerm, LangTermLang, NextLang}
 import com.thoughtworks.DDF.Product.ADEvalProd
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalDoubleMin extends
   DoubleMin[ADEvalCase, ADEval] with
@@ -110,14 +111,8 @@ trait ADEvalDoubleMin extends
     }
 
   override implicit def doubleInfo: ADEvalCase.Aux[scala.Double, Lambda[X => (scala.Double, X)]] =
-    new ADEvalCase[scala.Double] {
+    new ADEvalCase[scala.Double] with DoubleRI[ADEvalMatch] {
       override type WithGrad[G] = (scala.Double, G)
-
-      override val tm = new ADEvalMatch[scala.Double] {
-        override type ret = Unit
-      }
-
-      override def tmr: tm.ret = ()
 
       override def wgi[G: Gradient]: LangInfoG[(scala.Double, G)] =
         base.prodInfo(base.doubleInfo, implicitly[Gradient[G]].GInfo)

@@ -4,6 +4,7 @@ import com.thoughtworks.DDF.Arrow.ADEvalArr
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.LangInfoG
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalBool extends
   Bool[ADEvalCase, ADEval] with ADEvalArr {
@@ -20,16 +21,11 @@ trait ADEvalBool extends
     override def term[G: Gradient] = base.litB(b)
   }
 
-  override implicit def boolInfo: ADEvalCase.Aux[Boolean, Lambda[X => Boolean]] = new ADEvalCase[Boolean] {
-    override type WithGrad[_] = Boolean
+  override implicit def boolInfo: ADEvalCase.Aux[Boolean, Lambda[X => Boolean]] =
+    new ADEvalCase[Boolean] with BoolRI[ADEvalMatch] {
+      override type WithGrad[_] = Boolean
 
-    override val tm = new ADEvalMatch[Boolean] {
-      override type ret = Unit
-    }
-
-    override def tmr: tm.ret = ()
-
-    override def wgi[G: Gradient]: LangInfoG[Boolean] = base.boolInfo
+      override def wgi[G: Gradient]: LangInfoG[Boolean] = base.boolInfo
   }
 }
 

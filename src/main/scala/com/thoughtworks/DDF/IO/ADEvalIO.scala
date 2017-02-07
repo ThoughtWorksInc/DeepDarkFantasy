@@ -5,6 +5,7 @@ import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 import com.thoughtworks.DDF.Top.ADEvalTop
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalIO extends
   IO[ADEvalCase, ADEval] with
@@ -43,22 +44,16 @@ trait ADEvalIO extends
             base.C__(base.mkProd(base.doubleInfo, implicitly[Gradient[G]].GInfo))(implicitly[Gradient[G]].constG)))
     }
 
-  def iofem[A] = new ADEvalMatch[IO[A]] {
-    override type ret = ADEvalCase[A]
-  }
-
   override def IOInfo[A](implicit ai: ADEvalCase[A]): ADEvalCase.Aux[IO[A], Lambda[G => IO[ai.WithGrad[G]]]] =
-    new ADEvalCase[IO[A]] {
+    new ADEvalCase[IO[A]] with IORI[ADEvalMatch, ADEvalCase, A] {
       override def wgi[G: Gradient]: LangInfoG[IO[ai.WithGrad[G]]] = base.IOInfo(ai.wgi[G])
 
       override type WithGrad[G] = IO[ai.WithGrad[G]]
 
-      override val tm = iofem[A]
-
-      override def tmr: tm.ret = ai
+      override def tmr = ai
     }
 
-  override def IOElmInfo[A]: ADEvalCase[IO[A]] => ADEvalCase[A] = _.get(iofem[A])
+  override def IOElmInfo[A]: ADEvalCase[IO[A]] => ADEvalCase[A] = _.get(IOM[ADEvalMatch, ADEvalCase, A])
 }
 
 object ADEvalIO extends ADEvalIO

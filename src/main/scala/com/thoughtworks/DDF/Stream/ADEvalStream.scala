@@ -5,6 +5,7 @@ import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 import com.thoughtworks.DDF.Language.LangTermLang
 import com.thoughtworks.DDF.Top.ADEvalTop
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
 trait ADEvalStream extends
   Stream[ADEvalCase, ADEval] with
@@ -33,23 +34,17 @@ trait ADEvalStream extends
       override def term[G: Gradient] = base.streamMatch(ai.wgi[G], bi.wgi[G])
     }
 
-  private def sfem[A] = new ADEvalMatch[scala.Stream[A]] {
-    override type ret = ADEvalCase[A]
-  }
-
   override implicit def streamInfo[A](implicit ai: ADEvalCase[A]):
   ADEvalCase.Aux[scala.Stream[A], Lambda[G => scala.Stream[ai.WithGrad[G]]]] =
-    new ADEvalCase[scala.Stream[A]] {
+    new ADEvalCase[scala.Stream[A]] with StreamRI[ADEvalMatch, ADEvalCase, A] {
       override type WithGrad[G] = scala.Stream[ai.WithGrad[G]]
-
-      override val tm = sfem[A]
 
       override def tmr = ai
 
       override def wgi[G: Gradient] = base.streamInfo(ai.wgi[G])
     }
 
-  override def streamElmInfo[A]: ADEvalCase[scala.Stream[A]] => ADEvalCase[A] = _.get(sfem[A])
+  override def streamElmInfo[A]: ADEvalCase[scala.Stream[A]] => ADEvalCase[A] = _.get(StM[ADEvalMatch, ADEvalCase, A])
 }
 
 object ADEvalStream extends ADEvalStream
