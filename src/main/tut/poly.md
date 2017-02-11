@@ -75,4 +75,4 @@ for (i <- Range(0, 50)) {
 As you can see, weight approach 4, because 4 * 4 + 2 * 4 + 3 = 27.
 
 Note: Weights are printed with nonconstant iteration between them,
-so initally(where they change quicker) more weight will be shown.
+so initially(where they change quicker) more weight will be shown.
