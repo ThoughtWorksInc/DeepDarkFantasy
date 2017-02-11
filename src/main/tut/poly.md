@@ -41,18 +41,18 @@ val train = l.B__(loss)(exp)
 ```
 We find the AST representing the derivative of the whole pass:
 
-ADEvalInterLang is a intepreter of the AST: it just return a new AST representing the derivative.
+ADEvalInterLang is a interpreter of the AST: it just return a new AST representing the derivative.
 ```tut
 val train_it: LangTerm[((Double, Double)) => (Double, Double)] =
   train(ADEvalInterLang).get[Double](
     ADEvalInterLang.aInfo(ADEvalInterLang.doubleInfo, ADEvalInterLang.doubleInfo))(GDouble)
 ```
-We set inital weight(x) to 0. 
-This shouldnt be done to neural network in general, but it has non zero derivative so we will do so.
+We set initial weight(x) to 0. 
+This shouldn't be done to neural network in general, but it has non zero derivative so we will do so.
 ```tut
 var weight: Double = 0
 ```
-We can print the derivative AST. It is very long and unreadable, but dont worry about that. 
+We can print the derivative AST. It is very long and unreadable, but don't worry about that. 
 We will run it to give you confidence.
 
 ShowLang is the interpreter that print stuff.
@@ -61,7 +61,7 @@ train_it[NoInfo, Lambda[X => Show]](ShowLang)
 ```
 Here's the standard gradient descend.
 
-EvalMInterLang is the intepreter that evaluate the AST in MetaLanguage(Scala).
+EvalMInterLang is the interpreter that evaluate the AST in MetaLanguage(Scala).
 
 We can also evaluate it in ObjectLanguage(DDF) but we dont need that.
 ```tut
@@ -75,4 +75,4 @@ for (i <- Range(0, 50)) {
 As you can see, weight approach 4, because 4 * 4 + 2 * 4 + 3 = 27.
 
 Note: Weights are printed with nonconstant iteration between them,
-so initally(where they change quicker) more weight will be shown.
+so initially(where they change quicker) more weight will be shown.
