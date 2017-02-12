@@ -13,12 +13,12 @@ import com.thoughtworks.DDF.{NoInfo, Show}
 Now we make a shorthand to declare AST:
 ```scala
 scala> val l = InterLangTermLang
-l: com.thoughtworks.DDF.Language.InterLangTermLang.type = com.thoughtworks.DDF.Language.InterLangTermLang$@155fc2c
+l: com.thoughtworks.DDF.Language.InterLangTermLang.type = com.thoughtworks.DDF.Language.InterLangTermLang$@182a75a
 ```
 We then introduce a variable. Let's called it x.
 ```scala
 scala> val nl = NextLang(l, l.doubleInfo)
-nl: com.thoughtworks.DDF.Language.Lang[com.thoughtworks.DDF.Language.InterLangInfoG,[X]scala.util.Either[com.thoughtworks.DDF.Language.InterLangTerm[X],com.thoughtworks.DDF.Language.InterLangTerm[Double => X]]] with com.thoughtworks.DDF.Language.NextBase[com.thoughtworks.DDF.Language.InterLangInfoG,com.thoughtworks.DDF.Language.InterLangTerm,Double] = com.thoughtworks.DDF.Language.NextLang$$anon$1@be2051
+nl: com.thoughtworks.DDF.Language.Lang[com.thoughtworks.DDF.Language.InterLangInfoG,[X]scala.util.Either[com.thoughtworks.DDF.Language.InterLangTerm[X],com.thoughtworks.DDF.Language.InterLangTerm[Double => X]]] with com.thoughtworks.DDF.Language.NextBase[com.thoughtworks.DDF.Language.InterLangInfoG,com.thoughtworks.DDF.Language.InterLangTerm,Double] = com.thoughtworks.DDF.Language.NextLang$$anon$1@1f43642
 ```
 We build the AST representing "x * x + 2 * x + 3".
 
@@ -30,7 +30,7 @@ Now the AST does not contain a free variable "x", and become a AST that represen
 returning a double
 ```scala
 scala> val exp = nl.collapse(nl.plusD__(nl.multD__(nl.in)(nl.in))(nl.plusD__(nl.multD__(nl.litD(2))(nl.in))(nl.litD(3))))
-exp: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@1460b53
+exp: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@174d71c
 ```
 We then build the loss function, "(x - 27) * (x - 27)", a L2 Loss.
 
@@ -41,30 +41,30 @@ W (W = f => x => f(x)(x)) is of type (A => A => B) => (A => B).
 W(mult) take a double x, and return x * x. It is just square. 
 ```scala
 scala> val loss = nl.collapse(nl.Let__(nl.minusD__(nl.litD(27))(nl.in))(nl.W_(nl.multD)))
-loss: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@199d5c8
+loss: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@b55177
 ```
 Now we use B: (B => C) => (A => B) => (A => C) to compose loss after exp, 
 so for a x, we can measure how close it is to 27.
 ```scala
 scala> val train = l.B__(loss)(exp)
-train: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@769e4d
+train: com.thoughtworks.DDF.Language.InterLangTerm[Double => Double] = com.thoughtworks.DDF.Language.InterLangTermInterLang$$anon$38@1a25b02
 ```
 We find the AST representing the derivative of the whole pass:
 
-ADEvalInterLang is a intepreter of the AST: it just return a new AST representing the derivative.
+ADEvalInterLang is a interpreter of the AST: it just return a new AST representing the derivative.
 ```scala
 scala> val train_it: LangTerm[((Double, Double)) => (Double, Double)] =
      |   train(ADEvalInterLang).get[Double](
      |     ADEvalInterLang.aInfo(ADEvalInterLang.doubleInfo, ADEvalInterLang.doubleInfo))(GDouble)
-train_it: com.thoughtworks.DDF.Language.LangTerm[((Double, Double)) => (Double, Double)] = com.thoughtworks.DDF.Language.LangTermLang$$anon$50@b67a97
+train_it: com.thoughtworks.DDF.Language.LangTerm[((Double, Double)) => (Double, Double)] = com.thoughtworks.DDF.Language.LangTermLang$$anon$39@136bf21
 ```
-We set inital weight(x) to 0. 
-This shouldnt be done to neural network in general, but it has non zero derivative so we will do so.
+We set initial weight(x) to 0. 
+This shouldn't be done to neural network in general, but it has non zero derivative so we will do so.
 ```scala
 scala> var weight: Double = 0
 weight: Double = 0.0
 ```
-We can print the derivative AST. It is very long and unreadable, but dont worry about that. 
+We can print the derivative AST. It is very long and unreadable, but don't worry about that. 
 We will run it to give you confidence.
 
 ShowLang is the interpreter that print stuff.
@@ -74,7 +74,7 @@ res0: com.thoughtworks.DDF.Show = (B (C (B Let (B (C (B (S (B S (B (B mkPair) (C
 ```
 Here's the standard gradient descend.
 
-EvalMInterLang is the intepreter that evaluate the AST in MetaLanguage(Scala).
+EvalMInterLang is the interpreter that evaluate the AST in MetaLanguage(Scala).
 
 We can also evaluate it in ObjectLanguage(DDF) but we dont need that.
 ```scala
@@ -138,4 +138,4 @@ scala> for (i <- Range(0, 50)) {
 As you can see, weight approach 4, because 4 * 4 + 2 * 4 + 3 = 27.
 
 Note: Weights are printed with nonconstant iteration between them,
-so initally(where they change quicker) more weight will be shown.
+so initially(where they change quicker) more weight will be shown.
