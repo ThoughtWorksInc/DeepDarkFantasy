@@ -9,6 +9,7 @@ import com.thoughtworks.DDF.NoInfo
 import com.thoughtworks.DDF.Option.EvalMOption
 import com.thoughtworks.DDF.Stream.EvalMStream
 import com.thoughtworks.DDF.Sum.EvalMSum
+import com.thoughtworks.DDF.String.EvalMString
 
 trait EvalMInterLang extends
   InterLang[NoInfo, Lambda[X => X]] with
@@ -20,8 +21,7 @@ trait EvalMInterLang extends
   EvalMIO with
   EvalMSum with
   EvalMStream with
-  EvalMBotMin {
-  override def litString: (String) => String = identity[String]
-}
+  EvalMBotMin with
+  EvalMString
 
 object EvalMInterLang extends EvalMInterLang

@@ -206,7 +206,9 @@ trait InterLang2Lang[Info[_], Repr[_]] extends Lang[Info, Repr] {
 
   override def stringInfo: Info[String] = i.stringInfo
 
-  override def litString: (String) => Repr[String] = i.litString
+  override def litString: String => Repr[String] = i.litString
+
+  override def stringApp: Repr[String => String => String] = i.stringApp
 }
 
 object InterLang2Lang {

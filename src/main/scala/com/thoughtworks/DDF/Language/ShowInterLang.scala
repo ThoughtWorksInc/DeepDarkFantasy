@@ -30,6 +30,8 @@ trait ShowInterLang extends
   ShowStream with
   ShowIO {
   override def litString: String => Show = str => Show("str: " + str)
+
+  override def stringApp = Show("stringApp")
 }
 
 object ShowInterLang extends ShowInterLang

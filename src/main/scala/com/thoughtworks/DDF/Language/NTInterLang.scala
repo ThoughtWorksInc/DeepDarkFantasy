@@ -150,6 +150,8 @@ trait NTInterLang[Info[_], Repr[_], F[_]] extends InterLang[Info, F] {
   override def litString: (String) => F[String] = str => NTF(base.litString(str))
 
   override def stringInfo: Info[String] = base.stringInfo
+
+  override def stringApp: F[String => String => String] = NTF(base.stringApp)
 }
 
 object NTInterLang {

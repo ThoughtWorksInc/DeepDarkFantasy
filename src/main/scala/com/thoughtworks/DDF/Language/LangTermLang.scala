@@ -403,6 +403,10 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
   override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = _.get(AM[LangInfoGMatch, LangInfoG, A, B])._2
 
   override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = _.info
+
+  override def stringApp = new RawLangTerm[String => String => String] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.stringApp
+  }.convert
 }
 
 object LangTermLang extends LangTermLang

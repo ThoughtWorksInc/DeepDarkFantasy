@@ -205,6 +205,8 @@ trait EvalOInterLang extends
       override type ret = Unit
     }
   }
+
+  override def stringApp: EvalO[String => String => String] = ???
 }
 
 object EvalOInterLang extends EvalOInterLang

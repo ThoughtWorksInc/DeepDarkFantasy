@@ -11,7 +11,7 @@ import com.thoughtworks.DDF.Option.SimpleOption
 import com.thoughtworks.DDF.Stream.SimpleStream
 import com.thoughtworks.DDF.Sum.SimpleSum
 import com.thoughtworks.DDF.Top.SimpleTop
-import com.thoughtworks.DDF.String.StringInfo
+import com.thoughtworks.DDF.String.SimpleString
 
 trait SimpleLang[Repr[_]] extends
   LangInfo[NoInfo, Repr] with
@@ -25,9 +25,7 @@ trait SimpleLang[Repr[_]] extends
   SimpleBot[Repr] with
   SimpleIO[Repr] with
   SimpleStream[Repr] with
-  StringInfo[NoInfo, Repr] {
-  override def stringInfo: NoInfo[scala.Predef.String] = ???
-}
+  SimpleString[Repr]
 
 object SimpleLang {
   implicit def apply[Repr[_]] = new SimpleLang[Repr] {}

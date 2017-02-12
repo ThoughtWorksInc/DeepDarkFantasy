@@ -248,6 +248,10 @@ trait InterLangTermInterLang extends
   override def stringInfo: InterLangInfoG[String] = new InterLangInfoG[String] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[String] = lang.stringInfo
   }
+
+  override def stringApp = new InterLangTerm[String => String => String] {
+    override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.stringApp
+  }
 }
 
 object InterLangTermInterLang extends InterLangTermInterLang

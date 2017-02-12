@@ -26,8 +26,9 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   IsoStream[OInfo, NInfo, ORepr, NRepr] {
   override def stringInfo: NInfo[String] = iconv[String](l.stringInfo)
 
-  override def litString: (String) => NRepr[String] = x => rconv[String](l.litString(x))
+  override def litString: String => NRepr[String] = x => rconv[String](l.litString(x))
 
+  override def stringApp = rconv(l.stringApp)
 }
 
 object IsoLang {
