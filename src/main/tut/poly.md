@@ -3,6 +3,7 @@ Let's first import some stuff:
 ```tut
 import com.thoughtworks.DDF.Gradient.GDouble
 import com.thoughtworks.DDF.Language._
+import com.thoughtworks.DDF.Language.Preclude._
 import com.thoughtworks.DDF.{NoInfo, Show}
 ```
 Now we make a shorthand to declare AST:
@@ -25,14 +26,8 @@ returning a double
 val exp = nl.collapse(nl.plusD__(nl.multD__(nl.in)(nl.in))(nl.plusD__(nl.multD__(nl.litD(2))(nl.in))(nl.litD(3))))
 ```
 We then build the loss function, "(x - 27) * (x - 27)", a L2 Loss.
-
-Let is of type A => (A => B) => B, with A, B specialize to double
-
-W (W = f => x => f(x)(x)) is of type (A => A => B) => (A => B). 
-
-W(mult) take a double x, and return x * x. It is just square. 
 ```tut
-val loss = nl.collapse(nl.Let__(nl.minusD__(nl.litD(27))(nl.in))(nl.W_(nl.multD)))
+val loss = L2_(l.litD(27))(l)
 ```
 Now we use B: (B => C) => (A => B) => (A => C) to compose loss after exp, 
 so for a x, we can measure how close it is to 27.

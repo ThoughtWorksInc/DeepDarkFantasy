@@ -91,4 +91,34 @@ object Preclude {
     val nLang = NextLang(lang, lang.doubleInfo)
     nLang.collapse(relu_[Info, nLang.repr](nLang.in)(nLang))
   }
+
+  def abs[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double] = {
+    import lang._
+    W_(S__[Double, Double, Double => Double](B__(ite[Double])(C__(ltD)(litD(0))))(negD))
+  }
+
+  def abs_[Info[_], Repr[_]](r: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] =
+    lang.app(abs(lang))(r)
+
+  def L1[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double => Double] = {
+    import lang._
+    B__(B_[Double, Double, Double](abs))(minusD)
+  }
+
+  def L1_[Info[_], Repr[_]](x: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double => Double] =
+    lang.app(L1(lang))(x)
+
+  def L1__[Info[_], Repr[_]](x: Repr[Double])(y: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] =
+    lang.app(L1_(x)(lang))(y)
+
+  def L2[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Double => Double => Double] = {
+    import lang._
+    B__(B_[Double, Double, Double](square))(minusD)
+  }
+
+  def L2_[Info[_], Repr[_]](x: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double => Double] =
+    lang.app(L2(lang))(x)
+
+  def L2__[Info[_], Repr[_]](x: Repr[Double])(y: Repr[Double])(implicit lang: Lang[Info, Repr]): Repr[Double] =
+    lang.app(L2_(x)(lang))(y)
 }
