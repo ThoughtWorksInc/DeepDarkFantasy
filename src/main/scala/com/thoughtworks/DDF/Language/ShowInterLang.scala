@@ -13,6 +13,9 @@ import com.thoughtworks.DDF.Product.ShowProd
 import com.thoughtworks.DDF.Stream.ShowStream
 import com.thoughtworks.DDF.Sum.ShowSum
 import com.thoughtworks.DDF.Top.ShowTop
+import com.thoughtworks.DDF.String.{ShowString, SimpleString, String}
+
+
 
 trait ShowInterLang extends
   InterLang[NoInfo, Lambda[X => Show]] with
@@ -28,10 +31,7 @@ trait ShowInterLang extends
   ShowBotMin with
   ShowArr with
   ShowStream with
-  ShowIO {
-  override def litString: String => Show = str => Show("str: " + str)
-
-  override def stringApp = Show("stringApp")
-}
+  ShowIO with
+  ShowString
 
 object ShowInterLang extends ShowInterLang

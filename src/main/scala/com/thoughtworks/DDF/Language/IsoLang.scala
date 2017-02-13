@@ -10,6 +10,7 @@ import com.thoughtworks.DDF.Option.IsoOption
 import com.thoughtworks.DDF.Reader.IsoReader
 import com.thoughtworks.DDF.State.IsoState
 import com.thoughtworks.DDF.Stream.IsoStream
+import com.thoughtworks.DDF.String.IsoString
 import scalaz.Isomorphism._
 
 trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
@@ -23,13 +24,8 @@ trait IsoLang[OInfo[_], NInfo[_], ORepr[_], NRepr[_]] extends
   IsoReader[OInfo, NInfo, ORepr, NRepr] with
   IsoState[OInfo, NInfo, ORepr, NRepr] with
   IsoIO[OInfo, NInfo, ORepr, NRepr] with
-  IsoStream[OInfo, NInfo, ORepr, NRepr] {
-  override def stringInfo: NInfo[String] = iconv[String](l.stringInfo)
-
-  override def litString: String => NRepr[String] = x => rconv[String](l.litString(x))
-
-  override def stringApp = rconv(l.stringApp)
-}
+  IsoStream[OInfo, NInfo, ORepr, NRepr] with
+  IsoString[OInfo, NInfo, ORepr, NRepr]
 
 object IsoLang {
   def apply[OInfo[_], NInfo[_], ORepr[_], NRepr[_]](implicit
