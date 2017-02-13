@@ -13,9 +13,7 @@ import com.thoughtworks.DDF.Product.ShowProd
 import com.thoughtworks.DDF.Stream.ShowStream
 import com.thoughtworks.DDF.Sum.ShowSum
 import com.thoughtworks.DDF.Top.ShowTop
-import com.thoughtworks.DDF.String.{ShowString, SimpleString, String}
-
-
+import com.thoughtworks.DDF.String.ShowString
 
 trait ShowInterLang extends
   InterLang[NoInfo, Lambda[X => Show]] with

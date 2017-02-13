@@ -1,10 +1,9 @@
 package com.thoughtworks.DDF.Language
+
+import com.thoughtworks.DDF.Bot.LangTermBot
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermLang extends Lang[LangInfoG, LangTerm] {
-  override implicit def botInfo = new LangInfoG[Nothing] with BotRI[LangInfoGMatch] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Nothing] = lang.botInfo
-  }
+trait LangTermLang extends Lang[LangInfoG, LangTerm] with LangTermBot {
 
   override def ite[A](implicit ai: LangInfoG[A]) = new RawLangTerm[Boolean => A => A => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.ite[A](ai(lang))
@@ -49,12 +48,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.mkProd(ai(lang), bi(lang))
   }.convert
 
-  override def app[A, B]: LangTerm[A => B] => LangTerm[A] => LangTerm[B] = f => x => new LangTerm[B] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[B] = lang.app(f(lang))(x(lang))
-
-    override def info: LangInfoG[B] = rngInfo(f.info)
-  }
-
   override implicit def listInfo[A](implicit ai: LangInfoG[A]) =
     new LangInfoG[List[A]] with ListRI[LangInfoGMatch, LangInfoG, A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[List[A]] = lang.listInfo(ai(lang))
@@ -63,12 +56,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
   }
 
   override def listElmInfo[A]: LangInfoG[List[A]] => LangInfoG[A] = _.get(LM[LangInfoGMatch, LangInfoG, A])
-
-  override def impossible = new LangTerm[Unit => Nothing] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.impossible
-
-    override def info: LangInfoG[Unit => Nothing] = aInfo[Unit, Nothing]
-  }
 
   override def contBind[R, A, B](implicit ri: LangInfoG[R], ai: LangInfoG[A], bi: LangInfoG[B]) =
     new RawLangTerm[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]] {
@@ -98,10 +85,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[String] = lang.litString(str)
   }.convert
 
-  override def imfalso[A](implicit ai: LangInfoG[A]) = new RawLangTerm[Unit => A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.imfalso[A](ai(lang))
-  }.convert
-
   override def sumMatch[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
     new RawLangTerm[Either[A, B] => (A => C) => (B => C) => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
@@ -127,12 +110,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =
         lang.stateBind(si(lang), ai(lang), bi(lang))
     }.convert
-
-  override def exfalso[A](implicit ai: LangInfoG[A]) = new LangTerm[Nothing => A] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.exfalso[A](ai(lang))
-
-    override def info: LangInfoG[Nothing => A] = aInfo[Nothing, A]
-  }
 
   override def zro[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[((A, B)) => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.zro(ai(lang), bi(lang))
@@ -185,10 +162,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
   }
 
   override def optionElmInfo[A]: LangInfoG[Option[A]] => LangInfoG[A] = _.get(OM[LangInfoGMatch, LangInfoG, A])
-
-  override implicit def topInfo: LangInfoG[Unit] = new LangInfoG[Unit] with TopRI[LangInfoGMatch] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Unit] = lang.topInfo
-  }
 
   override def sumAssocRL[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
     new RawLangTerm[Either[A, Either[B, C]] => Either[Either[A, B], C]] {
@@ -327,10 +300,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.Y[A, B](ai(lang), bi(lang))
   }.convert
 
-  override def mkTop: LangTerm[Unit] = new RawLangTerm[Unit] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.mkTop
-  }.convert
-
   override def streamNil[A](implicit ai: LangInfoG[A]): LangTerm[Stream[A]] = new RawLangTerm[Stream[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[Stream[A]] = lang.streamNil(ai(lang))
   }.convert
@@ -390,19 +359,6 @@ trait LangTermLang extends Lang[LangInfoG, LangTerm] {
     new RawLangTerm[(A => B => C) => (A => B) => A => C] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.S(ai(lang), bi(lang), ci(lang))
     }.convert
-
-  override implicit def aInfo[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
-    new LangInfoG[A => B] with ArrowRI[LangInfoGMatch, LangInfoG, A, B] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.aInfo(ai(lang), bi(lang))
-
-    override def tmr: tm.ret = (ai, bi)
-  }
-
-  override def domInfo[A, B]: LangInfoG[A => B] => LangInfoG[A] = _.get(AM[LangInfoGMatch, LangInfoG, A, B])._1
-
-  override def rngInfo[A, B]: LangInfoG[A => B] => LangInfoG[B] = _.get(AM[LangInfoGMatch, LangInfoG, A, B])._2
-
-  override def reprInfo[A]: LangTerm[A] => LangInfoG[A] = _.info
 
   override def stringApp = new RawLangTerm[String => String => String] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.stringApp
