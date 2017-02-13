@@ -44,7 +44,7 @@ We have an [annotated example](doc/poly.md) on how to use our code. More documen
 
 Another good starting point is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala).
 
-If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf)
+If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf).
 # FA Q
 
 Q: How is the speed?
@@ -68,4 +68,4 @@ Q: What are you currently working on?
 A: I am trying to formalize a core subset of the language, to demonstrate what does derivative in our context mean (and why it is correct).
 # Thank You Sir
 
-This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry)
+This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry).
