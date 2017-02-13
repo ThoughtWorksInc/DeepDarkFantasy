@@ -2,6 +2,8 @@
 
 ## Ordinary Language Feature
 
+0. [String](src/main/scala/com/thoughtworks/DDF/String/String.scala)
+
 1. [Double](src/main/scala/com/thoughtworks/DDF/Double/Double.scala)
 
 2. [Boolean](src/main/scala/com/thoughtworks/DDF/Bool/Bool.scala)
