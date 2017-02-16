@@ -2,23 +2,20 @@ package com.thoughtworks.DDF.String
 
 import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language._
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermString extends com.thoughtworks.DDF.String.String[LangInfoG, LangTerm] with LangTermArr {
-  override def litString: String => LangTerm[String] = str => new RawLangTerm[String] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[String] = lang.litString(str)
+trait LangTermString extends String[LangInfoG, LangTerm] with LangTermArr {
+  override def litString = str => new RawLangTerm[scala.Predef.String] {
+    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[scala.Predef.String] =
+      lang.litString(str)
   }.convert
 
-  override implicit def stringInfo: LangInfoG[String] = new LangInfoG[String] {
-    override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[String] = lang.stringInfo
-
-    override val tm: LangInfoGMatch.Aux[String, Unit] = new LangInfoGMatch[String] {
-      override type ret = Unit
+  override implicit def stringInfo: LangInfoG[scala.Predef.String] =
+    new LangInfoG[scala.Predef.String] with StringRI[LangInfoGMatch] {
+      override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[scala.Predef.String] = lang.stringInfo
     }
 
-    override def tmr: tm.ret = ()
-  }
-
-  override def stringApp = new RawLangTerm[String => String => String] {
+  override def stringApp = new RawLangTerm[scala.Predef.String => scala.Predef.String => scala.Predef.String] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.stringApp
   }.convert
 }

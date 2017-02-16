@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.IO
 
 import com.thoughtworks.DDF.Double.LangTermDouble
 import com.thoughtworks.DDF.Language._
-import com.thoughtworks.DDF.RecursiveInfoMatch.IORI
+import com.thoughtworks.DDF.RecursiveInfoMatch._
 import com.thoughtworks.DDF.Top.LangTermTop
 
 trait LangTermIO extends IO[LangInfoG, LangTerm] with LangTermDouble with LangTermTop {
