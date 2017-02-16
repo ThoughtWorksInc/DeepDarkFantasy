@@ -65,7 +65,7 @@ A: I like it that way.
 
 Q: What are you currently working on?
 
-A: I am trying to complete the formalization of a core subset of the language, to demonstrate what does derivative in our context mean (and why it is correct).
+A: I am trying to add a neural network demo.
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry).
