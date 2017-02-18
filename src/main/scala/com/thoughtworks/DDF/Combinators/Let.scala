@@ -2,11 +2,10 @@ package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait Let[Info[_], Repr[_]] extends Arr[Info, Repr] {
-  def Let[A, B](implicit ai: Info[A], bi: Info[B]): Repr[A => (A => B) => B]
+trait Let extends Arr {
+  def Let[A <: Type: Kind, B <: Type: Kind]: A ~>: (A ~>: B) ~>: B
 
-  final def Let_[A, B](a: Repr[A])(implicit bi: Info[B]): Repr[(A => B) => B] = app(Let(reprInfo(a), bi))(a)
+  final def Let_[A <: Type: Kind, B <: Type: Kind](a: A) = app(Let[A, B])(a)
 
-  final def Let__[A, B]: Repr[A] => Repr[(A => B)] => Repr[B] = a => f =>
-    app(Let_(a)(rngInfo(reprInfo(f))))(f)
+  final def Let__[A <: Type: Kind, B <: Type: Kind](a: A)(f: A ~>: B) = app(Let_[A, B](a))(f)
 }

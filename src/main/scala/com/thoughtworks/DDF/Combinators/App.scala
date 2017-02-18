@@ -2,11 +2,10 @@ package com.thoughtworks.DDF.Combinators
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait App[Info[_], Repr[_]] extends Arr[Info, Repr] {
-  def App[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => A => B]
+trait App extends Arr {
+  def App[A <: Type: Kind, B <: Type: Kind]: (A ~>: B) ~>: A ~>: B
 
-  final def App_[A, B]: Repr[A => B] => Repr[A => B] = f =>
-    app(App(domInfo(reprInfo(f)), rngInfo(reprInfo(f))))(f)
+  final def App_[A <: Type: Kind, B <: Type: Kind](f: A ~>: B) = app(App[A, B])(f)
 
-  final def App__[A, B]: Repr[A => B] => Repr[A] => Repr[B] = f => app(App_(f))
+  final def App__[A <: Type: Kind, B <: Type: Kind](f: A ~>: B)(a: A) = app(App_(f))(a)
 }

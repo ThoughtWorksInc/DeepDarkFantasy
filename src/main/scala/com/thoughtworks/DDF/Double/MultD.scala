@@ -2,10 +2,10 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait MultD[Info[_], Repr[_]] extends LitD[Info, Repr] with Arr[Info, Repr] {
-  def multD: Repr[scala.Double => scala.Double => scala.Double]
+trait MultD extends DoubleType with Arr {
+  def multD: Double ~>: Double ~>: Double
 
-  final def multD_ : Repr[scala.Double] => Repr[scala.Double => scala.Double] = app(multD)
+  final def multD_ : Double => Double ~>: Double = app(multD)
 
-  final def multD__ : Repr[scala.Double] => Repr[scala.Double] => Repr[scala.Double] = l => app(multD_(l))
+  final def multD__ : Double => Double => Double = l => app(multD_(l))
 }

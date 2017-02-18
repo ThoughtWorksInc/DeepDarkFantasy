@@ -1,5 +1,5 @@
 package com.thoughtworks.DDF.Top
 
-trait Top[Info[_], Repr[_]] extends TopInfo[Info, Repr] {
-  def mkTop: Repr[scala.Unit]
+trait Top extends TopType {
+  def mkTop: Top
 }

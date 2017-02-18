@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.IO
 
-trait PutDouble[Info[_], Repr[_]] extends IOBase[Info, Repr] {
-  def putDouble: Repr[Double => IO[Unit]]
+trait PutDouble extends IOBase {
+  def putDouble: Double ~>: IO[Top]
 
-  final lazy val putDouble_ : Repr[Double] => Repr[IO[Unit]] = app(putDouble)
+  final lazy val putDouble_ = app(putDouble)
 }

@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch.{SumRI, _}
 
-trait LangTermSum extends Sum[LangInfoG, LangTerm] with LangTermArr {
+trait LangTermSum extends Sum with LangTermArr {
   override def sumAssocRL[A, B, C](implicit ai: LangInfoG[A], bi: LangInfoG[B], ci: LangInfoG[C]) =
     new RawLangTerm[Either[A, Either[B, C]] => Either[Either[A, B], C]] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) =

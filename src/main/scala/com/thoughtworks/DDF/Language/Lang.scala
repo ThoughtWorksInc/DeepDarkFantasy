@@ -17,22 +17,22 @@ import com.thoughtworks.DDF.Top.Top
 import com.thoughtworks.DDF.Stream.Stream
 import com.thoughtworks.DDF.String.String
 
-trait Lang[Info[_], Repr[_]] extends
-  LangInfo[Info, Repr] with
-  InterLang[Info, Repr] with
-  Prod[Info, Repr] with
-  Double[Info, Repr] with
-  Option[Info, Repr] with
-  Except[Info, Repr] with
-  Reader[Info, Repr] with
-  State[Info, Repr] with
-  List[Info, Repr] with
-  Bool[Info, Repr] with
-  Comb[Info, Repr] with
-  Cont[Info, Repr] with
-  Sum[Info, Repr] with
-  Top[Info, Repr] with
-  Bot[Info, Repr] with
-  IO[Info, Repr] with
-  Stream[Info, Repr] with
-  String[Info, Repr]
+trait Lang extends
+  LangType with
+  InterLang with
+  Prod with
+  Double with
+  Option with
+  Except with
+  Reader with
+  State with
+  List with
+  Bool with
+  Comb with
+  Cont with
+  Sum with
+  Top with
+  Bot with
+  IO with
+  Stream with
+  String

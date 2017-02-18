@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGSumInfo[R[_]] extends
-  SumInfo[InterLangInfoG, R] with
+  SumType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override implicit def sumInfo[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangInfoG[Either[A, B]] {

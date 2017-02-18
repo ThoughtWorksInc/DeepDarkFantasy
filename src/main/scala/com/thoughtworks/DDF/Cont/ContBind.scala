@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Cont
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait ContBind[Info[_], Repr[_]] extends ContInfo[Info, Repr] with Arr[Info, Repr] {
+trait ContBind extends ContType with Arr {
   def contBind[R, A, B](implicit ri: Info[R], ai: Info[A], bi: Info[B]):
   Repr[Cont[R, A] => (A => Cont[R, B]) => Cont[R, B]]
 

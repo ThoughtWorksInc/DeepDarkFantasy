@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 import com.thoughtworks.DDF.Top.LangTermTop
 
-trait LangTermStream extends com.thoughtworks.DDF.Stream.Stream[LangInfoG, LangTerm] with LangTermTop with LangTermArr {
+trait LangTermStream extends Stream with LangTermTop with LangTermArr {
   override def streamMatch[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) =
     new RawLangTerm[scala.Stream[A] => B => (A => scala.Stream[A] => B) => B] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.streamMatch(ai(lang), bi(lang))

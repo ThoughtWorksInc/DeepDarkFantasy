@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Bool.LangTermBool
 import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch.DoubleRI
 
-trait LangTermDouble extends Double[LangInfoG, LangTerm] with LangTermBool {
+trait LangTermDouble extends Double with LangTermBool {
   override def multD = new RawLangTerm[scala.Double => scala.Double => scala.Double] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.multD
   }.convert

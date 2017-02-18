@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Product
 
-trait Prod[Info[_], Repr[_]] extends
-  Curry[Info, Repr] with
-  UnCurry[Info, Repr] with
-  ><[Info, Repr]
+trait Prod extends
+  Curry with
+  UnCurry with
+  ><

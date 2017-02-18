@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Except
 
-trait ExceptBind[Info[_], Repr[_]] extends ExceptBase[Info, Repr] {
+trait ExceptBind extends ExceptBase {
   def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
   Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]]
 

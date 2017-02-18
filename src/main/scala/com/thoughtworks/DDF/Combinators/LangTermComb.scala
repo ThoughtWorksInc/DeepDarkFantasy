@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Combinators
 import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language.{Lang, LangInfoG, LangTerm, RawLangTerm}
 
-trait LangTermComb extends Comb[LangInfoG, LangTerm] with LangTermArr {
+trait LangTermComb extends Comb with LangTermArr {
   override def K[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => B => A] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.K[A, B](ai(lang), bi(lang))
   }.convert

@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.IO
 
-trait IORet[Info[_], Repr[_]] extends IOBase[Info, Repr] {
-  def IORet[A](implicit ai: Info[A]): Repr[A => IO[A]]
+trait IORet extends IOBase {
+  def IORet[A <: Type: Kind]: A ~>: IO[A]
 
-  final def IORet_[A]: Repr[A] => Repr[IO[A]] = a => app(IORet(reprInfo(a)))(a)
+  final def IORet_[A <: Type: Kind](a: A) = app(IORet[A])(a)
 }

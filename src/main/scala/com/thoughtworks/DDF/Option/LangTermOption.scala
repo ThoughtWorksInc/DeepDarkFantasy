@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermOption extends Option[LangInfoG, LangTerm] with LangTermArr {
+trait LangTermOption extends Option with LangTermArr {
   override def some[A](implicit ai: LangInfoG[A]) = new RawLangTerm[A => scala.Option[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.some[A](ai(lang))
   }.convert

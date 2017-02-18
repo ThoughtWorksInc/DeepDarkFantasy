@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGListInfo[R[_]] extends
-  ListInfo[InterLangInfoG, R] with
+  ListType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override implicit def listInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[scala.List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[scala.List[A]] =

@@ -1,8 +1,8 @@
 package com.thoughtworks.DDF.Cont
 
-import com.thoughtworks.DDF.Arrow.ArrInfo
+import com.thoughtworks.DDF.Arrow.ArrType
 
-trait ContInfo[Info[_], Repr[_]] extends ArrInfo[Info, Repr] {
+trait ContType extends ArrType {
   final type Cont[R, A] = (A => R) => R
 
   final def contInfo[R, A]: Info[R] => Info[A] => Info[Cont[R, A]] = r => a => aInfo(aInfo(a, r), r)

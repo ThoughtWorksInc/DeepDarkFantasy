@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGIOInfo[R[_]] extends
-  IOInfo[InterLangInfoG, R] with
+  IOType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override def IOInfo[A](implicit ai: InterLangInfoG[A]) = new InterLangInfoG[IO[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]) = lang.IOInfo(ai(lang))

@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGBotInfo[R[_]] extends
-  BotInfo[InterLangInfoG, R] {
+  BotType[InterLangInfoG, R] {
   override implicit def botInfo: InterLangInfoG[Nothing] =
     new InterLangInfoG[Nothing] {
       override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Nothing] = lang.botInfo

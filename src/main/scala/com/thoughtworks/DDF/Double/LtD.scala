@@ -1,11 +1,12 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Bool.Bool
+import com.thoughtworks.DDF.Arrow.Arr
+import com.thoughtworks.DDF.Bool.BoolType
 
-trait LtD[Info[_], Repr[_]] extends LitD[Info, Repr] with Bool[Info, Repr] {
-  def ltD: Repr[scala.Double => scala.Double => Boolean]
+trait LtD extends DoubleType with BoolType with Arr {
+  def ltD: Double ~>: Double ~>: Boolean
 
-  final def ltD_ : Repr[scala.Double] => Repr[scala.Double => Boolean] = app(ltD)
+  final def ltD_ : Double => Double ~>: Boolean = app(ltD)
 
-  final def ltD__ : Repr[scala.Double] => Repr[scala.Double] => Repr[Boolean] = l => app(ltD_(l))
+  final def ltD__ : Double => Double => Boolean = l => app(ltD_(l))
 }

@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.Stream
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait StreamMatch[Info[_], Repr[_]] extends StreamInfo[Info, Repr] with Arr[Info, Repr] {
+trait StreamMatch extends StreamType with Arr {
   def streamMatch[A, B](implicit ai: Info[A], bi: Info[B]):
   Repr[scala.Stream[A] => B => (A => scala.Stream[A] => B) => B]
 

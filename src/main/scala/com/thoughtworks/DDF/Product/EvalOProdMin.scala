@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.{EvalO, EvalOMatch}
 
 trait EvalOProdMin extends
   ProdMin[InterLangInfoG, EvalO] with
-  ILIGProdInfo[EvalO] with
+  ILIGProdType[EvalO] with
   EvalOArr {
   def ptm[A, B]: EvalOMatch.Aux[(A, B), (EvalO[A], EvalO[B])] = new EvalOMatch[(A, B)] {
     override type ret = (EvalO[A], EvalO[B])

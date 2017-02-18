@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Product
 
-trait ><[Info[_], Repr[_]] extends ProdMin[Info, Repr] {
+trait >< extends ProdMin {
   def ><[A, B, C, D](implicit ai: Info[A], bi: Info[B], ci: Info[C], di: Info[D]):
   Repr[(A => C) => (B => D) => (((A, B)) => (C, D))]
 

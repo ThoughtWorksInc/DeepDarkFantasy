@@ -2,9 +2,8 @@ package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait Zeroth[Info[_], Repr[_]] extends ProdInfo[Info, Repr] with Arr[Info, Repr] {
-  def zro[A, B](implicit ai: Info[A], bi: Info[B]): Repr[((A, B)) => A]
+trait Zeroth extends ProdType with Arr {
+  def zro[A <: Type: Kind, B <: Type: Kind]: Prod[A, B] ~>: A
 
-  final def zro_[A, B]: Repr[(A, B)] => Repr[A] = x =>
-    app(zro(prodZroInfo(reprInfo(x)), prodFstInfo(reprInfo(x))))(x)
+  final def zro_[A <: Type: Kind, B <: Type: Kind]: Prod[A, B] => A = app(zro[A, B])
 }

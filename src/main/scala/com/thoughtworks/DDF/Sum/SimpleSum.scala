@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Sum
 import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleSum[Repr[_]] extends SumInfo[NoInfo, Repr] with SimpleArr[Repr] {
+trait SimpleSum[Repr[_]] extends SumType[NoInfo, Repr] with SimpleArr[Repr] {
   override implicit def sumInfo[A, B](implicit ai: NoInfo[A], bi: NoInfo[B]) = NoInfo()
 
   override def sumLeftInfo[A, B]  = _ => NoInfo()

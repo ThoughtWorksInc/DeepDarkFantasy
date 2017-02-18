@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermString extends String[LangInfoG, LangTerm] with LangTermArr {
+trait LangTermString extends String with LangTermArr {
   override def litString = str => new RawLangTerm[scala.Predef.String] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Repr[scala.Predef.String] =
       lang.litString(str)

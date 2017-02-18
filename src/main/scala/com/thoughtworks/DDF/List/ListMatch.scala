@@ -2,15 +2,15 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait ListMatch[Info[_], Repr[_]] extends ListInfo[Info, Repr] with Arr[Info, Repr] {
-  def listMatch[A, B](implicit ai: Info[A], bi: Info[B]): Repr[scala.List[A] => B => (A => scala.List[A] => B) => B]
+trait ListMatch extends ListType with Arr {
+  def listMatch[A <: Type: Kind, B <: Type: Kind]: List[A] ~>: B ~>: (A ~>: List[A] ~>: B) ~>: B
 
-  final def listMatch_[A, B](l: Repr[scala.List[A]])(implicit bi: Info[B]): Repr[B => (A => scala.List[A] => B) => B] =
-    app(listMatch[A, B](listElmInfo(reprInfo(l)), bi))(l)
+  final def listMatch_[A <: Type: Kind, B <: Type: Kind](l: List[A]): B ~>: (A ~>: List[A] ~>: B) ~>: B =
+    app(listMatch[A, B])(l)
 
-  final def listMatch__[A, B]: Repr[scala.List[A]] => Repr[B] => Repr[(A => scala.List[A] => B) => B] = l => z =>
-    app(listMatch_[A, B](l)(reprInfo(z)))(z)
+  final def listMatch__[A <: Type: Kind, B <: Type: Kind](l: List[A])(b: B): (A ~>: List[A] ~>: B) ~>: B =
+    app(listMatch_[A, B](l))(b)
 
-  final def listMatch___[A, B]: Repr[scala.List[A]] => Repr[B] => Repr[A => scala.List[A] => B] => Repr[B] = l => z =>
-    app(listMatch__(l)(z))
+  final def listMatch___[A <: Type: Kind, B <: Type: Kind](l: List[A])(b: B)(f: A ~>: List[A] ~>: B): B =
+    app(listMatch__(l)(b))(f)
 }

@@ -13,7 +13,7 @@ import com.thoughtworks.DDF.Stream.Stream
 
 trait MinLang[Info[_], Repr[_]] extends
   ProdMin[Info, Repr] with
-  LangInfo[Info, Repr] with
+  LangType[Info, Repr] with
   ListMin[Info, Repr] with
   DoubleMin[Info, Repr] with
   Option[Info, Repr] with

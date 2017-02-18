@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGDoubleInfo[R[_]] extends
-  DoubleInfo[InterLangInfoG, R] with
+  DoubleType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override implicit def doubleInfo: InterLangInfoG[scala.Double] = new InterLangInfoG[scala.Double] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[scala.Double] = lang.doubleInfo

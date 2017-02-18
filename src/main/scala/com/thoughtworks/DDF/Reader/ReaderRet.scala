@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Reader
 
-trait ReaderRet[Info[_], Repr[_]] extends ReaderBase[Info, Repr] {
+trait ReaderRet extends ReaderBase {
   def readerRet[E, A](implicit ei: Info[E], ai: Info[A]): Repr[A => Reader[E, A]]
 
   final def readerRet_[E, A](a: Repr[A])(implicit ei: Info[E]): Repr[Reader[E, A]] =

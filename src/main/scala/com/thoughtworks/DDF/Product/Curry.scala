@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Product
 
-trait Curry[Info[_], Repr[_]] extends ProdMin[Info, Repr] {
+trait Curry extends ProdMin {
   def curry[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[(((A, B)) => C) => A => B => C]
 
   final def curry_[A, B, C]: Repr[((A, B)) => C] => Repr[A => B => C] = f =>

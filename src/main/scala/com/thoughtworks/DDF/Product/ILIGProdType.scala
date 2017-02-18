@@ -5,8 +5,8 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 
 import scalaz.NaturalTransformation
 
-trait ILIGProdInfo[R[_]] extends
-  ProdInfo[InterLangInfoG, R] with
+trait ILIGProdType[R[_]] extends
+  ProdType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override implicit def prodInfo[A, B](implicit ai: InterLangInfoG[A], bi: InterLangInfoG[B]) =
     new InterLangInfoG[(A, B)] {
@@ -25,9 +25,9 @@ trait ILIGProdInfo[R[_]] extends
     }
 }
 
-object ILIGProdInfo {
-  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => ILIGProdInfo[Repr] =
-    nt => new ILIGProdInfo[Repr] {
+object ILIGProdType {
+  def apply[Repr[_]]: NaturalTransformation[Repr, InterLangInfoG] => ILIGProdType[Repr] =
+    nt => new ILIGProdType[Repr] {
       override def reprInfo[A]: Repr[A] => InterLangInfoG[A] = nt.apply
     }
 }

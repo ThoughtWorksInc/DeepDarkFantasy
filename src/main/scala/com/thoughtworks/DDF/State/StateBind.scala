@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.State
 
-trait StateBind[Info[_], Repr[_]] extends StateBase[Info, Repr] {
+trait StateBind extends StateBase {
   def stateBind[S, A, B](implicit si: Info[S], ai: Info[A], bi: Info[B]):
   Repr[State[S, A] => (A => State[S, B]) => State[S, B]]
 

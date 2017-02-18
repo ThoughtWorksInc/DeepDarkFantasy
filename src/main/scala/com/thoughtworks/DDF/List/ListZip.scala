@@ -2,12 +2,10 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Product.ProdMin
 
-trait ListZip[Info[_], Repr[_]] extends ProdMin[Info, Repr] with ListMin[Info, Repr] {
-  def listZip[A, B](implicit ai: Info[A], bi: Info[B]): Repr[scala.List[A] => scala.List[B] => scala.List[(A, B)]]
+trait ListZip extends ProdMin with ListMin {
+  def listZip[A <: Type: Kind, B <: Type: Kind]: List[A] ~>: List[B] ~>: List[Prod[A, B]]
 
-  final def listZip_[A, B](la: Repr[scala.List[A]])(implicit bi: Info[B]): Repr[scala.List[B] => scala.List[(A, B)]] =
-    app(listZip(listElmInfo(reprInfo(la)), bi))(la)
+  final def listZip_[A <: Type: Kind, B <: Type: Kind](la: List[A]) = app(listZip[A, B])(la)
 
-  final def listZip__[A, B]: Repr[scala.List[A]] => Repr[scala.List[B]] => Repr[scala.List[(A, B)]] = la => lb =>
-    app(listZip_(la)(listElmInfo(reprInfo(lb))))(lb)
+  final def listZip__[A <: Type: Kind, B <: Type: Kind](la: List[A])(lb: List[B]) = app(listZip_[A, B](la))(lb)
 }

@@ -14,7 +14,7 @@ import com.thoughtworks.DDF.Stream.LangTermStream
 import com.thoughtworks.DDF.String.LangTermString
 
 trait LangTermLang extends
-  Lang[LangInfoG, LangTerm] with
+  Lang with
   LangTermBot with
   LangTermComb with
   LangTermDouble with

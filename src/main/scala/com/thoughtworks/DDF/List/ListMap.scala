@@ -1,10 +1,9 @@
 package com.thoughtworks.DDF.List
 
-trait ListMap[Info[_], Repr[_]] extends ListMin[Info, Repr] {
-  def listMap[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B) => scala.List[A] => scala.List[B]]
+trait ListMap extends ListMin {
+  def listMap[A <: Type: Kind, B <: Type: Kind]: (A ~>: B) ~>: List[A] ~>: List[B]
 
-  final def listMap_[A, B]: Repr[A => B] => Repr[scala.List[A] => scala.List[B]] = f =>
-    app(listMap(domInfo(reprInfo(f)), rngInfo(reprInfo(f))))(f)
+  final def listMap_[A <: Type: Kind, B <: Type: Kind](f: A ~>: B): List[A] ~>: List[B] = app(listMap[A, B])(f)
 
-  final def listMap__[A, B]: Repr[A => B] => Repr[scala.List[A]] => Repr[scala.List[B]] = f => app(listMap_(f))
+  final def listMap__[A <: Type: Kind, B <: Type: Kind](f: A ~>: B)(l: List[A]): List[B] = app(listMap_(f))(l)
 }

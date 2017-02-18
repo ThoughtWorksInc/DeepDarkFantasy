@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Arrow.LangTermArr
 import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermProd extends Prod[LangInfoG, LangTerm] with LangTermArr {
+trait LangTermProd extends Prod with LangTermArr {
   override def mkProd[A, B](implicit ai: LangInfoG[A], bi: LangInfoG[B]) = new RawLangTerm[A => B => (A, B)] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.mkProd(ai(lang), bi(lang))
   }.convert

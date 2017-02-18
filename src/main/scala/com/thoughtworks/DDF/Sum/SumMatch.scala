@@ -2,15 +2,14 @@ package com.thoughtworks.DDF.Sum
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait SumMatch[Info[_], Repr[_]] extends Arr[Info, Repr] with SumInfo[Info, Repr] {
-  def sumMatch[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]): Repr[Either[A, B] => (A => C) => (B => C) => C]
+trait SumMatch extends Arr with SumType {
+  def sumMatch[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind]: Sum[A, B] ~>: (A ~>: C) ~>: (B ~>: C) ~>: C
 
-  final def sumMatch_[A, B, C](e: Repr[Either[A, B]])(implicit ci: Info[C]): Repr[(A => C) => (B => C) => C] =
-    app(sumMatch(sumLeftInfo(reprInfo(e)), sumRightInfo(reprInfo(e)), ci))(e)
+  final def sumMatch_[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind](e: Sum[A, B]) = app(sumMatch[A, B, C])(e)
 
-  final def sumMatch__[A, B, C]: Repr[Either[A, B]] => Repr[A => C] => Repr[(B => C) => C] = e => lc =>
-    app(sumMatch_(e)(rngInfo(reprInfo(lc))))(lc)
+  final def sumMatch__[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind](e: Sum[A, B])(ac: A ~>: C) =
+    app(sumMatch_[A, B, C](e))(ac)
 
-  final def sumMatch___[A, B, C]: Repr[Either[A, B]] => Repr[A => C] => Repr[B => C] => Repr[C] = e => lc =>
-    app(sumMatch__(e)(lc))
+  final def sumMatch___[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind](e: Sum[A, B])(ac: A ~>: C)(bc: B ~>: C) =
+    app(sumMatch__(e)(ac))(bc)
 }

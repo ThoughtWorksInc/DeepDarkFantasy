@@ -1,13 +1,11 @@
 package com.thoughtworks.DDF.List
 
-trait FoldLeft[Info[_], Repr[_]] extends ListMin[Info, Repr] {
-  def foldLeft[A, B](implicit ai: Info[A], bi: Info[B]): Repr[(A => B => A) => A => scala.List[B] => A]
+trait FoldLeft extends ListMin {
+  def foldLeft[A <: Type: Kind, B <: Type: Kind]: (A ~>: B ~>: A) ~>: A ~>: List[B] ~>: A
 
-  final def foldLeft_[A, B]: Repr[A => B => A] => Repr[A => scala.List[B] => A] = f =>
-    app(foldLeft(domInfo(reprInfo(f)), domInfo(rngInfo(reprInfo(f)))))(f)
+  final def foldLeft_[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: A): A ~>: List[B] ~>: A = app(foldLeft[A, B])(f)
 
-  final def foldLeft__[A, B]: Repr[A => B => A] => Repr[A] => Repr[scala.List[B] => A] = f => app(foldLeft_(f))
+  final def foldLeft__[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: A)(a: A): List[B] ~>: A = app(foldLeft_(f))(a)
 
-  final def foldLeft___[A, B]: Repr[A => B => A] => Repr[A] => Repr[scala.List[B]] => Repr[A] = f => x =>
-    app(foldLeft__(f)(x))
+  final def foldLeft___[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: A)(a: A)(l: List[B]) = app(foldLeft__(f)(a))(l)
 }

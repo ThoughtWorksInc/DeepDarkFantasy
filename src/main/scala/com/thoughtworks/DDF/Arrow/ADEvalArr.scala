@@ -2,11 +2,11 @@ package com.thoughtworks.DDF.Arrow
 
 import com.thoughtworks.DDF.Gradient.Gradient
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
-import com.thoughtworks.DDF.InfoBase.ADEvalInfoBase
+import com.thoughtworks.DDF.LangBase.ADEvalLangBase
 import com.thoughtworks.DDF.Language.{LangInfoG, LangTermLang}
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait ADEvalArr extends Arr[ADEvalCase, ADEval] with ADEvalInfoBase {
+trait ADEvalArr extends Arr with ADEvalLangBase {
   val base = LangTermLang
 
   override def app[A, B]: ADEval[A => B] => ADEval[A] => ADEval[B] = f => x => new ADEval[B] {

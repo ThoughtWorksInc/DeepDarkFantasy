@@ -3,11 +3,11 @@ package com.thoughtworks.DDF.String
 import com.thoughtworks.DDF.Arrow.ADEvalArr
 import com.thoughtworks.DDF.{ADEval, ADEvalCase, ADEvalMatch}
 import com.thoughtworks.DDF.Gradient.Gradient
-import com.thoughtworks.DDF.InfoBase.ADEvalInfoBase
+import com.thoughtworks.DDF.LangBase.ADEvalLangBase
 import com.thoughtworks.DDF.Language.{LangTermLang}
 import com.thoughtworks.DDF.RecursiveInfoMatch.StringRI
 
-trait ADEvalString extends String[ADEvalCase, ADEval] with ADEvalInfoBase with ADEvalArr {
+trait ADEvalString extends String[ADEvalCase, ADEval] with ADEvalLangBase with ADEvalArr {
   override val base = LangTermLang
 
   override def stringInfo: ADEvalCase.Aux[scala.Predef.String, Lambda[X => scala.Predef.String]] =

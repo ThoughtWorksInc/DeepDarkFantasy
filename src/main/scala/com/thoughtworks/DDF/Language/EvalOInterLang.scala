@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.{EvalO, EvalOMatch}
 
 trait EvalOInterLang extends
   InterLang[InterLangInfoG, EvalO] with
-  ILIGLangInfo[EvalO] with
+  ILIGLangType[EvalO] with
   EvalOComb with
   EvalOList {
   override def ltD: EvalO[Double => Double => Boolean] =

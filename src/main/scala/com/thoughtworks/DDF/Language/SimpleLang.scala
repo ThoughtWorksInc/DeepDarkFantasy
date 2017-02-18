@@ -14,7 +14,7 @@ import com.thoughtworks.DDF.Top.SimpleTop
 import com.thoughtworks.DDF.String.SimpleString
 
 trait SimpleLang[Repr[_]] extends
-  LangInfo[NoInfo, Repr] with
+  LangType[NoInfo, Repr] with
   SimpleArr[Repr] with
   SimpleOption[Repr] with
   SimpleDouble[Repr] with

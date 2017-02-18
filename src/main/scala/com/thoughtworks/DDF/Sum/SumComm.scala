@@ -1,8 +1,7 @@
 package com.thoughtworks.DDF.Sum
 
-trait SumComm[Info[_], Repr[_]] extends SumMin[Info, Repr] {
-  def sumComm[A, B](implicit ai: Info[A], bi: Info[B]): Repr[Either[A, B] => Either[B, A]]
+trait SumComm extends SumMin {
+  def sumComm[A <: Type: Kind, B <: Type: Kind]: Sum[A, B] ~>: Sum[B, A]
 
-  final def sumComm_[A, B]: Repr[Either[A, B]] => Repr[Either[B, A]] = e =>
-    app(sumComm(sumLeftInfo(reprInfo(e)), sumRightInfo(reprInfo(e))))(e)
+  final def sumComm_[A <: Type: Kind, B <: Type: Kind](s: Sum[A, B]) = app(sumComm[A, B])(s)
 }

@@ -4,7 +4,7 @@ import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.Product.LangTermProd
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 
-trait LangTermList extends com.thoughtworks.DDF.List.List[LangInfoG, LangTerm] with LangTermProd {
+trait LangTermList extends List with LangTermProd {
   override def reverse[A](implicit ai: LangInfoG[A]) = new RawLangTerm[scala.List[A] => scala.List[A]] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]) = lang.reverse[A](ai(lang))
   }.convert

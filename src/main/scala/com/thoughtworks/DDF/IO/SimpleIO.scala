@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.IO
 import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleIO[Repr[_]] extends IOInfo[NoInfo, Repr] with SimpleArr[Repr] {
+trait SimpleIO[Repr[_]] extends IOType[NoInfo, Repr] with SimpleArr[Repr] {
   override def IOInfo[A](implicit ai: NoInfo[A]): NoInfo[IO[A]] = NoInfo()
 
   override def IOElmInfo[A]: NoInfo[IO[A]] => NoInfo[A] = _ => NoInfo()

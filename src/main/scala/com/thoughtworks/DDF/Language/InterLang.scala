@@ -14,18 +14,18 @@ import com.thoughtworks.DDF.Top.Top
 import com.thoughtworks.DDF.Stream.Stream
 import com.thoughtworks.DDF.String.String
 
-trait InterLang[Info[_], Repr[_]] extends
-  LangInfo[Info, Repr] with
-  ProdMin[Info, Repr] with
-  DoubleMin[Info, Repr] with
-  Option[Info, Repr] with
-  Arr[Info, Repr] with
-  Top[Info, Repr] with
-  List[Info, Repr] with
-  Bool[Info, Repr] with
-  Sum[Info, Repr] with
-  Comb[Info, Repr] with
-  BotMin[Info, Repr] with
-  IO[Info, Repr] with
-  Stream[Info, Repr] with
-  String[Info, Repr]
+trait InterLang extends
+  LangType with
+  ProdMin with
+  DoubleMin with
+  Option with
+  Arr with
+  Top with
+  List with
+  Bool with
+  Sum with
+  Comb with
+  BotMin with
+  IO with
+  Stream with
+  String

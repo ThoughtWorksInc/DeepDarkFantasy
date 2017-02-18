@@ -2,8 +2,8 @@ package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.Arr
 
-trait ExpD[Info[_], Repr[_]] extends LitD[Info, Repr] with Arr[Info, Repr] {
-  def expD: Repr[scala.Double => scala.Double]
+trait ExpD extends DoubleType with Arr {
+  def expD: Double ~>: Double
 
-  final def expD_ : Repr[scala.Double] => Repr[scala.Double] = app(expD)
+  final def expD_ : Double => Double = app(expD)
 }

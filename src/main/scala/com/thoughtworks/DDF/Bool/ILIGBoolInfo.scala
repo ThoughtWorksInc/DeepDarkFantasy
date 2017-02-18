@@ -6,7 +6,7 @@ import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
 import scalaz.NaturalTransformation
 
 trait ILIGBoolInfo[R[_]] extends
-  BoolInfo[InterLangInfoG, R] with
+  BoolType[InterLangInfoG, R] with
   ILIGArrInfo[R] {
   override implicit def boolInfo: InterLangInfoG[Boolean] = new InterLangInfoG[Boolean] {
     override def apply[Info[_], Repr[_]](implicit lang: InterLang[Info, Repr]): Info[Boolean] = lang.boolInfo

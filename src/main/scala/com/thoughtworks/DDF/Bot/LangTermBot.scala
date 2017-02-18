@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 import com.thoughtworks.DDF.Top.LangTermTop
 
-trait LangTermBot extends Bot[LangInfoG, LangTerm] with LangTermTop with LangTermArr {
+trait LangTermBot extends Bot with LangTermTop with LangTermArr {
   override implicit def botInfo = new LangInfoG[Nothing] with BotRI[LangInfoGMatch] {
     override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[Nothing] = lang.botInfo
   }

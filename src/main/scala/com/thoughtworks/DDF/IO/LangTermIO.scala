@@ -5,7 +5,7 @@ import com.thoughtworks.DDF.Language._
 import com.thoughtworks.DDF.RecursiveInfoMatch._
 import com.thoughtworks.DDF.Top.LangTermTop
 
-trait LangTermIO extends IO[LangInfoG, LangTerm] with LangTermDouble with LangTermTop {
+trait LangTermIO extends IO with LangTermDouble with LangTermTop {
   override implicit def IOInfo[A](implicit ai: LangInfoG[A]): LangInfoG[IO[A]] =
     new LangInfoG[IO[A]] with IORI[LangInfoGMatch, LangInfoG, A] {
       override def apply[Info[_], Repr[_]](implicit lang: Lang[Info, Repr]): Info[IO[A]] = lang.IOInfo(ai(lang))

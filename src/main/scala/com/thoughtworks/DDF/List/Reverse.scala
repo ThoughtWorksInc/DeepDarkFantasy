@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.List
 
-trait Reverse[Info[_], Repr[_]] extends ListMin[Info, Repr] {
-  def reverse[A](implicit ai: Info[A]): Repr[scala.List[A] => scala.List[A]]
+trait Reverse extends ListMin {
+  def reverse[A <: Type: Kind]: List[A] ~>: List[A]
 
-  final def reverse_[A]: Repr[scala.List[A]] => Repr[scala.List[A]] = f => app(reverse(listElmInfo(reprInfo(f))))(f)
+  final def reverse_[A <: Type: Kind](l: List[A]): List[A] = app(reverse)(l)
 }
