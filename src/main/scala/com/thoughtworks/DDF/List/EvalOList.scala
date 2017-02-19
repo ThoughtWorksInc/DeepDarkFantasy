@@ -2,7 +2,7 @@ package com.thoughtworks.DDF.List
 
 import com.thoughtworks.DDF.Arrow.EvalOArr
 import com.thoughtworks.DDF.Combinators.EvalOComb
-import com.thoughtworks.DDF.Language.{InterLangInfoG, InterLangTerm}
+import com.thoughtworks.DDF.Language.InterLangTerm
 import com.thoughtworks.DDF.Product.EvalOProdMin
 import com.thoughtworks.DDF.{EvalO, EvalOMatch}
 

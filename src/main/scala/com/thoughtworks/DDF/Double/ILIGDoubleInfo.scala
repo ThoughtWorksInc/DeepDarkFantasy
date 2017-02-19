@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Double
 
 import com.thoughtworks.DDF.Arrow.ILIGArrInfo
-import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
+import com.thoughtworks.DDF.Language.InterLang
 
 import scalaz.NaturalTransformation
 

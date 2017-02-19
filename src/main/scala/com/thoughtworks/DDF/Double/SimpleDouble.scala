@@ -3,7 +3,7 @@ package com.thoughtworks.DDF.Double
 import com.thoughtworks.DDF.Arrow.SimpleArr
 import com.thoughtworks.DDF.NoInfo
 
-trait SimpleDouble[Repr[_]] extends DoubleType[NoInfo, Repr] with SimpleArr[Repr] {
+trait SimpleDouble extends DoubleType with SimpleArr {
   override implicit def doubleInfo = NoInfo()
 }
 

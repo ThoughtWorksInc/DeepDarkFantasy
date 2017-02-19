@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Stream
 
 import com.thoughtworks.DDF.Arrow.ILIGArrInfo
-import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
+import com.thoughtworks.DDF.Language.InterLang
 import com.thoughtworks.DDF.Top.ILIGTopType
 
 import scalaz.NaturalTransformation

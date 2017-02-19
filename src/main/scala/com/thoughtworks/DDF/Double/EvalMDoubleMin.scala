@@ -4,8 +4,8 @@ import com.thoughtworks.DDF.Bool.EvalMBool
 import com.thoughtworks.DDF.NoInfo
 
 trait EvalMDoubleMin extends
-  DoubleMin[NoInfo, Lambda[X => X]] with
-  SimpleDouble[Lambda[X => X]] with
+  DoubleMin with
+  SimpleDouble with
   EvalMBool {
   override def recipD: scala.Double => scala.Double = x => 1 / x
 

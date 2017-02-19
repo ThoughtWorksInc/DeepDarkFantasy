@@ -1,7 +1,7 @@
 package com.thoughtworks.DDF.Product
 
 import com.thoughtworks.DDF.Arrow.EvalOArr
-import com.thoughtworks.DDF.Language.{InterLangInfoG, InterLangTerm}
+import com.thoughtworks.DDF.Language.InterLangTerm
 import com.thoughtworks.DDF.{EvalO, EvalOMatch}
 
 trait EvalOProdMin extends

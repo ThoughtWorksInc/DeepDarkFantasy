@@ -1,6 +1,6 @@
 package com.thoughtworks.DDF.Top
 
-import com.thoughtworks.DDF.Language.{InterLang, InterLangInfoG}
+import com.thoughtworks.DDF.Language.InterLang
 
 import scalaz.NaturalTransformation
 
