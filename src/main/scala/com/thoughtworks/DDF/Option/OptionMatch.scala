@@ -8,9 +8,8 @@ trait OptionMatch extends OptionType with Arr {
   final def optionMatch_[A <: Type: Kind, B <: Type: Kind](oa: Option[A]): B ~>: (A ~>: B) ~>: B =
     app(optionMatch[A, B])(oa)
 
-  final def optionMatch__[A, B]: Repr[scala.Option[A]] => Repr[B] => Repr[(A => B) => B] = oa => b =>
-    app(optionMatch_(oa)(reprInfo(b)))(b)
+  final def optionMatch__[A <: Type: Kind, B <: Type: Kind](oa: Option[A])(b: B) = app(optionMatch_[A, B](oa))(b)
 
-  final def optionMatch___[A, B]: Repr[scala.Option[A]] => Repr[B] => Repr[A => B] => Repr[B] = oa => b =>
-    app(optionMatch__(oa)(b))
+  final def optionMatch___[A <: Type: Kind, B <: Type: Kind](oa: Option[A])(b: B)(f: A ~>: B) =
+    app(optionMatch__(oa)(b))(f)
 }

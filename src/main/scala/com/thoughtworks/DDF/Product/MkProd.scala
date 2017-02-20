@@ -7,5 +7,5 @@ trait MkProd extends ProdType with Arr {
 
   final def mkProd_[A <: Type: Kind, B <: Type: Kind](a: A): B ~>: Prod[A, B] = app(mkProd[A, B])(a)
 
-  final def mkProd__[A, B]: Repr[A] => Repr[B] => Repr[(A, B)] = a => b => app(mkProd_(a)(reprInfo(b)))(b)
+  final def mkProd__[A <: Type: Kind, B <: Type: Kind](a: A)(b: B) = app(mkProd_[A, B](a))(b)
 }

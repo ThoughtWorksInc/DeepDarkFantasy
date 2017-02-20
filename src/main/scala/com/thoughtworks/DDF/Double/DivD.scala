@@ -1,11 +1,11 @@
 package com.thoughtworks.DDF.Double
 
-import com.thoughtworks.DDF.Arrow.Arr
+import com.thoughtworks.DDF.Arrow.{Arr, ArrType}
 
-trait DivD extends LitD with Arr {
-  def divD: Repr[scala.Double => scala.Double => scala.Double]
+trait DivD extends DoubleType with Arr {
+  def divD: Double ~>: Double ~>: Double
 
-  final def divD_ : Repr[scala.Double] => Repr[scala.Double => scala.Double] = app(divD)
+  final def divD_ = app(divD)_
 
-  final def divD__ : Repr[scala.Double] => Repr[scala.Double] => Repr[scala.Double] = l => app(divD_(l))
+  final def divD__(l: Double) = app(divD_(l))_
 }

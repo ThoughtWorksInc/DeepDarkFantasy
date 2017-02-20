@@ -3,15 +3,12 @@ package com.thoughtworks.DDF.Stream
 import com.thoughtworks.DDF.Arrow.Arr
 
 trait StreamMatch extends StreamType with Arr {
-  def streamMatch[A, B](implicit ai: Info[A], bi: Info[B]):
-  Repr[scala.Stream[A] => B => (A => scala.Stream[A] => B) => B]
+  def streamMatch[A <: Type: Kind, B <: Type: Kind]: Stream[A] ~>: B ~>: (A ~>: Stream[A] ~>: B) ~>: B
 
-  def streamMatch_[A, B](sa: Repr[scala.Stream[A]])(implicit bi: Info[B]): Repr[B => (A => scala.Stream[A] => B) => B] =
-    app(streamMatch(streamElmInfo(reprInfo(sa)), bi))(sa)
+  def streamMatch_[A <: Type: Kind, B <: Type: Kind](sa: Stream[A]) = app(streamMatch[A, B])(sa)
 
-  final def streamMatch__[A, B]: Repr[scala.Stream[A]] => Repr[B] => Repr[(A => scala.Stream[A] => B) => B] = sa => b =>
-    app(streamMatch_(sa)(reprInfo(b)))(b)
+  final def streamMatch__[A <: Type: Kind, B <: Type: Kind](sa: Stream[A])(b: B) = app(streamMatch_[A, B](sa))(b)
 
-  final def streamMatch___[A, B]: Repr[scala.Stream[A]] => Repr[B] => Repr[A => scala.Stream[A] => B] => Repr[B] =
-    sa => b => app(streamMatch__(sa)(b))
+  final def streamMatch___[A <: Type: Kind, B <: Type: Kind](sa: Stream[A])(b: B)(f: A ~>: Stream[A] ~>: B) =
+    app(streamMatch__[A, B](sa)(b))(f)
 }

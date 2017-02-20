@@ -5,7 +5,8 @@ trait FoldRight extends ListMin {
 
   final def foldRight_[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: B) = app(foldRight[A, B])(f)
 
-  final def foldRight__[A, B](f: A ~>: B ~>: B)(b: B) = app(foldRight_(f))(b)
+  final def foldRight__[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: B)(b: B) = app(foldRight_[A, B](f))(b)
 
-  final def foldRight___[A, B](f: A ~>: B ~>: B)(b: B)(l: List[A]) = app(foldRight__(f)(b))(l)
+  final def foldRight___[A <: Type: Kind, B <: Type: Kind](f: A ~>: B ~>: B)(b: B)(l: List[A]) =
+    app(foldRight__(f)(b))(l)
 }

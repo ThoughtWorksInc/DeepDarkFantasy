@@ -5,5 +5,5 @@ import com.thoughtworks.DDF.LangBase.LangBase
 trait StreamType extends LangBase {
   type Stream[+A <: Type] <: Type
 
-  implicit def ProdK[A <: Type: Kind]: Kind[Stream[A]]
+  implicit def StreamK[A <: Type: Kind]: Kind[Stream[A]]
 }

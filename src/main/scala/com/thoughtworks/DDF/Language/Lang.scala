@@ -19,7 +19,6 @@ import com.thoughtworks.DDF.String.String
 
 trait Lang extends
   LangType with
-  InterLang with
   Prod with
   Double with
   Option with

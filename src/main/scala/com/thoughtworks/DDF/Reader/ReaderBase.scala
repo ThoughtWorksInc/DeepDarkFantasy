@@ -3,11 +3,5 @@ package com.thoughtworks.DDF.Reader
 import com.thoughtworks.DDF.Arrow.Arr
 
 trait ReaderBase extends Arr {
-  final type Reader[E, T] = E => T
-
-  final def readerInfo[E, T]: Info[E] => Info[T] => Info[Reader[E, T]] = e => t => aInfo(e, t)
-
-  final def readerInfoE[E, T]: Info[Reader[E, T]] => Info[E] = domInfo
-
-  final def readerInfoT[E, T]: Info[Reader[E, T]] => Info[T] = rngInfo
+  final type Reader[-E <: Type, +T <: Type] = E ~>: T
 }

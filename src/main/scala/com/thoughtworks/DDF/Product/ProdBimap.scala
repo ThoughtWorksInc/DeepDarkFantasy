@@ -1,15 +1,15 @@
 package com.thoughtworks.DDF.Product
 
 trait >< extends ProdMin {
-  def ><[A, B, C, D](implicit ai: Info[A], bi: Info[B], ci: Info[C], di: Info[D]):
-  Repr[(A => C) => (B => D) => (((A, B)) => (C, D))]
+  def ><[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind, D <: Type: Kind]:
+  (A ~>: C) ~>: (B ~>: D) ~>: Prod[A, B] ~>: Prod[C, D]
 
-  final def `>_<`[A, B, C, D](ab: Repr[A => C])(implicit bi: Info[B], di: Info[D]):
-  Repr[(B => D) => (((A, B)) => (C, D))] = app(><(domInfo(reprInfo(ab)), bi, rngInfo(reprInfo(ab)), di))(ab)
+  final def `>_<`[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind, D <: Type: Kind](ac: A ~>: C) =
+    app(><[A, B, C, D])(ac)
 
-  def `>__<`[A, B, C, D]: Repr[A => C] => Repr[B => D] => Repr[((A, B)) => (C, D)] = ab => cd =>
-    app(`>_<`(ab)(domInfo(reprInfo(cd)), rngInfo(reprInfo(cd))))(cd)
+  def `>__<`[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind, D <: Type: Kind](ac: A ~>: C)(bd: B ~>: D) =
+    app(`>_<`[A, B, C, D](ac))(bd)
 
-  def `>___<`[A, B, C, D]: Repr[A => C] => Repr[B => D] => Repr[(A, B)] => Repr[(C, D)] = ab => cd =>
-    app(`>__<`(ab)(cd))
+  def `>___<`[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind, D <: Type: Kind]
+  (ac: A ~>: C)(bd: B ~>: D)(p: Prod[A, B]) = app(`>__<`(ac)(bd))(p)
 }

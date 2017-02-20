@@ -3,12 +3,11 @@ package com.thoughtworks.DDF.String
 import com.thoughtworks.DDF.Arrow.Arr
 
 trait String extends StringType with Arr {
-  def litString: scala.Predef.String => Repr[scala.Predef.String]
+  def litString: scala.Predef.String => String
 
-  def stringApp: Repr[scala.Predef.String => scala.Predef.String => scala.Predef.String]
+  def stringApp: String ~>: String ~>: String
 
-  def stringApp_ : Repr[scala.Predef.String] => Repr[scala.Predef.String => scala.Predef.String] = app(stringApp)
+  def stringApp_ : String => String ~>: String = app(stringApp)
 
-  def stringApp__ : Repr[scala.Predef.String] => Repr[scala.Predef.String] => Repr[scala.Predef.String] = l =>
-    app(stringApp_(l))
+  def stringApp__ : String => String => String = l => app(stringApp_(l))
 }

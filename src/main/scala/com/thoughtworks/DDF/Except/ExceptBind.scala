@@ -1,13 +1,14 @@
 package com.thoughtworks.DDF.Except
 
-trait ExceptBind extends ExceptBase {
-  def exceptBind[A, B, C](implicit ai: Info[A], bi: Info[B], ci: Info[C]):
-  Repr[Except[A, B] => (B => Except[A, C]) => Except[A, C]]
+import com.thoughtworks.DDF.Arrow.Arr
 
-  final def exceptBind_[A, B, C](e: Repr[Except[A, B]])(implicit ci: Info[C]):
-  Repr[(B => Except[A, C]) => Except[A, C]] =
-    app(exceptBind(exceptInfoA(reprInfo(e)), exceptInfoB(reprInfo(e)), ci))(e)
+trait ExceptBind extends ExceptBase with Arr {
+  def exceptBind[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind]:
+  Except[A, B] ~>: (B ~>: Except[A, C]) ~>: Except[A, C]
 
-  final def exceptBind__[A, B, C]: Repr[Except[A, B]] => Repr[B => Except[A, C]] => Repr[Except[A, C]] = e => f =>
-    app(exceptBind_(e)(exceptInfoB(rngInfo(reprInfo(f)))))(f)
+  final def exceptBind_[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind](e: Except[A, B]) =
+    app(exceptBind[A, B, C])(e)
+
+  final def exceptBind__[A <: Type: Kind, B <: Type: Kind, C <: Type: Kind](e: Except[A, B])(f: B ~>: Except[A, C]) =
+    app(exceptBind_[A, B, C](e))(f)
 }

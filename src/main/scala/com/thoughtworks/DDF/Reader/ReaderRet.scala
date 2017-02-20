@@ -1,10 +1,9 @@
 package com.thoughtworks.DDF.Reader
 
 trait ReaderRet extends ReaderBase {
-  def readerRet[E, A](implicit ei: Info[E], ai: Info[A]): Repr[A => Reader[E, A]]
+  def readerRet[E <: Type: Kind, A <: Type: Kind]: A ~>: Reader[E, A]
 
-  final def readerRet_[E, A](a: Repr[A])(implicit ei: Info[E]): Repr[Reader[E, A]] =
-    app(readerRet[E, A](ei, reprInfo(a)))(a)
+  final def readerRet_[E <: Type: Kind, A <: Type: Kind](a: A): Reader[E, A] = app(readerRet[E, A])(a)
 
-  final def readerRet__[E, A]: Repr[A] => Repr[E] => Repr[A] = a => e => app(readerRet_[E, A](a)(reprInfo(e)))(e)
+  final def readerRet__[E <: Type: Kind, A <: Type: Kind](a: A)(e: E) = app(readerRet_[E, A](a))(e)
 }
