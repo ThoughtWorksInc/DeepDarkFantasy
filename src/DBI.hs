@@ -9,10 +9,12 @@
     PolyKinds,
     LambdaCase,
     NoMonomorphismRestriction,
-    TypeFamilies #-}
+    TypeFamilies,
+    EmptyCase #-}
 
 module DBI where
 import Util
+import Data.Void
 
 class DBI repr where
   z :: repr (a, h) a
@@ -33,6 +35,12 @@ class DBI repr where
   divide :: repr h (Double -> Double -> Double)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = lam $ f z
+  fix :: repr h ((a -> a) -> a)
+  left :: repr h (a -> Either a b)
+  right :: repr h (b -> Either a b)
+  sumMatch :: repr h ((a -> c) -> (b -> c) -> Either a b -> c)
+  unit :: repr h ()
+  exfalso :: repr h (Void -> a)
 
 newtype Eval h x = Eval {unEval :: h -> x}
 
@@ -51,9 +59,17 @@ instance DBI Eval where
   minus = comb (-)
   mult = comb (*)
   divide = comb (/)
+  fix = comb loop
+    where loop x = x $ loop x
+  left = comb Left
+  right = comb Right
+  sumMatch = comb $ \l r -> \case
+                             (Left x) -> l x
+                             (Right x) -> r x
+  unit = comb ()
+  exfalso = comb absurd
 
 newtype DShow h a = DShow {unDShow :: [String] -> Int -> String}
-
 name = DShow . const . const
 
 instance DBI DShow where
@@ -71,6 +87,12 @@ instance DBI DShow where
   minus = name "minus"
   mult = name "mult"
   divide = name "divide"
+  fix = name "fix"
+  left = name "left"
+  right = name "right"
+  sumMatch = name "sumMatch"
+  unit = name "unit"
+  exfalso = name "exfalso"
 
 type family Diff x
 type instance Diff Double = (Double, Double)
@@ -78,6 +100,7 @@ type instance Diff () = ()
 type instance Diff (a, b) = (Diff a, Diff b)
 type instance Diff (a -> b) = Diff a -> Diff b
 type instance Diff (Either a b) = Either (Diff a) (Diff b)
+type instance Diff Void = Void
 
 newtype WDiff repr h x = WDiff {unWDiff :: repr (Diff h) (Diff x)}
 
@@ -125,6 +148,12 @@ instance DBI repr => DBI (WDiff repr) where
       (divide2 (minus2 (mult2 (prodZro1 r) (prodFst1 l)) (mult2 (prodZro1 l) (prodFst1 r)))
         (mult2 (prodZro1 r) (prodZro1 r)))
   hoas f = WDiff $ hoas (unWDiff . f . WDiff)
+  fix = WDiff fix
+  left = WDiff left
+  right = WDiff right
+  sumMatch = WDiff sumMatch
+  unit = WDiff unit
+  exfalso = WDiff exfalso
 
 scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
 
