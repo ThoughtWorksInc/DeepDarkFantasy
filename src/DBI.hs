@@ -8,7 +8,8 @@
     IncoherentInstances,
     PolyKinds,
     LambdaCase,
-    NoMonomorphismRestriction #-}
+    NoMonomorphismRestriction,
+    TypeFamilies #-}
 
 module DBI where
 import Util
@@ -21,6 +22,15 @@ class DBI repr where
   mkprod :: repr h (a -> b -> (a, b))
   prodZro :: repr h ((a, b) -> a)
   prodFst :: repr h ((a, b) -> b)
+  lit :: Double -> repr h Double
+  litZro :: repr h Double
+  litZro = lit 0
+  litFst :: repr h Double
+  litFst = lit 1
+  plus :: repr h (Double -> Double -> Double)
+  minus :: repr h (Double -> Double -> Double)
+  mult :: repr h (Double -> Double -> Double)
+  divide :: repr h (Double -> Double -> Double)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = lam $ f z
 
@@ -36,8 +46,15 @@ instance DBI Eval where
   prodZro = comb fst
   prodFst = comb snd
   mkprod = comb (,)
+  lit = comb
+  plus = comb (+)
+  minus = comb (-)
+  mult = comb (*)
+  divide = comb (/)
 
 newtype DShow h a = DShow {unDShow :: [String] -> Int -> String}
+
+name = DShow . const . const
 
 instance DBI DShow where
   z = DShow $ const $ show . flip (-) 1
@@ -46,9 +63,23 @@ instance DBI DShow where
   app (DShow f) (DShow x) = DShow $ \vars h -> "(" ++ f vars h ++ " " ++ x vars h ++ ")"
   hoas f = DShow $ \(v:vars) h ->
     "(\\" ++ v ++ " -> " ++ (unDShow $ f $ DShow $ const $ const v) vars h ++ ")"
-  mkprod = DShow $ const $ const "mkprod"
-  prodZro = DShow $ const $ const "zro"
-  prodFst = DShow $ const $ const "fst"
+  mkprod = name "mkprod"
+  prodZro = name "zro"
+  prodFst = name "fst"
+  lit x = name $ show x
+  plus = name "plus"
+  minus = name "minus"
+  mult = name "mult"
+  divide = name "divide"
+
+type family Diff x
+type instance Diff Double = (Double, Double)
+type instance Diff () = ()
+type instance Diff (a, b) = (Diff a, Diff b)
+type instance Diff (a -> b) = Diff a -> Diff b
+type instance Diff (Either a b) = Either (Diff a) (Diff b)
+
+newtype WDiff repr h x = WDiff {unWDiff :: repr (Diff h) (Diff x)}
 
 class NT l r where
     conv :: l t -> r t
@@ -63,7 +94,39 @@ hlam :: forall repr a b h. DBI repr =>
  ((forall k. NT (repr (a, h)) k => k a) -> (repr (a, h)) b) -> repr h (a -> b)
 hlam f = hoas (\x -> f $ conv x)
 
+app2 f a = app (app f a)
+
+mkprod2 = app2 mkprod
+plus2 = app2 plus
+prodZro1 = app prodZro
+prodFst1 = app prodFst
+minus2 = app2 minus
+mult2 = app2 mult
+divide2 = app2 divide
+
+instance DBI repr => DBI (WDiff repr) where
+  z = WDiff z
+  s (WDiff x) = WDiff $ s x
+  lam (WDiff f) = WDiff $ lam f
+  app (WDiff f) (WDiff x) = WDiff $ app f x
+  mkprod = WDiff mkprod
+  prodZro = WDiff prodZro
+  prodFst = WDiff prodFst
+  lit x = WDiff $ app (app mkprod (lit x)) (lit 0)
+  plus = WDiff $ hlam $ \l -> hlam $ \r ->
+    mkprod2 (plus2 (prodZro1 l) (prodZro1 r)) (plus2 (prodFst1 l) (prodFst1 r))
+  minus = WDiff $ hlam $ \l -> hlam $ \r ->
+    mkprod2 (minus2 (prodZro1 l) (prodZro1 r)) (minus2 (prodFst1 l) (prodFst1 r))
+  mult = WDiff $ hlam $ \l -> hlam $ \r ->
+    mkprod2 (mult2 (prodZro1 l) (prodZro1 r))
+      (plus2 (mult2 (prodZro1 l) (prodFst1 r)) (mult2 (prodZro1 r) (prodFst1 l)))
+  divide = WDiff $ hlam $ \l -> hlam $ \r ->
+    mkprod2 (divide2 (prodZro1 l) (prodZro1 r))
+      (divide2 (minus2 (mult2 (prodZro1 r) (prodFst1 l)) (mult2 (prodZro1 l) (prodFst1 r)))
+        (mult2 (prodZro1 r) (prodZro1 r)))
+  hoas f = WDiff $ hoas (unWDiff . f . WDiff)
+
 scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
 
 main :: IO ()
-main = putStrLn $ unDShow scomb vars 0
+main = putStrLn $ unDShow (unWDiff scomb) vars 0
