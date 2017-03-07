@@ -41,6 +41,14 @@ class DBI repr where
   sumMatch :: repr h ((a -> c) -> (b -> c) -> Either a b -> c)
   unit :: repr h ()
   exfalso :: repr h (Void -> a)
+  nothing :: repr h (Maybe a)
+  just :: repr h (a -> Maybe a)
+  optionMatch :: repr h (b -> (a -> b) -> Maybe a -> b)
+  ioRet :: repr h (a -> IO a)
+  ioBind :: repr h (IO a -> (a -> IO b) -> IO b)
+  nil :: repr h [a]
+  cons :: repr h (a -> [a] -> [a])
+  listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
 
 newtype Eval h x = Eval {unEval :: h -> x}
 
@@ -64,10 +72,22 @@ instance DBI Eval where
   left = comb Left
   right = comb Right
   sumMatch = comb $ \l r -> \case
-                             (Left x) -> l x
-                             (Right x) -> r x
+                             Left x -> l x
+                             Right x -> r x
   unit = comb ()
   exfalso = comb absurd
+  nothing = comb Nothing
+  just = comb Just
+  ioRet = comb return
+  ioBind = comb (>>=)
+  nil = comb []
+  cons = comb (:)
+  listMatch = comb $ \l r -> \case
+                            [] -> l
+                            x:xs -> r x xs
+  optionMatch = comb $ \l r -> \case
+                              Nothing -> l
+                              Just x -> r x
 
 newtype DShow h a = DShow {unDShow :: [String] -> Int -> String}
 name = DShow . const . const
@@ -93,6 +113,14 @@ instance DBI DShow where
   sumMatch = name "sumMatch"
   unit = name "unit"
   exfalso = name "exfalso"
+  nothing = name "nothing"
+  just = name "just"
+  ioRet = name "ioRet"
+  ioBind = name "ioBind"
+  nil = name "nil"
+  cons = name "cons"
+  listMatch = name "listMatch"
+  optionMatch = name "optionMatch"
 
 type family Diff x
 type instance Diff Double = (Double, Double)
@@ -101,6 +129,9 @@ type instance Diff (a, b) = (Diff a, Diff b)
 type instance Diff (a -> b) = Diff a -> Diff b
 type instance Diff (Either a b) = Either (Diff a) (Diff b)
 type instance Diff Void = Void
+type instance Diff (Maybe a) = Maybe (Diff a)
+type instance Diff (IO a) = IO (Diff a)
+type instance Diff [a] = [Diff a]
 
 newtype WDiff repr h x = WDiff {unWDiff :: repr (Diff h) (Diff x)}
 
@@ -154,6 +185,14 @@ instance DBI repr => DBI (WDiff repr) where
   sumMatch = WDiff sumMatch
   unit = WDiff unit
   exfalso = WDiff exfalso
+  nothing = WDiff nothing
+  just = WDiff just
+  ioRet = WDiff ioRet
+  ioBind = WDiff ioBind
+  nil = WDiff nil
+  cons = WDiff cons
+  listMatch = WDiff listMatch
+  optionMatch = WDiff optionMatch
 
 scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
 
