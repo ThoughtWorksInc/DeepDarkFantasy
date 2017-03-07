@@ -15,7 +15,7 @@
 module DBI where
 import Util
 import Data.Void
-
+import Control.Monad (when)
 class DBI repr where
   z :: repr (a, h) a
   s :: repr h b -> repr (a, h) b
@@ -196,5 +196,21 @@ instance DBI repr => DBI (WDiff repr) where
 
 scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
 
+noEnv :: repr () x -> repr () x
+noEnv = id
+
 main :: IO ()
-main = putStrLn $ unDShow (unWDiff scomb) vars 0
+main = do
+  putStrLn $ unDShow poly vars 0
+  go 0 0
+  where
+    poly = hlam $ \x -> plus2 (plus2 (mult2 x x) (mult2 (lit 2) x)) (lit 3)
+    l2 = hlam $ \x -> mult2 (minus2 x (lit 27)) (minus2 x (lit 27))
+    comp = hlam $ \x -> app l2 (app poly x)
+    go :: Integer -> Double -> IO ()
+    go i w | i < 1000 = do
+      when (isSquare i) $ print w
+      go (1 + i) $ w - 0.01 * snd (unEval (unWDiff $ noEnv comp) () (w, 1))
+    go i w = return ()
+    isSquare n = sq * sq == n
+      where sq = floor $ sqrt (fromIntegral n::Double)
