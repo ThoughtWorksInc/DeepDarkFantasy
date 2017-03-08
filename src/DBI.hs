@@ -16,6 +16,7 @@ module DBI where
 import Util
 import Data.Void
 import Control.Monad (when)
+
 class DBI repr where
   z :: repr (a, h) a
   s :: repr h b -> repr (a, h) b
