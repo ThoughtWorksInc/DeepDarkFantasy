@@ -3,7 +3,7 @@ version: 0.0.1
 cabal-version: 1.12
 build-type: Simple
 license: AllRightsReserved
-
+Tested-With: GHC == 8.0.2
 executable DeepDarkFantasy
     main-is: Main.hs
     build-depends:
