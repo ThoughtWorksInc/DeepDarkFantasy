@@ -1,2 +1,2 @@
 language: Haskell
-ghc: 8.0
+ghc: 8.0.1
