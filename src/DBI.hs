@@ -89,16 +89,29 @@ instance DBI Eval where
                               Nothing -> l
                               Just x -> r x
 
-newtype DShow h a = DShow {unDShow :: [String] -> Int -> String}
-name = DShow . const . const
+data AST = Leaf String | App String AST [AST] | Lam String [String] AST
+
+appAST (Leaf f) x = App f x []
+appAST (App f x l) r = App f x (l ++ [r])
+appAST lam@(Lam s l t) r = appAST (Leaf $ show lam) r --TODO: fix
+
+lamAST str (Lam s l t) = Lam str (s:l) t
+lamAST str r = Lam str [] r
+
+instance Show AST where
+  show (Leaf f) = f
+  show (App f x l) = "(" ++ f ++ " " ++ show x ++ concatMap ((" " ++) . show) l ++ ")"
+  show (Lam s l t) = "(\\" ++ s ++ concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
+newtype DShow h a = DShow {unDShow :: [String] -> Int -> AST}
+name = DShow . const . const . Leaf
 
 instance DBI DShow where
-  z = DShow $ const $ show . flip (-) 1
+  z = DShow $ const $ Leaf . show . flip (-) 1
   s (DShow v) = DShow $ \vars -> v vars . flip (-) 1
-  lam (DShow f) = DShow $ \vars x -> "(\\" ++ show x ++ " -> " ++ f vars (x + 1) ++ ")"
-  app (DShow f) (DShow x) = DShow $ \vars h -> "(" ++ f vars h ++ " " ++ x vars h ++ ")"
+  lam (DShow f) = DShow $ \vars x -> lamAST (show x) (f vars (x + 1))
+  app (DShow f) (DShow x) = DShow $ \vars h -> appAST (f vars h) (x vars h)
   hoas f = DShow $ \(v:vars) h ->
-    "(\\" ++ v ++ " -> " ++ (unDShow $ f $ DShow $ const $ const v) vars h ++ ")"
+    lamAST v (unDShow (f $ DShow $ const $ const $ Leaf v) vars h)
   mkprod = name "mkprod"
   prodZro = name "zro"
   prodFst = name "fst"
@@ -201,7 +214,8 @@ noEnv = id
 
 main :: IO ()
 main = do
-  putStrLn $ unDShow poly vars 0
+  print $ unDShow scomb vars 0
+  print $ unDShow poly vars 0
   go 0 0
   where
     poly = hlam $ \x -> plus2 (plus2 (mult2 x x) (mult2 (lit 2) x)) (lit 3)
