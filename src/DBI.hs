@@ -222,9 +222,9 @@ main = do
     l2 = hlam $ \x -> mult2 (minus2 x (lit 27)) (minus2 x (lit 27))
     comp = hlam $ \x -> app l2 (app poly x)
     go :: Integer -> Double -> IO ()
-    go i w | i < 1000 = do
+    go i w | i < 200 = do
       when (isSquare i) $ print w
-      go (1 + i) $ w - 0.01 * snd (unEval (unWDiff $ noEnv comp) () (w, 1))
+      go (1 + i) $ w - 0.001 * snd (unEval (unWDiff $ noEnv comp) () (w, 1))
     go i w = return ()
     isSquare n = sq * sq == n
       where sq = floor $ sqrt (fromIntegral n::Double)
