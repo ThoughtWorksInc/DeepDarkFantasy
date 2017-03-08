@@ -1,0 +1,2 @@
+language: Haskell
+ghc: 8.0

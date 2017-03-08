@@ -93,7 +93,7 @@ data AST = Leaf String | App String AST [AST] | Lam String [String] AST
 
 appAST (Leaf f) x = App f x []
 appAST (App f x l) r = App f x (l ++ [r])
-appAST lam@(Lam s l t) r = appAST (Leaf $ show lam) r --TODO: fix
+appAST lam r = appAST (Leaf $ show lam) r
 
 lamAST str (Lam s l t) = Lam str (s:l) t
 lamAST str r = Lam str [] r
