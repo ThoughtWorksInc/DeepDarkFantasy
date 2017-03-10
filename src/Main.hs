@@ -14,5 +14,6 @@ module Main (main) where
 import qualified HOAS
 import qualified Comb
 import qualified DBI
+import qualified Poly
 
-main = DBI.main
+main = Poly.main
