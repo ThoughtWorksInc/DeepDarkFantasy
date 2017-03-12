@@ -3,8 +3,6 @@
 [![Join the chat at https://gitter.im/ThoughtWorksInc/DeepDarkFantasy](https://badges.gitter.im/ThoughtWorksInc/DeepDarkFantasy.svg)](https://gitter.im/ThoughtWorksInc/DeepDarkFantasy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/ThoughtWorksInc/DeepDarkFantasy.svg?branch=master)](https://travis-ci.org/ThoughtWorksInc/DeepDarkFantasy)
 
-# Whole project is being rewrited in Haskell so more people can understand.
-
 ### What if we combine Functional Programming and Deep Learning?
 
 As we all know, a neural network is just a computable math expression (and hence a program). 
