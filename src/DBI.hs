@@ -140,23 +140,21 @@ instance DBI DShow where
   listMatch = name "listMatch"
   optionMatch = name "optionMatch"
 
-class NT l r where
-  conv :: l h t -> r h t
+class NT repr l r where
+    conv :: DBI repr => repr l t -> repr r t
 
-data Next repr a h x = DBI repr => Next{unNext::repr (a, h) x}
+instance NT repr l r => NT repr l (a, r) where
+    conv = s . conv
 
-instance (NT l r, DBI r) => NT l (Next r a) where
-  conv = Next . s . conv
+instance NT repr x x where
+    conv = id
 
-instance NT r r where
-  conv = id
-
-instance NT (Next r a) (Next r a) where
-  conv = id
+instance NT repr (a, x) (a, x) where
+    conv = id
 
 hlam :: forall repr a b h. DBI repr =>
-  ((forall k. (NT (Next repr a) k => k h a)) -> (Next repr a h b)) -> repr h (a -> b)
-hlam f = hoas (\x -> unNext $ f (conv $ Next x))
+ ((forall k. NT repr ((a, h)) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
+hlam f = hoas (\x -> f $ conv x)
 
 type family Diff x
 type instance Diff Double = (Double, Double)
@@ -180,8 +178,6 @@ prodFst1 = app prodFst
 minus2 = app2 minus
 mult2 = app2 mult
 divide2 = app2 divide
-
-instance DBI repr => DBI (Next repr a) where
 
 instance DBI repr => DBI (WDiff repr) where
   z = WDiff z

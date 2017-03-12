@@ -19,7 +19,7 @@
 > import DBI hiding (main)
 
 > poly :: forall repr h. (DBI repr) => repr h (Double -> Double)
-> poly = hlam $ \x -> x
+> poly = hlam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (lit 2.0) x) (lit 3.0))
 > l2 = hlam $ \x -> mult2 (minus2 x (lit 27)) (minus2 x (lit 27))
 > comp = hlam $ \x -> app l2 (app poly x)
 
