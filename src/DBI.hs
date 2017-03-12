@@ -11,7 +11,10 @@
     NoMonomorphismRestriction,
     TypeFamilies,
     LiberalTypeSynonyms,
-    EmptyCase #-}
+    EmptyCase,
+    FunctionalDependencies,
+    AllowAmbiguousTypes,
+    ExistentialQuantification #-}
 
 module DBI where
 import Util
@@ -137,6 +140,24 @@ instance DBI DShow where
   listMatch = name "listMatch"
   optionMatch = name "optionMatch"
 
+class NT l r where
+  conv :: l h t -> r h t
+
+data Next repr a h x = DBI repr => Next{unNext::repr (a, h) x}
+
+instance (NT l r, DBI r) => NT l (Next r a) where
+  conv = Next . s . conv
+
+instance NT r r where
+  conv = id
+
+instance NT (Next r a) (Next r a) where
+  conv = id
+
+hlam :: forall repr a b h. DBI repr =>
+  ((forall k. (NT (Next repr a) k => k h a)) -> (Next repr a h b)) -> repr h (a -> b)
+hlam f = hoas (\x -> unNext $ f (conv $ Next x))
+
 type family Diff x
 type instance Diff Double = (Double, Double)
 type instance Diff () = ()
@@ -150,19 +171,6 @@ type instance Diff [a] = [Diff a]
 
 newtype WDiff repr h x = WDiff {unWDiff :: repr (Diff h) (Diff x)}
 
-class NT l r where
-    conv :: l t -> r t
-
-instance (DBI repr, NT (repr l) (repr r)) => NT (repr l) (repr (a, r)) where
-    conv = s . conv
-
-instance NT x x where
-    conv = id
-
-hlam :: forall repr a b h. DBI repr =>
- ((forall k. NT (repr (a, h)) k => k a) -> (repr (a, h)) b) -> repr h (a -> b)
-hlam f = hoas (\x -> f $ conv x)
-
 app2 f a = app (app f a)
 
 mkprod2 = app2 mkprod
@@ -172,6 +180,8 @@ prodFst1 = app prodFst
 minus2 = app2 minus
 mult2 = app2 mult
 divide2 = app2 divide
+
+instance DBI repr => DBI (Next repr a) where
 
 instance DBI repr => DBI (WDiff repr) where
   z = WDiff z
