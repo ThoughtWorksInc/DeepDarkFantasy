@@ -3,7 +3,7 @@ version: 0.0.1
 cabal-version: 1.12
 build-type: Simple
 license: AllRightsReserved
-Tested-With: GHC == 8.0.2
+tested-with: GHC ==8.0.2
 
 library
     exposed-modules:
@@ -17,4 +17,7 @@ library
         base -any
     default-language: Haskell2010
     hs-source-dirs: src
+    other-modules:
+        MK
     ghc-options: -ferror-spans
+
