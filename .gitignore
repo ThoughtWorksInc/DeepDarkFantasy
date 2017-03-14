@@ -2,3 +2,5 @@
 target/
 local.sbt
 dist/
+*.o
+*.hi

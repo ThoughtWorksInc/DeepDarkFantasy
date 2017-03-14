@@ -17,7 +17,5 @@ library
         base -any
     default-language: Haskell2010
     hs-source-dirs: src
-    other-modules:
-        MK
     ghc-options: -ferror-spans
 
