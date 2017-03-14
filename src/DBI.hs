@@ -5,7 +5,6 @@
     FlexibleInstances,
     FlexibleContexts,
     UndecidableInstances,
-    IncoherentInstances,
     PolyKinds,
     LambdaCase,
     NoMonomorphismRestriction,
@@ -141,15 +140,12 @@ instance DBI DShow where
   optionMatch = name "optionMatch"
 
 class NT repr l r where
-    conv :: DBI repr => repr l t -> repr r t
+    conv :: repr l t -> repr r t
 
-instance NT repr l r => NT repr l (a, r) where
+instance {-# INCOHERENT #-} (DBI repr, NT repr l r) => NT repr l (a, r) where
     conv = s . conv
 
 instance NT repr x x where
-    conv = id
-
-instance NT repr (a, x) (a, x) where
     conv = id
 
 hlam :: forall repr a b h. DBI repr =>
