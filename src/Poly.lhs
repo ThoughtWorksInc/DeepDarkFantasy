@@ -42,7 +42,7 @@ We want to minimize this distance.
 
 Let's begin by trying to print poly
 
->   print $ unDShow poly vars 0
+>   print $ unShow poly vars 0
 >   go 0 0
 >   where
 

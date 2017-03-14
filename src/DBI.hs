@@ -16,6 +16,8 @@
     ExistentialQuantification #-}
 
 module DBI where
+import qualified Prelude as P
+import Prelude (($), (.), const, (+), flip, id, (-), (++), show, (>>=), (*), (/))
 import Util
 import Data.Void
 import Control.Monad (when)
@@ -26,30 +28,30 @@ class DBI repr where
   lam :: repr (a, h) b -> repr h (a -> b)
   app :: repr h (a -> b) -> repr h a -> repr h b
   mkprod :: repr h (a -> b -> (a, b))
-  prodZro :: repr h ((a, b) -> a)
-  prodFst :: repr h ((a, b) -> b)
-  lit :: Double -> repr h Double
-  litZro :: repr h Double
+  zro :: repr h ((a, b) -> a)
+  fst :: repr h ((a, b) -> b)
+  lit :: P.Double -> repr h P.Double
+  litZro :: repr h P.Double
   litZro = lit 0
-  litFst :: repr h Double
-  litFst = lit 1
-  plus :: repr h (Double -> Double -> Double)
-  minus :: repr h (Double -> Double -> Double)
-  mult :: repr h (Double -> Double -> Double)
-  divide :: repr h (Double -> Double -> Double)
+  litOne :: repr h P.Double
+  litOne = lit 1
+  plus :: repr h (P.Double -> P.Double -> P.Double)
+  minus :: repr h (P.Double -> P.Double -> P.Double)
+  mult :: repr h (P.Double -> P.Double -> P.Double)
+  divide :: repr h (P.Double -> P.Double -> P.Double)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = lam $ f z
   fix :: repr h ((a -> a) -> a)
-  left :: repr h (a -> Either a b)
-  right :: repr h (b -> Either a b)
-  sumMatch :: repr h ((a -> c) -> (b -> c) -> Either a b -> c)
+  left :: repr h (a -> P.Either a b)
+  right :: repr h (b -> P.Either a b)
+  sumMatch :: repr h ((a -> c) -> (b -> c) -> P.Either a b -> c)
   unit :: repr h ()
   exfalso :: repr h (Void -> a)
-  nothing :: repr h (Maybe a)
-  just :: repr h (a -> Maybe a)
-  optionMatch :: repr h (b -> (a -> b) -> Maybe a -> b)
-  ioRet :: repr h (a -> IO a)
-  ioBind :: repr h (IO a -> (a -> IO b) -> IO b)
+  nothing :: repr h (P.Maybe a)
+  just :: repr h (a -> P.Maybe a)
+  optionMatch :: repr h (b -> (a -> b) -> P.Maybe a -> b)
+  ioRet :: repr h (a -> P.IO a)
+  ioBind :: repr h (P.IO a -> (a -> P.IO b) -> P.IO b)
   nil :: repr h [a]
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
@@ -59,12 +61,12 @@ newtype Eval h x = Eval {unEval :: h -> x}
 comb = Eval . const
 
 instance DBI Eval where
-  z = Eval fst
-  s (Eval a) = Eval $ a . snd
+  z = Eval P.fst
+  s (Eval a) = Eval $ a . P.snd
   lam (Eval f) = Eval $ \a h -> f (h, a)
   app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
-  prodZro = comb fst
-  prodFst = comb snd
+  zro = comb P.fst
+  fst = comb P.snd
   mkprod = comb (,)
   lit = comb
   plus = comb (+)
@@ -73,16 +75,16 @@ instance DBI Eval where
   divide = comb (/)
   fix = comb loop
     where loop x = x $ loop x
-  left = comb Left
-  right = comb Right
+  left = comb P.Left
+  right = comb P.Right
   sumMatch = comb $ \l r -> \case
-                             Left x -> l x
-                             Right x -> r x
+                             P.Left x -> l x
+                             P.Right x -> r x
   unit = comb ()
   exfalso = comb absurd
-  nothing = comb Nothing
-  just = comb Just
-  ioRet = comb return
+  nothing = comb P.Nothing
+  just = comb P.Just
+  ioRet = comb P.return
   ioBind = comb (>>=)
   nil = comb []
   cons = comb (:)
@@ -90,10 +92,10 @@ instance DBI Eval where
                             [] -> l
                             x:xs -> r x xs
   optionMatch = comb $ \l r -> \case
-                              Nothing -> l
-                              Just x -> r x
+                              P.Nothing -> l
+                              P.Just x -> r x
 
-data AST = Leaf String | App String AST [AST] | Lam String [String] AST
+data AST = Leaf P.String | App P.String AST [AST] | Lam P.String [P.String] AST
 
 appAST (Leaf f) x = App f x []
 appAST (App f x l) r = App f x (l ++ [r])
@@ -102,23 +104,23 @@ appAST lam r = appAST (Leaf $ show lam) r
 lamAST str (Lam s l t) = Lam str (s:l) t
 lamAST str r = Lam str [] r
 
-instance Show AST where
+instance P.Show AST where
   show (Leaf f) = f
-  show (App f x l) = "(" ++ f ++ " " ++ show x ++ concatMap ((" " ++) . show) l ++ ")"
-  show (Lam s l t) = "(\\" ++ s ++ concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
-newtype DShow h a = DShow {unDShow :: [String] -> Int -> AST}
-name = DShow . const . const . Leaf
+  show (App f x l) = "(" ++ f ++ " " ++ show x ++ P.concatMap ((" " ++) . show) l ++ ")"
+  show (Lam s l t) = "(\\" ++ s ++ P.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
+newtype Show h a = Show {unShow :: [P.String] -> P.Int -> AST}
+name = Show . const . const . Leaf
 
-instance DBI DShow where
-  z = DShow $ const $ Leaf . show . flip (-) 1
-  s (DShow v) = DShow $ \vars -> v vars . flip (-) 1
-  lam (DShow f) = DShow $ \vars x -> lamAST (show x) (f vars (x + 1))
-  app (DShow f) (DShow x) = DShow $ \vars h -> appAST (f vars h) (x vars h)
-  hoas f = DShow $ \(v:vars) h ->
-    lamAST v (unDShow (f $ DShow $ const $ const $ Leaf v) vars h)
+instance DBI Show where
+  z = Show $ const $ Leaf . show . flip (-) 1
+  s (Show v) = Show $ \vars -> v vars . flip (-) 1
+  lam (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
+  app (Show f) (Show x) = Show $ \vars h -> appAST (f vars h) (x vars h)
+  hoas f = Show $ \(v:vars) h ->
+    lamAST v (unShow (f $ Show $ const $ const $ Leaf v) vars h)
   mkprod = name "mkprod"
-  prodZro = name "zro"
-  prodFst = name "fst"
+  zro = name "zro"
+  fst = name "fst"
   lit x = name $ show x
   plus = name "plus"
   minus = name "minus"
@@ -153,14 +155,14 @@ hlam :: forall repr a b h. DBI repr =>
 hlam f = hoas (\x -> f $ conv x)
 
 type family Diff x
-type instance Diff Double = (Double, Double)
+type instance Diff P.Double = (P.Double, P.Double)
 type instance Diff () = ()
 type instance Diff (a, b) = (Diff a, Diff b)
 type instance Diff (a -> b) = Diff a -> Diff b
-type instance Diff (Either a b) = Either (Diff a) (Diff b)
+type instance Diff (P.Either a b) = P.Either (Diff a) (Diff b)
 type instance Diff Void = Void
-type instance Diff (Maybe a) = Maybe (Diff a)
-type instance Diff (IO a) = IO (Diff a)
+type instance Diff (P.Maybe a) = P.Maybe (Diff a)
+type instance Diff (P.IO a) = P.IO (Diff a)
 type instance Diff [a] = [Diff a]
 
 newtype WDiff repr h x = WDiff {unWDiff :: repr (Diff h) (Diff x)}
@@ -169,8 +171,8 @@ app2 f a = app (app f a)
 
 mkprod2 = app2 mkprod
 plus2 = app2 plus
-prodZro1 = app prodZro
-prodFst1 = app prodFst
+zro1 = app zro
+fst1 = app fst
 minus2 = app2 minus
 mult2 = app2 mult
 divide2 = app2 divide
@@ -181,20 +183,20 @@ instance DBI repr => DBI (WDiff repr) where
   lam (WDiff f) = WDiff $ lam f
   app (WDiff f) (WDiff x) = WDiff $ app f x
   mkprod = WDiff mkprod
-  prodZro = WDiff prodZro
-  prodFst = WDiff prodFst
+  zro = WDiff zro
+  fst = WDiff fst
   lit x = WDiff $ app (app mkprod (lit x)) (lit 0)
   plus = WDiff $ hlam $ \l -> hlam $ \r ->
-    mkprod2 (plus2 (prodZro1 l) (prodZro1 r)) (plus2 (prodFst1 l) (prodFst1 r))
+    mkprod2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
   minus = WDiff $ hlam $ \l -> hlam $ \r ->
-    mkprod2 (minus2 (prodZro1 l) (prodZro1 r)) (minus2 (prodFst1 l) (prodFst1 r))
+    mkprod2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
   mult = WDiff $ hlam $ \l -> hlam $ \r ->
-    mkprod2 (mult2 (prodZro1 l) (prodZro1 r))
-      (plus2 (mult2 (prodZro1 l) (prodFst1 r)) (mult2 (prodZro1 r) (prodFst1 l)))
+    mkprod2 (mult2 (zro1 l) (zro1 r))
+      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
   divide = WDiff $ hlam $ \l -> hlam $ \r ->
-    mkprod2 (divide2 (prodZro1 l) (prodZro1 r))
-      (divide2 (minus2 (mult2 (prodZro1 r) (prodFst1 l)) (mult2 (prodZro1 l) (prodFst1 r)))
-        (mult2 (prodZro1 r) (prodZro1 r)))
+    mkprod2 (divide2 (zro1 l) (zro1 r))
+      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
+        (mult2 (zro1 r) (zro1 r)))
   hoas f = WDiff $ hoas (unWDiff . f . WDiff)
   fix = WDiff fix
   left = WDiff left
