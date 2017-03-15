@@ -16,7 +16,7 @@
 > module Poly where
 > import Control.Monad (when)
 > import Util
-> import DBI hiding (main)
+> import DBI hiding (main, return)
 
 Importting files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
