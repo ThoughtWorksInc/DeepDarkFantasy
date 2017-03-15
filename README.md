@@ -18,13 +18,11 @@ They all had their own special gradient structure to propagate loss accordingly.
 However, in the end of the day, what is updated is only container of double (or other representation of real).
 Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
 
-The full list of features implemented can be seen [here](FEATURES.md)
-
 ----------
 
 Can we make the language typed so we can detect error before we train the network?
 
-**Yes and No.** I am able to type most stuff, but I am having trouble adding higher kinded type, so it is somewhat limited. I need a bit help here.
+**Sort of.** I am able to type most stuff, but I am having trouble adding higher kinded type/generic type. However, they can be written as Haskell function (macro in DDF).
 
 ----------
 
@@ -40,11 +38,10 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 You should read the [blog](http://marisa.moe/DLPL.html) before anything.
 
-We have an [annotated example](doc/poly.md) on how to use our code. More documentation is coming up.
-
-Another good starting point is [here](src/main/scala/com/thoughtworks/DDF/Language/Preclude.scala).
+We have an [annotated example](src/Poly.lhs) on how to use our code. More documentation is coming up.
 
 If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf).
+
 # FA Q
 
 Q: How is the speed?
@@ -66,6 +63,7 @@ A: I like it that way.
 Q: What are you currently working on?
 
 A: I am trying to add a neural network demo.
+
 # Thank You Sir
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry).
