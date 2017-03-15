@@ -52,13 +52,22 @@ class DBI repr where
   optionMatch :: repr h (b -> (a -> b) -> P.Maybe a -> b)
   ioRet :: repr h (a -> P.IO a)
   ioBind :: repr h (P.IO a -> (a -> P.IO b) -> P.IO b)
+  ioMap :: repr h ((a -> b) -> P.IO a -> P.IO b)
   nil :: repr h [a]
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
+  com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
+  com = hlam $ \f -> hlam $ \g -> hlam $ \x -> app f (app g x)
 
-class Monad r m where
+class Functor r f where
+  map :: r h ((a -> b) -> (f a -> f b))
+
+class Functor r m => Monad r m where
   return :: r h (a -> (m a))
   bind :: r h (m a -> (a -> m b) -> m b)
+
+instance DBI r => Functor r P.IO where
+  map = ioMap
 
 instance DBI r => Monad r P.IO where
   return = ioRet
@@ -67,6 +76,11 @@ instance DBI r => Monad r P.IO where
 app3 f x y z = app (app2 f x y) z
 
 optionMatch3 = app3 optionMatch
+optionMatch2 = app2 optionMatch
+com2 = app2 com
+
+instance DBI r => Functor r P.Maybe where
+  map = hlam $ \func -> optionMatch2 nothing (com2 just func)
 
 instance DBI r => Monad r P.Maybe where
   return = just
@@ -110,6 +124,7 @@ instance DBI Eval where
   optionMatch = comb $ \l r -> \case
                               P.Nothing -> l
                               P.Just x -> r x
+  ioMap = comb P.fmap
 
 data AST = Leaf P.String | App P.String AST [AST] | Lam P.String [P.String] AST
 
@@ -156,6 +171,7 @@ instance DBI Show where
   cons = name "cons"
   listMatch = name "listMatch"
   optionMatch = name "optionMatch"
+  ioMap = name "ioMap"
 
 class NT repr l r where
     conv :: repr l t -> repr r t
@@ -228,6 +244,7 @@ instance DBI repr => DBI (WDiff repr) where
   cons = WDiff cons
   listMatch = WDiff listMatch
   optionMatch = WDiff optionMatch
+  ioMap = WDiff ioMap
 
 scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
 
