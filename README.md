@@ -11,7 +11,7 @@ As we all know, a neural network is just a computable math expression (and hence
 
 Of course, I must still be able to train the network.
 
-**Yes! I had add all the above construct, and I am planning to add more (stream, tree, map, set, for example).** 
+**Yes! I had add all the above construct, and I am planning to add more (tree, map, set, for example).** 
 
 They all had their own special gradient structure to propagate loss accordingly. 
 
@@ -28,9 +28,7 @@ Can we make the language typed so we can detect error before we train the networ
 
 Can we make the language modular and extensible so all people can write all sorts of Chuck Norris move into the language?
 
-**Yes Yes Yes!** The whole language is structured in a way very similar to [finally tagless](http://okmij.org/ftp/tagless-final/JFP.pdf), and [object algebra](https://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf). 
-
-So, it is possible to add new operation/constructor, and still retain type safety.
+**Yes Yes Yes!** The whole language is structured in [finally tagless style](http://okmij.org/ftp/tagless-final/JFP.pdf), so, it is possible to add new operation/constructor, and still retain type safety.
 
 In fact, there isn't even a core language! All feature(function, double, back propagation, pretty printing) is added as ordinary plugin so you can extend/subset the language as you can wish.
 
