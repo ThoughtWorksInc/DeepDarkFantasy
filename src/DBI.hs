@@ -17,7 +17,7 @@
 
 module DBI where
 import qualified Prelude as P
-import Prelude (($), (.), const, (+), flip, id, (-), (++), show, (>>=), (*), (/))
+import Prelude (($), (.), const, (+), flip, id, (-), (++), show, (>>=), (*), (/), undefined)
 import Util
 import Data.Void
 import Control.Monad (when)
@@ -55,6 +55,22 @@ class DBI repr where
   nil :: repr h [a]
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
+
+class Monad r m where
+  return :: r h (a -> (m a))
+  bind :: r h (m a -> (a -> m b) -> m b)
+
+instance DBI r => Monad r P.IO where
+  return = ioRet
+  bind = ioBind
+
+app3 f x y z = app (app2 f x y) z
+
+optionMatch3 = app3 optionMatch
+
+instance DBI r => Monad r P.Maybe where
+  return = just
+  bind = hlam $ \x -> hlam $ \func -> optionMatch3 nothing func x
 
 newtype Eval h x = Eval {unEval :: h -> x}
 
