@@ -32,7 +32,7 @@ poly x = x * x + (2 * x + 3)
 l2 x = (x - 27) * (x - 27)
 l2 measure how far is the input from 27
 
-> comp = hlam $ \x -> app l2 (app poly x)
+> comp = com2 l2 poly
 
 By composing the two, we can measure how far is x * x + 2 * x + 3 from 27.
 We want to minimize this distance.
