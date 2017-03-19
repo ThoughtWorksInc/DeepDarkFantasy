@@ -58,6 +58,20 @@ class DBI repr where
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
   com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
   com = hlam $ \f -> hlam $ \g -> hlam $ \x -> app f (app g x)
+  append :: repr h ([a] -> [a] -> [a])
+  append = hlam $ \l -> hlam $ \r -> fix2 (hlam $ \self -> listMatch2 r (hlam $ \a -> hlam $ \as -> cons2 a (app self as))) l
+
+cons2 = app2 cons
+listMatch2 = app2 listMatch
+fix2 = app2 fix
+
+class Monoid r m where
+  mzero :: r h m
+  mappend :: r h (m -> m -> m)
+
+instance DBI r => Monoid r [a] where
+  mzero = nil
+  mappend = append
 
 class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
