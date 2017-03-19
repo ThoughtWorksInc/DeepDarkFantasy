@@ -2,21 +2,30 @@ name: DeepDarkFantasy
 version: 0.0.1
 cabal-version: 1.12
 build-type: Simple
-license: AllRightsReserved
+license: Apache
 tested-with: GHC ==8.0.2
+maintainer: lolisa@marisa.moe
+category: DSL
+description: meow
+synopsis: I am very Moe
+license-file: LICENSE
+
+source-repository head
+  type: git
+  location: https://github.com/ThoughtWorksInc/DeepDarkFantasy
 
 library
-    exposed-modules:
-        Comb
-        DBI
-        HOAS
-        Main
-        Poly
-        Util
-    build-depends:
-        base -any,
-        mtl -any
-    default-language: Haskell2010
-    hs-source-dirs: src
-    ghc-options: -ferror-spans
+  exposed-modules:
+    Comb
+    DBI
+    HOAS
+    Main
+    Poly
+    Util
+  build-depends:
+    base == 4.9.0.0,
+    mtl -any
+  default-language: Haskell2010
+  hs-source-dirs: src
+  ghc-options: -ferror-spans
 
