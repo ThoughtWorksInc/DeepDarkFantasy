@@ -42,7 +42,7 @@ We want to minimize this distance.
 
 Let's begin by trying to print poly
 
->   print $ unShow poly vars 0
+>   print $ runShow poly vars 0
 >   go 0 0
 >   where
 
@@ -56,7 +56,7 @@ and minimize (comp x) by taking derivative of x, and decrease it whenever it is 
 
 print the weight in increasing interval, so initially more weight can be printed
 
->       go (1 + i) $ w - 0.001 * snd (unEval (unWDiff $ noEnv comp) () (w, 1))
+>       go (1 + i) $ w - 0.001 * snd (runEval (runWDiff $ noEnv comp) () (w, 1))
 
 noEnv comp assume the term (which is a De Brujin Index term) need no enviroment (is free)
 and it is a finally tagless term, with WDiff interpreter being implicitly applied,
