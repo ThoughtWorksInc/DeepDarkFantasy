@@ -37,10 +37,10 @@ class DBI repr where
   litZero = lit 0
   litOne :: repr h P.Double
   litOne = lit 1
-  plus :: repr h (P.Double -> P.Double -> P.Double)
-  minus :: repr h (P.Double -> P.Double -> P.Double)
-  mult :: repr h (P.Double -> P.Double -> P.Double)
-  divide :: repr h (P.Double -> P.Double -> P.Double)
+  doublePlus :: repr h (P.Double -> P.Double -> P.Double)
+  doubleMinus :: repr h (P.Double -> P.Double -> P.Double)
+  doubleMult :: repr h (P.Double -> P.Double -> P.Double)
+  doubleDivide :: repr h (P.Double -> P.Double -> P.Double)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = lam $ f z
   fix :: repr h ((a -> a) -> a)
@@ -60,8 +60,8 @@ class DBI repr where
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
   com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
   com = hlam3 $ \f g x -> app f (app g x)
-  append :: repr h ([a] -> [a] -> [a])
-  append = hlam2 $ \l r -> fix2 (hlam $ \self -> listMatch2 r (hlam2 $ \a as -> cons2 a (app self as))) l
+  listAppend :: repr h ([a] -> [a] -> [a])
+  listAppend = hlam2 $ \l r -> fix2 (hlam $ \self -> listMatch2 r (hlam2 $ \a as -> cons2 a (app self as))) l
   writer :: repr h ((a, w) -> P.Writer w a)
   runWriter :: repr h (P.Writer w a -> (a, w))
   swap :: repr h ((l, r) -> (r, l))
@@ -81,46 +81,43 @@ listMatch2 = app2 listMatch
 fix2 = app2 fix
 
 class Monoid r m where
-  mzero :: r h m
-  mappend :: r h (m -> m -> m)
+  zero :: r h m
+  plus :: r h (m -> m -> m)
 
 class (DBI r, Monoid r g) => Group r g where
   invert :: r h (g -> g)
-  gminus :: r h (g -> g -> g)
-  invert = gminus1 mzero
-  gminus = hlam2 $ \x y -> mappend2 x (invert1 y)
-  {-# MINIMAL (invert | gminus) #-}
+  minus :: r h (g -> g -> g)
+  invert = minus1 zero
+  minus = hlam2 $ \x y -> plus2 x (invert1 y)
+  {-# MINIMAL (invert | minus) #-}
 
-gminus1 = app gminus
-gminus2 = app2 gminus
+minus1 = app minus
 divide1 = app divide
 
 recip = divide1 litOne
 recip1 = app recip
 
 class Group r v => Vector r v where
-  smult :: r h (P.Double -> v -> v)
-  sdivide :: r h (v -> P.Double -> v)
-  smult = hlam2 $ \x y -> sdivide2 y (recip1 x)
-  sdivide = hlam2 $ \x y -> smult2 (recip1 y) x
-  {-# MINIMAL (smult | sdivide) #-}
+  mult :: r h (P.Double -> v -> v)
+  divide :: r h (v -> P.Double -> v)
+  mult = hlam2 $ \x y -> divide2 y (recip1 x)
+  divide = hlam2 $ \x y -> mult2 (recip1 y) x
+  {-# MINIMAL (mult | divide) #-}
 
 instance DBI r => Monoid r P.Double where
-  mzero = litZero
-  mappend = plus
+  zero = litZero
+  plus = doublePlus
 
 instance DBI r => Group r P.Double where
-  gminus = minus
+  minus = doubleMinus
 
 instance DBI r => Vector r P.Double where
-  smult = mult
-  sdivide = divide
-
-sdivide2 = app2 sdivide
+  mult = doubleMult
+  divide = doubleDivide
 
 instance DBI r => Monoid r [a] where
-  mzero = nil
-  mappend = append
+  zero = nil
+  plus = listAppend
 
 class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
@@ -156,14 +153,13 @@ instance DBI r => Functor r (P.Writer w) where
 
 writer1 = app writer
 runWriter1 = app runWriter
-mappend2 = app2 mappend
 
 instance (DBI r, Monoid r w) => Applicative r (P.Writer w) where
-  pure = com2 writer (flip2 mkProd mzero)
-  ap = hlam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (mappend2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
+  pure = com2 writer (flip2 mkProd zero)
+  ap = hlam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (plus2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
 
 instance (DBI r, Monoid r w) => Monad r (P.Writer w) where
-  join = hlam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (mappend2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
+  join = hlam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (plus2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
 
 instance DBI r => Functor r P.IO where
   map = ioMap
@@ -206,10 +202,10 @@ instance DBI Eval where
   fst = comb P.snd
   mkProd = comb (,)
   lit = comb
-  plus = comb (+)
-  minus = comb (-)
-  mult = comb (*)
-  divide = comb (/)
+  doublePlus = comb (+)
+  doubleMinus = comb (-)
+  doubleMult = comb (*)
+  doubleDivide = comb (/)
   fix = comb loop
     where loop x = x $ loop x
   left = comb P.Left
@@ -261,11 +257,11 @@ instance DBI Show where
   mkProd = name "mkProd"
   zro = name "zro"
   fst = name "fst"
-  lit x = name $ show x
-  plus = name "plus"
-  minus = name "minus"
-  mult = name "mult"
-  divide = name "divide"
+  lit = name . show
+  doublePlus = name "plus"
+  doubleMinus = name "minus"
+  doubleMult = name "mult"
+  doubleDivide = name "divide"
   fix = name "fix"
   left = name "left"
   right = name "right"
@@ -299,8 +295,8 @@ hlam f = hoas (\x -> f $ conv x)
 
 hlam2 :: forall repr a b c h. DBI repr =>
   ((forall k. NT repr (a, h) k => repr k a) -> (forall k. NT repr (b, (a, h)) k => repr k b) -> (repr (b, (a, h))) c) -> repr h (a -> b -> c)
-  
 hlam2 f = hlam $ \x -> hlam $ \y -> f x y
+
 hlam3 f = hlam2 $ \x y -> hlam $ \z -> f x y z
 
 type family Diff v x
@@ -328,7 +324,6 @@ minus2 = app2 minus
 mult2 = app2 mult
 divide2 = app2 divide
 invert1 = app invert
-smult2 = app2 smult
 
 instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   z = WDiff z
@@ -338,17 +333,17 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   mkProd = WDiff mkProd
   zro = WDiff zro
   fst = WDiff fst
-  lit x = WDiff $ mkProd2 (lit x) mzero
-  plus = WDiff $ hlam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (mappend2 (fst1 l) (fst1 r))
-  minus = WDiff $ hlam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (gminus2 (fst1 l) (fst1 r))
-  mult = WDiff $ hlam2 $ \l r ->
+  lit x = WDiff $ mkProd2 (lit x) zero
+  doublePlus = WDiff $ hlam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  doubleMinus = WDiff $ hlam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  doubleMult = WDiff $ hlam2 $ \l r ->
     mkProd2 (mult2 (zro1 l) (zro1 r))
-      (mappend2 (smult2 (zro1 l) (fst1 r)) (smult2 (zro1 r) (fst1 l)))
-  divide = WDiff $ hlam2 $ \l r ->
+      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
+  doubleDivide = WDiff $ hlam2 $ \l r ->
     mkProd2 (divide2 (zro1 l) (zro1 r))
-      (sdivide2 (gminus2 (smult2 (zro1 r) (fst1 l)) (smult2 (zro1 l) (fst1 r)))
+      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
   hoas f = WDiff $ hoas (runWDiff . f . WDiff)
   fix = WDiff fix
