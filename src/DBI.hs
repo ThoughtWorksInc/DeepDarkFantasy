@@ -12,7 +12,9 @@
     LiberalTypeSynonyms,
     EmptyCase,
     FunctionalDependencies,
-    ExistentialQuantification #-}
+    AllowAmbiguousTypes,
+    ExistentialQuantification,
+    InstanceSigs #-}
 
 module DBI where
 import qualified Prelude as P
@@ -103,6 +105,18 @@ class Group r v => Vector r v where
   mult = hlam2 $ \x y -> divide2 y (recip1 x)
   divide = hlam2 $ \x y -> mult2 (recip1 y) x
   {-# MINIMAL (mult | divide) #-}
+
+instance DBI r => Monoid r () where
+  zero = unit
+  plus = const1 $ const1 unit
+
+instance DBI r => Group r () where
+  invert = const1 unit
+  minus = const1 $ const1 unit
+
+instance DBI r => Vector r () where
+  mult = const1 $ const1 unit
+  divide = const1 $ const1 unit
 
 instance DBI r => Monoid r P.Double where
   zero = litZero
@@ -387,3 +401,46 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
+
+data ImpW repr h x = forall w. Group repr w => ImpW (forall k. NT repr h k => repr k (w -> x))
+
+mkImpW :: forall repr w h x. (DBI repr, Group repr w) => repr h (w -> x) -> ImpW repr h x
+mkImpW x = ImpW (conv x)
+
+noW :: forall repr h x. DBI repr => repr h x -> ImpW repr h x
+noW x = mkImpW (const1 x :: repr h (() -> x))
+
+instance DBI repr => DBI (ImpW repr) where
+  nil = noW nil
+  cons = noW cons
+  listMatch = noW listMatch
+  zro = noW zro
+  fst = noW fst
+  mkProd = noW mkProd
+  ioRet = noW ioRet
+  ioMap = noW ioMap
+  ioBind = noW ioBind
+  unit = noW unit
+  nothing = noW nothing
+  just = noW just
+  optionMatch = noW optionMatch
+  exfalso = noW exfalso
+  doublePlus = noW doublePlus
+  doubleMinus = noW doubleMinus
+  doubleMult = noW doubleMult
+  doubleDivide = noW doubleDivide
+  fix = noW fix
+  left = noW left
+  right = noW right
+  sumMatch = noW sumMatch
+  lit = noW . lit
+  writer = noW writer
+  runWriter = noW runWriter
+  z = noW z
+  s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
+  s (ImpW x) = work x
+    where
+      work :: Group repr w => repr h (w -> b) -> ImpW repr (a, h) b
+      work x = mkImpW (s x)
+  app (ImpW f) (ImpW x) = mkImpW (hlam $ \p -> app (app f (zro1 p)) (app x (fst1 p)))
+  lam (ImpW f) = mkImpW (flip1 $ lam f)
