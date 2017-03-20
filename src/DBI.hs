@@ -1,3 +1,4 @@
+
 {-# LANGUAGE
     MultiParamTypeClasses,
     RankNTypes,
@@ -60,19 +61,19 @@ class DBI repr where
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
   com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
-  com = hlam $ \f -> hlam $ \g -> hlam $ \x -> app f (app g x)
+  com = hlam3 $ \f g x -> app f (app g x)
   append :: repr h ([a] -> [a] -> [a])
-  append = hlam $ \l -> hlam $ \r -> fix2 (hlam $ \self -> listMatch2 r (hlam $ \a -> hlam $ \as -> cons2 a (app self as))) l
+  append = hlam2 $ \l r -> fix2 (hlam $ \self -> listMatch2 r (hlam2 $ \a as -> cons2 a (app self as))) l
   writer :: repr h ((a, w) -> P.Writer w a)
   runWriter :: repr h (P.Writer w a -> (a, w))
   swap :: repr h ((l, r) -> (r, l))
   swap = hlam $ \p -> mkProd2 (fst1 p) (zro1 p)
   flip :: repr h ((a -> b -> c) -> (b -> a -> c))
-  flip = hlam $ \f -> hlam $ \b -> hlam $ \a -> app2 f a b
+  flip = hlam3 $ \f b a -> app2 f a b
   id :: repr h (a -> a)
   id = hlam $ \x -> x
   const :: repr h (a -> b -> a)
-  const = hlam $ \x -> hlam $ \_ -> x
+  const = hlam2 $ \x _ -> x
 
 const1 = app const
 cons2 = app2 cons
@@ -100,7 +101,7 @@ class Applicative r m => Monad r m where
   bind :: r h (m a -> (a -> m b) -> m b)
   join :: r h (m (m a) -> m a)
   join = hlam $ \m -> bind2 m id
-  bind = hlam $ \m -> hlam $ \f -> join1 (app2 map f m)
+  bind = hlam2 $ \m f -> join1 (app2 map f m)
   {-# MINIMAL (join | bind) #-}
 
 bind2 = app2 bind
@@ -114,7 +115,7 @@ class DBI r => BiFunctor r p where
   bimap :: r h ((a -> b) -> (c -> d) -> p a c -> p b d)
 
 instance DBI r => BiFunctor r (,) where
-  bimap = hlam $ \l -> hlam $ \r -> hlam $ \p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
+  bimap = hlam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
 
 instance DBI r => Functor r (P.Writer w) where
   map = hlam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
@@ -125,7 +126,7 @@ mappend2 = app2 mappend
 
 instance (DBI r, Monoid r w) => Applicative r (P.Writer w) where
   pure = com2 writer (flip2 mkProd mzero)
-  ap = hlam $ \f -> hlam $ \x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (mappend2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
+  ap = hlam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (mappend2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
 
 instance (DBI r, Monoid r w) => Monad r (P.Writer w) where
   join = hlam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (mappend2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
@@ -137,7 +138,7 @@ ioBind2 = app2 ioBind
 
 instance DBI r => Applicative r P.IO where
   pure = ioRet
-  ap = hlam $ \f -> hlam $ \x -> ioBind2 f (flip2 ioMap x)
+  ap = hlam2 $ \f x -> ioBind2 f (flip2 ioMap x)
 
 instance DBI r => Monad r P.IO where
   bind = ioBind
@@ -156,7 +157,7 @@ instance DBI r => Applicative r P.Maybe where
   ap = optionMatch2 (const1 nothing) map
 
 instance DBI r => Monad r P.Maybe where
-  bind = hlam $ \x -> hlam $ \func -> optionMatch3 nothing func x
+  bind = hlam2 $ \x func -> optionMatch3 nothing func x
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
@@ -259,8 +260,14 @@ instance NT repr x x where
     conv = P.id
 
 hlam :: forall repr a b h. DBI repr =>
- ((forall k. NT repr ((a, h)) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
+  ((forall k. NT repr (a, h) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
 hlam f = hoas (\x -> f $ conv x)
+
+hlam2 :: forall repr a b c h. DBI repr =>
+  ((forall k. NT repr (a, h) k => repr k a) -> (forall k. NT repr (b, (a, h)) k => repr k b) -> (repr (b, (a, h))) c) -> repr h (a -> b -> c)
+  
+hlam2 f = hlam $ \x -> hlam $ \y -> f x y
+hlam3 f = hlam2 $ \x y -> hlam $ \z -> f x y z
 
 type family Diff x
 type instance Diff P.Double = (P.Double, P.Double)
@@ -296,14 +303,14 @@ instance DBI repr => DBI (WDiff repr) where
   zro = WDiff zro
   fst = WDiff fst
   lit x = WDiff $ app (mkProd1 (lit x)) (lit 0)
-  plus = WDiff $ hlam $ \l -> hlam $ \r ->
+  plus = WDiff $ hlam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  minus = WDiff $ hlam $ \l -> hlam $ \r ->
+  minus = WDiff $ hlam2 $ \l r ->
     mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  mult = WDiff $ hlam $ \l -> hlam $ \r ->
+  mult = WDiff $ hlam2 $ \l r ->
     mkProd2 (mult2 (zro1 l) (zro1 r))
       (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
-  divide = WDiff $ hlam $ \l -> hlam $ \r ->
+  divide = WDiff $ hlam2 $ \l r ->
     mkProd2 (divide2 (zro1 l) (zro1 r))
       (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
@@ -326,7 +333,7 @@ instance DBI repr => DBI (WDiff repr) where
   writer = WDiff writer
   runWriter = WDiff runWriter
 
-scomb = hlam $ \f -> hlam $ \x -> hlam $ \arg -> app (app f arg) (app x arg)
+scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
