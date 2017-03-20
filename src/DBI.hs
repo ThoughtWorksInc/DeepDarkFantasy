@@ -14,7 +14,8 @@
     FunctionalDependencies,
     AllowAmbiguousTypes,
     ExistentialQuantification,
-    InstanceSigs #-}
+    InstanceSigs,
+    TupleSections #-}
 
 module DBI where
 import qualified Prelude as P
@@ -25,6 +26,21 @@ import Control.Monad (when)
 import qualified Control.Monad.Writer as P
 import qualified Data.Functor.Identity as P
 import qualified Data.Tuple as P
+import System.Random
+
+instance Random () where
+  random = ((),)
+  randomR _ = random
+
+instance (Random l, Random r) => Random (l, r) where
+  random g0 = ((l, r), g2)
+    where
+      (l, g1) = random g0
+      (r, g2) = random g1
+  randomR ((llo, rlo), (lhi, rhi)) g0 = ((l, r), g2)
+    where
+      (l, g1) = randomR (llo, lhi) g0
+      (r, g2) = randomR (rlo, rhi) g1
 
 class DBI repr where
   z :: repr (a, h) a
@@ -402,9 +418,9 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
 noEnv :: repr () x -> repr () x
 noEnv = P.id
 
-data ImpW repr h x = forall w. Group repr w => ImpW (forall k. NT repr h k => repr k (w -> x))
+data ImpW repr h x = forall w. (Random w, Group repr w) => ImpW (forall k. NT repr h k => repr k (w -> x))
 
-mkImpW :: forall repr w h x. (DBI repr, Group repr w) => repr h (w -> x) -> ImpW repr h x
+mkImpW :: forall repr w h x. (DBI repr, Random w, Group repr w) => repr h (w -> x) -> ImpW repr h x
 mkImpW x = ImpW (conv x)
 
 noW :: forall repr h x. DBI repr => repr h x -> ImpW repr h x
@@ -440,7 +456,7 @@ instance DBI repr => DBI (ImpW repr) where
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
   s (ImpW x) = work x
     where
-      work :: Group repr w => repr h (w -> b) -> ImpW repr (a, h) b
+      work :: (Random w, Group repr w) => repr h (w -> b) -> ImpW repr (a, h) b
       work x = mkImpW (s x)
   app (ImpW f) (ImpW x) = mkImpW (hlam $ \p -> app (app f (zro1 p)) (app x (fst1 p)))
   lam (ImpW f) = mkImpW (flip1 $ lam f)
