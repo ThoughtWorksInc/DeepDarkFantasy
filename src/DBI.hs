@@ -1,4 +1,3 @@
-
 {-# LANGUAGE
     MultiParamTypeClasses,
     RankNTypes,
@@ -74,13 +73,15 @@ class DBI repr where
   id = hlam $ \x -> x
   const :: repr h (a -> b -> a)
   const = hlam2 $ \x _ -> x
+  scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
+  scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
 
 const1 = app const
 cons2 = app2 cons
 listMatch2 = app2 listMatch
 fix2 = app2 fix
 
-class DBI r => Monoid r m where
+class Monoid r m where
   mzero :: r h m
   mappend :: r h (m -> m -> m)
 
@@ -88,7 +89,7 @@ instance DBI r => Monoid r [a] where
   mzero = nil
   mappend = append
 
-class DBI r => Functor r f where
+class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
 
 class Functor r a => Applicative r a where
@@ -97,7 +98,7 @@ class Functor r a => Applicative r a where
 
 return = pure
 
-class Applicative r m => Monad r m where
+class (DBI r, Applicative r m) => Monad r m where
   bind :: r h (m a -> (a -> m b) -> m b)
   join :: r h (m (m a) -> m a)
   join = hlam $ \m -> bind2 m id
@@ -332,8 +333,6 @@ instance DBI repr => DBI (WDiff repr) where
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter
-
-scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
