@@ -115,6 +115,16 @@ instance DBI r => Vector r P.Double where
   mult = doubleMult
   divide = doubleDivide
 
+instance (DBI repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
+  zero = mkProd2 zero zero
+  plus = hlam2 $ \l r -> mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+
+instance (DBI repr, Group repr l, Group repr r) => Group repr (l, r) where
+  invert = bimap2 invert invert
+
+instance (DBI repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
+  mult = hlam $ \x -> bimap2 (mult1 x) (mult1 x)
+
 instance DBI r => Monoid r [a] where
   zero = nil
   plus = listAppend
@@ -321,6 +331,7 @@ plus2 = app2 plus
 zro1 = app zro
 fst1 = app fst
 minus2 = app2 minus
+mult1 = app mult
 mult2 = app2 mult
 divide2 = app2 divide
 invert1 = app invert
