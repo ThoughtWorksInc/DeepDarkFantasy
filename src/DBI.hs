@@ -12,7 +12,6 @@
     LiberalTypeSynonyms,
     EmptyCase,
     FunctionalDependencies,
-    AllowAmbiguousTypes,
     ExistentialQuantification #-}
 
 module DBI where
@@ -34,8 +33,8 @@ class DBI repr where
   zro :: repr h ((a, b) -> a)
   fst :: repr h ((a, b) -> b)
   lit :: P.Double -> repr h P.Double
-  litZro :: repr h P.Double
-  litZro = lit 0
+  litZero :: repr h P.Double
+  litZero = lit 0
   litOne :: repr h P.Double
   litOne = lit 1
   plus :: repr h (P.Double -> P.Double -> P.Double)
@@ -84,6 +83,40 @@ fix2 = app2 fix
 class Monoid r m where
   mzero :: r h m
   mappend :: r h (m -> m -> m)
+
+class (DBI r, Monoid r g) => Group r g where
+  invert :: r h (g -> g)
+  gminus :: r h (g -> g -> g)
+  invert = gminus1 mzero
+  gminus = hlam2 $ \x y -> mappend2 x (invert1 y)
+  {-# MINIMAL (invert | gminus) #-}
+
+gminus1 = app gminus
+gminus2 = app2 gminus
+divide1 = app divide
+
+recip = divide1 litOne
+recip1 = app recip
+
+class Group r v => Vector r v where
+  smult :: r h (P.Double -> v -> v)
+  sdivide :: r h (v -> P.Double -> v)
+  smult = hlam2 $ \x y -> sdivide2 y (recip1 x)
+  sdivide = hlam2 $ \x y -> smult2 (recip1 y) x
+  {-# MINIMAL (smult | sdivide) #-}
+
+instance DBI r => Monoid r P.Double where
+  mzero = litZero
+  mappend = plus
+
+instance DBI r => Group r P.Double where
+  gminus = minus
+
+instance DBI r => Vector r P.Double where
+  smult = mult
+  sdivide = divide
+
+sdivide2 = app2 sdivide
 
 instance DBI r => Monoid r [a] where
   mzero = nil
@@ -146,8 +179,8 @@ instance DBI r => Monad r P.IO where
 
 app3 f x y z = app (app2 f x y) z
 
-optionMatch3 = app3 optionMatch
 optionMatch2 = app2 optionMatch
+optionMatch3 = app3 optionMatch
 com2 = app2 com
 
 instance DBI r => Functor r P.Maybe where
@@ -270,19 +303,19 @@ hlam2 :: forall repr a b c h. DBI repr =>
 hlam2 f = hlam $ \x -> hlam $ \y -> f x y
 hlam3 f = hlam2 $ \x y -> hlam $ \z -> f x y z
 
-type family Diff x
-type instance Diff P.Double = (P.Double, P.Double)
-type instance Diff () = ()
-type instance Diff (a, b) = (Diff a, Diff b)
-type instance Diff (a -> b) = Diff a -> Diff b
-type instance Diff (P.Either a b) = P.Either (Diff a) (Diff b)
-type instance Diff Void = Void
-type instance Diff (P.Maybe a) = P.Maybe (Diff a)
-type instance Diff (P.IO a) = P.IO (Diff a)
-type instance Diff [a] = [Diff a]
-type instance Diff (P.Writer w a) = P.Writer (Diff w) (Diff a)
+type family Diff v x
+type instance Diff v P.Double = (P.Double, v)
+type instance Diff v () = ()
+type instance Diff v (a, b) = (Diff v a, Diff v b)
+type instance Diff v (a -> b) = Diff v a -> Diff v b
+type instance Diff v (P.Either a b) = P.Either (Diff v a) (Diff v b)
+type instance Diff v Void = Void
+type instance Diff v (P.Maybe a) = P.Maybe (Diff v a)
+type instance Diff v (P.IO a) = P.IO (Diff v a)
+type instance Diff v [a] = [Diff v a]
+type instance Diff v (P.Writer w a) = P.Writer (Diff v w) (Diff v a)
 
-newtype WDiff repr h x = WDiff {runWDiff :: repr (Diff h) (Diff x)}
+newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
 
 app2 f a = app (app f a)
 
@@ -294,8 +327,10 @@ fst1 = app fst
 minus2 = app2 minus
 mult2 = app2 mult
 divide2 = app2 divide
+invert1 = app invert
+smult2 = app2 smult
 
-instance DBI repr => DBI (WDiff repr) where
+instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   z = WDiff z
   s (WDiff x) = WDiff $ s x
   lam (WDiff f) = WDiff $ lam f
@@ -303,17 +338,17 @@ instance DBI repr => DBI (WDiff repr) where
   mkProd = WDiff mkProd
   zro = WDiff zro
   fst = WDiff fst
-  lit x = WDiff $ app (mkProd1 (lit x)) (lit 0)
+  lit x = WDiff $ mkProd2 (lit x) mzero
   plus = WDiff $ hlam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (mappend2 (fst1 l) (fst1 r))
   minus = WDiff $ hlam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (gminus2 (fst1 l) (fst1 r))
   mult = WDiff $ hlam2 $ \l r ->
     mkProd2 (mult2 (zro1 l) (zro1 r))
-      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
+      (mappend2 (smult2 (zro1 l) (fst1 r)) (smult2 (zro1 r) (fst1 l)))
   divide = WDiff $ hlam2 $ \l r ->
     mkProd2 (divide2 (zro1 l) (zro1 r))
-      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
+      (sdivide2 (gminus2 (smult2 (zro1 r) (fst1 l)) (smult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
   hoas f = WDiff $ hoas (runWDiff . f . WDiff)
   fix = WDiff fix
