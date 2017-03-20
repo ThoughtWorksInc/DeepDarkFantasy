@@ -125,6 +125,16 @@ instance (DBI repr, Group repr l, Group repr r) => Group repr (l, r) where
 instance (DBI repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
   mult = hlam $ \x -> bimap2 (mult1 x) (mult1 x)
 
+instance (DBI repr, Monoid repr l, Monoid repr r) => Monoid repr (l -> r) where
+  zero = const1 zero
+  plus = hlam3 $ \l r x -> plus2 (app l x) (app r x)
+
+instance (DBI repr, Group repr l, Group repr r) => Group repr (l -> r) where
+  invert = hlam2 $ \l x -> app l (invert1 x)
+
+instance (DBI repr, Vector repr l, Vector repr r) => Vector repr (l -> r) where
+  mult = hlam3 $ \l r x -> app r (mult2 l x)
+
 instance DBI r => Monoid r [a] where
   zero = nil
   plus = listAppend
