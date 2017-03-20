@@ -24,7 +24,8 @@ library
     Util
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
-    mtl -any
+    mtl -any,
+    random -any
   default-language: Haskell2010
   hs-source-dirs: src
   ghc-options: -ferror-spans
