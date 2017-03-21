@@ -62,7 +62,7 @@ noEnv comp assume the term (which is a De Brujin Index term) need no environment
 and it is a finally tagless term, with WDiff interpreter being implicitly applied,
 which return another finally tagless term, but taking derivative of x.
 it is then applied to Eval interpreter (which eval it in the meta language, haskell).
-similar to unWDiff, we use unEval to take out the term from a newtype
+similar to runWDiff, we use runEval to take out the term from a newtype
 now we apply the environment (remember it has no environment? so just stick a unit)
 and a pair, the zeroth being x, the first being derivative of x, which is 1.
 the whole computation return a pair of (x * x + (2 * x + 3) - 27)^2, and it's derivative.
