@@ -18,7 +18,7 @@
 > import Util
 > import DBI hiding (main, return)
 
-Importting files and opening language extension...
+Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
@@ -58,12 +58,12 @@ print the weight in increasing interval, so initially more weight can be printed
 
 >       go (1 + i) $ w - 0.001 * snd (runEval (runWDiff $ noEnv comp) () (w, 1))
 
-noEnv comp assume the term (which is a De Brujin Index term) need no enviroment (is free)
+noEnv comp assume the term (which is a De Brujin Index term) need no environment (is free)
 and it is a finally tagless term, with WDiff interpreter being implicitly applied,
 which return another finally tagless term, but taking derivative of x.
 it is then applied to Eval interpreter (which eval it in the meta language, haskell).
-similar to unWDiff, we use unEval to take out the term from a newtype
-now we apply the enviroment (remember it has no enviroment? so just stick a unit)
+similar to runWDiff, we use runEval to take out the term from a newtype
+now we apply the environment (remember it has no environment? so just stick a unit)
 and a pair, the zeroth being x, the first being derivative of x, which is 1.
 the whole computation return a pair of (x * x + (2 * x + 3) - 27)^2, and it's derivative.
 we modify w using the derivative.
