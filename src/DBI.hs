@@ -12,10 +12,11 @@
     LiberalTypeSynonyms,
     EmptyCase,
     FunctionalDependencies,
-    AllowAmbiguousTypes,
     ExistentialQuantification,
     InstanceSigs,
-    TupleSections #-}
+    AllowAmbiguousTypes,
+    TupleSections,
+    ConstraintKinds #-}
 
 module DBI where
 import qualified Prelude as P
@@ -27,6 +28,7 @@ import qualified Control.Monad.Writer as P
 import qualified Data.Functor.Identity as P
 import qualified Data.Tuple as P
 import System.Random
+import Data.Proxy
 
 instance Random () where
   random = ((),)
@@ -41,6 +43,18 @@ instance (Random l, Random r) => Random (l, r) where
     where
       (l, g1) = randomR (llo, lhi) g0
       (r, g2) = randomR (rlo, rhi) g1
+
+class Reify repr x where
+  reify :: x -> repr h x
+
+instance DBI repr => Reify repr () where
+  reify _ = unit
+
+instance DBI repr => Reify repr P.Double where
+  reify = lit
+
+instance (DBI repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
+  reify (l, r) = mkProd2 (reify l) (reify r)
 
 class DBI repr where
   z :: repr (a, h) a
@@ -92,6 +106,7 @@ class DBI repr where
   const = hlam2 $ \x _ -> x
   scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
   scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
+  exp :: repr h (P.Double -> P.Double)
 
 const1 = app const
 cons2 = app2 cons
@@ -280,6 +295,7 @@ instance DBI Eval where
   ioMap = comb P.fmap
   writer = comb (P.WriterT . P.Identity)
   runWriter = comb P.runWriter
+  exp = comb P.exp
 
 data AST = Leaf P.String | App P.String AST [AST] | Lam P.String [P.String] AST
 
@@ -303,7 +319,7 @@ instance DBI Show where
   lam (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
   app (Show f) (Show x) = Show $ \vars h -> appAST (f vars h) (x vars h)
   hoas f = Show $ \(v:vars) h ->
-    lamAST v (runShow (f $ Show $ P.const $ P.const $ Leaf v) vars h)
+    lamAST v (runShow (f $ Show $ P.const $ P.const $ Leaf v) vars (h + 1))
   mkProd = name "mkProd"
   zro = name "zro"
   fst = name "fst"
@@ -329,6 +345,7 @@ instance DBI Show where
   ioMap = name "ioMap"
   writer = name "writer"
   runWriter = name "runWriter"
+  exp = name "exp"
 
 class NT repr l r where
     conv :: repr l t -> repr r t
@@ -414,17 +431,48 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter
+  exp = WDiff $ hlam $ \x -> mkProd2 (exp1 (zro1 x)) (mult2 (exp1 (zro1 x)) (fst1 x))
+
+exp1 = app exp
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
 
-data ImpW repr h x = forall w. (Random w, Group repr w) => ImpW (forall k. NT repr h k => repr k (w -> x))
+class Monoid repr w => WithDiff repr w where
+  withDiff :: repr h ((w -> x) -> w -> Diff x w)
+  fromDiff :: Proxy x -> repr h (Diff x w -> w)
 
-mkImpW :: forall repr w h x. (DBI repr, Random w, Group repr w) => repr h (w -> x) -> ImpW repr h x
-mkImpW x = ImpW (conv x)
+selfDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)
+selfDiff = withDiff1 id
+
+withDiff1 = app withDiff
+
+instance DBI repr => WithDiff repr () where
+  withDiff = const1 id
+  fromDiff _ = id
+
+instance DBI repr => WithDiff repr P.Double where
+  withDiff = hlam2 $ \conv d -> mkProd2 d (app conv d)
+  fromDiff _ = zro
+
+instance (DBI repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
+  withDiff = hlam $ \conv -> bimap2 (withDiff1 (hlam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (hlam $ \r -> app conv (mkProd2 zero r)))
+  fromDiff p = bimap2 (fromDiff p) (fromDiff p)
+
+class (Random w, Reify repr w, WithDiff repr w, Vector repr w) => Weight repr w
+
+instance (Random w, Reify repr w, WithDiff repr w, Vector repr w) => Weight repr w
+
+data ImpW repr h x = forall w. Weight repr w => ImpW (repr h (w -> x))
+
+data Term con h x = Term (forall r. con r => r h x)
+
+--data UnDiff con h x res = UnDiff (forall w. (forall repr. con repr => repr h (w -> x)) -> res)
+--unDiff :: forall h x res. ImpW (Term DBI) h x -> UnDiff DBI h x res -> res
+--unDiff (ImpW (Term x)) (UnDiff u) = u x
 
 noW :: forall repr h x. DBI repr => repr h x -> ImpW repr h x
-noW x = mkImpW (const1 x :: repr h (() -> x))
+noW x = ImpW (const1 x :: repr h (() -> x))
 
 instance DBI repr => DBI (ImpW repr) where
   nil = noW nil
@@ -456,7 +504,40 @@ instance DBI repr => DBI (ImpW repr) where
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
   s (ImpW x) = work x
     where
-      work :: (Random w, Group repr w) => repr h (w -> b) -> ImpW repr (a, h) b
-      work x = mkImpW (s x)
-  app (ImpW f) (ImpW x) = mkImpW (hlam $ \p -> app (app f (zro1 p)) (app x (fst1 p)))
-  lam (ImpW f) = mkImpW (flip1 $ lam f)
+      work :: Weight repr w => repr h (w -> b) -> ImpW repr (a, h) b
+      work x = ImpW (s x)
+  app (ImpW f) (ImpW x) = ImpW (hlam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
+  lam (ImpW f) = ImpW (flip1 $ lam f)
+  exp = noW exp
+
+instance DBI (Term DBI) where
+  z = Term z
+  s (Term x) = Term (s x)
+  lam (Term x) = Term (lam x)
+  app (Term f) (Term x) = Term $ app f x
+  mkProd = Term mkProd
+  zro = Term zro
+  fst = Term fst
+  lit x = Term $ lit x
+  doublePlus = Term doublePlus
+  doubleMinus = Term doubleMinus
+  doubleMult = Term doubleMult
+  doubleDivide = Term doubleDivide
+  fix = Term fix
+  left = Term left
+  right = Term right
+  sumMatch = Term sumMatch
+  unit = Term unit
+  exfalso = Term exfalso
+  nothing = Term nothing
+  just = Term just
+  optionMatch = Term optionMatch
+  exp = Term exp
+  ioRet = Term ioRet
+  ioMap = Term ioMap
+  ioBind = Term ioBind
+  nil = Term nil
+  cons = Term cons
+  listMatch = Term listMatch
+  writer = Term writer
+  runWriter = Term runWriter
