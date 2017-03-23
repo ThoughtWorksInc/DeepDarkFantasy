@@ -107,12 +107,17 @@ class DBI repr where
   scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
   scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
   exp :: repr h (P.Double -> P.Double)
+  curry :: repr h (((a, b) -> c) -> (a -> b -> c))
+  uncurry :: repr h ((a -> b -> c) -> ((a, b) -> c))
+  curry = hlam3 $ \f a b -> app f (mkProd2 a b)
+  uncurry = hlam2 $ \f p -> app2 f (zro1 p) (fst1 p)
 
 const1 = app const
 cons2 = app2 cons
 listMatch2 = app2 listMatch
 fix1 = app fix
 fix2 = app2 fix
+uncurry1 = app uncurry
 
 class Monoid r m where
   zero :: r h m

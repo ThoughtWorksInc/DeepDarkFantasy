@@ -80,7 +80,7 @@ And finally, the whole NN:
 
 > type XOR = (Double, Double) -> Double
 > xor :: DBI repr => ImpW repr h XOR
-> xor = com2 (com2 neuron (bimap2 scaleAdd scaleAdd)) hidden
+> xor = neuron `com2` (bimap2 scaleAdd scaleAdd) `com2` hidden
 
 But before we can train it, we need to define the dataset and the loss function.
 
