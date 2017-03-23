@@ -111,6 +111,7 @@ class DBI repr where
 const1 = app const
 cons2 = app2 cons
 listMatch2 = app2 listMatch
+fix1 = app fix
 fix2 = app2 fix
 
 class Monoid r m where
@@ -186,6 +187,11 @@ instance DBI r => Monoid r [a] where
 
 class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
+
+instance DBI r => Functor r [] where
+  map = hlam $ \f -> fix1 $ hlam $ \self -> listMatch2 nil (hlam2 $ \x xs -> cons2 (app f x) $ app self xs)
+
+map2 = app2 map
 
 class Functor r a => Applicative r a where
   pure :: r h (x -> a x)
@@ -438,77 +444,91 @@ exp1 = app exp
 noEnv :: repr () x -> repr () x
 noEnv = P.id
 
-class Monoid repr w => WithDiff repr w where
-  withDiff :: repr h ((w -> x) -> w -> Diff x w)
-  fromDiff :: Proxy x -> repr h (Diff x w -> w)
-
-selfDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)
-selfDiff = withDiff1 id
+selfWithDiff :: (DBI repr, Weight repr w) => repr h (w -> Diff w w)
+selfWithDiff = withDiff1 id
 
 withDiff1 = app withDiff
 
-instance DBI repr => WithDiff repr () where
+class RandRange w where
+  randRange :: (P.Double, P.Double) -> (w, w)
+
+instance RandRange () where
+  randRange _ = ((), ())
+
+instance RandRange P.Double where
+  randRange (lo, hi) = (lo, hi)
+
+instance (RandRange l, RandRange r) => RandRange (l, r) where
+  randRange (lo, hi) = ((llo, rlo), (lhi, rhi))
+    where
+      (llo, lhi) = randRange (lo, hi)
+      (rlo, rhi) = randRange (lo, hi)
+
+instance DBI repr => Weight repr () where
   withDiff = const1 id
   fromDiff _ = id
 
-instance DBI repr => WithDiff repr P.Double where
-  withDiff = hlam2 $ \conv d -> mkProd2 d (app conv d)
+instance DBI repr => Weight repr P.Double where
+  withDiff = hlam2 $ \conv d -> mkProd2 d (app conv litOne)
   fromDiff _ = zro
 
-instance (DBI repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
+instance (DBI repr, Weight repr l, Weight repr r) => Weight repr (l, r) where
   withDiff = hlam $ \conv -> bimap2 (withDiff1 (hlam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (hlam $ \r -> app conv (mkProd2 zero r)))
   fromDiff p = bimap2 (fromDiff p) (fromDiff p)
 
-class (Random w, Reify repr w, WithDiff repr w, Vector repr w) => Weight repr w
+class (Random w, RandRange w, Reify repr w, P.Show w, Vector repr w) => Weight repr w where
+  withDiff :: repr h ((w -> x) -> w -> Diff x w)
+  fromDiff :: Proxy x -> repr h (Diff x w -> w)
 
-instance (Random w, Reify repr w, WithDiff repr w, Vector repr w) => Weight repr w
+data RunImpW repr h x = forall w. Weight repr w => RunImpW (repr h (w -> x))
+data ImpW repr h x = NoImpW (repr h x) | forall w. Weight repr w => ImpW (repr h (w -> x))
 
-data ImpW repr h x = forall w. Weight repr w => ImpW (repr h (w -> x))
+runImpW :: forall repr h x. DBI repr => ImpW repr h x -> RunImpW repr h x
+runImpW (ImpW x) = RunImpW x
+runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
 
 data Term con h x = Term (forall r. con r => r h x)
 
---data UnDiff con h x res = UnDiff (forall w. (forall repr. con repr => repr h (w -> x)) -> res)
---unDiff :: forall h x res. ImpW (Term DBI) h x -> UnDiff DBI h x res -> res
---unDiff (ImpW (Term x)) (UnDiff u) = u x
-
-noW :: forall repr h x. DBI repr => repr h x -> ImpW repr h x
-noW x = ImpW (const1 x :: repr h (() -> x))
-
 instance DBI repr => DBI (ImpW repr) where
-  nil = noW nil
-  cons = noW cons
-  listMatch = noW listMatch
-  zro = noW zro
-  fst = noW fst
-  mkProd = noW mkProd
-  ioRet = noW ioRet
-  ioMap = noW ioMap
-  ioBind = noW ioBind
-  unit = noW unit
-  nothing = noW nothing
-  just = noW just
-  optionMatch = noW optionMatch
-  exfalso = noW exfalso
-  doublePlus = noW doublePlus
-  doubleMinus = noW doubleMinus
-  doubleMult = noW doubleMult
-  doubleDivide = noW doubleDivide
-  fix = noW fix
-  left = noW left
-  right = noW right
-  sumMatch = noW sumMatch
-  lit = noW . lit
-  writer = noW writer
-  runWriter = noW runWriter
-  z = noW z
+  nil = NoImpW nil
+  cons = NoImpW cons
+  listMatch = NoImpW listMatch
+  zro = NoImpW zro
+  fst = NoImpW fst
+  mkProd = NoImpW mkProd
+  ioRet = NoImpW ioRet
+  ioMap = NoImpW ioMap
+  ioBind = NoImpW ioBind
+  unit = NoImpW unit
+  nothing = NoImpW nothing
+  just = NoImpW just
+  optionMatch = NoImpW optionMatch
+  exfalso = NoImpW exfalso
+  doublePlus = NoImpW doublePlus
+  doubleMinus = NoImpW doubleMinus
+  doubleMult = NoImpW doubleMult
+  doubleDivide = NoImpW doubleDivide
+  fix = NoImpW fix
+  left = NoImpW left
+  right = NoImpW right
+  sumMatch = NoImpW sumMatch
+  lit = NoImpW . lit
+  writer = NoImpW writer
+  runWriter = NoImpW runWriter
+  z = NoImpW z
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
   s (ImpW x) = work x
     where
       work :: Weight repr w => repr h (w -> b) -> ImpW repr (a, h) b
       work x = ImpW (s x)
+  s (NoImpW x) = NoImpW (s x)
   app (ImpW f) (ImpW x) = ImpW (hlam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
+  app (NoImpW f) (NoImpW x) = NoImpW (app f x)
+  app (ImpW f) (NoImpW x) = ImpW (hlam $ \w -> app2 (conv f) w (conv x))
+  app (NoImpW f) (ImpW x) = ImpW (hlam $ \w -> app (conv f) (app (conv x) w))
   lam (ImpW f) = ImpW (flip1 $ lam f)
-  exp = noW exp
+  lam (NoImpW x) = NoImpW (lam x)
+  exp = NoImpW exp
 
 instance DBI (Term DBI) where
   z = Term z

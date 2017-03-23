@@ -91,6 +91,3 @@ followed by something like
 3.999999999999999
 which mean we found 4 as a soultion.
 plugging it back to the equation, we can verify that (4 * 4) + 2 * 4 + 3 is indeed 27!
-
-> isSquare n = sq * sq == n
->   where sq = floor $ sqrt (fromIntegral n::Double)
