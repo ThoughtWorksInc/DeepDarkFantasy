@@ -55,7 +55,7 @@ Obviously, we just need to take the implicit argument.
 
 We have the weight, now we need the activation function, sigmoid.
 
-> sigmoid = lam $ \x -> recip1 (plus2 doubleOne (exp1 (invert1 x)))
+> sigmoid = lam $ \x -> recip1 (plus2 doubleOne (doubleExp1 (invert1 x)))
 > sigmoid1 = app sigmoid
 
 With weight and sigmoid we can construct a neuron of type ((Double, Double) -> Double)

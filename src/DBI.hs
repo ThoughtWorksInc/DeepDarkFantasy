@@ -29,6 +29,7 @@ import qualified Data.Functor.Identity as P
 import qualified Data.Tuple as P
 import System.Random
 import Data.Proxy
+import qualified GHC.Float as P
 
 instance Random () where
   random = ((),)
@@ -73,6 +74,17 @@ class DBI repr where
   doubleMinus :: repr h (P.Double -> P.Double -> P.Double)
   doubleMult :: repr h (P.Double -> P.Double -> P.Double)
   doubleDivide :: repr h (P.Double -> P.Double -> P.Double)
+  doubleExp :: repr h (P.Double -> P.Double)
+  float :: P.Float -> repr h P.Float
+  floatZero :: repr h P.Float
+  floatZero = float 0
+  floatOne :: repr h P.Float
+  floatOne = float 1
+  floatPlus :: repr h (P.Float -> P.Float -> P.Float)
+  floatMinus :: repr h (P.Float -> P.Float -> P.Float)
+  floatMult :: repr h (P.Float -> P.Float -> P.Float)
+  floatDivide :: repr h (P.Float -> P.Float -> P.Float)
+  floatExp :: repr h (P.Float -> P.Float)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = abs $ f z
   fix :: repr h ((a -> a) -> a)
@@ -106,11 +118,12 @@ class DBI repr where
   const = lam2 $ \x _ -> x
   scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
   scomb = lam3 $ \f x arg -> app (app f arg) (app x arg)
-  exp :: repr h (P.Double -> P.Double)
   curry :: repr h (((a, b) -> c) -> (a -> b -> c))
   uncurry :: repr h ((a -> b -> c) -> ((a, b) -> c))
   curry = lam3 $ \f a b -> app f (mkProd2 a b)
   uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
+  float2Double :: repr h (P.Float -> P.Double)
+  double2Float :: repr h (P.Double -> P.Float)
 
 const1 = app const
 cons2 = app2 cons
@@ -165,6 +178,17 @@ instance DBI r => Group r P.Double where
 instance DBI r => Vector r P.Double where
   mult = doubleMult
   divide = doubleDivide
+
+instance DBI r => Monoid r P.Float where
+  zero = floatZero
+  plus = floatPlus
+
+instance DBI r => Group r P.Float where
+  minus = floatMinus
+
+instance DBI r => Vector r P.Float where
+  mult = com2 floatMult double2Float
+  divide = com2 (flip2 com double2Float) floatDivide
 
 instance (DBI repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
   zero = mkProd2 zero zero
@@ -306,7 +330,15 @@ instance DBI Eval where
   ioMap = comb P.fmap
   writer = comb (P.WriterT . P.Identity)
   runWriter = comb P.runWriter
-  exp = comb P.exp
+  doubleExp = comb P.exp
+  float = comb
+  floatPlus = comb (+)
+  floatMinus = comb (-)
+  floatMult = comb (*)
+  floatDivide = comb (/)
+  floatExp = comb P.exp
+  float2Double = comb P.float2Double
+  double2Float = comb P.double2Float
 
 data AST = Leaf P.String | App P.String AST [AST] | Lam P.String [P.String] AST
 
@@ -339,6 +371,7 @@ instance DBI Show where
   doubleMinus = name "minus"
   doubleMult = name "mult"
   doubleDivide = name "divide"
+  doubleExp = name "exp"
   fix = name "fix"
   left = name "left"
   right = name "right"
@@ -356,7 +389,14 @@ instance DBI Show where
   ioMap = name "ioMap"
   writer = name "writer"
   runWriter = name "runWriter"
-  exp = name "exp"
+  float = name . show
+  floatPlus = name "plus"
+  floatMinus = name "minus"
+  floatMult = name "mult"
+  floatDivide = name "divide"
+  floatExp = name "exp"
+  float2Double = name "float2Double"
+  double2Float = name "double2Float"
 
 class NT repr l r where
     conv :: repr l t -> repr r t
@@ -379,6 +419,7 @@ lam3 f = lam2 $ \x y -> lam $ \z -> f x y z
 
 type family Diff v x
 type instance Diff v P.Double = (P.Double, v)
+type instance Diff v P.Float = (P.Float, v)
 type instance Diff v () = ()
 type instance Diff v (a, b) = (Diff v a, Diff v b)
 type instance Diff v (a -> b) = Diff v a -> Diff v b
@@ -424,6 +465,7 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
     mkProd2 (divide2 (zro1 l) (zro1 r))
       (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
+  doubleExp = WDiff $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
   hoas f = WDiff $ hoas (runWDiff . f . WDiff)
   fix = WDiff fix
   left = WDiff left
@@ -442,9 +484,25 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter
-  exp = WDiff $ lam $ \x -> mkProd2 (exp1 (zro1 x)) (mult2 (exp1 (zro1 x)) (fst1 x))
+  float x = WDiff $ mkProd2 (float x) zero
+  floatPlus = WDiff $ lam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  floatMinus = WDiff $ lam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  floatMult = WDiff $ lam2 $ \l r ->
+    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
+      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+  floatDivide = WDiff $ lam2 $ \l r ->
+    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
+        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
+  floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+  float2Double = WDiff $ bimap2 float2Double id
+  double2Float = WDiff $ bimap2 double2Float id
 
-exp1 = app exp
+float2Double1 = app float2Double
+doubleExp1 = app doubleExp
+floatExp1 = app floatExp
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
@@ -509,15 +567,10 @@ instance DBI repr => DBI (ImpW repr) where
   just = NoImpW just
   optionMatch = NoImpW optionMatch
   exfalso = NoImpW exfalso
-  doublePlus = NoImpW doublePlus
-  doubleMinus = NoImpW doubleMinus
-  doubleMult = NoImpW doubleMult
-  doubleDivide = NoImpW doubleDivide
   fix = NoImpW fix
   left = NoImpW left
   right = NoImpW right
   sumMatch = NoImpW sumMatch
-  double = NoImpW . double
   writer = NoImpW writer
   runWriter = NoImpW runWriter
   z = NoImpW z
@@ -533,7 +586,20 @@ instance DBI repr => DBI (ImpW repr) where
   app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
-  exp = NoImpW exp
+  double = NoImpW . double
+  doubleExp = NoImpW doubleExp
+  doublePlus = NoImpW doublePlus
+  doubleMinus = NoImpW doubleMinus
+  doubleMult = NoImpW doubleMult
+  doubleDivide = NoImpW doubleDivide
+  float = NoImpW . float
+  floatExp = NoImpW floatExp
+  floatPlus = NoImpW floatPlus
+  floatMinus = NoImpW floatMinus
+  floatMult = NoImpW floatMult
+  floatDivide = NoImpW floatDivide
+  float2Double = NoImpW float2Double
+  double2Float = NoImpW double2Float
 
 instance DBI (Term DBI) where
   z = Term z
@@ -543,11 +609,6 @@ instance DBI (Term DBI) where
   mkProd = Term mkProd
   zro = Term zro
   fst = Term fst
-  double x = Term $ double x
-  doublePlus = Term doublePlus
-  doubleMinus = Term doubleMinus
-  doubleMult = Term doubleMult
-  doubleDivide = Term doubleDivide
   fix = Term fix
   left = Term left
   right = Term right
@@ -557,7 +618,12 @@ instance DBI (Term DBI) where
   nothing = Term nothing
   just = Term just
   optionMatch = Term optionMatch
-  exp = Term exp
+  double x = Term $ double x
+  doublePlus = Term doublePlus
+  doubleMinus = Term doubleMinus
+  doubleMult = Term doubleMult
+  doubleDivide = Term doubleDivide
+  doubleExp = Term doubleExp
   ioRet = Term ioRet
   ioMap = Term ioMap
   ioBind = Term ioBind
@@ -566,3 +632,11 @@ instance DBI (Term DBI) where
   listMatch = Term listMatch
   writer = Term writer
   runWriter = Term runWriter
+  float x = Term $ float x
+  floatPlus = Term floatPlus
+  floatMinus = Term floatMinus
+  floatMult = Term floatMult
+  floatDivide = Term floatDivide
+  floatExp = Term floatExp
+  float2Double = Term float2Double
+  double2Float = Term double2Float
