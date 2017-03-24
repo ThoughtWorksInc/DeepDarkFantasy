@@ -55,7 +55,7 @@ Obviously, we just need to take the implicit argument.
 
 We have the weight, now we need the activation function, sigmoid.
 
-> sigmoid = hlam $ \x -> recip1 (plus2 litOne (exp1 (invert1 x)))
+> sigmoid = lam $ \x -> recip1 (plus2 doubleOne (exp1 (invert1 x)))
 > sigmoid1 = app sigmoid
 
 With weight and sigmoid we can construct a neuron of type ((Double, Double) -> Double)
@@ -63,7 +63,7 @@ The weight should be a pair of Double, each as a scale on the actual input, with
 We then add the two scaled input, with the bias, and pass them into sigmoid.
 
 > scaleAdd :: DBI repr => ImpW repr h ((Double, Double) -> Double)
-> scaleAdd = ImpW $ hlam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (plus2 (fst1 w) (fst1 p))
+> scaleAdd = ImpW $ lam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (plus2 (fst1 w) (fst1 p))
 
 > withBias :: DBI repr => ImpW repr h (Double -> Double)
 > withBias = ImpW $ plus
@@ -74,7 +74,7 @@ We then add the two scaled input, with the bias, and pass them into sigmoid.
 
 Now, the hidden layer of type (Double, Double) -> ((Double, Double), (Double, Double))
 
-> hidden = hlam $ \p -> mkProd2 (mkProd2 (neuron1 p) (neuron1 p)) (mkProd2 (neuron1 p) (neuron1 p))
+> hidden = lam $ \p -> mkProd2 (mkProd2 (neuron1 p) (neuron1 p)) (mkProd2 (neuron1 p) (neuron1 p))
 
 And finally, the whole NN:
 
@@ -85,20 +85,20 @@ And finally, the whole NN:
 But before we can train it, we need to define the dataset and the loss function.
 
 > l2 :: DBI repr => repr h (Double -> Double -> Double)
-> l2 = hlam2 $ \l r -> (mult2 (minus2 l r) (minus2 l r))
+> l2 = lam2 $ \l r -> (mult2 (minus2 l r) (minus2 l r))
 > l22 = app2 l2
 
 > eval :: DBI repr => repr h (XOR -> ((Double, Double), Double) -> Double)
-> eval = hlam2 $ \xor p -> l22 (app xor (zro1 p)) (fst1 p)
+> eval = lam2 $ \xor p -> l22 (app xor (zro1 p)) (fst1 p)
 
 > dataset :: DBI repr => repr h [((Double, Double), Double)]
 > dataset = cons2 (build 0 0 0) (cons2 (build 0 1 1) (cons2 (build 1 0 1) (cons2 (build 1 1 0) nil)))
->   where build l r ret = mkProd2 (mkProd2 (lit l) (lit r)) (lit ret)
+>   where build l r ret = mkProd2 (mkProd2 (double l) (double r)) (double ret)
 
 However, unlike Poly, there are more than one datapoint, so we need to use a list, and map xor onto it.
 
 > loss :: DBI repr => repr h (XOR -> Double)
-> loss = hlam $ \xor -> fix2 (hlam $ \self -> listMatch2 litZero (hlam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
+> loss = lam $ \xor -> fix2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
 
 Let's try to print the thing.
 
@@ -117,7 +117,7 @@ Getting random weights...
 
 >       diffAST (runWDiff xor :: Term DBI () (Diff w (w -> XOR))) initWeight
 >         (selfWithDiff :: Term DBI () (w -> Diff w w)) (runWDiff $ noEnv loss :: Term DBI () (Diff w (XOR -> Double)))
->         ((hlam3 $ \d o n -> minus2 o (mult2 d n)) :: Term DBI () (Double -> w -> w -> w))
+>         ((lam3 $ \d o n -> minus2 o (mult2 d n)) :: Term DBI () (Double -> w -> w -> w))
 >     diffAST (Term xor) weight (Term wdiff) (Term loss) (Term update) =
 >       go (runEval xor ()) weight (runEval wdiff ()) (runEval loss ()) (runEval update ()) 0
 >     go :: forall w. P.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> IO ()

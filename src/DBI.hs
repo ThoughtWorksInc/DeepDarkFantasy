@@ -51,7 +51,7 @@ instance DBI repr => Reify repr () where
   reify _ = unit
 
 instance DBI repr => Reify repr P.Double where
-  reify = lit
+  reify = double
 
 instance (DBI repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
   reify (l, r) = mkProd2 (reify l) (reify r)
@@ -59,22 +59,22 @@ instance (DBI repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
 class DBI repr where
   z :: repr (a, h) a
   s :: repr h b -> repr (a, h) b
-  lam :: repr (a, h) b -> repr h (a -> b)
+  abs :: repr (a, h) b -> repr h (a -> b)
   app :: repr h (a -> b) -> repr h a -> repr h b
   mkProd :: repr h (a -> b -> (a, b))
   zro :: repr h ((a, b) -> a)
   fst :: repr h ((a, b) -> b)
-  lit :: P.Double -> repr h P.Double
-  litZero :: repr h P.Double
-  litZero = lit 0
-  litOne :: repr h P.Double
-  litOne = lit 1
+  double :: P.Double -> repr h P.Double
+  doubleZero :: repr h P.Double
+  doubleZero = double 0
+  doubleOne :: repr h P.Double
+  doubleOne = double 1
   doublePlus :: repr h (P.Double -> P.Double -> P.Double)
   doubleMinus :: repr h (P.Double -> P.Double -> P.Double)
   doubleMult :: repr h (P.Double -> P.Double -> P.Double)
   doubleDivide :: repr h (P.Double -> P.Double -> P.Double)
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
-  hoas f = lam $ f z
+  hoas f = abs $ f z
   fix :: repr h ((a -> a) -> a)
   left :: repr h (a -> P.Either a b)
   right :: repr h (b -> P.Either a b)
@@ -91,26 +91,26 @@ class DBI repr where
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
   com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
-  com = hlam3 $ \f g x -> app f (app g x)
+  com = lam3 $ \f g x -> app f (app g x)
   listAppend :: repr h ([a] -> [a] -> [a])
-  listAppend = hlam2 $ \l r -> fix2 (hlam $ \self -> listMatch2 r (hlam2 $ \a as -> cons2 a (app self as))) l
+  listAppend = lam2 $ \l r -> fix2 (lam $ \self -> listMatch2 r (lam2 $ \a as -> cons2 a (app self as))) l
   writer :: repr h ((a, w) -> P.Writer w a)
   runWriter :: repr h (P.Writer w a -> (a, w))
   swap :: repr h ((l, r) -> (r, l))
-  swap = hlam $ \p -> mkProd2 (fst1 p) (zro1 p)
+  swap = lam $ \p -> mkProd2 (fst1 p) (zro1 p)
   flip :: repr h ((a -> b -> c) -> (b -> a -> c))
-  flip = hlam3 $ \f b a -> app2 f a b
+  flip = lam3 $ \f b a -> app2 f a b
   id :: repr h (a -> a)
-  id = hlam $ \x -> x
+  id = lam $ \x -> x
   const :: repr h (a -> b -> a)
-  const = hlam2 $ \x _ -> x
+  const = lam2 $ \x _ -> x
   scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
-  scomb = hlam3 $ \f x arg -> app (app f arg) (app x arg)
+  scomb = lam3 $ \f x arg -> app (app f arg) (app x arg)
   exp :: repr h (P.Double -> P.Double)
   curry :: repr h (((a, b) -> c) -> (a -> b -> c))
   uncurry :: repr h ((a -> b -> c) -> ((a, b) -> c))
-  curry = hlam3 $ \f a b -> app f (mkProd2 a b)
-  uncurry = hlam2 $ \f p -> app2 f (zro1 p) (fst1 p)
+  curry = lam3 $ \f a b -> app f (mkProd2 a b)
+  uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
 
 const1 = app const
 cons2 = app2 cons
@@ -127,20 +127,20 @@ class (DBI r, Monoid r g) => Group r g where
   invert :: r h (g -> g)
   minus :: r h (g -> g -> g)
   invert = minus1 zero
-  minus = hlam2 $ \x y -> plus2 x (invert1 y)
+  minus = lam2 $ \x y -> plus2 x (invert1 y)
   {-# MINIMAL (invert | minus) #-}
 
 minus1 = app minus
 divide1 = app divide
 
-recip = divide1 litOne
+recip = divide1 doubleOne
 recip1 = app recip
 
 class Group r v => Vector r v where
   mult :: r h (P.Double -> v -> v)
   divide :: r h (v -> P.Double -> v)
-  mult = hlam2 $ \x y -> divide2 y (recip1 x)
-  divide = hlam2 $ \x y -> mult2 (recip1 y) x
+  mult = lam2 $ \x y -> divide2 y (recip1 x)
+  divide = lam2 $ \x y -> mult2 (recip1 y) x
   {-# MINIMAL (mult | divide) #-}
 
 instance DBI r => Monoid r () where
@@ -156,7 +156,7 @@ instance DBI r => Vector r () where
   divide = const1 $ const1 unit
 
 instance DBI r => Monoid r P.Double where
-  zero = litZero
+  zero = doubleZero
   plus = doublePlus
 
 instance DBI r => Group r P.Double where
@@ -168,23 +168,23 @@ instance DBI r => Vector r P.Double where
 
 instance (DBI repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
   zero = mkProd2 zero zero
-  plus = hlam2 $ \l r -> mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  plus = lam2 $ \l r -> mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
 
 instance (DBI repr, Group repr l, Group repr r) => Group repr (l, r) where
   invert = bimap2 invert invert
 
 instance (DBI repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
-  mult = hlam $ \x -> bimap2 (mult1 x) (mult1 x)
+  mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
 instance (DBI repr, Monoid repr l, Monoid repr r) => Monoid repr (l -> r) where
   zero = const1 zero
-  plus = hlam3 $ \l r x -> plus2 (app l x) (app r x)
+  plus = lam3 $ \l r x -> plus2 (app l x) (app r x)
 
 instance (DBI repr, Group repr l, Group repr r) => Group repr (l -> r) where
-  invert = hlam2 $ \l x -> app l (invert1 x)
+  invert = lam2 $ \l x -> app l (invert1 x)
 
 instance (DBI repr, Vector repr l, Vector repr r) => Vector repr (l -> r) where
-  mult = hlam3 $ \l r x -> app r (mult2 l x)
+  mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance DBI r => Monoid r [a] where
   zero = nil
@@ -194,7 +194,7 @@ class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
 
 instance DBI r => Functor r [] where
-  map = hlam $ \f -> fix1 $ hlam $ \self -> listMatch2 nil (hlam2 $ \x xs -> cons2 (app f x) $ app self xs)
+  map = lam $ \f -> fix1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
 
 map2 = app2 map
 
@@ -207,8 +207,8 @@ return = pure
 class (DBI r, Applicative r m) => Monad r m where
   bind :: r h (m a -> (a -> m b) -> m b)
   join :: r h (m (m a) -> m a)
-  join = hlam $ \m -> bind2 m id
-  bind = hlam2 $ \m f -> join1 (app2 map f m)
+  join = lam $ \m -> bind2 m id
+  bind = lam2 $ \m f -> join1 (app2 map f m)
   {-# MINIMAL (join | bind) #-}
 
 bind2 = app2 bind
@@ -222,20 +222,20 @@ class DBI r => BiFunctor r p where
   bimap :: r h ((a -> b) -> (c -> d) -> p a c -> p b d)
 
 instance DBI r => BiFunctor r (,) where
-  bimap = hlam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
+  bimap = lam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
 
 instance DBI r => Functor r (P.Writer w) where
-  map = hlam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
+  map = lam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
 
 writer1 = app writer
 runWriter1 = app runWriter
 
 instance (DBI r, Monoid r w) => Applicative r (P.Writer w) where
   pure = com2 writer (flip2 mkProd zero)
-  ap = hlam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (plus2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
+  ap = lam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (plus2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
 
 instance (DBI r, Monoid r w) => Monad r (P.Writer w) where
-  join = hlam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (plus2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
+  join = lam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (plus2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
 
 instance DBI r => Functor r P.IO where
   map = ioMap
@@ -244,7 +244,7 @@ ioBind2 = app2 ioBind
 
 instance DBI r => Applicative r P.IO where
   pure = ioRet
-  ap = hlam2 $ \f x -> ioBind2 f (flip2 ioMap x)
+  ap = lam2 $ \f x -> ioBind2 f (flip2 ioMap x)
 
 instance DBI r => Monad r P.IO where
   bind = ioBind
@@ -256,14 +256,14 @@ optionMatch3 = app3 optionMatch
 com2 = app2 com
 
 instance DBI r => Functor r P.Maybe where
-  map = hlam $ \func -> optionMatch2 nothing (com2 just func)
+  map = lam $ \func -> optionMatch2 nothing (com2 just func)
 
 instance DBI r => Applicative r P.Maybe where
   pure = just
   ap = optionMatch2 (const1 nothing) map
 
 instance DBI r => Monad r P.Maybe where
-  bind = hlam2 $ \x func -> optionMatch3 nothing func x
+  bind = lam2 $ \x func -> optionMatch3 nothing func x
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
@@ -272,12 +272,12 @@ comb = Eval . P.const
 instance DBI Eval where
   z = Eval P.fst
   s (Eval a) = Eval $ a . P.snd
-  lam (Eval f) = Eval $ \a h -> f (h, a)
+  abs (Eval f) = Eval $ \a h -> f (h, a)
   app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
   zro = comb P.fst
   fst = comb P.snd
   mkProd = comb (,)
-  lit = comb
+  double = comb
   doublePlus = comb (+)
   doubleMinus = comb (-)
   doubleMult = comb (*)
@@ -327,14 +327,14 @@ name = Show . P.const . P.const . Leaf
 instance DBI Show where
   z = Show $ P.const $ Leaf . show . P.flip (-) 1
   s (Show v) = Show $ \vars -> v vars . P.flip (-) 1
-  lam (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
+  abs (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
   app (Show f) (Show x) = Show $ \vars h -> appAST (f vars h) (x vars h)
   hoas f = Show $ \(v:vars) h ->
     lamAST v (runShow (f $ Show $ P.const $ P.const $ Leaf v) vars (h + 1))
   mkProd = name "mkProd"
   zro = name "zro"
   fst = name "fst"
-  lit = name . show
+  double = name . show
   doublePlus = name "plus"
   doubleMinus = name "minus"
   doubleMult = name "mult"
@@ -367,15 +367,15 @@ instance {-# INCOHERENT #-} (DBI repr, NT repr l r) => NT repr l (a, r) where
 instance NT repr x x where
     conv = P.id
 
-hlam :: forall repr a b h. DBI repr =>
+lam :: forall repr a b h. DBI repr =>
   ((forall k. NT repr (a, h) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
-hlam f = hoas (\x -> f $ conv x)
+lam f = hoas (\x -> f $ conv x)
 
-hlam2 :: forall repr a b c h. DBI repr =>
+lam2 :: forall repr a b c h. DBI repr =>
   ((forall k. NT repr (a, h) k => repr k a) -> (forall k. NT repr (b, (a, h)) k => repr k b) -> (repr (b, (a, h))) c) -> repr h (a -> b -> c)
-hlam2 f = hlam $ \x -> hlam $ \y -> f x y
+lam2 f = lam $ \x -> lam $ \y -> f x y
 
-hlam3 f = hlam2 $ \x y -> hlam $ \z -> f x y z
+lam3 f = lam2 $ \x y -> lam $ \z -> f x y z
 
 type family Diff v x
 type instance Diff v P.Double = (P.Double, v)
@@ -407,20 +407,20 @@ invert1 = app invert
 instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   z = WDiff z
   s (WDiff x) = WDiff $ s x
-  lam (WDiff f) = WDiff $ lam f
+  abs (WDiff f) = WDiff $ abs f
   app (WDiff f) (WDiff x) = WDiff $ app f x
   mkProd = WDiff mkProd
   zro = WDiff zro
   fst = WDiff fst
-  lit x = WDiff $ mkProd2 (lit x) zero
-  doublePlus = WDiff $ hlam2 $ \l r ->
+  double x = WDiff $ mkProd2 (double x) zero
+  doublePlus = WDiff $ lam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  doubleMinus = WDiff $ hlam2 $ \l r ->
+  doubleMinus = WDiff $ lam2 $ \l r ->
     mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  doubleMult = WDiff $ hlam2 $ \l r ->
+  doubleMult = WDiff $ lam2 $ \l r ->
     mkProd2 (mult2 (zro1 l) (zro1 r))
       (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
-  doubleDivide = WDiff $ hlam2 $ \l r ->
+  doubleDivide = WDiff $ lam2 $ \l r ->
     mkProd2 (divide2 (zro1 l) (zro1 r))
       (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
@@ -442,7 +442,7 @@ instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter
-  exp = WDiff $ hlam $ \x -> mkProd2 (exp1 (zro1 x)) (mult2 (exp1 (zro1 x)) (fst1 x))
+  exp = WDiff $ lam $ \x -> mkProd2 (exp1 (zro1 x)) (mult2 (exp1 (zro1 x)) (fst1 x))
 
 exp1 = app exp
 
@@ -474,11 +474,11 @@ instance DBI repr => Weight repr () where
   fromDiff _ = id
 
 instance DBI repr => Weight repr P.Double where
-  withDiff = hlam2 $ \conv d -> mkProd2 d (app conv litOne)
+  withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
   fromDiff _ = zro
 
 instance (DBI repr, Weight repr l, Weight repr r) => Weight repr (l, r) where
-  withDiff = hlam $ \conv -> bimap2 (withDiff1 (hlam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (hlam $ \r -> app conv (mkProd2 zero r)))
+  withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))
   fromDiff p = bimap2 (fromDiff p) (fromDiff p)
 
 class (Random w, RandRange w, Reify repr w, P.Show w, Vector repr w) => Weight repr w where
@@ -517,7 +517,7 @@ instance DBI repr => DBI (ImpW repr) where
   left = NoImpW left
   right = NoImpW right
   sumMatch = NoImpW sumMatch
-  lit = NoImpW . lit
+  double = NoImpW . double
   writer = NoImpW writer
   runWriter = NoImpW runWriter
   z = NoImpW z
@@ -527,23 +527,23 @@ instance DBI repr => DBI (ImpW repr) where
       work :: Weight repr w => repr h (w -> b) -> ImpW repr (a, h) b
       work x = ImpW (s x)
   s (NoImpW x) = NoImpW (s x)
-  app (ImpW f) (ImpW x) = ImpW (hlam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
+  app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
   app (NoImpW f) (NoImpW x) = NoImpW (app f x)
-  app (ImpW f) (NoImpW x) = ImpW (hlam $ \w -> app2 (conv f) w (conv x))
-  app (NoImpW f) (ImpW x) = ImpW (hlam $ \w -> app (conv f) (app (conv x) w))
-  lam (ImpW f) = ImpW (flip1 $ lam f)
-  lam (NoImpW x) = NoImpW (lam x)
+  app (ImpW f) (NoImpW x) = ImpW (lam $ \w -> app2 (conv f) w (conv x))
+  app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
+  abs (ImpW f) = ImpW (flip1 $ abs f)
+  abs (NoImpW x) = NoImpW (abs x)
   exp = NoImpW exp
 
 instance DBI (Term DBI) where
   z = Term z
   s (Term x) = Term (s x)
-  lam (Term x) = Term (lam x)
+  abs (Term x) = Term (abs x)
   app (Term f) (Term x) = Term $ app f x
   mkProd = Term mkProd
   zro = Term zro
   fst = Term fst
-  lit x = Term $ lit x
+  double x = Term $ double x
   doublePlus = Term doublePlus
   doubleMinus = Term doubleMinus
   doubleMult = Term doubleMult

@@ -23,11 +23,11 @@ So, our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
 > poly :: forall repr h. DBI repr => repr h (Double -> Double)
-> poly = hlam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (lit 2.0) x) (lit 3.0))
+> poly = lam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (double 2.0) x) (double 3.0))
 
 poly x = x * x + (2 * x + 3)
 
-> l2 = hlam $ \x -> mult2 (minus2 x (lit 27)) (minus2 x (lit 27))
+> l2 = lam $ \x -> mult2 (minus2 x (double 27)) (minus2 x (double 27))
 
 l2 x = (x - 27) * (x - 27)
 l2 measure how far is the input from 27
