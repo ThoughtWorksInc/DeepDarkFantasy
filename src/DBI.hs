@@ -14,10 +14,12 @@
     FunctionalDependencies,
     ExistentialQuantification,
     InstanceSigs,
-    AllowAmbiguousTypes,
     TupleSections,
     ConstraintKinds,
-    DefaultSignatures #-}
+    DefaultSignatures,
+    UndecidableSuperClasses,
+    TypeOperators,
+    IncoherentInstances #-}
 
 module DBI where
 import qualified Prelude as P
@@ -30,6 +32,8 @@ import qualified Data.Functor.Identity as P
 import qualified Data.Tuple as P
 import System.Random
 import Data.Proxy
+import Data.Constraint
+import Data.Constraint.Forall
 import qualified GHC.Float as P
 
 instance Random () where
@@ -618,11 +622,21 @@ instance Lang repr => Lang (ImpW repr) where
   float2Double = NoImpW float2Double
   double2Float = NoImpW double2Float
 
-instance DBI (Term DBI) where
-  z = Term z
-  s (Term x) = Term (s x)
-  abs (Term x) = Term (abs x)
-  app (Term f) (Term x) = Term $ app f x
+class Class (r e) (l e) => SubLang l r e
+instance Class (r e) (l e) => SubLang l r e
+instance Class (DBI e) (Lang e) where cls = Sub Dict
+
+subLang :: forall sub sup r x. (Forall (SubLang sub sup), sub r) => Proxy sub -> Proxy sup -> Proxy r -> (sup r => x) -> x
+subLang _ _ _ x = x \\ ((cls :: sub r :- sup r) \\ (inst :: Forall (SubLang sub sup) :- SubLang sub sup r))
+
+instance Forall (SubLang con DBI) => DBI (Term con) where
+  z = Term work
+    where
+      work :: forall r a h. con r => r (a, h) a
+      work = (subLang (Proxy :: Proxy con) (Proxy :: Proxy DBI) (Proxy :: Proxy r) z)
+  s (Term x) = undefined
+  abs (Term x) = undefined
+  app (Term f) (Term x) = undefined
 
 instance Lang (Term Lang) where
   mkProd = Term mkProd
