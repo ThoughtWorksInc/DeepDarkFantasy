@@ -1,3 +1,5 @@
+Neural Network are program, and we can use PL techinque to help build Neural Network.
+
 What is NN?
 NN approach blackbox function.
 Very general - NLP, CV, speech synthesis, a few work on program synthesis/automatic theorem proving!
@@ -82,3 +84,13 @@ Partial Evaluation
 AST is fast comparing to exponential blowup, but is really really slow:
 Cannot work on GPU, also dynamic eval overhead!
 Partial Evaluation, get the AST away (provided that the control flow is fixed for fixed input, varying weight)
+
+PL/FP technique:
+Optimization
+Partial Evaluation
+Type Checking
+Typeclass: unify forward mode, backward mode, multiple variable, no variable!
+Final Tagless style - no need to handle NN specially
+Closure of diff operator: higher order derivative for free! (We just take derivative multiple times)
+
+FAQ?
