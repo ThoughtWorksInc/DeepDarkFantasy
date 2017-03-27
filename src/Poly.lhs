@@ -22,7 +22,7 @@ Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
-> poly :: forall repr h. DBI repr => repr h (Double -> Double)
+> poly :: forall repr h. Lang repr => repr h (Double -> Double)
 > poly = lam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (double 2.0) x) (double 3.0))
 
 poly x = x * x + (2 * x + 3)

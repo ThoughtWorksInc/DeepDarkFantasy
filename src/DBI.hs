@@ -10,7 +10,6 @@
     NoMonomorphismRestriction,
     TypeFamilies,
     LiberalTypeSynonyms,
-    EmptyCase,
     FunctionalDependencies,
     ExistentialQuantification,
     InstanceSigs,
@@ -18,7 +17,8 @@
     ConstraintKinds,
     DefaultSignatures,
     UndecidableSuperClasses,
-    TypeOperators #-}
+    TypeOperators,
+    TypeApplications #-}
 
 module DBI where
 import qualified Prelude as P
@@ -31,8 +31,6 @@ import qualified Data.Functor.Identity as P
 import qualified Data.Tuple as P
 import System.Random
 import Data.Proxy
-import Data.Constraint
-import Data.Constraint.Forall
 import qualified GHC.Float as P
 
 instance Random () where
@@ -574,8 +572,6 @@ runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
 runImpW (ImpW x) = RunImpW x
 runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
 
-data Term con h x = Term (forall r. con r => r h x)
-
 instance Lang repr => DBI (ImpW repr) where
   z = NoImpW z
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
@@ -627,54 +623,47 @@ instance Lang repr => Lang (ImpW repr) where
   float2Double = NoImpW float2Double
   double2Float = NoImpW double2Float
 
-class Class (r e) (l e) => SubLang l r e
-instance Class (r e) (l e) => SubLang l r e
-instance Class (DBI e) (Lang e) where cls = Sub Dict
+data Combine l r h x = Combine (l h x) (r h x)
 
-subLang :: forall sub sup r x. (Forall (SubLang sub sup), sub r) => Proxy sub -> Proxy sup -> Proxy r -> (sup r => x) -> x
-subLang _ _ _ x = x \\ ((cls :: sub r :- sup r) \\ (inst :: Forall (SubLang sub sup) :- SubLang sub sup r))
+instance (DBI l, DBI r) => DBI (Combine l r) where
+  z = Combine z z
+  s (Combine l r) = Combine (s l) (s r)
+  app (Combine fl fr) (Combine xl xr) = Combine (app fl xl) (app fr xr)
+  abs (Combine l r) = Combine (abs l) (abs r)
+  hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l r -> l) (hoas $ \x -> case f (Combine z x) of Combine l r -> r)
 
-instance Forall (SubLang con DBI) => DBI (Term con) where
-  z = Term work
-    where
-      work :: forall r a h. con r => r (a, h) a
-      work = (subLang (Proxy :: Proxy con) (Proxy :: Proxy DBI) (Proxy :: Proxy r) z)
-  s (Term x) = undefined
-  abs (Term x) = undefined
-  app (Term f) (Term x) = undefined
-
-instance Lang (Term Lang) where
-  mkProd = Term mkProd
-  zro = Term zro
-  fst = Term fst
-  fix = Term fix
-  left = Term left
-  right = Term right
-  sumMatch = Term sumMatch
-  unit = Term unit
-  exfalso = Term exfalso
-  nothing = Term nothing
-  just = Term just
-  optionMatch = Term optionMatch
-  double x = Term $ double x
-  doublePlus = Term doublePlus
-  doubleMinus = Term doubleMinus
-  doubleMult = Term doubleMult
-  doubleDivide = Term doubleDivide
-  doubleExp = Term doubleExp
-  ioRet = Term ioRet
-  ioMap = Term ioMap
-  ioBind = Term ioBind
-  nil = Term nil
-  cons = Term cons
-  listMatch = Term listMatch
-  writer = Term writer
-  runWriter = Term runWriter
-  float x = Term $ float x
-  floatPlus = Term floatPlus
-  floatMinus = Term floatMinus
-  floatMult = Term floatMult
-  floatDivide = Term floatDivide
-  floatExp = Term floatExp
-  float2Double = Term float2Double
-  double2Float = Term double2Float
+instance (Lang l, Lang r) => Lang (Combine l r) where
+  mkProd = Combine mkProd mkProd
+  zro = Combine zro zro
+  fst = Combine fst fst
+  double x = Combine (double x) (double x)
+  doublePlus = Combine doublePlus doublePlus
+  doubleMinus = Combine doubleMinus doubleMinus
+  doubleMult = Combine doubleMult doubleMult
+  doubleDivide = Combine doubleDivide doubleDivide
+  doubleExp = Combine doubleExp doubleExp
+  float x = Combine (float x) (float x)
+  floatPlus = Combine floatPlus floatPlus
+  floatMinus = Combine floatMinus floatMinus
+  floatMult = Combine floatMult floatMult
+  floatDivide = Combine floatDivide floatDivide
+  floatExp = Combine floatExp floatExp
+  fix = Combine fix fix
+  left = Combine left left
+  right = Combine right right
+  sumMatch = Combine sumMatch sumMatch
+  unit = Combine unit unit
+  exfalso = Combine exfalso exfalso
+  nothing = Combine nothing nothing
+  just = Combine just just
+  optionMatch = Combine optionMatch optionMatch
+  ioRet = Combine ioRet ioRet
+  ioBind = Combine ioBind ioBind
+  ioMap = Combine ioMap ioMap
+  nil = Combine nil nil
+  cons = Combine cons cons
+  listMatch = Combine listMatch listMatch
+  runWriter = Combine runWriter runWriter
+  writer = Combine writer writer
+  double2Float = Combine double2Float double2Float
+  float2Double = Combine float2Double float2Double
