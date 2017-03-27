@@ -92,5 +92,6 @@ Type Checking
 Typeclass: unify forward mode, backward mode, multiple variable, no variable!
 Final Tagless style - no need to handle NN specially
 Closure of diff operator: higher order derivative for free! (We just take derivative multiple times)
+example from Colah's blog
 
 FAQ?
