@@ -17,7 +17,8 @@
     ConstraintKinds,
     DefaultSignatures,
     TypeOperators,
-    TypeApplications #-}
+    TypeApplications,
+    PartialTypeSignatures #-}
 
 module DBI where
 import qualified Prelude as P
@@ -31,6 +32,25 @@ import qualified Data.Tuple as P
 import System.Random
 import Data.Proxy
 import qualified GHC.Float as P
+import Data.Constraint
+import Data.Constraint.Forall
+
+class Monoid repr w => WithDiff repr w where
+  withDiff :: repr h ((w -> x) -> w -> Diff x w)
+
+instance Lang repr => WithDiff repr () where
+  withDiff = const1 id
+
+instance Lang repr => WithDiff repr P.Double where
+  withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
+
+instance (Lang repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
+  withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))
+
+withDiff1 = app withDiff
+
+selfWithDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)
+selfWithDiff = withDiff1 id
 
 instance Random () where
   random = ((),)
@@ -364,6 +384,7 @@ instance P.Show AST where
   show (Leaf f) = f
   show (App f x l) = "(" ++ f ++ " " ++ show x ++ P.concatMap ((" " ++) . show) l ++ ")"
   show (Lam s l t) = "(\\" ++ s ++ P.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
+
 newtype Show h a = Show {runShow :: [P.String] -> P.Int -> AST}
 name = Show . P.const . P.const . Leaf
 
@@ -444,6 +465,7 @@ type instance Diff v [a] = [Diff v a]
 type instance Diff v (P.Writer w a) = P.Writer (Diff v w) (Diff v a)
 
 newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
+newtype GWDiff repr h x = GWDiff {runGWDiff :: forall v. Vector repr v => Proxy v -> repr (Diff v h) (Diff v x)}
 
 app2 f a = app (app f a)
 
@@ -458,12 +480,69 @@ mult2 = app2 mult
 divide2 = app2 divide
 invert1 = app invert
 
-instance (Vector repr v, DBI repr) => DBI (WDiff repr v) where
+instance DBI repr => DBI (WDiff repr v) where
   z = WDiff z
   s (WDiff x) = WDiff $ s x
   abs (WDiff f) = WDiff $ abs f
   app (WDiff f) (WDiff x) = WDiff $ app f x
   hoas f = WDiff $ hoas (runWDiff . f . WDiff)
+
+instance DBI repr => DBI (GWDiff repr) where
+  z = GWDiff (P.const z)
+  s (GWDiff x) = GWDiff (\p -> s $ x p)
+  app (GWDiff f) (GWDiff x) = GWDiff (\p -> app (f p) (x p))
+  abs (GWDiff x) = GWDiff (\p -> abs $ x p)
+
+instance Lang repr => Lang (GWDiff repr) where
+  mkProd = GWDiff (P.const mkProd)
+  zro = GWDiff $ P.const $ zro
+  fst = GWDiff $ P.const $ fst
+  double x = GWDiff $ P.const $ mkProd2 (double x) zero
+  doublePlus = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  doubleMinus = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  doubleMult = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (mult2 (zro1 l) (zro1 r))
+      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
+  doubleDivide = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (divide2 (zro1 l) (zro1 r))
+      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
+        (mult2 (zro1 r) (zro1 r)))
+  doubleExp = GWDiff $ P.const $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
+  fix = GWDiff $ P.const fix
+  left = GWDiff $ P.const left
+  right = GWDiff $ P.const right
+  sumMatch = GWDiff $ P.const sumMatch
+  unit = GWDiff $ P.const unit
+  exfalso = GWDiff $ P.const exfalso
+  nothing = GWDiff $ P.const nothing
+  just = GWDiff $ P.const just
+  ioRet = GWDiff $ P.const ioRet
+  ioBind = GWDiff $ P.const ioBind
+  nil = GWDiff $ P.const nil
+  cons = GWDiff $ P.const cons
+  listMatch = GWDiff $ P.const listMatch
+  optionMatch = GWDiff $ P.const optionMatch
+  ioMap = GWDiff $ P.const ioMap
+  writer = GWDiff $ P.const writer
+  runWriter = GWDiff $ P.const runWriter
+  float x = GWDiff $ P.const $ mkProd2 (float x) zero
+  floatPlus = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  floatMinus = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  floatMult = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
+      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+  floatDivide = GWDiff $ P.const $ lam2 $ \l r ->
+    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
+        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
+  floatExp = GWDiff $ P.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+  float2Double = GWDiff $ P.const $ bimap2 float2Double id
+  double2Float = GWDiff $ P.const $ bimap2 double2Float id
+
 
 instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   mkProd = WDiff mkProd
@@ -522,11 +601,6 @@ floatExp1 = app floatExp
 noEnv :: repr () x -> repr () x
 noEnv = P.id
 
-selfWithDiff :: (DBI repr, Weight repr w) => repr h (w -> Diff w w)
-selfWithDiff = withDiff1 id
-
-withDiff1 = app withDiff
-
 class RandRange w where
   randRange :: (P.Double, P.Double) -> (w, w)
 
@@ -542,24 +616,36 @@ instance (RandRange l, RandRange r) => RandRange (l, r) where
       (llo, lhi) = randRange (lo, hi)
       (rlo, rhi) = randRange (lo, hi)
 
-instance Lang repr => Weight repr () where
-  withDiff = const1 id
-  fromDiff _ = id
+instance Weight () where weightCon = Sub Dict
 
-instance Lang repr => Weight repr P.Double where
-  withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
-  fromDiff _ = zro
+instance Weight P.Double where weightCon = Sub Dict
 
-instance (Lang repr, Weight repr l, Weight repr r) => Weight repr (l, r) where
-  withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))
-  fromDiff p = bimap2 (fromDiff p) (fromDiff p)
+instance (Weight l, Weight r) => Weight (l, r) where
+  weightCon :: forall con. (con (), con P.Double, ForallV (ProdCon con)) :- con (l, r)
+  weightCon = Sub (mapDict (prodCon \\ (instV :: (ForallV (ProdCon con) :- ProdCon con l r))) (Dict \\ weightCon @l @con \\ weightCon @r @con))
 
-class (Random w, RandRange w, Reify repr w, P.Show w, Vector repr w) => Weight repr w where
-  withDiff :: repr h ((w -> x) -> w -> Diff x w)
-  fromDiff :: Proxy x -> repr h (Diff x w -> w)
+class ProdCon con l r where
+  prodCon :: (con l, con r) :- con (l, r)
 
-data RunImpW repr h x = forall w. Weight repr w => RunImpW (repr h (w -> x))
-data ImpW repr h x = NoImpW (repr h x) | forall w. Weight repr w => ImpW (repr h (w -> x))
+instance ProdCon Random l r where prodCon = Sub Dict
+
+instance ProdCon RandRange l r where prodCon = Sub Dict
+
+instance ProdCon P.Show l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
+
+class Weight w where
+  weightCon :: (con (), con P.Double, ForallV (ProdCon con)) :- con w
+
+data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
+data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
 
 runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
 runImpW (ImpW x) = RunImpW x
@@ -570,7 +656,7 @@ instance Lang repr => DBI (ImpW repr) where
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
   s (ImpW x) = work x
     where
-      work :: Weight repr w => repr h (w -> b) -> ImpW repr (a, h) b
+      work :: Weight w => repr h (w -> b) -> ImpW repr (a, h) b
       work x = ImpW (s x)
   s (NoImpW x) = NoImpW (s x)
   app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
