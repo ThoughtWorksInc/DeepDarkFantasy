@@ -16,6 +16,7 @@
     TupleSections,
     ConstraintKinds,
     DefaultSignatures,
+    UndecidableSuperClasses,
     TypeOperators,
     TypeApplications #-}
 
@@ -414,10 +415,16 @@ instance Lang Show where
 class NT repr l r where
     conv :: repr l t -> repr r t
 
-instance {-# INCOHERENT #-} (DBI repr, NT repr l r) => NT repr l (a, r) where
-    conv = s . conv
+class NTS repr l r where
+    convS :: repr l t -> repr r t
 
-instance NT repr x x where
+instance (DBI repr, NT repr l r) => NTS repr l (a, r) where
+    convS = s . conv
+
+instance {-# OVERLAPPABLE #-} NTS repr l r => NT repr l r where
+    conv = convS
+
+instance {-# OVERLAPPING #-} NT repr x x where
     conv = P.id
 
 lam :: forall repr a b h. DBI repr =>
