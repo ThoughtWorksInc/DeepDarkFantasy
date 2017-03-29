@@ -1,4 +1,4 @@
-> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications #-}
+> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
 
@@ -88,13 +88,12 @@ However, unlike Poly, there are more than one datapoint, so we need to use a lis
 Let's try to print the thing.
 
 > main :: IO ()
-> main = case runImpW $ noEnv xor of RunImpW xor -> inner xor
->   where
->     inner :: forall w. Weight w => Combine Show (GWDiff Eval) () (w -> (Double, Double) -> Double) -> IO ()
->     inner (Combine xorS xorE) = do
+> main =
+>   case runImpW $ noEnv xor of
+>     RunImpW ((Combine xorS xorE) :: Weight w => Combine Show (GWDiff Eval) () (w -> XOR)) -> do
 >       print $ runShow xorS vars 0
 
-now you will see a list of gibberish
+printing weights. now you will see a list of gibberish
 
 >       initWeight :: w <- ((randomRIO (randRange (-0.01, 0.01)) \\ weightCon @w @Random) \\ weightCon @w @RandRange)
 
@@ -102,18 +101,18 @@ Getting random weights...
 
 >       (go (diff xorE) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
 >           ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0) \\ weightCon @w @P.Show
->         where
->           diff :: GWDiff Eval () x -> Diff w x
->           diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
->     go :: P.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> IO ()
->     go xor weight reify loss update i | i <= 2500 = do
->       when (isSquare i) $ do
->         print weight
->         print lossVal
->         putStr "\n"
->       go xor (update 0.3 weight lossDiff) reify loss update (1 + i)
 >       where
->         (lossVal, lossDiff) = loss $ xor (reify weight)
->     go _ _ _ _ _ _ = return ()
+>         diff :: GWDiff Eval () x -> Diff w x
+>         diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
+>         go :: P.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> IO ()
+>         go xor weight reify loss update i | i <= 2500 = do
+>           when (isSquare i) $ do
+>             print weight
+>             print lossVal
+>             putStr "\n"
+>           go xor (update 0.3 weight lossDiff) reify loss update (1 + i)
+>             where
+>               (lossVal, lossDiff) = loss $ xor (reify weight)
+>         go _ _ _ _ _ _ = return ()
 
 And the main loop. Basically we take the derivative of stuff, eval them, and use the derivative of loss to update the weights.
