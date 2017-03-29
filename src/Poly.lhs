@@ -18,6 +18,7 @@
 > import Util
 > import DBI hiding (return)
 > import Lang
+> import qualified Control.Monad as P
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
@@ -38,12 +39,14 @@ l2 measure how far is the input from 27
 By composing the two, we can measure how far is x * x + 2 * x + 3 from 27.
 We want to minimize this distance.
 
-> main :: IO ()
-> main = do
+Now write a generic function that calculate x and return it.
+
+> solve :: forall m. P.Monad m => (AST -> m ()) -> (Integer -> Double -> m ()) -> m Double
+> solve doAST doIter = do
 
 Let's begin by trying to print poly
 
->   print $ runShow poly vars 0
+>   doAST $ runShow poly vars 0
 >   go 0 0
 >   where
 
@@ -51,12 +54,9 @@ The main loop. i is step and w is weight (our current estimate of x).
 We start by assuming x = 0 is the solution,
 and minimize (comp x) by taking derivative of x, and decrease it whenever it is positive (and vice versa).
 
->     go :: Integer -> Double -> IO ()
+>     go :: Integer -> Double -> m Double
 >     go i w | i < 200 = do
->       when (isSquare i) $ print w
-
-print the weight in increasing interval, so initially more weight can be printed
-
+>       doIter i w
 >       go (1 + i) $ w - 0.001 * snd (runEval (runWDiff $ noEnv comp) () (w, 1))
 
 noEnv comp assume the term (which is a De Brujin Index term) need no environment (is free)
@@ -69,7 +69,7 @@ and a pair, the zeroth being x, the first being derivative of x, which is 1.
 the whole computation return a pair of (x * x + (2 * x + 3) - 27)^2, and it's derivative.
 we modify w using the derivative.
 
->     go i w = return ()
+>     go i w = return w
 
 By running the program, you shall see
 (\a -> (plus (mult a a) (plus (mult 2.0 a) 3.0)))
@@ -92,3 +92,16 @@ followed by something like
 3.999999999999999
 which mean we found 4 as a soultion.
 plugging it back to the equation, we can verify that (4 * 4) + 2 * 4 + 3 is indeed 27!
+
+Now the main function:
+
+> main :: IO ()
+> main = do
+>   d <- solve print printSquare
+>   putStrLn $ "x is: " ++ (show d)
+>   return ()
+>   where
+>     printSquare i x = when (isSquare i) (print x)
+
+the only thing worth noting is that we print the weight in increasing interval,
+so initially more weight is printed
