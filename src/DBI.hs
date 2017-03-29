@@ -226,6 +226,14 @@ class Weight w where
 data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
 data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
 
+type RunImpWR repr h x = forall r. (forall w. Weight w => repr h (w -> x) -> r) -> r
+
+runImpW2RunImpWR :: RunImpW repr h x -> RunImpWR repr h x
+runImpW2RunImpWR (RunImpW x) = \f -> f x
+
+runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
+runImpWR2RunImpW f = f RunImpW
+
 data Combine l r h x = Combine (l h x) (r h x)
 
 instance (DBI l, DBI r) => DBI (Combine l r) where
