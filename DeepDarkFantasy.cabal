@@ -20,6 +20,7 @@ library
     Poly
     Xor
     Util
+    Lang
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
     mtl -any,
