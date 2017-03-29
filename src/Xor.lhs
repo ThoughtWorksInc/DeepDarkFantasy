@@ -1,23 +1,4 @@
-> {-# LANGUAGE
->     MultiParamTypeClasses,
->     RankNTypes,
->     ScopedTypeVariables,
->     FlexibleInstances,
->     FlexibleContexts,
->     UndecidableInstances,
->     PolyKinds,
->     LambdaCase,
->     NoMonomorphismRestriction,
->     TypeFamilies,
->     LiberalTypeSynonyms,
->     EmptyCase,
->     FunctionalDependencies,
->     ExistentialQuantification,
->     InstanceSigs,
->     TupleSections,
->     ConstraintKinds,
->     TypeApplications,
->     TypeOperators #-}
+> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
 
