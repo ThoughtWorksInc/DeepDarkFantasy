@@ -76,6 +76,8 @@ class DBI repr where
   scomb = lam3 $ \f x arg -> app2 f arg (app x arg)
   dup :: repr h ((a -> a -> b) -> (a -> b))
   dup = lam2 $ \f x -> app2 f x x
+  let_ :: repr h (a -> (a -> b) -> b)
+  let_ = flip1 id
 
 const1 = app const
 map2 = app2 map
