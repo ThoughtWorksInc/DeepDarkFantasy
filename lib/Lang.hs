@@ -24,7 +24,7 @@
 module Lang where
 import DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), undefined)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), undefined, Double)
 import qualified Control.Monad.Writer as P
 import qualified Data.Functor.Identity as P
 import qualified GHC.Float as P
@@ -482,14 +482,14 @@ instance (Lang repr, Group repr l, Group repr r) => Group repr (l, r) where
 instance (Lang repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
   mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
-instance (Lang repr, Monoid repr l, Monoid repr r) => Monoid repr (l -> r) where
+instance (Lang repr, Monoid repr v) => Monoid repr (Double -> v) where
   zero = const1 zero
   plus = lam3 $ \l r x -> plus2 (app l x) (app r x)
 
-instance (Lang repr, Group repr l, Group repr r) => Group repr (l -> r) where
+instance (Lang repr, Group repr v) => Group repr (Double -> v) where
   invert = lam2 $ \l x -> app l (invert1 x)
 
-instance (Lang repr, Vector repr l, Vector repr r) => Vector repr (l -> r) where
+instance (Lang repr, Vector repr v) => Vector repr (Double -> v) where
   mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance Lang r => Monoid r [a] where
