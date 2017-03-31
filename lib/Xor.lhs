@@ -6,7 +6,7 @@ This is the classical example of using sigmoid NN to approximate Xor.
 > import DBI hiding (return)
 > import qualified Poly as YouShouldAlreadyReadThis
 > import qualified Prelude as P
-> import Prelude (Double, IO, return, ($), print, undefined, Int, (<=), (<), (+), (-), (*), (/), fromIntegral, putStr)
+> import Prelude (Double, IO, return, ($), print, undefined, Int, (<=), (<), (+), (-), (*), (/), (++), fromIntegral, putStr)
 > import Util
 > import System.Random
 > import Control.Monad (when)
@@ -85,34 +85,43 @@ However, unlike Poly, there are more than one datapoint, so we need to use a lis
 > loss :: Lang repr => repr h (XOR -> Double)
 > loss = lam $ \xor -> fix2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
 
-Let's try to print the thing.
+Now we are good to implement the train function!
 
-> main :: IO ()
-> main =
->   case runImpW $ noEnv xor of
->     RunImpW ((Combine xorS xorE) :: Weight w => Combine Show (GWDiff Eval) () (w -> XOR)) -> do
->       print $ runShow xorS vars 0
+> findXor :: forall g m. (RandomGen g, P.Monad m) => g -> (AST -> m ()) -> (Int -> Double -> P.String -> m ()) -> m XOR
+> findXor rand doAST doIter = case runImpW $ noEnv xor of
+>   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GWDiff Eval)) () (w -> XOR)) -> do
+>     doAST $ xorS vars 0
 
 printing weights. now you will see a list of gibberish
 
->       initWeight :: w <- ((randomRIO (randRange (-0.01, 0.01)) \\ weightCon @w @Random) \\ weightCon @w @RandRange)
+>     let initWeight :: w = P.fst $ ((randomR (randRange (-0.01, 0.01)) \\ weightCon @w @Random) \\ weightCon @w @RandRange) rand
 
 Getting random weights...
 
->       (go (diff xorE) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
->           ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0) \\ weightCon @w @P.Show
->       where
->         diff :: GWDiff Eval () x -> Diff w x
->         diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
->         go :: P.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> IO ()
->         go xor weight reify loss update i | i <= 2500 = do
->           when (isSquare i) $ do
->             print weight
->             print lossVal
->             putStr "\n"
->           go xor (update 0.3 weight lossDiff) reify loss update (1 + i)
->             where
->               (lossVal, lossDiff) = loss $ xor (reify weight)
->         go _ _ _ _ _ _ = return ()
+>     (go (diff xorE) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
+>         ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0 (xorEv ())) \\ weightCon @w @P.Show
+>     where
+>       diff :: GWDiff Eval () x -> Diff w x
+>       diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
+>       go :: P.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
+>       go xor weight reify loss update i orig | i <= 2500 = do
+>         doIter i lossVal (P.show weight)
+>         go xor (update 0.3 weight lossDiff) reify loss update (1 + i) orig
+>           where
+>             (lossVal, lossDiff) = loss $ xor (reify weight)
+>       go xor weight _ _ _ _ orig = return $ orig weight
 
-And the main loop. Basically we take the derivative of stuff, eval them, and use the derivative of loss to update the weights.
+> main :: IO ()
+> main = do
+>   g <- getStdGen
+>   xor <- findXor g print (\i d w -> when (isSquare i) $ do
+>     print d
+>     P.putStrLn w
+>     P.putStrLn "")
+>   let doXor :: Double -> Double -> IO ()
+>       doXor l r = P.putStrLn $ P.show l ++ " xor " ++ P.show r ++ " is " ++ (P.show $ xor (l, r))
+>   doXor 0 0
+>   doXor 0 1
+>   doXor 1 0
+>   doXor 1 1
+>   return ()
