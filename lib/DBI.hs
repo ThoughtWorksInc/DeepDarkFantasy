@@ -82,8 +82,10 @@ bind2 = app2 bind
 map1 = app map
 join1 = app join
 bimap2 = app2 bimap
+bimap3 = app3 bimap
 flip1 = app flip
 flip2 = app2 flip
+let_2 = app2 let_
 
 class Functor r f where
   map :: r h ((a -> b) -> (f a -> f b))
@@ -165,10 +167,10 @@ lam2 f = lam $ \x -> lam $ \y -> f x y
 
 lam3 f = lam2 $ \x y -> lam $ \z -> f x y z
 
-type family Diff v x
+type family Diff (v :: *) (x :: *)
 type instance Diff v () = ()
-type instance Diff v (a -> b) = Diff v a -> Diff v b
-type instance Diff v (a, b) = (Diff v a, Diff v b)
+type instance Diff v (l, r) = (Diff v l, Diff v r)
+type instance Diff v (l -> r) = Diff v l -> Diff v r
 
 newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
 

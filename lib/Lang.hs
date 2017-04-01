@@ -23,8 +23,11 @@
 module Lang where
 import DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe)
 import qualified Control.Monad.Writer as P
+import Control.Monad.Writer (Writer, WriterT(..))
+import qualified Control.Monad.State as P
+import Control.Monad.State (State)
 import qualified Data.Functor.Identity as P
 import qualified GHC.Float as P
 import GHC.Float (Float)
@@ -35,14 +38,15 @@ import Data.Proxy
 import Data.Constraint
 import Data.Constraint.Forall
 
-type instance Diff v (P.Writer w a) = P.Writer (Diff v w) (Diff v a)
 type instance Diff v Void = Void
 type instance Diff v P.Double = (P.Double, v)
 type instance Diff v P.Float = (P.Float, v)
-type instance Diff v (P.Either a b) = P.Either (Diff v a) (Diff v b)
-type instance Diff v (P.Maybe a) = P.Maybe (Diff v a)
-type instance Diff v (P.IO a) = P.IO (Diff v a)
-type instance Diff v [a] = [Diff v a]
+type instance Diff v (Writer l r) = Writer (Diff v l) (Diff v r)
+type instance Diff v (IO l) = IO (Diff v l)
+type instance Diff v (Maybe l) = Maybe (Diff v l)
+type instance Diff v [l] = [Diff v l]
+type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
+type instance Diff v (State l r) = State (Diff v l) (Diff v r)
 
 class DBI repr => Lang repr where
   mkProd :: repr h (a -> b -> (a, b))
@@ -97,6 +101,8 @@ class DBI repr => Lang repr where
   double2Float :: repr h (P.Double -> P.Float)
   undefined :: repr h a
   undefined = fix1 id
+  state :: repr h ((l -> (r, l)) -> State l r)
+  runState :: repr h (State l r -> (l -> (r, l)))
 
 instance Lang repr => ConvDiff repr () where
   toDiffBy = const1 id
@@ -169,7 +175,7 @@ instance Lang Eval where
                               P.Nothing -> l
                               P.Just x -> r x
   ioMap = comb P.fmap
-  writer = comb (P.WriterT . P.Identity)
+  writer = comb (WriterT . P.Identity)
   runWriter = comb P.runWriter
   doubleExp = comb P.exp
   float = comb
@@ -180,6 +186,8 @@ instance Lang Eval where
   floatExp = comb P.exp
   float2Double = comb P.float2Double
   double2Float = comb P.double2Float
+  state = comb P.state
+  runState = comb P.runState
 
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
@@ -224,6 +232,8 @@ instance Lang repr => Lang (UnHOAS repr) where
   floatExp = UnHOAS floatExp
   float2Double = UnHOAS float2Double
   double2Float = UnHOAS double2Float
+  state = UnHOAS state
+  runState = UnHOAS runState
 
 instance Lang Show where
   mkProd = name "mkProd"
@@ -260,6 +270,8 @@ instance Lang Show where
   floatExp = name "exp"
   float2Double = name "float2Double"
   double2Float = name "double2Float"
+  state = name "state"
+  runState = name "runState"
 
 instance Lang repr => Lang (GWDiff repr) where
   mkProd = GWDiff (P.const mkProd)
@@ -310,6 +322,8 @@ instance Lang repr => Lang (GWDiff repr) where
   floatExp = GWDiff $ P.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
   float2Double = GWDiff $ P.const $ bimap2 float2Double id
   double2Float = GWDiff $ P.const $ bimap2 double2Float id
+  state = GWDiff $ P.const state
+  runState = GWDiff $ P.const runState
 
 instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   mkProd = WDiff mkProd
@@ -360,6 +374,8 @@ instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
   float2Double = WDiff $ bimap2 float2Double id
   double2Float = WDiff $ bimap2 double2Float id
+  state = WDiff state
+  runState = WDiff runState
 
 instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
 
@@ -404,6 +420,8 @@ instance Lang repr => Lang (ImpW repr) where
   floatDivide = NoImpW floatDivide
   float2Double = NoImpW float2Double
   double2Float = NoImpW double2Float
+  state = NoImpW state
+  runState = NoImpW runState
 
 instance (Lang l, Lang r) => Lang (Combine l r) where
   mkProd = Combine mkProd mkProd
@@ -440,6 +458,8 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   writer = Combine writer writer
   double2Float = Combine double2Float double2Float
   float2Double = Combine float2Double float2Double
+  state = Combine state state
+  runState = Combine runState runState
 
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
@@ -538,15 +558,25 @@ instance Lang r => BiFunctor r Either where
 instance Lang r => BiFunctor r (,) where
   bimap = lam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
 
-instance Lang r => Functor r (P.Writer w) where
+instance Lang r => Functor r (Writer w) where
   map = lam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
 
-instance (Lang r, Monoid r w) => Applicative r (P.Writer w) where
+instance (Lang r, Monoid r w) => Applicative r (Writer w) where
   pure = com2 writer (flip2 mkProd zero)
   ap = lam2 $ \f x -> writer1 (mkProd2 (app (zro1 (runWriter1 f)) (zro1 (runWriter1 x))) (plus2 (fst1 (runWriter1 f)) (fst1 (runWriter1 x))))
 
-instance (Lang r, Monoid r w) => Monad r (P.Writer w) where
+instance (Lang r, Monoid r w) => Monad r (Writer w) where
   join = lam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (plus2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
+
+instance Lang r => Functor r (State l) where
+  map = lam2 $ \f s -> state1 (com2 (bimap2 f id) (runState1 s))
+
+instance Lang r => Applicative r (State l) where
+  pure = lam $ \x -> state1 (mkProd1 x)
+  ap = lam2 $ \f x -> state1 $ lam $ \s -> let_2 (runState2 f s) (lam $ \p -> bimap3 (zro1 p) id (runState2 x (fst1 p)))
+
+instance Lang r => Monad r (State l) where
+  join = lam $ \x -> state1 $ lam $ \s -> let_2 (runState2 x s) (uncurry1 runState)
 
 instance Lang r => Functor r P.IO where
   map = ioMap
@@ -580,6 +610,21 @@ instance DBI repr => DBI (GWDiff repr) where
   app (GWDiff f) (GWDiff x) = GWDiff (\p -> app (f p) (x p))
   abs (GWDiff x) = GWDiff (\p -> abs $ x p)
 
+instance Lang repr => DBI (ImpW repr) where
+  z = NoImpW z
+  s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
+  s (ImpW x) = work x
+    where
+      work :: Weight w => repr h (w -> b) -> ImpW repr (a, h) b
+      work x = ImpW (s x)
+  s (NoImpW x) = NoImpW (s x)
+  app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
+  app (NoImpW f) (NoImpW x) = NoImpW (app f x)
+  app (ImpW f) (NoImpW x) = ImpW (lam $ \w -> app2 (conv f) w (conv x))
+  app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
+  abs (ImpW f) = ImpW (flip1 $ abs f)
+  abs (NoImpW x) = NoImpW (abs x)
+
 cons2 = app2 cons
 listMatch2 = app2 listMatch
 fix1 = app fix
@@ -607,18 +652,6 @@ float2Double1 = app float2Double
 doubleExp1 = app doubleExp
 floatExp1 = app floatExp
 sumMatch2 = app2 sumMatch
-
-instance Lang repr => DBI (ImpW repr) where
-  z = NoImpW z
-  s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
-  s (ImpW x) = work x
-    where
-      work :: Weight w => repr h (w -> b) -> ImpW repr (a, h) b
-      work x = ImpW (s x)
-  s (NoImpW x) = NoImpW (s x)
-  app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
-  app (NoImpW f) (NoImpW x) = NoImpW (app f x)
-  app (ImpW f) (NoImpW x) = ImpW (lam $ \w -> app2 (conv f) w (conv x))
-  app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
-  abs (ImpW f) = ImpW (flip1 $ abs f)
-  abs (NoImpW x) = NoImpW (abs x)
+state1 = app state
+runState1 = app runState
+runState2 = app2 runState
