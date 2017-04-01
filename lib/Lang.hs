@@ -23,7 +23,7 @@
 module Lang where
 import DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), undefined, Double)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double)
 import qualified Control.Monad.Writer as P
 import qualified Data.Functor.Identity as P
 import qualified GHC.Float as P
@@ -94,6 +94,8 @@ class DBI repr => Lang repr where
   uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
   float2Double :: repr h (P.Float -> P.Double)
   double2Float :: repr h (P.Double -> P.Float)
+  undefined :: repr h a
+  undefined = fix1 id
 
 class Reify repr x where
   reify :: x -> repr h x
