@@ -1,6 +1,6 @@
 module Main where
 
-import Poly hiding (main)
+import DDF.Poly hiding (main)
 import Control.Monad
 import System.Exit (exitFailure)
 

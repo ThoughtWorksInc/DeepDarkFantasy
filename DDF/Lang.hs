@@ -20,15 +20,14 @@
     TypeApplications,
     PartialTypeSignatures #-}
 
-module Lang where
-import DBI
+module DDF.Lang (module DDF.Lang, module DDF.Bool) where
+import DDF.DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe, Bool)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe)
 import qualified Control.Monad.Writer as P
-import Control.Monad.Writer (Writer, WriterT(..))
+import Control.Monad.Writer (Writer, WriterT)
 import qualified Control.Monad.State as P
 import Control.Monad.State (State)
-import qualified Data.Functor.Identity as P
 import qualified GHC.Float as P
 import GHC.Float (Float)
 import qualified Data.Tuple as P
@@ -38,6 +37,7 @@ import Data.Proxy
 import Data.Constraint
 import Data.Constraint.Forall
 import qualified Data.Bool as P
+import DDF.Bool
 
 type instance Diff v Void = Void
 type instance Diff v P.Double = (P.Double, v)
@@ -48,9 +48,9 @@ type instance Diff v (Maybe l) = Maybe (Diff v l)
 type instance Diff v [l] = [Diff v l]
 type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
 type instance Diff v (State l r) = State (Diff v l) (Diff v r)
-type instance Diff v Bool = Bool
+type instance Diff v P.Bool = P.Bool
 
-class DBI repr => Lang repr where
+class Bool repr => Lang repr where
   mkProd :: repr h (a -> b -> (a, b))
   zro :: repr h ((a, b) -> a)
   fst :: repr h ((a, b) -> b)
@@ -105,8 +105,6 @@ class DBI repr => Lang repr where
   undefined = fix1 id
   state :: repr h ((l -> (r, l)) -> State l r)
   runState :: repr h (State l r -> (l -> (r, l)))
-  bool :: Bool -> repr h Bool
-  ite :: repr h (a -> a -> Bool -> a)
 
 instance Lang repr => ConvDiff repr () where
   toDiffBy = const1 id
@@ -148,194 +146,9 @@ instance Lang repr => Reify repr Double where
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
   reify (l, r) = mkProd2 (reify l) (reify r)
 
-instance Lang Eval where
-  zro = comb P.fst
-  fst = comb P.snd
-  mkProd = comb (,)
-  double = comb
-  doublePlus = comb (+)
-  doubleMinus = comb (-)
-  doubleMult = comb (*)
-  doubleDivide = comb (/)
-  fix = comb loop
-    where loop x = x $ loop x
-  left = comb P.Left
-  right = comb P.Right
-  sumMatch = comb $ \l r -> \case
-                             P.Left x -> l x
-                             P.Right x -> r x
-  unit = comb ()
-  exfalso = comb absurd
-  nothing = comb P.Nothing
-  just = comb P.Just
-  ioRet = comb P.return
-  ioBind = comb (>>=)
-  nil = comb []
-  cons = comb (:)
-  listMatch = comb $ \l r -> \case
-                            [] -> l
-                            x:xs -> r x xs
-  optionMatch = comb $ \l r -> \case
-                              P.Nothing -> l
-                              P.Just x -> r x
-  ioMap = comb P.fmap
-  writer = comb (WriterT . P.Identity)
-  runWriter = comb P.runWriter
-  doubleExp = comb P.exp
-  float = comb
-  floatPlus = comb (+)
-  floatMinus = comb (-)
-  floatMult = comb (*)
-  floatDivide = comb (/)
-  floatExp = comb P.exp
-  float2Double = comb P.float2Double
-  double2Float = comb P.double2Float
-  state = comb P.state
-  runState = comb P.runState
-  bool = comb
-  ite = comb P.bool
-
-newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
-
-instance DBI repr => DBI (UnHOAS repr) where
-  z = UnHOAS z
-  s (UnHOAS x) = UnHOAS $ s x
-  abs (UnHOAS x) = UnHOAS $ abs x
-  app (UnHOAS f) (UnHOAS x) = UnHOAS $ app f x
-
-instance Lang repr => Lang (UnHOAS repr) where
-  mkProd = UnHOAS mkProd
-  zro = UnHOAS zro
-  fst = UnHOAS fst
-  double = UnHOAS . double
-  doublePlus = UnHOAS doublePlus
-  doubleMinus = UnHOAS doubleMinus
-  doubleMult = UnHOAS doubleMult
-  doubleDivide = UnHOAS doubleDivide
-  doubleExp = UnHOAS doubleExp
-  fix = UnHOAS fix
-  left = UnHOAS left
-  right = UnHOAS right
-  sumMatch = UnHOAS sumMatch
-  unit = UnHOAS unit
-  exfalso = UnHOAS exfalso
-  nothing = UnHOAS nothing
-  just = UnHOAS just
-  ioRet = UnHOAS ioRet
-  ioBind = UnHOAS ioBind
-  nil = UnHOAS nil
-  cons = UnHOAS cons
-  listMatch = UnHOAS listMatch
-  optionMatch = UnHOAS optionMatch
-  ioMap = UnHOAS ioMap
-  writer = UnHOAS writer
-  runWriter = UnHOAS runWriter
-  float = UnHOAS . float
-  floatPlus = UnHOAS floatPlus
-  floatMinus = UnHOAS floatMinus
-  floatMult = UnHOAS floatMult
-  floatDivide = UnHOAS floatDivide
-  floatExp = UnHOAS floatExp
-  float2Double = UnHOAS float2Double
-  double2Float = UnHOAS double2Float
-  state = UnHOAS state
-  runState = UnHOAS runState
-  bool = UnHOAS . bool
-  ite = UnHOAS ite
-
-instance Lang Show where
-  mkProd = name "mkProd"
-  zro = name "zro"
-  fst = name "fst"
-  double = name . show
-  doublePlus = name "plus"
-  doubleMinus = name "minus"
-  doubleMult = name "mult"
-  doubleDivide = name "divide"
-  doubleExp = name "exp"
-  fix = name "fix"
-  left = name "left"
-  right = name "right"
-  sumMatch = name "sumMatch"
-  unit = name "unit"
-  exfalso = name "exfalso"
-  nothing = name "nothing"
-  just = name "just"
-  ioRet = name "ioRet"
-  ioBind = name "ioBind"
-  nil = name "nil"
-  cons = name "cons"
-  listMatch = name "listMatch"
-  optionMatch = name "optionMatch"
-  ioMap = name "ioMap"
-  writer = name "writer"
-  runWriter = name "runWriter"
-  float = name . show
-  floatPlus = name "plus"
-  floatMinus = name "minus"
-  floatMult = name "mult"
-  floatDivide = name "divide"
-  floatExp = name "exp"
-  float2Double = name "float2Double"
-  double2Float = name "double2Float"
-  state = name "state"
-  runState = name "runState"
-  bool = name . show
-  ite = name "ite"
-
-instance Lang repr => Lang (GWDiff repr) where
-  mkProd = GWDiff (P.const mkProd)
-  zro = GWDiff $ P.const $ zro
-  fst = GWDiff $ P.const $ fst
-  double x = GWDiff $ P.const $ mkProd2 (double x) zero
-  doublePlus = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  doubleMinus = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  doubleMult = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (mult2 (zro1 l) (zro1 r))
-      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
-  doubleDivide = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (zro1 r))
-      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
-        (mult2 (zro1 r) (zro1 r)))
-  doubleExp = GWDiff $ P.const $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
-  fix = GWDiff $ P.const fix
-  left = GWDiff $ P.const left
-  right = GWDiff $ P.const right
-  sumMatch = GWDiff $ P.const sumMatch
-  unit = GWDiff $ P.const unit
-  exfalso = GWDiff $ P.const exfalso
-  nothing = GWDiff $ P.const nothing
-  just = GWDiff $ P.const just
-  ioRet = GWDiff $ P.const ioRet
-  ioBind = GWDiff $ P.const ioBind
-  nil = GWDiff $ P.const nil
-  cons = GWDiff $ P.const cons
-  listMatch = GWDiff $ P.const listMatch
-  optionMatch = GWDiff $ P.const optionMatch
-  ioMap = GWDiff $ P.const ioMap
-  writer = GWDiff $ P.const writer
-  runWriter = GWDiff $ P.const runWriter
-  float x = GWDiff $ P.const $ mkProd2 (float x) zero
-  floatPlus = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  floatMinus = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  floatMult = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
-  floatDivide = GWDiff $ P.const $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = GWDiff $ P.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
-  float2Double = GWDiff $ P.const $ bimap2 float2Double id
-  double2Float = GWDiff $ P.const $ bimap2 double2Float id
-  state = GWDiff $ P.const state
-  runState = GWDiff $ P.const runState
-  bool x = GWDiff $ P.const $ bool x
-  ite = GWDiff $ P.const ite
+instance (Bool r, Vector r v) => Bool (WDiff r v) where
+  bool = WDiff . bool
+  ite = WDiff ite
 
 instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   mkProd = WDiff mkProd
@@ -388,8 +201,6 @@ instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   double2Float = WDiff $ bimap2 double2Float id
   state = WDiff state
   runState = WDiff runState
-  bool x = WDiff $ bool x
-  ite = WDiff $ ite
 
 instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
 
@@ -436,48 +247,10 @@ instance Lang repr => Lang (ImpW repr) where
   double2Float = NoImpW double2Float
   state = NoImpW state
   runState = NoImpW runState
+
+instance Lang r => Bool (ImpW r) where
   bool = NoImpW . bool
   ite = NoImpW ite
-
-instance (Lang l, Lang r) => Lang (Combine l r) where
-  mkProd = Combine mkProd mkProd
-  zro = Combine zro zro
-  fst = Combine fst fst
-  double x = Combine (double x) (double x)
-  doublePlus = Combine doublePlus doublePlus
-  doubleMinus = Combine doubleMinus doubleMinus
-  doubleMult = Combine doubleMult doubleMult
-  doubleDivide = Combine doubleDivide doubleDivide
-  doubleExp = Combine doubleExp doubleExp
-  float x = Combine (float x) (float x)
-  floatPlus = Combine floatPlus floatPlus
-  floatMinus = Combine floatMinus floatMinus
-  floatMult = Combine floatMult floatMult
-  floatDivide = Combine floatDivide floatDivide
-  floatExp = Combine floatExp floatExp
-  fix = Combine fix fix
-  left = Combine left left
-  right = Combine right right
-  sumMatch = Combine sumMatch sumMatch
-  unit = Combine unit unit
-  exfalso = Combine exfalso exfalso
-  nothing = Combine nothing nothing
-  just = Combine just just
-  optionMatch = Combine optionMatch optionMatch
-  ioRet = Combine ioRet ioRet
-  ioBind = Combine ioBind ioBind
-  ioMap = Combine ioMap ioMap
-  nil = Combine nil nil
-  cons = Combine cons cons
-  listMatch = Combine listMatch listMatch
-  runWriter = Combine runWriter runWriter
-  writer = Combine writer writer
-  double2Float = Combine double2Float double2Float
-  float2Double = Combine float2Double float2Double
-  state = Combine state state
-  runState = Combine runState runState
-  bool x = Combine (bool x) (bool x)
-  ite = Combine ite ite
 
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
@@ -620,14 +393,6 @@ runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
 runImpW (ImpW x) = RunImpW x
 runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
 
-newtype GWDiff repr h x = GWDiff {runGWDiff :: forall v. Vector repr v => Proxy v -> repr (Diff v h) (Diff v x)}
-
-instance DBI repr => DBI (GWDiff repr) where
-  z = GWDiff (P.const z)
-  s (GWDiff x) = GWDiff (\p -> s $ x p)
-  app (GWDiff f) (GWDiff x) = GWDiff (\p -> app (f p) (x p))
-  abs (GWDiff x) = GWDiff (\p -> abs $ x p)
-
 instance Lang repr => DBI (ImpW repr) where
   z = NoImpW z
   s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
@@ -642,6 +407,8 @@ instance Lang repr => DBI (ImpW repr) where
   app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
+
+
 
 cons2 = app2 cons
 listMatch2 = app2 listMatch

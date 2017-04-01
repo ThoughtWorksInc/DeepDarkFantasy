@@ -16,17 +16,23 @@ source-repository head
 
 library
   exposed-modules:
-    DBI
-    Poly
-    Xor
-    Util
-    Lang
+    DDF.Bool
+    DDF.Combine
+    DDF.DBI
+    DDF.Eval
+    DDF.GWDiff
+    DDF.ImportMeta
+    DDF.Lang
+    DDF.Poly
+    DDF.Show
+    DDF.UnHOAS
+    DDF.Util
+    DDF.Xor
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
     mtl -any,
     random -any,
     constraints -any 
-  hs-source-dirs: lib
   ghc-options: -ferror-spans 
   default-language: Haskell2010
 

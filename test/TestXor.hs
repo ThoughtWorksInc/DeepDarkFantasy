@@ -1,7 +1,6 @@
 module Main where
 
-import Poly hiding (main)
-import Xor hiding (main)
+import DDF.Xor hiding (main)
 import Control.Monad
 import System.Exit (exitFailure)
 import System.Random

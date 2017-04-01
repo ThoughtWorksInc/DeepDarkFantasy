@@ -19,15 +19,15 @@
     TypeApplications,
     PartialTypeSignatures #-}
 
-module DBI where
+module DDF.DBI (module DDF.DBI, module DDF.ImportMeta) where
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), undefined)
-import Util
+import DDF.Util
 import Control.Monad (when)
 import System.Random
 import Data.Proxy
 import Data.Constraint
 import Data.Constraint.Forall
+import DDF.ImportMeta
 
 class Monoid r m where
   zero :: r h m
@@ -107,41 +107,6 @@ class BiFunctor r p where
 app3 f x y z = app (app2 f x y) z
 com2 = app2 com
 
-newtype Eval h x = Eval {runEval :: h -> x}
-
-comb = Eval . P.const
-
-instance DBI Eval where
-  z = Eval P.fst
-  s (Eval a) = Eval $ a . P.snd
-  abs (Eval f) = Eval $ \a h -> f (h, a)
-  app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
-
-data AST = Leaf P.String | App P.String AST [AST] | Lam P.String [P.String] AST
-
-appAST (Leaf f) x = App f x []
-appAST (App f x l) r = App f x (l ++ [r])
-appAST lam r = appAST (Leaf $ show lam) r
-
-lamAST str (Lam s l t) = Lam str (s:l) t
-lamAST str r = Lam str [] r
-
-instance P.Show AST where
-  show (Leaf f) = f
-  show (App f x l) = "(" ++ f ++ " " ++ show x ++ P.concatMap ((" " ++) . show) l ++ ")"
-  show (Lam s l t) = "(\\" ++ s ++ P.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
-
-newtype Show h a = Show {runShow :: [P.String] -> P.Int -> AST}
-name = Show . P.const . P.const . Leaf
-
-instance DBI Show where
-  z = Show $ P.const $ Leaf . show . P.flip (-) 1
-  s (Show v) = Show $ \vars -> v vars . P.flip (-) 1
-  abs (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
-  app (Show f) (Show x) = Show $ \vars h -> appAST (f vars h) (x vars h)
-  hoas f = Show $ \(v:vars) h ->
-    lamAST v (runShow (f $ Show $ P.const $ P.const $ Leaf v) vars (h + 1))
-
 class NT repr l r where
     conv :: repr l t -> repr r t
 
@@ -218,12 +183,3 @@ runImpW2RunImpWR (RunImpW x) = \f -> f x
 
 runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
 runImpWR2RunImpW f = f RunImpW
-
-data Combine l r h x = Combine (l h x) (r h x)
-
-instance (DBI l, DBI r) => DBI (Combine l r) where
-  z = Combine z z
-  s (Combine l r) = Combine (s l) (s r)
-  app (Combine fl fr) (Combine xl xr) = Combine (app fl xl) (app fr xr)
-  abs (Combine l r) = Combine (abs l) (abs r)
-  hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l r -> l) (hoas $ \x -> case f (Combine z x) of Combine l r -> r)

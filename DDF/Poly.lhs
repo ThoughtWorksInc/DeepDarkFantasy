@@ -13,12 +13,13 @@
 >     LiberalTypeSynonyms,
 >     EmptyCase #-}
 
-> module Poly where
+> module DDF.Poly where
 > import Control.Monad (when)
-> import Util
-> import DBI hiding (return)
-> import Lang
-> import qualified Control.Monad as P
+> import DDF.Util
+> import DDF.Lang
+> import DDF.Show
+> import DDF.Eval
+> import qualified Control.Monad as M
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
@@ -41,7 +42,7 @@ We want to minimize this distance.
 
 Now write a generic function that calculate x and return it.
 
-> solve :: forall m. P.Monad m => (AST -> m ()) -> (Integer -> Double -> m ()) -> m Double
+> solve :: forall m. M.Monad m => (AST -> m ()) -> (Integer -> Double -> m ()) -> m Double
 > solve doAST doIter = do
 
 Let's begin by trying to print poly
@@ -69,7 +70,7 @@ and a pair, the zeroth being x, the first being derivative of x, which is 1.
 the whole computation return a pair of (x * x + (2 * x + 3) - 27)^2, and it's derivative.
 we modify w using the derivative.
 
->     go i w = return w
+>     go i w = M.return w
 
 By running the program, you shall see
 (\a -> (plus (mult a a) (plus (mult 2.0 a) 3.0)))
@@ -99,7 +100,7 @@ Now the main function:
 > main = do
 >   d <- solve print printSquare
 >   putStrLn $ "x is: " ++ (show d)
->   return ()
+>   M.return ()
 >   where
 >     printSquare i x = when (isSquare i) (print x)
 
