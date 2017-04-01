@@ -16,7 +16,6 @@
     TupleSections,
     ConstraintKinds,
     DefaultSignatures,
-    UndecidableSuperClasses,
     TypeOperators,
     TypeApplications,
     PartialTypeSignatures #-}
@@ -416,6 +415,9 @@ instance Lang repr => WithDiff repr () where
 
 instance Lang repr => WithDiff repr P.Double where
   withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
+
+instance Lang repr => WithDiff repr P.Float where
+  withDiff = lam2 $ \conv d -> mkProd2 d (app conv floatOne)
 
 instance (Lang repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
   withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))

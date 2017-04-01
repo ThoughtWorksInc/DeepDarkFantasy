@@ -13,10 +13,8 @@
     FunctionalDependencies,
     ExistentialQuantification,
     InstanceSigs,
-    TupleSections,
     ConstraintKinds,
     DefaultSignatures,
-    UndecidableSuperClasses,
     TypeOperators,
     TypeApplications,
     PartialTypeSignatures #-}
@@ -38,26 +36,24 @@ class Monoid r m where
 class Monoid repr w => WithDiff repr w where
   withDiff :: repr h ((w -> x) -> w -> Diff x w)
 
+class DBI repr => ConvDiff repr where
+  toDiff :: forall h x w. Monoid repr x => Proxy x -> repr h (w -> Diff x w)
+  toDiff _ = toDiffBy1 @repr @h @x @w zero
+  toDiffBy :: forall h x w. repr h (x -> w -> Diff x w)
+  fromDiff :: forall h x w. Monoid repr x => Proxy x -> repr h (Diff x w -> w)
+  fromDiff _ = fromDiffBy1 @repr @h @x @w zero
+  fromDiffBy :: repr h (x -> Diff x w -> w)
+
 withDiff1 = app withDiff
+toDiffBy1 :: forall repr h x w. ConvDiff repr => repr h x -> repr h (w -> Diff x w)
+toDiffBy1 = app toDiffBy
+fromDiffBy1 :: forall repr h x w. ConvDiff repr => repr h x -> repr h (Diff x w -> w)
+fromDiffBy1 = app fromDiffBy
 
 selfWithDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)
 selfWithDiff = withDiff1 id
 
-instance Random () where
-  random = ((),)
-  randomR _ = random
-
-instance (Random l, Random r) => Random (l, r) where
-  random g0 = ((l, r), g2)
-    where
-      (l, g1) = random g0
-      (r, g2) = random g1
-  randomR ((llo, rlo), (lhi, rhi)) g0 = ((l, r), g2)
-    where
-      (l, g1) = randomR (llo, lhi) g0
-      (r, g2) = randomR (rlo, rhi) g1
-
-class DBI repr where
+class DBI (repr :: * -> * -> *) where
   z :: repr (a, h) a
   s :: repr h b -> repr (a, h) b
   abs :: repr (a, h) b -> repr h (a -> b)
@@ -190,27 +186,12 @@ instance DBI repr => DBI (WDiff repr v) where
 noEnv :: repr () x -> repr () x
 noEnv = P.id
 
-class RandRange w where
-  randRange :: (P.Double, P.Double) -> (w, w)
-
-instance RandRange () where
-  randRange _ = ((), ())
-
-instance RandRange P.Double where
-  randRange (lo, hi) = (lo, hi)
-
-instance (RandRange l, RandRange r) => RandRange (l, r) where
-  randRange (lo, hi) = ((llo, rlo), (lhi, rhi))
-    where
-      (llo, lhi) = randRange (lo, hi)
-      (rlo, rhi) = randRange (lo, hi)
-
 instance Weight () where weightCon = Sub Dict
 
 instance Weight P.Double where weightCon = Sub Dict
 
 instance (Weight l, Weight r) => Weight (l, r) where
-  weightCon :: forall con. (con (), con P.Double, ForallV (ProdCon con)) :- con (l, r)
+  weightCon :: forall con. (con (), con P.Float, con P.Double, ForallV (ProdCon con)) :- con (l, r)
   weightCon = Sub (mapDict (prodCon \\ (instV :: (ForallV (ProdCon con) :- ProdCon con l r))) (Dict \\ weightCon @l @con \\ weightCon @r @con))
 
 class ProdCon con l r where
@@ -223,7 +204,7 @@ instance ProdCon RandRange l r where prodCon = Sub Dict
 instance ProdCon P.Show l r where prodCon = Sub Dict
 
 class Weight w where
-  weightCon :: (con (), con P.Double, ForallV (ProdCon con)) :- con w
+  weightCon :: (con (), con P.Float, con P.Double, ForallV (ProdCon con)) :- con w
 
 data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
 data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
