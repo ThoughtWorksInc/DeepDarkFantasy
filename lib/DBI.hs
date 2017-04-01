@@ -36,18 +36,18 @@ class Monoid r m where
 class Monoid repr w => WithDiff repr w where
   withDiff :: repr h ((w -> x) -> w -> Diff x w)
 
-class DBI repr => ConvDiff repr where
-  toDiff :: forall h x w. Monoid repr x => Proxy x -> repr h (w -> Diff x w)
-  toDiff _ = toDiffBy1 @repr @h @x @w zero
-  toDiffBy :: forall h x w. repr h (x -> w -> Diff x w)
-  fromDiff :: forall h x w. Monoid repr x => Proxy x -> repr h (Diff x w -> w)
-  fromDiff _ = fromDiffBy1 @repr @h @x @w zero
+class DBI repr => ConvDiff repr w where
+  toDiff :: forall h x. Monoid repr x => Proxy x -> repr h (w -> Diff x w)
+  toDiff _ = toDiffBy1 @repr @w @x zero
+  toDiffBy :: forall h x. repr h (x -> w -> Diff x w)
+  fromDiff :: forall h x. Monoid repr x => Proxy x -> repr h (Diff x w -> w)
+  fromDiff _ = fromDiffBy1 @repr @w @x zero
   fromDiffBy :: repr h (x -> Diff x w -> w)
 
 withDiff1 = app withDiff
-toDiffBy1 :: forall repr h x w. ConvDiff repr => repr h x -> repr h (w -> Diff x w)
+toDiffBy1 :: forall repr w x h. ConvDiff repr w => repr h x -> repr h (w -> Diff x w)
 toDiffBy1 = app toDiffBy
-fromDiffBy1 :: forall repr h x w. ConvDiff repr => repr h x -> repr h (Diff x w -> w)
+fromDiffBy1 :: forall repr w x h. ConvDiff repr w => repr h x -> repr h (Diff x w -> w)
 fromDiffBy1 = app fromDiffBy
 
 selfWithDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)

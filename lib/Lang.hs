@@ -23,10 +23,11 @@
 module Lang where
 import DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either)
 import qualified Control.Monad.Writer as P
 import qualified Data.Functor.Identity as P
 import qualified GHC.Float as P
+import GHC.Float (Float)
 import qualified Data.Tuple as P
 import Data.Void
 import Data.Proxy
@@ -97,13 +98,41 @@ class DBI repr => Lang repr where
   undefined :: repr h a
   undefined = fix1 id
 
+instance Lang repr => ConvDiff repr () where
+  toDiffBy = const1 id
+  fromDiffBy = const1 id
+
+instance Lang repr => ConvDiff repr Double where
+  toDiffBy = flip1 mkProd
+  fromDiffBy = const1 zro
+
+instance Lang repr => ConvDiff repr Float where
+  toDiffBy = flip1 mkProd
+  fromDiffBy = const1 zro
+
+instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (l, r) where
+  toDiffBy = lam $ \x -> bimap2 (toDiffBy1 x) (toDiffBy1 x)
+  fromDiffBy = lam $ \x -> bimap2 (fromDiffBy1 x) (fromDiffBy1 x)
+
+instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (Either l r) where
+  toDiffBy = lam $ \x -> bimap2 (toDiffBy1 x) (toDiffBy1 x)
+  fromDiffBy = lam $ \x -> bimap2 (fromDiffBy1 x) (fromDiffBy1 x)
+
+instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (l -> r) where
+  toDiffBy = lam2 $ \x f -> (toDiffBy1 x) `com2` f `com2` (fromDiffBy1 x)
+  fromDiffBy = lam2 $ \x f -> (fromDiffBy1 x) `com2` f `com2` (toDiffBy1 x)
+
+instance (Lang repr, ConvDiff repr l) => ConvDiff repr [l] where
+  toDiffBy = lam $ \x -> map1 (toDiffBy1 x)
+  fromDiffBy = lam $ \x -> map1 (fromDiffBy1 x)
+
 class Reify repr x where
   reify :: x -> repr h x
 
 instance Lang repr => Reify repr () where
   reify _ = unit
 
-instance Lang repr => Reify repr P.Double where
+instance Lang repr => Reify repr Double where
   reify = double
 
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
@@ -415,7 +444,7 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
 
-instance Lang repr => WithDiff repr P.Double where
+instance Lang repr => WithDiff repr Double where
   withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
 
 instance Lang repr => WithDiff repr P.Float where
@@ -434,11 +463,11 @@ class Monoid r g => Group r g where
   {-# MINIMAL (invert | minus) #-}
 
 class Group r v => Vector r v where
-  mult :: r h (P.Double -> v -> v)
-  divide :: r h (v -> P.Double -> v)
-  default mult :: Lang r => r h (P.Double -> v -> v)
+  mult :: r h (Double -> v -> v)
+  divide :: r h (v -> Double -> v)
+  default mult :: Lang r => r h (Double -> v -> v)
   mult = lam2 $ \x y -> divide2 y (recip1 x)
-  default divide :: Lang r => r h (v -> P.Double -> v)
+  default divide :: Lang r => r h (v -> Double -> v)
   divide = lam2 $ \x y -> mult2 (recip1 y) x
   {-# MINIMAL (mult | divide) #-}
 
@@ -454,14 +483,14 @@ instance Lang r => Vector r () where
   mult = const1 $ const1 unit
   divide = const1 $ const1 unit
 
-instance Lang r => Monoid r P.Double where
+instance Lang r => Monoid r Double where
   zero = doubleZero
   plus = doublePlus
 
-instance Lang r => Group r P.Double where
+instance Lang r => Group r Double where
   minus = doubleMinus
 
-instance Lang r => Vector r P.Double where
+instance Lang r => Vector r Double where
   mult = doubleMult
   divide = doubleDivide
 
@@ -502,6 +531,9 @@ instance Lang r => Monoid r [a] where
 
 instance Lang r => Functor r [] where
   map = lam $ \f -> fix1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
+
+instance Lang r => BiFunctor r Either where
+  bimap = lam2 $ \l r -> sumMatch2 (com2 left l) (com2 right r)
 
 instance Lang r => BiFunctor r (,) where
   bimap = lam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
@@ -574,6 +606,7 @@ minus2 = app2 minus
 float2Double1 = app float2Double
 doubleExp1 = app doubleExp
 floatExp1 = app floatExp
+sumMatch2 = app2 sumMatch
 
 instance Lang repr => DBI (ImpW repr) where
   z = NoImpW z
