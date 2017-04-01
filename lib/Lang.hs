@@ -23,7 +23,7 @@
 module Lang where
 import DBI
 import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe)
+import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe, Bool)
 import qualified Control.Monad.Writer as P
 import Control.Monad.Writer (Writer, WriterT(..))
 import qualified Control.Monad.State as P
@@ -37,6 +37,7 @@ import Data.Proxy
 import Data.Proxy
 import Data.Constraint
 import Data.Constraint.Forall
+import qualified Data.Bool as P
 
 type instance Diff v Void = Void
 type instance Diff v P.Double = (P.Double, v)
@@ -47,6 +48,7 @@ type instance Diff v (Maybe l) = Maybe (Diff v l)
 type instance Diff v [l] = [Diff v l]
 type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
 type instance Diff v (State l r) = State (Diff v l) (Diff v r)
+type instance Diff v Bool = Bool
 
 class DBI repr => Lang repr where
   mkProd :: repr h (a -> b -> (a, b))
@@ -103,6 +105,8 @@ class DBI repr => Lang repr where
   undefined = fix1 id
   state :: repr h ((l -> (r, l)) -> State l r)
   runState :: repr h (State l r -> (l -> (r, l)))
+  bool :: Bool -> repr h Bool
+  ite :: repr h (a -> a -> Bool -> a)
 
 instance Lang repr => ConvDiff repr () where
   toDiffBy = const1 id
@@ -188,6 +192,8 @@ instance Lang Eval where
   double2Float = comb P.double2Float
   state = comb P.state
   runState = comb P.runState
+  bool = comb
+  ite = comb P.bool
 
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
@@ -234,6 +240,8 @@ instance Lang repr => Lang (UnHOAS repr) where
   double2Float = UnHOAS double2Float
   state = UnHOAS state
   runState = UnHOAS runState
+  bool = UnHOAS . bool
+  ite = UnHOAS ite
 
 instance Lang Show where
   mkProd = name "mkProd"
@@ -272,6 +280,8 @@ instance Lang Show where
   double2Float = name "double2Float"
   state = name "state"
   runState = name "runState"
+  bool = name . show
+  ite = name "ite"
 
 instance Lang repr => Lang (GWDiff repr) where
   mkProd = GWDiff (P.const mkProd)
@@ -324,6 +334,8 @@ instance Lang repr => Lang (GWDiff repr) where
   double2Float = GWDiff $ P.const $ bimap2 double2Float id
   state = GWDiff $ P.const state
   runState = GWDiff $ P.const runState
+  bool x = GWDiff $ P.const $ bool x
+  ite = GWDiff $ P.const ite
 
 instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   mkProd = WDiff mkProd
@@ -376,6 +388,8 @@ instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
   double2Float = WDiff $ bimap2 double2Float id
   state = WDiff state
   runState = WDiff runState
+  bool x = WDiff $ bool x
+  ite = WDiff $ ite
 
 instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
 
@@ -422,6 +436,8 @@ instance Lang repr => Lang (ImpW repr) where
   double2Float = NoImpW double2Float
   state = NoImpW state
   runState = NoImpW runState
+  bool = NoImpW . bool
+  ite = NoImpW ite
 
 instance (Lang l, Lang r) => Lang (Combine l r) where
   mkProd = Combine mkProd mkProd
@@ -460,6 +476,8 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   float2Double = Combine float2Double float2Double
   state = Combine state state
   runState = Combine runState runState
+  bool x = Combine (bool x) (bool x)
+  ite = Combine ite ite
 
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
