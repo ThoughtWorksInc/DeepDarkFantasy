@@ -72,3 +72,4 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
   double2Float = WDiff $ bimap2 double2Float id
   state = WDiff state
   runState = WDiff runState
+  putStrLn = WDiff putStrLn

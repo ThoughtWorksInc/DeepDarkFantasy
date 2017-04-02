@@ -4,21 +4,20 @@ module DDF.Show (module DDF.Show) where
 
 import DDF.Lang
 import qualified Prelude as M
-import DDF.ImportMeta
 
 data AST = Leaf M.String | App M.String AST [AST] | Lam M.String [M.String] AST
 
 appAST (Leaf f) x = App f x []
 appAST (App f x l) r = App f x (l ++ [r])
-appAST lam r = appAST (Leaf $ show lam) r
+appAST l r = appAST (Leaf $ show l) r
 
-lamAST str (Lam s l t) = Lam str (s:l) t
+lamAST str (Lam st l t) = Lam str (st:l) t
 lamAST str r = Lam str [] r
 
 instance M.Show AST where
   show (Leaf f) = f
   show (App f x l) = "(" ++ f ++ " " ++ show x ++ M.concatMap ((" " ++) . show) l ++ ")"
-  show (Lam s l t) = "(\\" ++ s ++ M.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
+  show (Lam str l t) = "(\\" ++ str ++ M.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
 
 newtype Show h a = Show {runShow :: [M.String] -> M.Int -> AST}
 name = Show . M.const . M.const . Leaf
@@ -75,3 +74,4 @@ instance Lang Show where
   double2Float = name "double2Float"
   state = name "state"
   runState = name "runState"
+  putStrLn = name "putStrLn"

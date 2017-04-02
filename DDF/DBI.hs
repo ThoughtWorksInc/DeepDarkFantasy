@@ -22,9 +22,7 @@
 module DDF.DBI (module DDF.DBI, module DDF.ImportMeta) where
 import qualified Prelude as P
 import DDF.Util
-import Control.Monad (when)
 import System.Random
-import Data.Proxy
 import Data.Constraint
 import Data.Constraint.Forall
 import DDF.ImportMeta
@@ -84,7 +82,7 @@ class (DBI r, Applicative r m) => Monad r m where
 class BiFunctor r p where
   bimap :: r h ((a -> b) -> (c -> d) -> p a c -> p b d)
 
-app3 f x y z = app (app2 f x y) z
+app3 f a b c = app (app2 f a b) c
 com2 = app2 com
 
 class NT repr l r where
@@ -110,7 +108,7 @@ lam2 :: forall repr a b c h. DBI repr =>
   ((forall k. NT repr (a, h) k => repr k a) -> (forall k. NT repr (b, (a, h)) k => repr k b) -> (repr (b, (a, h))) c) -> repr h (a -> b -> c)
 lam2 f = lam $ \x -> lam $ \y -> f x y
 
-lam3 f = lam2 $ \x y -> lam $ \z -> f x y z
+lam3 f = lam2 $ \a b -> lam $ \c -> f a b c
 
 app2 f a = app (app f a)
 

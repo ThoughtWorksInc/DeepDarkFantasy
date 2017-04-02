@@ -56,3 +56,4 @@ instance Lang repr => Lang (UnHOAS repr) where
   double2Float = UnHOAS double2Float
   state = UnHOAS state
   runState = UnHOAS runState
+  putStrLn = UnHOAS putStrLn

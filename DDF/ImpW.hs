@@ -29,10 +29,7 @@ instance Lang r => Char (ImpW r) where
 instance Lang r => DBI (ImpW r) where
   z = NoImpW z
   s :: forall a h b. ImpW r h b -> ImpW r (a, h) b
-  s (ImpW x) = work x
-    where
-      work :: Weight w => r h (w -> b) -> ImpW r (a, h) b
-      work x = ImpW (s x)
+  s (ImpW w) = ImpW (s w)
   s (NoImpW x) = NoImpW (s x)
   app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
   app (NoImpW f) (NoImpW x) = NoImpW (app f x)
@@ -78,3 +75,4 @@ instance Lang r => Lang (ImpW r) where
   double2Float = NoImpW double2Float
   state = NoImpW state
   runState = NoImpW runState
+  putStrLn = NoImpW putStrLn

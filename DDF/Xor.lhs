@@ -1,9 +1,9 @@
 > {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
+You should already read DDF.Poly before this.
 
 > module DDF.Xor where
-> import qualified DDF.Poly as YouShouldAlreadyReadThis
 > import qualified Prelude as M
 > import System.Random
 > import Control.Monad (when)
@@ -33,8 +33,8 @@ Weight also form a Vector so we can combine weights (update it), scale it (to co
 
 Let's start by constructing a weight.
 
-> weight :: Lang repr => ImpW repr h Double
-> weight = ImpW id
+> doubleWeight :: Lang repr => ImpW repr h Double
+> doubleWeight = ImpW id
 
 Note that we are just manipulating AST.
 If you wanna do weight sharing, you need to use let(in DDF) yourself.
@@ -67,8 +67,8 @@ Now, the hidden layer of type (Double, Double) -> ((Double, Double), (Double, Do
 And finally, the whole NN:
 
 > type XOR = (Double, Double) -> Double
-> xor :: Lang repr => ImpW repr h XOR
-> xor = neuron `com2` (bimap2 scaleAdd scaleAdd) `com2` hidden
+> xorNet :: Lang repr => ImpW repr h XOR
+> xorNet = neuron `com2` (bimap2 scaleAdd scaleAdd) `com2` hidden
 
 But before we can train it, we need to define the dataset and the loss function.
 
@@ -91,7 +91,7 @@ However, unlike Poly, there are more than one datapoint, so we need to use a lis
 Now we are good to implement the train function!
 
 > findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (Int -> Double -> M.String -> m ()) -> m XOR
-> findXor rand doAST doIter = case runImpW $ noEnv xor of
+> findXor rand doAST doIter = case runImpW $ noEnv xorNet of
 >   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GWDiff Eval)) () (w -> XOR)) -> do
 >     doAST $ xorS vars 0
 
@@ -107,22 +107,22 @@ Getting random weights...
 >       diff :: GWDiff Eval () x -> Diff w x
 >       diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
 >       go :: M.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
->       go xor weight reify loss update i orig | i <= 2500 = do
+>       go xor weight reifyE lossE update i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)
->         go xor (update 0.3 weight lossDiff) reify loss update (1 + i) orig
+>         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig
 >           where
->             (lossVal, lossDiff) = loss $ xor (reify weight)
->       go xor weight _ _ _ _ orig = M.return $ orig weight
+>             (lossVal, lossDiff) = lossE $ xor (reifyE weight)
+>       go _ weight _ _ _ _ orig = M.return $ orig weight
 
 > main :: IO ()
 > main = do
 >   g <- getStdGen
->   xor <- findXor g print (\i d w -> when (isSquare i) $ do
+>   xorTrained <- findXor g print (\i d w -> when (isSquare i) $ do
 >     print d
 >     M.putStrLn w
 >     M.putStrLn "")
 >   let doXor :: Double -> Double -> IO ()
->       doXor l r = M.putStrLn $ M.show l ++ " xor " ++ M.show r ++ " is " ++ (M.show $ xor (l, r))
+>       doXor l r = M.putStrLn $ M.show l ++ " xor " ++ M.show r ++ " is " ++ (M.show $ xorTrained (l, r))
 >   doXor 0 0
 >   doXor 0 1
 >   doXor 1 0

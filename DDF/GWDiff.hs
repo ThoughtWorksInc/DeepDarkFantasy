@@ -1,3 +1,4 @@
+
 {-# LANGUAGE NoImplicitPrelude, RankNTypes #-}
 
 module DDF.GWDiff (module DDF.GWDiff, module DDF.Diff) where
@@ -72,3 +73,4 @@ instance Lang r => Lang (GWDiff r) where
   double2Float = GWDiff $ M.const $ bimap2 double2Float id
   state = GWDiff $ M.const state
   runState = GWDiff $ M.const runState
+  putStrLn = GWDiff $ M.const putStrLn

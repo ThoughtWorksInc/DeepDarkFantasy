@@ -3,7 +3,6 @@
 module DDF.Combine where
 
 import DDF.Lang
-import DDF.ImportMeta
 
 data Combine l r h x = Combine (l h x) (r h x)
 
@@ -12,7 +11,7 @@ instance (DBI l, DBI r) => DBI (Combine l r) where
   s (Combine l r) = Combine (s l) (s r)
   app (Combine fl fr) (Combine xl xr) = Combine (app fl xl) (app fr xr)
   abs (Combine l r) = Combine (abs l) (abs r)
-  hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l r -> l) (hoas $ \x -> case f (Combine z x) of Combine l r -> r)
+  hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l _ -> l) (hoas $ \x -> case f (Combine z x) of Combine _ r -> r)
 
 instance (Bool l, Bool r) => Bool (Combine l r) where
   bool x = Combine (bool x) (bool x)
@@ -58,3 +57,4 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   float2Double = Combine float2Double float2Double
   state = Combine state state
   runState = Combine runState runState
+  putStrLn = Combine putStrLn putStrLn

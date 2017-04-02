@@ -24,13 +24,8 @@ module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char) where
 import DDF.Bool
 import DDF.Char
 import Data.Constraint
-import Data.Constraint.Forall
-import Data.Proxy
 
-import qualified Control.Monad.State as M
 import qualified Control.Monad.Writer as M
-import qualified Data.Bool as M
-import qualified Data.Tuple as M
 import qualified GHC.Float as M
 import qualified Prelude as M
 
@@ -89,6 +84,7 @@ class (Bool repr, Char repr) => Lang repr where
   undefined = fix1 id
   state :: repr h ((l -> (r, l)) -> State l r)
   runState :: repr h (State l r -> (l -> (r, l)))
+  putStrLn :: repr h (String -> IO ())
 
 class Reify repr x where
   reify :: x -> repr h x
@@ -204,14 +200,14 @@ instance (Lang r, Monoid r w) => Monad r (Writer w) where
   join = lam $ \x -> writer1 $ mkProd2 (zro1 $ runWriter1 $ zro1 $ runWriter1 x) (plus2 (fst1 $ runWriter1 $ zro1 $ runWriter1 x) (fst1 $ runWriter1 x))
 
 instance Lang r => Functor r (State l) where
-  map = lam2 $ \f s -> state1 (com2 (bimap2 f id) (runState1 s))
+  map = lam2 $ \f st -> state1 (com2 (bimap2 f id) (runState1 st))
 
 instance Lang r => Applicative r (State l) where
   pure = lam $ \x -> state1 (mkProd1 x)
-  ap = lam2 $ \f x -> state1 $ lam $ \s -> let_2 (runState2 f s) (lam $ \p -> bimap3 (zro1 p) id (runState2 x (fst1 p)))
+  ap = lam2 $ \f x -> state1 $ lam $ \st -> let_2 (runState2 f st) (lam $ \p -> bimap3 (zro1 p) id (runState2 x (fst1 p)))
 
 instance Lang r => Monad r (State l) where
-  join = lam $ \x -> state1 $ lam $ \s -> let_2 (runState2 x s) (uncurry1 runState)
+  join = lam $ \x -> state1 $ lam $ \st -> let_2 (runState2 x st) (uncurry1 runState)
 
 instance Lang r => Functor r M.IO where
   map = ioMap

@@ -87,10 +87,10 @@ instance Lang repr => WithDiff repr () where
   withDiff = const1 id
 
 instance Lang repr => WithDiff repr Double where
-  withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
+  withDiff = lam2 $ \con d -> mkProd2 d (app con doubleOne)
 
 instance Lang repr => WithDiff repr M.Float where
-  withDiff = lam2 $ \conv d -> mkProd2 d (app conv floatOne)
+  withDiff = lam2 $ \con d -> mkProd2 d (app con floatOne)
 
 instance (Lang repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
-  withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))
+  withDiff = lam $ \con -> bimap2 (withDiff1 (lam $ \l -> app con (mkProd2 l zero))) (withDiff1 (lam $ \r -> app con (mkProd2 zero r)))
