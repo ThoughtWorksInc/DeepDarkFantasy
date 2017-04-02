@@ -42,13 +42,27 @@ instance Prod Show where
   zro = name "zro"
   fst = name "fst"
 
-instance Lang Show where
+instance Double Show where
   double = name . show
   doublePlus = name "plus"
   doubleMinus = name "minus"
   doubleMult = name "mult"
   doubleDivide = name "divide"
   doubleExp = name "exp"
+
+instance Float Show where
+  float = name . show
+  floatPlus = name "plus"
+  floatMinus = name "minus"
+  floatMult = name "mult"
+  floatDivide = name "divide"
+  floatExp = name "exp"
+
+instance Ordering Show where
+  ordering = name . show
+  ltEqGt = name "ltEqGt"
+
+instance Lang Show where
   fix = name "fix"
   left = name "left"
   right = name "right"
@@ -66,12 +80,6 @@ instance Lang Show where
   ioMap = name "ioMap"
   writer = name "writer"
   runWriter = name "runWriter"
-  float = name . show
-  floatPlus = name "plus"
-  floatMinus = name "minus"
-  floatMult = name "mult"
-  floatDivide = name "divide"
-  floatExp = name "exp"
   float2Double = name "float2Double"
   double2Float = name "double2Float"
   state = name "state"

@@ -33,7 +33,7 @@ Weight also form a Vector so we can combine weights (update it), scale it (to co
 
 Let's start by constructing a weight.
 
-> doubleWeight :: Lang repr => ImpW repr h Double
+> doubleWeight :: Lang repr => ImpW repr h M.Double
 > doubleWeight = ImpW id
 
 Note that we are just manipulating AST.
@@ -46,51 +46,51 @@ We have the weight, now we need the activation function, sigmoid.
 > sigmoid = lam $ \x -> recip1 (plus2 doubleOne (doubleExp1 (invert1 x)))
 > sigmoid1 = app sigmoid
 
-With weight and sigmoid we can construct a neuron of type ((Double, Double) -> Double)
-The weight should be a pair of Double, each as a scale on the actual input, with a bias.
+With weight and sigmoid we can construct a neuron of type ((M.Double, M.Double) -> M.Double)
+The weight should be a pair of M.Double, each as a scale on the actual input, with a bias.
 We then add the two scaled input, with the bias, and pass them into sigmoid.
 
-> scaleAdd :: Lang repr => ImpW repr h ((Double, Double) -> Double)
+> scaleAdd :: Lang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
 > scaleAdd = ImpW $ lam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (plus2 (fst1 w) (fst1 p))
 
-> withBias :: Lang repr => ImpW repr h (Double -> Double)
+> withBias :: Lang repr => ImpW repr h (M.Double -> M.Double)
 > withBias = ImpW $ plus
 
-> neuron :: Lang repr => ImpW repr h ((Double, Double) -> Double)
+> neuron :: Lang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
 > neuron = com2 (com2 sigmoid withBias) scaleAdd
 > neuron1 = app neuron
 
-Now, the hidden layer of type (Double, Double) -> ((Double, Double), (Double, Double))
+Now, the hidden layer of type (M.Double, M.Double) -> ((M.Double, M.Double), (M.Double, M.Double))
 
 > hidden = lam $ \p -> mkProd2 (mkProd2 (neuron1 p) (neuron1 p)) (mkProd2 (neuron1 p) (neuron1 p))
 
 And finally, the whole NN:
 
-> type XOR = (Double, Double) -> Double
+> type XOR = (M.Double, M.Double) -> M.Double
 > xorNet :: Lang repr => ImpW repr h XOR
 > xorNet = neuron `com2` (bimap2 scaleAdd scaleAdd) `com2` hidden
 
 But before we can train it, we need to define the dataset and the loss function.
 
-> l2 :: Lang repr => repr h (Double -> Double -> Double)
+> l2 :: Lang repr => repr h (M.Double -> M.Double -> M.Double)
 > l2 = lam2 $ \l r -> (mult2 (minus2 l r) (minus2 l r))
 > l22 = app2 l2
 
-> eval :: Lang repr => repr h (XOR -> ((Double, Double), Double) -> Double)
+> eval :: Lang repr => repr h (XOR -> ((M.Double, M.Double), M.Double) -> M.Double)
 > eval = lam2 $ \xor p -> l22 (app xor (zro1 p)) (fst1 p)
 
-> dataset :: Lang repr => repr h [((Double, Double), Double)]
+> dataset :: Lang repr => repr h [((M.Double, M.Double), M.Double)]
 > dataset = cons2 (build 0 0 0) (cons2 (build 0 1 1) (cons2 (build 1 0 1) (cons2 (build 1 1 0) nil)))
 >   where build l r ret = mkProd2 (mkProd2 (double l) (double r)) (double ret)
 
 However, unlike Poly, there are more than one datapoint, so we need to use a list, and map xor onto it.
 
-> loss :: Lang repr => repr h (XOR -> Double)
+> loss :: Lang repr => repr h (XOR -> M.Double)
 > loss = lam $ \xor -> fix2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
 
 Now we are good to implement the train function!
 
-> findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (Int -> Double -> M.String -> m ()) -> m XOR
+> findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (Int -> M.Double -> M.String -> m ()) -> m XOR
 > findXor rand doAST doIter = case runImpW $ noEnv xorNet of
 >   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GWDiff Eval)) () (w -> XOR)) -> do
 >     doAST $ xorS vars 0
@@ -106,7 +106,7 @@ Getting random weights...
 >     where
 >       diff :: GWDiff Eval () x -> Diff w x
 >       diff x = (runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)
->       go :: M.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> Double)) -> (Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
+>       go :: M.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
 >       go xor weight reifyE lossE update i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)
 >         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig
@@ -121,7 +121,7 @@ Getting random weights...
 >     print d
 >     M.putStrLn w
 >     M.putStrLn "")
->   let doXor :: Double -> Double -> IO ()
+>   let doXor :: M.Double -> M.Double -> IO ()
 >       doXor l r = M.putStrLn $ M.show l ++ " xor " ++ M.show r ++ " is " ++ (M.show $ xorTrained (l, r))
 >   doXor 0 0
 >   doXor 0 1

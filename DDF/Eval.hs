@@ -34,12 +34,30 @@ instance Prod Eval where
   zro = comb M.fst
   fst = comb M.snd
 
-instance Lang Eval where
+instance Double Eval where
   double = comb
   doublePlus = comb (+)
   doubleMinus = comb (-)
   doubleMult = comb (*)
   doubleDivide = comb (/)
+  doubleExp = comb M.exp
+
+instance Float Eval where
+  float = comb
+  floatPlus = comb (+)
+  floatMinus = comb (-)
+  floatMult = comb (*)
+  floatDivide = comb (/)
+  floatExp = comb M.exp
+
+instance Ordering Eval where
+  ordering = comb
+  ltEqGt = comb $ \lt eq gt -> \case
+                                M.LT -> lt
+                                M.EQ -> eq
+                                M.GT -> gt
+
+instance Lang Eval where
   fix = comb loop
     where loop x = x $ loop x
   left = comb M.Left
@@ -64,13 +82,6 @@ instance Lang Eval where
   ioMap = comb M.fmap
   writer = comb (M.WriterT . M.Identity)
   runWriter = comb M.runWriter
-  doubleExp = comb M.exp
-  float = comb
-  floatPlus = comb (+)
-  floatMinus = comb (-)
-  floatMult = comb (*)
-  floatDivide = comb (/)
-  floatExp = comb M.exp
   float2Double = comb M.float2Double
   double2Float = comb M.double2Float
   state = comb M.state

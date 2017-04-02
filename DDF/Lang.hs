@@ -21,37 +21,20 @@
     PartialTypeSignatures,
     NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Prod) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Prod, module DDF.Ordering) where
 import DDF.Bool
 import DDF.Char
 import DDF.Prod
+import DDF.Ordering
+import DDF.Double
+import DDF.Float
 import Data.Constraint
 
 import qualified Control.Monad.Writer as M
 import qualified GHC.Float as M
 import qualified Prelude as M
 
-class (Bool r, Char r, Prod r) => Lang r where
-  double :: M.Double -> r h M.Double
-  doubleZero :: r h M.Double
-  doubleZero = double 0
-  doubleOne :: r h M.Double
-  doubleOne = double 1
-  doublePlus :: r h (M.Double -> M.Double -> M.Double)
-  doubleMinus :: r h (M.Double -> M.Double -> M.Double)
-  doubleMult :: r h (M.Double -> M.Double -> M.Double)
-  doubleDivide :: r h (M.Double -> M.Double -> M.Double)
-  doubleExp :: r h (M.Double -> M.Double)
-  float :: M.Float -> r h M.Float
-  floatZero :: r h M.Float
-  floatZero = float 0
-  floatOne :: r h M.Float
-  floatOne = float 1
-  floatPlus :: r h (M.Float -> M.Float -> M.Float)
-  floatMinus :: r h (M.Float -> M.Float -> M.Float)
-  floatMult :: r h (M.Float -> M.Float -> M.Float)
-  floatDivide :: r h (M.Float -> M.Float -> M.Float)
-  floatExp :: r h (M.Float -> M.Float)
+class (Bool r, Char r, Double r, Float r, Prod r, Ordering r) => Lang r where
   fix :: r h ((a -> a) -> a)
   left :: r h (a -> M.Either a b)
   right :: r h (b -> M.Either a b)
@@ -85,7 +68,7 @@ class Reify r x where
 instance Lang r => Reify r () where
   reify _ = unit
 
-instance Lang r => Reify r Double where
+instance Lang r => Reify r M.Double where
   reify = double
 
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
@@ -100,18 +83,18 @@ instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
 class Monoid r g => Group r g where
   invert :: r h (g -> g)
   minus :: r h (g -> g -> g)
-  default invert :: Lang r => r h (g -> g)
+  default invert :: DBI r => r h (g -> g)
   invert = minus1 zero
-  default minus :: Lang r => r h (g -> g -> g)
+  default minus :: DBI r => r h (g -> g -> g)
   minus = lam2 $ \x y -> plus2 x (invert1 y)
   {-# MINIMAL (invert | minus) #-}
 
 class Group r v => Vector r v where
-  mult :: r h (Double -> v -> v)
-  divide :: r h (v -> Double -> v)
-  default mult :: Lang r => r h (Double -> v -> v)
+  mult :: r h (M.Double -> v -> v)
+  divide :: r h (v -> M.Double -> v)
+  default mult :: Double r => r h (M.Double -> v -> v)
   mult = lam2 $ \x y -> divide2 y (recip1 x)
-  default divide :: Lang r => r h (v -> Double -> v)
+  default divide :: Double r => r h (v -> M.Double -> v)
   divide = lam2 $ \x y -> mult2 (recip1 y) x
   {-# MINIMAL (mult | divide) #-}
 
@@ -127,46 +110,46 @@ instance Lang r => Vector r () where
   mult = const1 $ const1 unit
   divide = const1 $ const1 unit
 
-instance Lang r => Monoid r Double where
+instance Double r => Monoid r M.Double where
   zero = doubleZero
   plus = doublePlus
 
-instance Lang r => Group r Double where
+instance Double r => Group r M.Double where
   minus = doubleMinus
 
-instance Lang r => Vector r Double where
+instance Double r => Vector r M.Double where
   mult = doubleMult
   divide = doubleDivide
 
-instance Lang r => Monoid r M.Float where
+instance Float r => Monoid r M.Float where
   zero = floatZero
   plus = floatPlus
 
-instance Lang r => Group r M.Float where
+instance Float r => Group r M.Float where
   minus = floatMinus
 
 instance Lang r => Vector r M.Float where
   mult = com2 floatMult double2Float
   divide = com2 (flip2 com double2Float) floatDivide
 
-instance (Lang repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
+instance (Prod repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
   zero = mkProd2 zero zero
   plus = lam2 $ \l r -> mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
 
-instance (Lang repr, Group repr l, Group repr r) => Group repr (l, r) where
+instance (Prod repr, Group repr l, Group repr r) => Group repr (l, r) where
   invert = bimap2 invert invert
 
-instance (Lang repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
+instance (Prod repr, Double repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
   mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
-instance (Lang r, Monoid r v) => Monoid r (Double -> v) where
+instance (Double r, Monoid r v) => Monoid r (M.Double -> v) where
   zero = const1 zero
   plus = lam3 $ \l r x -> plus2 (app l x) (app r x)
 
-instance (Lang r, Group r v) => Group r (Double -> v) where
+instance (Lang r, Group r v) => Group r (M.Double -> v) where
   invert = lam2 $ \l x -> app l (invert1 x)
 
-instance (Lang r, Vector r v) => Vector r (Double -> v) where
+instance (Lang r, Vector r v) => Vector r (M.Double -> v) where
   mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance Lang r => Monoid r [a] where
@@ -179,7 +162,7 @@ instance Lang r => Functor r [] where
 instance Lang r => BiFunctor r Either where
   bimap = lam2 $ \l r -> sumMatch2 (com2 left l) (com2 right r)
 
-instance Lang r => BiFunctor r (,) where
+instance Prod r => BiFunctor r (,) where
   bimap = lam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
 
 instance Lang r => Functor r (Writer w) where

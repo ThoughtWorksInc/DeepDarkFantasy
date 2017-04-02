@@ -31,17 +31,37 @@ instance Prod r => DBI (ImpW r) where
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
 
-instance Lang r => Bool (ImpW r) where
+instance (Prod r, Bool r) => Bool (ImpW r) where
   bool = NoImpW . bool
   ite = NoImpW ite
 
-instance Lang r => Char (ImpW r) where
+instance (Prod r, Char r) => Char (ImpW r) where
   char = NoImpW . char
 
 instance Prod r => Prod (ImpW r) where
   mkProd = NoImpW mkProd
   zro = NoImpW zro
   fst = NoImpW fst
+
+instance (Prod r, Double r) => Double (ImpW r) where
+  double = NoImpW . double
+  doubleExp = NoImpW doubleExp
+  doublePlus = NoImpW doublePlus
+  doubleMinus = NoImpW doubleMinus
+  doubleMult = NoImpW doubleMult
+  doubleDivide = NoImpW doubleDivide
+
+instance (Prod r, Float r) => Float (ImpW r) where
+  float = NoImpW . float
+  floatExp = NoImpW floatExp
+  floatPlus = NoImpW floatPlus
+  floatMinus = NoImpW floatMinus
+  floatMult = NoImpW floatMult
+  floatDivide = NoImpW floatDivide
+
+instance (Prod r, Ordering r) => Ordering (ImpW r) where
+  ordering = NoImpW . ordering
+  ltEqGt = NoImpW ltEqGt
 
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
@@ -61,18 +81,6 @@ instance Lang r => Lang (ImpW r) where
   sumMatch = NoImpW sumMatch
   writer = NoImpW writer
   runWriter = NoImpW runWriter
-  double = NoImpW . double
-  doubleExp = NoImpW doubleExp
-  doublePlus = NoImpW doublePlus
-  doubleMinus = NoImpW doubleMinus
-  doubleMult = NoImpW doubleMult
-  doubleDivide = NoImpW doubleDivide
-  float = NoImpW . float
-  floatExp = NoImpW floatExp
-  floatPlus = NoImpW floatPlus
-  floatMinus = NoImpW floatMinus
-  floatMult = NoImpW floatMult
-  floatDivide = NoImpW floatDivide
   float2Double = NoImpW float2Double
   double2Float = NoImpW double2Float
   state = NoImpW state

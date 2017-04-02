@@ -1,17 +1,20 @@
+
 > {-# LANGUAGE
->     MultiParamTypeClasses,
->     RankNTypes,
->     ScopedTypeVariables,
->     FlexibleInstances,
->     FlexibleContexts,
->     UndecidableInstances,
->     IncoherentInstances,
->     PolyKinds,
->     LambdaCase,
->     NoMonomorphismRestriction,
->     TypeFamilies,
->     LiberalTypeSynonyms,
->     EmptyCase #-}
+>   NoImplicitPrelude,
+>   MultiParamTypeClasses,
+>   RankNTypes,
+>   ScopedTypeVariables,
+>   FlexibleInstances,
+>   FlexibleContexts,
+>   UndecidableInstances,
+>   IncoherentInstances,
+>   PolyKinds,
+>   LambdaCase,
+>   NoMonomorphismRestriction,
+>   TypeFamilies,
+>   LiberalTypeSynonyms,
+>   EmptyCase
+> #-}
 
 > module DDF.Poly where
 > import Control.Monad (when)
@@ -21,14 +24,14 @@
 > import DDF.Eval
 > import DDF.WDiff
 > import qualified Control.Monad as M
-> import Prelude
+> import Prelude (Integer)
 > import qualified Prelude as M
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
-> poly :: forall repr h. Lang repr => repr h (Double -> Double)
+> poly :: forall repr h. Lang repr => repr h (M.Double -> M.Double)
 > poly = lam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (double 2.0) x) (double 3.0))
 
 poly x = x * x + (2 * x + 3)
@@ -45,7 +48,7 @@ We want to minimize this distance.
 
 Now write a generic function that calculate x and return it.
 
-> solve :: forall m. M.Monad m => (AST -> m ()) -> (Integer -> Double -> m ()) -> m Double
+> solve :: forall m. M.Monad m => (AST -> m ()) -> (Integer -> M.Double -> m ()) -> m M.Double
 > solve doAST doIter = do
 
 Let's begin by trying to print poly
@@ -58,10 +61,10 @@ The main loop. i is step and w is weight (our current estimate of x).
 We start by assuming x = 0 is the solution,
 and minimize (comp x) by taking derivative of x, and decrease it whenever it is positive (and vice versa).
 
->     go :: Integer -> Double -> m Double
+>     go :: Integer -> M.Double -> m M.Double
 >     go i w | i < 200 = do
 >       doIter i w
->       go (1 + i) $ w - 0.001 * snd (runEval (runWDiff $ noEnv comp) () (w, 1))
+>       go (1 + i) $ w - 0.001 * M.snd (runEval (runWDiff $ noEnv comp) () (w, 1))
 
 noEnv comp assume the term (which is a De Brujin Index term) need no environment (is free)
 and it is a finally tagless term, with WDiff interpreter being implicitly applied,

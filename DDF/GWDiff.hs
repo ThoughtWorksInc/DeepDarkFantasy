@@ -27,7 +27,7 @@ instance Prod r => Prod (GWDiff r) where
   zro = GWDiff $ M.const zro
   fst = GWDiff $ M.const fst
 
-instance Lang r => Lang (GWDiff r) where
+instance (Double r, Prod r) => Double (GWDiff r) where
   double x = GWDiff $ M.const $ mkProd2 (double x) zero
   doublePlus = GWDiff $ M.const $ lam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
@@ -41,6 +41,27 @@ instance Lang r => Lang (GWDiff r) where
       (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
   doubleExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
+
+instance Lang r => Float (GWDiff r) where
+  float x = GWDiff $ M.const $ mkProd2 (float x) zero
+  floatPlus = GWDiff $ M.const $ lam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  floatMinus = GWDiff $ M.const $ lam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  floatMult = GWDiff $ M.const $ lam2 $ \l r ->
+    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
+      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+  floatDivide = GWDiff $ M.const $ lam2 $ \l r ->
+    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
+        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
+  floatExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+
+instance Ordering r => Ordering (GWDiff r) where
+  ordering x = GWDiff $ M.const $ ordering x
+  ltEqGt = GWDiff $ M.const ltEqGt
+
+instance Lang r => Lang (GWDiff r) where
   fix = GWDiff $ M.const fix
   left = GWDiff $ M.const left
   right = GWDiff $ M.const right
@@ -58,19 +79,6 @@ instance Lang r => Lang (GWDiff r) where
   ioMap = GWDiff $ M.const ioMap
   writer = GWDiff $ M.const writer
   runWriter = GWDiff $ M.const runWriter
-  float x = GWDiff $ M.const $ mkProd2 (float x) zero
-  floatPlus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  floatMinus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  floatMult = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
-  floatDivide = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
   float2Double = GWDiff $ M.const $ bimap2 float2Double id
   double2Float = GWDiff $ M.const $ bimap2 double2Float id
   state = GWDiff $ M.const state

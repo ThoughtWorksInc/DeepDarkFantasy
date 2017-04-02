@@ -21,11 +21,14 @@ library
     DDF.Combine
     DDF.DBI
     DDF.Diff
+    DDF.Double
     DDF.Eval
+    DDF.Float
     DDF.GWDiff
     DDF.ImportMeta
     DDF.ImpW
     DDF.Lang
+    DDF.Ordering
     DDF.Poly
     DDF.Prod
     DDF.Show

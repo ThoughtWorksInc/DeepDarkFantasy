@@ -26,7 +26,7 @@ instance Prod r => Prod (WDiff r v) where
   zro = WDiff zro
   fst = WDiff fst
 
-instance (Vector r v, Lang r) => Lang (WDiff r v) where
+instance (Vector r v, Double r, Prod r) => Double (WDiff r v) where
   double x = WDiff $ mkProd2 (double x) zero
   doublePlus = WDiff $ lam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
@@ -40,6 +40,27 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
       (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
         (mult2 (zro1 r) (zro1 r)))
   doubleExp = WDiff $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
+
+instance (Vector r v, Lang r) => Float (WDiff r v) where
+  float x = WDiff $ mkProd2 (float x) zero
+  floatPlus = WDiff $ lam2 $ \l r ->
+    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+  floatMinus = WDiff $ lam2 $ \l r ->
+    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+  floatMult = WDiff $ lam2 $ \l r ->
+    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
+      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+  floatDivide = WDiff $ lam2 $ \l r ->
+    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
+        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
+  floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+
+instance Ordering r => Ordering (WDiff r v) where
+  ordering = WDiff . ordering
+  ltEqGt = WDiff ltEqGt
+
+instance (Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix
   left = WDiff left
   right = WDiff right
@@ -57,19 +78,6 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter
-  float x = WDiff $ mkProd2 (float x) zero
-  floatPlus = WDiff $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  floatMinus = WDiff $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  floatMult = WDiff $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
-  floatDivide = WDiff $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
   float2Double = WDiff $ bimap2 float2Double id
   double2Float = WDiff $ bimap2 double2Float id
   state = WDiff state

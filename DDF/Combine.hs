@@ -25,19 +25,27 @@ instance (Prod l, Prod r) => Prod (Combine l r) where
   zro = Combine zro zro
   fst = Combine fst fst
 
-instance (Lang l, Lang r) => Lang (Combine l r) where
+instance (Double l, Double r) => Double (Combine l r) where
   double x = Combine (double x) (double x)
   doublePlus = Combine doublePlus doublePlus
   doubleMinus = Combine doubleMinus doubleMinus
   doubleMult = Combine doubleMult doubleMult
   doubleDivide = Combine doubleDivide doubleDivide
   doubleExp = Combine doubleExp doubleExp
+
+instance (Float l, Float r) => Float (Combine l r) where
   float x = Combine (float x) (float x)
   floatPlus = Combine floatPlus floatPlus
   floatMinus = Combine floatMinus floatMinus
   floatMult = Combine floatMult floatMult
   floatDivide = Combine floatDivide floatDivide
   floatExp = Combine floatExp floatExp
+
+instance (Ordering l, Ordering r) => Ordering (Combine l r) where
+  ordering x = Combine (ordering x) (ordering x)
+  ltEqGt = Combine ltEqGt ltEqGt
+
+instance (Lang l, Lang r) => Lang (Combine l r) where
   fix = Combine fix fix
   left = Combine left left
   right = Combine right right

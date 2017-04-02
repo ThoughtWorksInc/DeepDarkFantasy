@@ -24,13 +24,28 @@ instance Prod r => Prod (UnHOAS r) where
   zro = UnHOAS zro
   fst = UnHOAS fst
 
-instance Lang repr => Lang (UnHOAS repr) where
+instance Ordering r => Ordering (UnHOAS r) where
+  ordering = UnHOAS . ordering
+  ltEqGt = UnHOAS ltEqGt
+
+instance Double r => Double (UnHOAS r) where
   double = UnHOAS . double
   doublePlus = UnHOAS doublePlus
   doubleMinus = UnHOAS doubleMinus
   doubleMult = UnHOAS doubleMult
   doubleDivide = UnHOAS doubleDivide
   doubleExp = UnHOAS doubleExp
+
+instance Float r => Float (UnHOAS r) where
+  float = UnHOAS . float
+  floatPlus = UnHOAS floatPlus
+  floatMinus = UnHOAS floatMinus
+  floatMult = UnHOAS floatMult
+  floatDivide = UnHOAS floatDivide
+  floatExp = UnHOAS floatExp
+
+instance Lang r => Lang (UnHOAS r) where
+  float2Double = UnHOAS float2Double
   fix = UnHOAS fix
   left = UnHOAS left
   right = UnHOAS right
@@ -48,13 +63,6 @@ instance Lang repr => Lang (UnHOAS repr) where
   ioMap = UnHOAS ioMap
   writer = UnHOAS writer
   runWriter = UnHOAS runWriter
-  float = UnHOAS . float
-  floatPlus = UnHOAS floatPlus
-  floatMinus = UnHOAS floatMinus
-  floatMult = UnHOAS floatMult
-  floatDivide = UnHOAS floatDivide
-  floatExp = UnHOAS floatExp
-  float2Double = UnHOAS float2Double
   double2Float = UnHOAS double2Float
   state = UnHOAS state
   runState = UnHOAS runState

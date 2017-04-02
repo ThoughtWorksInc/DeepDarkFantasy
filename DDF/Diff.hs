@@ -32,6 +32,7 @@ type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
 type instance Diff v (State l r) = State (Diff v l) (Diff v r)
 type instance Diff v M.Bool = M.Bool
 type instance Diff v M.Char = M.Char
+type instance Diff v M.Ordering = M.Ordering
 
 class Monoid repr w => WithDiff repr w where
   withDiff :: repr h ((w -> x) -> w -> Diff x w)
@@ -57,11 +58,11 @@ instance Lang repr => ConvDiff repr () where
   toDiffBy = const1 id
   fromDiffBy = const1 id
 
-instance Lang repr => ConvDiff repr Double where
+instance Lang repr => ConvDiff repr M.Double where
   toDiffBy = flip1 mkProd
   fromDiffBy = const1 zro
 
-instance Lang repr => ConvDiff repr Float where
+instance Lang repr => ConvDiff repr M.Float where
   toDiffBy = flip1 mkProd
   fromDiffBy = const1 zro
 
@@ -86,7 +87,7 @@ instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
 
-instance Lang repr => WithDiff repr Double where
+instance Lang repr => WithDiff repr M.Double where
   withDiff = lam2 $ \con d -> mkProd2 d (app con doubleOne)
 
 instance Lang repr => WithDiff repr M.Float where
