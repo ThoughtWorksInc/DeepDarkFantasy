@@ -39,17 +39,6 @@ import Data.Constraint.Forall
 import qualified Data.Bool as P
 import DDF.Bool
 
-type instance Diff v Void = Void
-type instance Diff v P.Double = (P.Double, v)
-type instance Diff v P.Float = (P.Float, v)
-type instance Diff v (Writer l r) = Writer (Diff v l) (Diff v r)
-type instance Diff v (IO l) = IO (Diff v l)
-type instance Diff v (Maybe l) = Maybe (Diff v l)
-type instance Diff v [l] = [Diff v l]
-type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
-type instance Diff v (State l r) = State (Diff v l) (Diff v r)
-type instance Diff v P.Bool = P.Bool
-
 class Bool repr => Lang repr where
   mkProd :: repr h (a -> b -> (a, b))
   zro :: repr h ((a, b) -> a)
@@ -106,34 +95,6 @@ class Bool repr => Lang repr where
   state :: repr h ((l -> (r, l)) -> State l r)
   runState :: repr h (State l r -> (l -> (r, l)))
 
-instance Lang repr => ConvDiff repr () where
-  toDiffBy = const1 id
-  fromDiffBy = const1 id
-
-instance Lang repr => ConvDiff repr Double where
-  toDiffBy = flip1 mkProd
-  fromDiffBy = const1 zro
-
-instance Lang repr => ConvDiff repr Float where
-  toDiffBy = flip1 mkProd
-  fromDiffBy = const1 zro
-
-instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (l, r) where
-  toDiffBy = lam $ \x -> bimap2 (toDiffBy1 x) (toDiffBy1 x)
-  fromDiffBy = lam $ \x -> bimap2 (fromDiffBy1 x) (fromDiffBy1 x)
-
-instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (Either l r) where
-  toDiffBy = lam $ \x -> bimap2 (toDiffBy1 x) (toDiffBy1 x)
-  fromDiffBy = lam $ \x -> bimap2 (fromDiffBy1 x) (fromDiffBy1 x)
-
-instance (Lang repr, ConvDiff repr l, ConvDiff repr r) => ConvDiff repr (l -> r) where
-  toDiffBy = lam2 $ \x f -> (toDiffBy1 x) `com2` f `com2` (fromDiffBy1 x)
-  fromDiffBy = lam2 $ \x f -> (fromDiffBy1 x) `com2` f `com2` (toDiffBy1 x)
-
-instance (Lang repr, ConvDiff repr l) => ConvDiff repr [l] where
-  toDiffBy = lam $ \x -> map1 (toDiffBy1 x)
-  fromDiffBy = lam $ \x -> map1 (fromDiffBy1 x)
-
 class Reify repr x where
   reify :: x -> repr h x
 
@@ -148,23 +109,9 @@ instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
 
 instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
 
-instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
-
 instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
 
 instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
-
-instance Lang repr => WithDiff repr () where
-  withDiff = const1 id
-
-instance Lang repr => WithDiff repr Double where
-  withDiff = lam2 $ \conv d -> mkProd2 d (app conv doubleOne)
-
-instance Lang repr => WithDiff repr P.Float where
-  withDiff = lam2 $ \conv d -> mkProd2 d (app conv floatOne)
-
-instance (Lang repr, WithDiff repr l, WithDiff repr r) => WithDiff repr (l, r) where
-  withDiff = lam $ \conv -> bimap2 (withDiff1 (lam $ \l -> app conv (mkProd2 l zero))) (withDiff1 (lam $ \r -> app conv (mkProd2 zero r)))
 
 class Monoid r g => Group r g where
   invert :: r h (g -> g)

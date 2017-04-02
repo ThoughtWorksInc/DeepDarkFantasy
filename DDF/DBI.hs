@@ -33,26 +33,6 @@ class Monoid r m where
   zero :: r h m
   plus :: r h (m -> m -> m)
 
-class Monoid repr w => WithDiff repr w where
-  withDiff :: repr h ((w -> x) -> w -> Diff x w)
-
-class DBI repr => ConvDiff repr w where
-  toDiff :: forall h x. Monoid repr x => Proxy x -> repr h (w -> Diff x w)
-  toDiff _ = toDiffBy1 @repr @w @x zero
-  toDiffBy :: forall h x. repr h (x -> w -> Diff x w)
-  fromDiff :: forall h x. Monoid repr x => Proxy x -> repr h (Diff x w -> w)
-  fromDiff _ = fromDiffBy1 @repr @w @x zero
-  fromDiffBy :: repr h (x -> Diff x w -> w)
-
-withDiff1 = app withDiff
-toDiffBy1 :: forall repr w x h. ConvDiff repr w => repr h x -> repr h (w -> Diff x w)
-toDiffBy1 = app toDiffBy
-fromDiffBy1 :: forall repr w x h. ConvDiff repr w => repr h x -> repr h (Diff x w -> w)
-fromDiffBy1 = app fromDiffBy
-
-selfWithDiff :: (DBI repr, WithDiff repr w) => repr h (w -> Diff w w)
-selfWithDiff = withDiff1 id
-
 class DBI (repr :: * -> * -> *) where
   z :: repr (a, h) a
   s :: repr h b -> repr (a, h) b
@@ -131,11 +111,6 @@ lam2 :: forall repr a b c h. DBI repr =>
 lam2 f = lam $ \x -> lam $ \y -> f x y
 
 lam3 f = lam2 $ \x y -> lam $ \z -> f x y z
-
-type family Diff (v :: *) (x :: *)
-type instance Diff v () = ()
-type instance Diff v (l, r) = (Diff v l, Diff v r)
-type instance Diff v (l -> r) = Diff v l -> Diff v r
 
 app2 f a = app (app f a)
 

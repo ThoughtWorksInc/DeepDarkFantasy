@@ -3,6 +3,7 @@
 module DDF.WDiff where
 
 import DDF.Lang
+import DDF.Diff
 
 newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
 

@@ -1,9 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude, RankNTypes #-}
 
-module DDF.GWDiff where
+module DDF.GWDiff (module DDF.GWDiff, module DDF.Diff) where
 import DDF.Lang
 import qualified Prelude as M
 import Data.Proxy
+import DDF.Diff
 
 newtype GWDiff repr h x = GWDiff {runGWDiff :: forall v. Vector repr v => Proxy v -> repr (Diff v h) (Diff v x)}
 

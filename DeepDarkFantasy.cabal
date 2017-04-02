@@ -19,6 +19,7 @@ library
     DDF.Bool
     DDF.Combine
     DDF.DBI
+    DDF.Diff
     DDF.Eval
     DDF.GWDiff
     DDF.ImportMeta

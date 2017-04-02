@@ -6,3 +6,4 @@ dist/
 *.hi
 .stack-work/
 *.exe
+*~
