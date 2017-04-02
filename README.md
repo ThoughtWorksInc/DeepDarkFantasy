@@ -69,3 +69,7 @@ This is heavily inspired by [Neural Networks, Types, and Functional Programming]
 Also, I'd like to thanks dram for getting it to work without Incoherent Instances, and fixing it on cabal & travis.
 
 And, You can be the next contributor!
+
+# I Want You
+
+Please look at [This Issue](https://github.com/ThoughtWorksInc/DeepDarkFantasy/issues/174) and help solve it.
