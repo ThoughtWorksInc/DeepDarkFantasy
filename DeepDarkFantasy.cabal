@@ -22,11 +22,13 @@ library
     DDF.Eval
     DDF.GWDiff
     DDF.ImportMeta
+    DDF.ImpW
     DDF.Lang
     DDF.Poly
     DDF.Show
     DDF.UnHOAS
     DDF.Util
+    DDF.WDiff
     DDF.Xor
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,

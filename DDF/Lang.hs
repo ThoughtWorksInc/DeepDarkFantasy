@@ -146,62 +146,6 @@ instance Lang repr => Reify repr Double where
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
   reify (l, r) = mkProd2 (reify l) (reify r)
 
-instance (Bool r, Vector r v) => Bool (WDiff r v) where
-  bool = WDiff . bool
-  ite = WDiff ite
-
-instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
-  mkProd = WDiff mkProd
-  zro = WDiff zro
-  fst = WDiff fst
-  double x = WDiff $ mkProd2 (double x) zero
-  doublePlus = WDiff $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  doubleMinus = WDiff $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  doubleMult = WDiff $ lam2 $ \l r ->
-    mkProd2 (mult2 (zro1 l) (zro1 r))
-      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
-  doubleDivide = WDiff $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (zro1 r))
-      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
-        (mult2 (zro1 r) (zro1 r)))
-  doubleExp = WDiff $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
-  fix = WDiff fix
-  left = WDiff left
-  right = WDiff right
-  sumMatch = WDiff sumMatch
-  unit = WDiff unit
-  exfalso = WDiff exfalso
-  nothing = WDiff nothing
-  just = WDiff just
-  ioRet = WDiff ioRet
-  ioBind = WDiff ioBind
-  nil = WDiff nil
-  cons = WDiff cons
-  listMatch = WDiff listMatch
-  optionMatch = WDiff optionMatch
-  ioMap = WDiff ioMap
-  writer = WDiff writer
-  runWriter = WDiff runWriter
-  float x = WDiff $ mkProd2 (float x) zero
-  floatPlus = WDiff $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
-  floatMinus = WDiff $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
-  floatMult = WDiff $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
-  floatDivide = WDiff $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
-  float2Double = WDiff $ bimap2 float2Double id
-  double2Float = WDiff $ bimap2 double2Float id
-  state = WDiff state
-  runState = WDiff runState
-
 instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
 
 instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
@@ -209,48 +153,6 @@ instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
 instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
 
 instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
-
-instance Lang repr => Lang (ImpW repr) where
-  nil = NoImpW nil
-  cons = NoImpW cons
-  listMatch = NoImpW listMatch
-  zro = NoImpW zro
-  fst = NoImpW fst
-  mkProd = NoImpW mkProd
-  ioRet = NoImpW ioRet
-  ioMap = NoImpW ioMap
-  ioBind = NoImpW ioBind
-  unit = NoImpW unit
-  nothing = NoImpW nothing
-  just = NoImpW just
-  optionMatch = NoImpW optionMatch
-  exfalso = NoImpW exfalso
-  fix = NoImpW fix
-  left = NoImpW left
-  right = NoImpW right
-  sumMatch = NoImpW sumMatch
-  writer = NoImpW writer
-  runWriter = NoImpW runWriter
-  double = NoImpW . double
-  doubleExp = NoImpW doubleExp
-  doublePlus = NoImpW doublePlus
-  doubleMinus = NoImpW doubleMinus
-  doubleMult = NoImpW doubleMult
-  doubleDivide = NoImpW doubleDivide
-  float = NoImpW . float
-  floatExp = NoImpW floatExp
-  floatPlus = NoImpW floatPlus
-  floatMinus = NoImpW floatMinus
-  floatMult = NoImpW floatMult
-  floatDivide = NoImpW floatDivide
-  float2Double = NoImpW float2Double
-  double2Float = NoImpW double2Float
-  state = NoImpW state
-  runState = NoImpW runState
-
-instance Lang r => Bool (ImpW r) where
-  bool = NoImpW . bool
-  ite = NoImpW ite
 
 instance Lang repr => WithDiff repr () where
   withDiff = const1 id
@@ -388,27 +290,6 @@ instance Lang r => Applicative r P.Maybe where
 
 instance Lang r => Monad r P.Maybe where
   bind = lam2 $ \x func -> optionMatch3 nothing func x
-
-runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
-runImpW (ImpW x) = RunImpW x
-runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
-
-instance Lang repr => DBI (ImpW repr) where
-  z = NoImpW z
-  s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
-  s (ImpW x) = work x
-    where
-      work :: Weight w => repr h (w -> b) -> ImpW repr (a, h) b
-      work x = ImpW (s x)
-  s (NoImpW x) = NoImpW (s x)
-  app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
-  app (NoImpW f) (NoImpW x) = NoImpW (app f x)
-  app (ImpW f) (NoImpW x) = ImpW (lam $ \w -> app2 (conv f) w (conv x))
-  app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
-  abs (ImpW f) = ImpW (flip1 $ abs f)
-  abs (NoImpW x) = NoImpW (abs x)
-
-
 
 cons2 = app2 cons
 listMatch2 = app2 listMatch

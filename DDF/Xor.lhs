@@ -15,6 +15,7 @@ This is the classical example of using sigmoid NN to approximate Xor.
 > import DDF.Combine
 > import DDF.Eval
 > import DDF.GWDiff
+> import DDF.ImpW
 
 Recall in poly, we constructed a function Double -> Double,
 with argument being the weight, and do gradient descend to found a solution.

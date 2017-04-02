@@ -137,18 +137,9 @@ type instance Diff v () = ()
 type instance Diff v (l, r) = (Diff v l, Diff v r)
 type instance Diff v (l -> r) = Diff v l -> Diff v r
 
-newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
-
 app2 f a = app (app f a)
 
 plus2 = app2 plus
-
-instance DBI repr => DBI (WDiff repr v) where
-  z = WDiff z
-  s (WDiff x) = WDiff $ s x
-  abs (WDiff f) = WDiff $ abs f
-  app (WDiff f) (WDiff x) = WDiff $ app f x
-  hoas f = WDiff $ hoas (runWDiff . f . WDiff)
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
@@ -172,14 +163,3 @@ instance ProdCon P.Show l r where prodCon = Sub Dict
 
 class Weight w where
   weightCon :: (con (), con P.Float, con P.Double, ForallV (ProdCon con)) :- con w
-
-data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
-data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
-
-type RunImpWR repr h x = forall r. (forall w. Weight w => repr h (w -> x) -> r) -> r
-
-runImpW2RunImpWR :: RunImpW repr h x -> RunImpWR repr h x
-runImpW2RunImpWR (RunImpW x) = \f -> f x
-
-runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
-runImpWR2RunImpW f = f RunImpW

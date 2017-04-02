@@ -19,6 +19,7 @@
 > import DDF.Lang
 > import DDF.Show
 > import DDF.Eval
+> import DDF.WDiff
 > import qualified Control.Monad as M
 
 Importing files and opening language extension...
