@@ -70,7 +70,7 @@ Also, I'd like to thanks [dram](https://github.com/dramforever) for getting it t
 
 And, You can be the next contributor!
 
-![I Want You](img/I_Want_You.png | width=64 "Baka!")
+![I Want You](img/I_Want_You.png "Baka!")
 [image courtesy of Milk Mage](http://www.pixiv.net/member_illust.php?id=46135)
 [aquired here](img/I_Want_You_Image_Courtesy.png)
 
