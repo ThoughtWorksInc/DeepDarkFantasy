@@ -18,6 +18,9 @@ instance (Bool l, Bool r) => Bool (Combine l r) where
   bool x = Combine (bool x) (bool x)
   ite = Combine ite ite
 
+instance (Char l, Char r) => Char (Combine l r) where
+  char x = Combine (char x) (char x)
+
 instance (Lang l, Lang r) => Lang (Combine l r) where
   mkProd = Combine mkProd mkProd
   zro = Combine zro zro

@@ -16,6 +16,9 @@ instance Bool r => Bool (UnHOAS r) where
   bool = UnHOAS . bool
   ite = UnHOAS ite
 
+instance Char r => Char (UnHOAS r) where
+  char = UnHOAS . char
+
 instance Lang repr => Lang (UnHOAS repr) where
   mkProd = UnHOAS mkProd
   zro = UnHOAS zro

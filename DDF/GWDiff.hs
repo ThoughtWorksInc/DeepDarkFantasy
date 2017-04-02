@@ -6,9 +6,9 @@ import qualified Prelude as M
 import Data.Proxy
 import DDF.Diff
 
-newtype GWDiff repr h x = GWDiff {runGWDiff :: forall v. Vector repr v => Proxy v -> repr (Diff v h) (Diff v x)}
+newtype GWDiff r h x = GWDiff {runGWDiff :: forall v. Vector r v => Proxy v -> r (Diff v h) (Diff v x)}
 
-instance DBI repr => DBI (GWDiff repr) where
+instance DBI r => DBI (GWDiff r) where
   z = GWDiff (M.const z)
   s (GWDiff x) = GWDiff (\p -> s $ x p)
   app (GWDiff f) (GWDiff x) = GWDiff (\p -> app (f p) (x p))
@@ -18,7 +18,10 @@ instance Bool r => Bool (GWDiff r) where
   bool x = GWDiff $ M.const $ bool x
   ite = GWDiff $ M.const ite
 
-instance Lang repr => Lang (GWDiff repr) where
+instance Char r => Char (GWDiff r) where
+  char x = GWDiff $ M.const $ char x
+
+instance Lang r => Lang (GWDiff r) where
   mkProd = GWDiff (M.const mkProd)
   zro = GWDiff $ M.const zro
   fst = GWDiff $ M.const fst

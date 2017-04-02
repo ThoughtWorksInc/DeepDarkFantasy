@@ -20,76 +20,71 @@
     TypeApplications,
     PartialTypeSignatures #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool) where
-import DDF.DBI
-import qualified Prelude as P
-import Prelude (($), (.), (+), (-), (++), show, (>>=), (*), (/), Double, Either, IO, Maybe)
-import qualified Control.Monad.Writer as P
-import Control.Monad.Writer (Writer, WriterT)
-import qualified Control.Monad.State as P
-import Control.Monad.State (State)
-import qualified GHC.Float as P
-import GHC.Float (Float)
-import qualified Data.Tuple as P
-import Data.Void
-import Data.Proxy
-import Data.Proxy
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char) where
+import DDF.Bool
+import DDF.Char
 import Data.Constraint
 import Data.Constraint.Forall
-import qualified Data.Bool as P
-import DDF.Bool
+import Data.Proxy
 
-class Bool repr => Lang repr where
+import qualified Control.Monad.State as M
+import qualified Control.Monad.Writer as M
+import qualified Data.Bool as M
+import qualified Data.Tuple as M
+import qualified GHC.Float as M
+import qualified Prelude as M
+
+class (Bool repr, Char repr) => Lang repr where
   mkProd :: repr h (a -> b -> (a, b))
   zro :: repr h ((a, b) -> a)
   fst :: repr h ((a, b) -> b)
-  double :: P.Double -> repr h P.Double
-  doubleZero :: repr h P.Double
+  double :: M.Double -> repr h M.Double
+  doubleZero :: repr h M.Double
   doubleZero = double 0
-  doubleOne :: repr h P.Double
+  doubleOne :: repr h M.Double
   doubleOne = double 1
-  doublePlus :: repr h (P.Double -> P.Double -> P.Double)
-  doubleMinus :: repr h (P.Double -> P.Double -> P.Double)
-  doubleMult :: repr h (P.Double -> P.Double -> P.Double)
-  doubleDivide :: repr h (P.Double -> P.Double -> P.Double)
-  doubleExp :: repr h (P.Double -> P.Double)
-  float :: P.Float -> repr h P.Float
-  floatZero :: repr h P.Float
+  doublePlus :: repr h (M.Double -> M.Double -> M.Double)
+  doubleMinus :: repr h (M.Double -> M.Double -> M.Double)
+  doubleMult :: repr h (M.Double -> M.Double -> M.Double)
+  doubleDivide :: repr h (M.Double -> M.Double -> M.Double)
+  doubleExp :: repr h (M.Double -> M.Double)
+  float :: M.Float -> repr h M.Float
+  floatZero :: repr h M.Float
   floatZero = float 0
-  floatOne :: repr h P.Float
+  floatOne :: repr h M.Float
   floatOne = float 1
-  floatPlus :: repr h (P.Float -> P.Float -> P.Float)
-  floatMinus :: repr h (P.Float -> P.Float -> P.Float)
-  floatMult :: repr h (P.Float -> P.Float -> P.Float)
-  floatDivide :: repr h (P.Float -> P.Float -> P.Float)
-  floatExp :: repr h (P.Float -> P.Float)
+  floatPlus :: repr h (M.Float -> M.Float -> M.Float)
+  floatMinus :: repr h (M.Float -> M.Float -> M.Float)
+  floatMult :: repr h (M.Float -> M.Float -> M.Float)
+  floatDivide :: repr h (M.Float -> M.Float -> M.Float)
+  floatExp :: repr h (M.Float -> M.Float)
   fix :: repr h ((a -> a) -> a)
-  left :: repr h (a -> P.Either a b)
-  right :: repr h (b -> P.Either a b)
-  sumMatch :: repr h ((a -> c) -> (b -> c) -> P.Either a b -> c)
+  left :: repr h (a -> M.Either a b)
+  right :: repr h (b -> M.Either a b)
+  sumMatch :: repr h ((a -> c) -> (b -> c) -> M.Either a b -> c)
   unit :: repr h ()
   exfalso :: repr h (Void -> a)
-  nothing :: repr h (P.Maybe a)
-  just :: repr h (a -> P.Maybe a)
-  optionMatch :: repr h (b -> (a -> b) -> P.Maybe a -> b)
-  ioRet :: repr h (a -> P.IO a)
-  ioBind :: repr h (P.IO a -> (a -> P.IO b) -> P.IO b)
-  ioMap :: repr h ((a -> b) -> P.IO a -> P.IO b)
+  nothing :: repr h (M.Maybe a)
+  just :: repr h (a -> M.Maybe a)
+  optionMatch :: repr h (b -> (a -> b) -> M.Maybe a -> b)
+  ioRet :: repr h (a -> M.IO a)
+  ioBind :: repr h (M.IO a -> (a -> M.IO b) -> M.IO b)
+  ioMap :: repr h ((a -> b) -> M.IO a -> M.IO b)
   nil :: repr h [a]
   cons :: repr h (a -> [a] -> [a])
   listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
   listAppend :: repr h ([a] -> [a] -> [a])
   listAppend = lam2 $ \l r -> fix2 (lam $ \self -> listMatch2 r (lam2 $ \a as -> cons2 a (app self as))) l
-  writer :: repr h ((a, w) -> P.Writer w a)
-  runWriter :: repr h (P.Writer w a -> (a, w))
+  writer :: repr h ((a, w) -> M.Writer w a)
+  runWriter :: repr h (M.Writer w a -> (a, w))
   swap :: repr h ((l, r) -> (r, l))
   swap = lam $ \p -> mkProd2 (fst1 p) (zro1 p)
   curry :: repr h (((a, b) -> c) -> (a -> b -> c))
   uncurry :: repr h ((a -> b -> c) -> ((a, b) -> c))
   curry = lam3 $ \f a b -> app f (mkProd2 a b)
   uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
-  float2Double :: repr h (P.Float -> P.Double)
-  double2Float :: repr h (P.Double -> P.Float)
+  float2Double :: repr h (M.Float -> M.Double)
+  double2Float :: repr h (M.Double -> M.Float)
   undefined :: repr h a
   undefined = fix1 id
   state :: repr h ((l -> (r, l)) -> State l r)
@@ -154,14 +149,14 @@ instance Lang r => Vector r Double where
   mult = doubleMult
   divide = doubleDivide
 
-instance Lang r => Monoid r P.Float where
+instance Lang r => Monoid r M.Float where
   zero = floatZero
   plus = floatPlus
 
-instance Lang r => Group r P.Float where
+instance Lang r => Group r M.Float where
   minus = floatMinus
 
-instance Lang r => Vector r P.Float where
+instance Lang r => Vector r M.Float where
   mult = com2 floatMult double2Float
   divide = com2 (flip2 com double2Float) floatDivide
 
@@ -218,24 +213,24 @@ instance Lang r => Applicative r (State l) where
 instance Lang r => Monad r (State l) where
   join = lam $ \x -> state1 $ lam $ \s -> let_2 (runState2 x s) (uncurry1 runState)
 
-instance Lang r => Functor r P.IO where
+instance Lang r => Functor r M.IO where
   map = ioMap
 
-instance Lang r => Applicative r P.IO where
+instance Lang r => Applicative r M.IO where
   pure = ioRet
   ap = lam2 $ \f x -> ioBind2 f (flip2 ioMap x)
 
-instance Lang r => Monad r P.IO where
+instance Lang r => Monad r M.IO where
   bind = ioBind
 
-instance Lang r => Functor r P.Maybe where
+instance Lang r => Functor r M.Maybe where
   map = lam $ \func -> optionMatch2 nothing (com2 just func)
 
-instance Lang r => Applicative r P.Maybe where
+instance Lang r => Applicative r M.Maybe where
   pure = just
   ap = optionMatch2 (const1 nothing) map
 
-instance Lang r => Monad r P.Maybe where
+instance Lang r => Monad r M.Maybe where
   bind = lam2 $ \x func -> optionMatch3 nothing func x
 
 cons2 = app2 cons

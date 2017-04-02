@@ -31,6 +31,7 @@ type instance Diff v [l] = [Diff v l]
 type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
 type instance Diff v (State l r) = State (Diff v l) (Diff v r)
 type instance Diff v M.Bool = M.Bool
+type instance Diff v M.Char = M.Char
 
 class Monoid repr w => WithDiff repr w where
   withDiff :: repr h ((w -> x) -> w -> Diff x w)

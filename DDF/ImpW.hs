@@ -23,12 +23,15 @@ instance Lang r => Bool (ImpW r) where
   bool = NoImpW . bool
   ite = NoImpW ite
 
-instance Lang repr => DBI (ImpW repr) where
+instance Lang r => Char (ImpW r) where
+  char = NoImpW . char
+
+instance Lang r => DBI (ImpW r) where
   z = NoImpW z
-  s :: forall a h b. ImpW repr h b -> ImpW repr (a, h) b
+  s :: forall a h b. ImpW r h b -> ImpW r (a, h) b
   s (ImpW x) = work x
     where
-      work :: Weight w => repr h (w -> b) -> ImpW repr (a, h) b
+      work :: Weight w => r h (w -> b) -> ImpW r (a, h) b
       work x = ImpW (s x)
   s (NoImpW x) = NoImpW (s x)
   app (ImpW f) (ImpW x) = ImpW (lam $ \p -> app (app (conv f) (zro1 p)) (app (conv x) (fst1 p)))
@@ -38,7 +41,7 @@ instance Lang repr => DBI (ImpW repr) where
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
 
-instance Lang repr => Lang (ImpW repr) where
+instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
   listMatch = NoImpW listMatch

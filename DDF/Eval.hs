@@ -26,6 +26,9 @@ instance Bool Eval where
   bool = comb
   ite = comb M.bool
 
+instance Char Eval where
+  char = comb
+
 instance Lang Eval where
   zro = comb M.fst
   fst = comb M.snd

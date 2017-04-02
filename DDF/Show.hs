@@ -35,6 +35,9 @@ instance Bool Show where
   bool = name . show
   ite = name "ite"
 
+instance Char Show where
+  char = name . show
+
 instance Lang Show where
   mkProd = name "mkProd"
   zro = name "zro"

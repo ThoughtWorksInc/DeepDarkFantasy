@@ -5,20 +5,23 @@ module DDF.WDiff where
 import DDF.Lang
 import DDF.Diff
 
-newtype WDiff repr v h x = WDiff {runWDiff :: repr (Diff v h) (Diff v x)}
+newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 
-instance DBI repr => DBI (WDiff repr v) where
+instance DBI r => DBI (WDiff r v) where
   z = WDiff z
   s (WDiff x) = WDiff $ s x
   abs (WDiff f) = WDiff $ abs f
   app (WDiff f) (WDiff x) = WDiff $ app f x
   hoas f = WDiff $ hoas (runWDiff . f . WDiff)
 
-instance (Bool r, Vector r v) => Bool (WDiff r v) where
+instance Bool r => Bool (WDiff r v) where
   bool = WDiff . bool
   ite = WDiff ite
 
-instance (Vector repr v, Lang repr) => Lang (WDiff repr v) where
+instance Char r => Char (WDiff r v) where
+  char = WDiff . char
+
+instance (Vector r v, Lang r) => Lang (WDiff r v) where
   mkProd = WDiff mkProd
   zro = WDiff zro
   fst = WDiff fst

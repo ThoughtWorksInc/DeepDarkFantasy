@@ -17,6 +17,7 @@ source-repository head
 library
   exposed-modules:
     DDF.Bool
+    DDF.Char
     DDF.Combine
     DDF.DBI
     DDF.Diff
