@@ -31,61 +31,61 @@ import qualified Control.Monad.Writer as M
 import qualified GHC.Float as M
 import qualified Prelude as M
 
-class (Bool repr, Char repr, Prod repr) => Lang repr where
-  double :: M.Double -> repr h M.Double
-  doubleZero :: repr h M.Double
+class (Bool r, Char r, Prod r) => Lang r where
+  double :: M.Double -> r h M.Double
+  doubleZero :: r h M.Double
   doubleZero = double 0
-  doubleOne :: repr h M.Double
+  doubleOne :: r h M.Double
   doubleOne = double 1
-  doublePlus :: repr h (M.Double -> M.Double -> M.Double)
-  doubleMinus :: repr h (M.Double -> M.Double -> M.Double)
-  doubleMult :: repr h (M.Double -> M.Double -> M.Double)
-  doubleDivide :: repr h (M.Double -> M.Double -> M.Double)
-  doubleExp :: repr h (M.Double -> M.Double)
-  float :: M.Float -> repr h M.Float
-  floatZero :: repr h M.Float
+  doublePlus :: r h (M.Double -> M.Double -> M.Double)
+  doubleMinus :: r h (M.Double -> M.Double -> M.Double)
+  doubleMult :: r h (M.Double -> M.Double -> M.Double)
+  doubleDivide :: r h (M.Double -> M.Double -> M.Double)
+  doubleExp :: r h (M.Double -> M.Double)
+  float :: M.Float -> r h M.Float
+  floatZero :: r h M.Float
   floatZero = float 0
-  floatOne :: repr h M.Float
+  floatOne :: r h M.Float
   floatOne = float 1
-  floatPlus :: repr h (M.Float -> M.Float -> M.Float)
-  floatMinus :: repr h (M.Float -> M.Float -> M.Float)
-  floatMult :: repr h (M.Float -> M.Float -> M.Float)
-  floatDivide :: repr h (M.Float -> M.Float -> M.Float)
-  floatExp :: repr h (M.Float -> M.Float)
-  fix :: repr h ((a -> a) -> a)
-  left :: repr h (a -> M.Either a b)
-  right :: repr h (b -> M.Either a b)
-  sumMatch :: repr h ((a -> c) -> (b -> c) -> M.Either a b -> c)
-  unit :: repr h ()
-  exfalso :: repr h (Void -> a)
-  nothing :: repr h (M.Maybe a)
-  just :: repr h (a -> M.Maybe a)
-  optionMatch :: repr h (b -> (a -> b) -> M.Maybe a -> b)
-  ioRet :: repr h (a -> M.IO a)
-  ioBind :: repr h (M.IO a -> (a -> M.IO b) -> M.IO b)
-  ioMap :: repr h ((a -> b) -> M.IO a -> M.IO b)
-  nil :: repr h [a]
-  cons :: repr h (a -> [a] -> [a])
-  listMatch :: repr h (b -> (a -> [a] -> b) -> [a] -> b)
-  listAppend :: repr h ([a] -> [a] -> [a])
+  floatPlus :: r h (M.Float -> M.Float -> M.Float)
+  floatMinus :: r h (M.Float -> M.Float -> M.Float)
+  floatMult :: r h (M.Float -> M.Float -> M.Float)
+  floatDivide :: r h (M.Float -> M.Float -> M.Float)
+  floatExp :: r h (M.Float -> M.Float)
+  fix :: r h ((a -> a) -> a)
+  left :: r h (a -> M.Either a b)
+  right :: r h (b -> M.Either a b)
+  sumMatch :: r h ((a -> c) -> (b -> c) -> M.Either a b -> c)
+  unit :: r h ()
+  exfalso :: r h (Void -> a)
+  nothing :: r h (M.Maybe a)
+  just :: r h (a -> M.Maybe a)
+  optionMatch :: r h (b -> (a -> b) -> M.Maybe a -> b)
+  ioRet :: r h (a -> M.IO a)
+  ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)
+  ioMap :: r h ((a -> b) -> M.IO a -> M.IO b)
+  nil :: r h [a]
+  cons :: r h (a -> [a] -> [a])
+  listMatch :: r h (b -> (a -> [a] -> b) -> [a] -> b)
+  listAppend :: r h ([a] -> [a] -> [a])
   listAppend = lam2 $ \l r -> fix2 (lam $ \self -> listMatch2 r (lam2 $ \a as -> cons2 a (app self as))) l
-  writer :: repr h ((a, w) -> M.Writer w a)
-  runWriter :: repr h (M.Writer w a -> (a, w))
-  float2Double :: repr h (M.Float -> M.Double)
-  double2Float :: repr h (M.Double -> M.Float)
-  undefined :: repr h a
+  writer :: r h ((a, w) -> M.Writer w a)
+  runWriter :: r h (M.Writer w a -> (a, w))
+  float2Double :: r h (M.Float -> M.Double)
+  double2Float :: r h (M.Double -> M.Float)
+  undefined :: r h a
   undefined = fix1 id
-  state :: repr h ((l -> (r, l)) -> State l r)
-  runState :: repr h (State l r -> (l -> (r, l)))
-  putStrLn :: repr h (String -> IO ())
+  state :: r h ((x -> (y, x)) -> State x y)
+  runState :: r h (State x y -> (x -> (y, x)))
+  putStrLn :: r h (String -> IO ())
 
-class Reify repr x where
-  reify :: x -> repr h x
+class Reify r x where
+  reify :: x -> r h x
 
-instance Lang repr => Reify repr () where
+instance Lang r => Reify r () where
   reify _ = unit
 
-instance Lang repr => Reify repr Double where
+instance Lang r => Reify r Double where
   reify = double
 
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
@@ -159,14 +159,14 @@ instance (Lang repr, Group repr l, Group repr r) => Group repr (l, r) where
 instance (Lang repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
   mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
-instance (Lang repr, Monoid repr v) => Monoid repr (Double -> v) where
+instance (Lang r, Monoid r v) => Monoid r (Double -> v) where
   zero = const1 zero
   plus = lam3 $ \l r x -> plus2 (app l x) (app r x)
 
-instance (Lang repr, Group repr v) => Group repr (Double -> v) where
+instance (Lang r, Group r v) => Group r (Double -> v) where
   invert = lam2 $ \l x -> app l (invert1 x)
 
-instance (Lang repr, Vector repr v) => Vector repr (Double -> v) where
+instance (Lang r, Vector r v) => Vector r (Double -> v) where
   mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance Lang r => Monoid r [a] where
