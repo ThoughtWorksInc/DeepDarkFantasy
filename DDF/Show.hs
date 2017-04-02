@@ -37,10 +37,12 @@ instance Bool Show where
 instance Char Show where
   char = name . show
 
-instance Lang Show where
+instance Prod Show where
   mkProd = name "mkProd"
   zro = name "zro"
   fst = name "fst"
+
+instance Lang Show where
   double = name . show
   doublePlus = name "plus"
   doubleMinus = name "minus"

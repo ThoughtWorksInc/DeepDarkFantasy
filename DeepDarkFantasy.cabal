@@ -27,6 +27,7 @@ library
     DDF.ImpW
     DDF.Lang
     DDF.Poly
+    DDF.Prod
     DDF.Show
     DDF.UnHOAS
     DDF.Util

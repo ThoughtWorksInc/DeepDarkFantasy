@@ -21,10 +21,12 @@ instance Bool r => Bool (WDiff r v) where
 instance Char r => Char (WDiff r v) where
   char = WDiff . char
 
-instance (Vector r v, Lang r) => Lang (WDiff r v) where
+instance Prod r => Prod (WDiff r v) where
   mkProd = WDiff mkProd
   zro = WDiff zro
   fst = WDiff fst
+
+instance (Vector r v, Lang r) => Lang (WDiff r v) where
   double x = WDiff $ mkProd2 (double x) zero
   doublePlus = WDiff $ lam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))

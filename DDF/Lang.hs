@@ -18,21 +18,20 @@
     DefaultSignatures,
     TypeOperators,
     TypeApplications,
-    PartialTypeSignatures #-}
+    PartialTypeSignatures,
+    NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Prod) where
 import DDF.Bool
 import DDF.Char
+import DDF.Prod
 import Data.Constraint
 
 import qualified Control.Monad.Writer as M
 import qualified GHC.Float as M
 import qualified Prelude as M
 
-class (Bool repr, Char repr) => Lang repr where
-  mkProd :: repr h (a -> b -> (a, b))
-  zro :: repr h ((a, b) -> a)
-  fst :: repr h ((a, b) -> b)
+class (Bool repr, Char repr, Prod repr) => Lang repr where
   double :: M.Double -> repr h M.Double
   doubleZero :: repr h M.Double
   doubleZero = double 0
@@ -72,12 +71,6 @@ class (Bool repr, Char repr) => Lang repr where
   listAppend = lam2 $ \l r -> fix2 (lam $ \self -> listMatch2 r (lam2 $ \a as -> cons2 a (app self as))) l
   writer :: repr h ((a, w) -> M.Writer w a)
   runWriter :: repr h (M.Writer w a -> (a, w))
-  swap :: repr h ((l, r) -> (r, l))
-  swap = lam $ \p -> mkProd2 (fst1 p) (zro1 p)
-  curry :: repr h (((a, b) -> c) -> (a -> b -> c))
-  uncurry :: repr h ((a -> b -> c) -> ((a, b) -> c))
-  curry = lam3 $ \f a b -> app f (mkProd2 a b)
-  uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
   float2Double :: repr h (M.Float -> M.Double)
   double2Float :: repr h (M.Double -> M.Float)
   undefined :: repr h a
@@ -236,14 +229,10 @@ fix2 = app2 fix
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
-zro1 = app zro
-fst1 = app fst
 mult1 = app mult
 mult2 = app2 mult
 divide2 = app2 divide
 invert1 = app invert
-mkProd1 = app mkProd
-mkProd2 = app2 mkProd
 minus1 = app minus
 divide1 = app divide
 recip = divide1 doubleOne

@@ -19,10 +19,12 @@ instance Bool r => Bool (UnHOAS r) where
 instance Char r => Char (UnHOAS r) where
   char = UnHOAS . char
 
-instance Lang repr => Lang (UnHOAS repr) where
+instance Prod r => Prod (UnHOAS r) where
   mkProd = UnHOAS mkProd
   zro = UnHOAS zro
   fst = UnHOAS fst
+
+instance Lang repr => Lang (UnHOAS repr) where
   double = UnHOAS . double
   doublePlus = UnHOAS doublePlus
   doubleMinus = UnHOAS doubleMinus

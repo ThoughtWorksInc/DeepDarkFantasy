@@ -19,14 +19,7 @@ runImpW2RunImpWR (RunImpW x) = \f -> f x
 runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
 runImpWR2RunImpW f = f RunImpW
 
-instance Lang r => Bool (ImpW r) where
-  bool = NoImpW . bool
-  ite = NoImpW ite
-
-instance Lang r => Char (ImpW r) where
-  char = NoImpW . char
-
-instance Lang r => DBI (ImpW r) where
+instance Prod r => DBI (ImpW r) where
   z = NoImpW z
   s :: forall a h b. ImpW r h b -> ImpW r (a, h) b
   s (ImpW w) = ImpW (s w)
@@ -38,13 +31,22 @@ instance Lang r => DBI (ImpW r) where
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
 
+instance Lang r => Bool (ImpW r) where
+  bool = NoImpW . bool
+  ite = NoImpW ite
+
+instance Lang r => Char (ImpW r) where
+  char = NoImpW . char
+
+instance Prod r => Prod (ImpW r) where
+  mkProd = NoImpW mkProd
+  zro = NoImpW zro
+  fst = NoImpW fst
+
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
   listMatch = NoImpW listMatch
-  zro = NoImpW zro
-  fst = NoImpW fst
-  mkProd = NoImpW mkProd
   ioRet = NoImpW ioRet
   ioMap = NoImpW ioMap
   ioBind = NoImpW ioBind

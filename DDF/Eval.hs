@@ -29,10 +29,12 @@ instance Bool Eval where
 instance Char Eval where
   char = comb
 
-instance Lang Eval where
+instance Prod Eval where
+  mkProd = comb (,)
   zro = comb M.fst
   fst = comb M.snd
-  mkProd = comb (,)
+
+instance Lang Eval where
   double = comb
   doublePlus = comb (+)
   doubleMinus = comb (-)

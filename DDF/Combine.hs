@@ -20,10 +20,12 @@ instance (Bool l, Bool r) => Bool (Combine l r) where
 instance (Char l, Char r) => Char (Combine l r) where
   char x = Combine (char x) (char x)
 
-instance (Lang l, Lang r) => Lang (Combine l r) where
+instance (Prod l, Prod r) => Prod (Combine l r) where
   mkProd = Combine mkProd mkProd
   zro = Combine zro zro
   fst = Combine fst fst
+
+instance (Lang l, Lang r) => Lang (Combine l r) where
   double x = Combine (double x) (double x)
   doublePlus = Combine doublePlus doublePlus
   doubleMinus = Combine doubleMinus doubleMinus

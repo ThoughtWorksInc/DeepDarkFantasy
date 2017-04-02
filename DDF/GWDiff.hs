@@ -22,10 +22,12 @@ instance Bool r => Bool (GWDiff r) where
 instance Char r => Char (GWDiff r) where
   char x = GWDiff $ M.const $ char x
 
-instance Lang r => Lang (GWDiff r) where
+instance Prod r => Prod (GWDiff r) where
   mkProd = GWDiff (M.const mkProd)
   zro = GWDiff $ M.const zro
   fst = GWDiff $ M.const fst
+
+instance Lang r => Lang (GWDiff r) where
   double x = GWDiff $ M.const $ mkProd2 (double x) zero
   doublePlus = GWDiff $ M.const $ lam2 $ \l r ->
     mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
