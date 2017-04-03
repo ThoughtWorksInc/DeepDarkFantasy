@@ -21,11 +21,10 @@
     PartialTypeSignatures,
     NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Prod, module DDF.Ordering) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Prod) where
 import DDF.Bool
 import DDF.Char
 import DDF.Prod
-import DDF.Ordering
 import DDF.Double
 import DDF.Float
 import Data.Constraint
@@ -34,7 +33,7 @@ import qualified Control.Monad.Writer as M
 import qualified GHC.Float as M
 import qualified Prelude as M
 
-class (Bool r, Char r, Double r, Float r, Prod r, Ordering r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Prod r) => Lang r where
   fix :: r h ((a -> a) -> a)
   left :: r h (a -> M.Either a b)
   right :: r h (b -> M.Either a b)

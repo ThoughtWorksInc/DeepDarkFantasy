@@ -41,10 +41,6 @@ instance (Float l, Float r) => Float (Combine l r) where
   floatDivide = Combine floatDivide floatDivide
   floatExp = Combine floatExp floatExp
 
-instance (Ordering l, Ordering r) => Ordering (Combine l r) where
-  ordering x = Combine (ordering x) (ordering x)
-  ltEqGt = Combine ltEqGt ltEqGt
-
 instance (Lang l, Lang r) => Lang (Combine l r) where
   fix = Combine fix fix
   left = Combine left left

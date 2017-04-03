@@ -56,10 +56,6 @@ instance (Vector r v, Lang r) => Float (WDiff r v) where
         (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
   floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
 
-instance Ordering r => Ordering (WDiff r v) where
-  ordering = WDiff . ordering
-  ltEqGt = WDiff ltEqGt
-
 instance (Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix
   left = WDiff left

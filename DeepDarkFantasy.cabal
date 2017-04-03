@@ -28,7 +28,6 @@ library
     DDF.ImportMeta
     DDF.ImpW
     DDF.Lang
-    DDF.Ordering
     DDF.Poly
     DDF.Prod
     DDF.Show

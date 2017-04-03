@@ -59,10 +59,6 @@ instance (Prod r, Float r) => Float (ImpW r) where
   floatMult = NoImpW floatMult
   floatDivide = NoImpW floatDivide
 
-instance (Prod r, Ordering r) => Ordering (ImpW r) where
-  ordering = NoImpW . ordering
-  ltEqGt = NoImpW ltEqGt
-
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons

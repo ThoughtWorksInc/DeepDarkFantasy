@@ -58,10 +58,6 @@ instance Float Show where
   floatDivide = name "divide"
   floatExp = name "exp"
 
-instance Ordering Show where
-  ordering = name . show
-  ltEqGt = name "ltEqGt"
-
 instance Lang Show where
   fix = name "fix"
   left = name "left"

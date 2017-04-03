@@ -57,10 +57,6 @@ instance Lang r => Float (GWDiff r) where
         (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
   floatExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
 
-instance Ordering r => Ordering (GWDiff r) where
-  ordering x = GWDiff $ M.const $ ordering x
-  ltEqGt = GWDiff $ M.const ltEqGt
-
 instance Lang r => Lang (GWDiff r) where
   fix = GWDiff $ M.const fix
   left = GWDiff $ M.const left

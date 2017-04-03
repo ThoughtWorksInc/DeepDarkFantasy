@@ -50,13 +50,6 @@ instance Float Eval where
   floatDivide = comb (/)
   floatExp = comb M.exp
 
-instance Ordering Eval where
-  ordering = comb
-  ltEqGt = comb $ \lt eq gt -> \case
-                                M.LT -> lt
-                                M.EQ -> eq
-                                M.GT -> gt
-
 instance Lang Eval where
   fix = comb loop
     where loop x = x $ loop x

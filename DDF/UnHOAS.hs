@@ -24,10 +24,6 @@ instance Prod r => Prod (UnHOAS r) where
   zro = UnHOAS zro
   fst = UnHOAS fst
 
-instance Ordering r => Ordering (UnHOAS r) where
-  ordering = UnHOAS . ordering
-  ltEqGt = UnHOAS ltEqGt
-
 instance Double r => Double (UnHOAS r) where
   double = UnHOAS . double
   doublePlus = UnHOAS doublePlus
