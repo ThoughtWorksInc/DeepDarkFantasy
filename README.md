@@ -34,9 +34,13 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 # Patchouli Go!
 
-You should read the [blog](http://marisa.moe/DLPL.html) before anything.
+You should read the [blog](http://marisa.moe/2017/DLPL/) before anything.
 
-We have an [annotated example](src/Poly.lhs) on how to use our code. More documentation is coming up.
+We have two example on using DDF to solve problem:
+
+[solving polynomial equation](DDF/Poly.lhs)
+
+[training XOR Network](DDF/Xor.lhs)
 
 If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf).
 
