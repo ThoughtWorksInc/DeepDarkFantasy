@@ -1,23 +1,24 @@
 {-# LANGUAGE
-    MultiParamTypeClasses,
-    RankNTypes,
-    ScopedTypeVariables,
-    FlexibleInstances,
-    FlexibleContexts,
-    UndecidableInstances,
-    PolyKinds,
-    LambdaCase,
-    NoMonomorphismRestriction,
-    TypeFamilies,
-    LiberalTypeSynonyms,
-    FunctionalDependencies,
-    ExistentialQuantification,
-    InstanceSigs,
-    ConstraintKinds,
-    DefaultSignatures,
-    TypeOperators,
-    TypeApplications,
-    PartialTypeSignatures #-}
+  MultiParamTypeClasses,
+  RankNTypes,
+  ScopedTypeVariables,
+  FlexibleInstances,
+  FlexibleContexts,
+  UndecidableInstances,
+  PolyKinds,
+  LambdaCase,
+  NoMonomorphismRestriction,
+  TypeFamilies,
+  LiberalTypeSynonyms,
+  FunctionalDependencies,
+  ExistentialQuantification,
+  InstanceSigs,
+  ConstraintKinds,
+  DefaultSignatures,
+  TypeOperators,
+  TypeApplications,
+  PartialTypeSignatures
+#-}
 
 module DDF.DBI (module DDF.DBI, module DDF.ImportMeta) where
 import qualified Prelude as P
@@ -66,7 +67,7 @@ flip2 = app2 flip
 let_2 = app2 let_
 
 class Functor r f where
-  map :: r h ((a -> b) -> (f a -> f b))
+  map ::  r h ((a -> b) -> (f a -> f b))
 
 class Functor r a => Applicative r a where
   pure :: r h (x -> a x)

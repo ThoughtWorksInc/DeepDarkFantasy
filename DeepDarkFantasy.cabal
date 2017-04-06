@@ -22,24 +22,30 @@ library
     DDF.DBI
     DDF.Diff
     DDF.Double
+    DDF.Dual
     DDF.Eval
     DDF.Float
     DDF.GWDiff
     DDF.ImportMeta
     DDF.ImpW
     DDF.Lang
+    DDF.Map
+    DDF.Meta.Dual
+    DDF.Option
     DDF.Poly
     DDF.Prod
     DDF.Show
     DDF.UnHOAS
     DDF.Util
     DDF.WDiff
+    DDF.WithDiff
     DDF.Xor
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
     mtl -any,
     random -any,
-    constraints -any 
+    constraints -any,
+    containers -any
   ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans -Werror
   default-language: Haskell2010
 

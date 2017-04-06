@@ -1,9 +1,15 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  ExplicitForAll,
+  InstanceSigs,
+  ScopedTypeVariables
+#-}
 
 module DDF.WDiff where
 
 import DDF.Lang
 import DDF.Diff
+import qualified Data.Map as M
 
 newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 
@@ -12,10 +18,10 @@ instance DBI r => DBI (WDiff r v) where
   s (WDiff x) = WDiff $ s x
   abs (WDiff f) = WDiff $ abs f
   app (WDiff f) (WDiff x) = WDiff $ app f x
-  hoas f = WDiff $ hoas (runWDiff . f . WDiff)
+  hoas f = WDiff $ hoas (\x -> runWDiff $ f $ WDiff x)
 
 instance Bool r => Bool (WDiff r v) where
-  bool = WDiff . bool
+  bool x = WDiff $ bool x
   ite = WDiff ite
 
 instance Char r => Char (WDiff r v) where
@@ -26,35 +32,53 @@ instance Prod r => Prod (WDiff r v) where
   zro = WDiff zro
   fst = WDiff fst
 
-instance (Vector r v, Double r, Prod r) => Double (WDiff r v) where
-  double x = WDiff $ mkProd2 (double x) zero
+instance Dual r => Dual (WDiff r v) where
+  dual = WDiff $ dual
+  runDual = WDiff $ runDual
+
+instance (Vector r v, Double r, Dual r) => Double (WDiff r v) where
+  double x = WDiff $ mkDual2 (double x) zero
   doublePlus = WDiff $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
   doubleMinus = WDiff $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
   doubleMult = WDiff $ lam2 $ \l r ->
-    mkProd2 (mult2 (zro1 l) (zro1 r))
-      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
+    mkDual2 (mult2 (dualOrig1 l) (dualOrig1 r))
+      (plus2 (mult2 (dualOrig1 l) (dualDiff1 r)) (mult2 (dualOrig1 r) (dualDiff1 l)))
   doubleDivide = WDiff $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (zro1 r))
-      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
-        (mult2 (zro1 r) (zro1 r)))
-  doubleExp = WDiff $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
+    mkDual2 (divide2 (dualOrig1 l) (dualOrig1 r))
+      (divide2 (minus2 (mult2 (dualOrig1 r) (dualDiff1 l)) (mult2 (dualOrig1 l) (dualDiff1 r)))
+        (mult2 (dualOrig1 r) (dualOrig1 r)))
+  doubleExp = WDiff $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x)))
 
 instance (Vector r v, Lang r) => Float (WDiff r v) where
-  float x = WDiff $ mkProd2 (float x) zero
+  float x = WDiff $ mkDual2 (float x) zero
   floatPlus = WDiff $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
   floatMinus = WDiff $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
   floatMult = WDiff $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+    mkDual2 (mult2 (float2Double1 (dualOrig1 l)) (dualOrig1 r))
+      (plus2 (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)) (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)))
   floatDivide = WDiff $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = WDiff $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+    mkDual2 (divide2 (dualOrig1 l) (float2Double1 (dualOrig1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)) (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)))
+        (float2Double1 (mult2 (float2Double1 (dualOrig1 r)) (dualOrig1 r))))
+  floatExp = WDiff (lam $ \x -> let_2 (floatExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 (float2Double1 e) (dualDiff1 x))))
+
+instance Option r => Option (WDiff r v) where
+  nothing = WDiff nothing
+  just = WDiff just
+  optionMatch = WDiff optionMatch
+
+instance Map r => Map (WDiff r v) where
+  empty = WDiff empty
+  singleton = WDiff singleton
+  lookup :: forall h k a. Ord k => WDiff r v h (k -> M.Map k a -> Maybe a)
+  lookup = withDict (diffOrd (Proxy :: Proxy (v, k))) (WDiff lookup)
+  alter :: forall h k a. Ord k => WDiff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = withDict (diffOrd (Proxy :: Proxy (v, k))) (WDiff alter)
+  mapMap = WDiff mapMap
 
 instance (Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix
@@ -63,14 +87,11 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
   sumMatch = WDiff sumMatch
   unit = WDiff unit
   exfalso = WDiff exfalso
-  nothing = WDiff nothing
-  just = WDiff just
   ioRet = WDiff ioRet
   ioBind = WDiff ioBind
   nil = WDiff nil
   cons = WDiff cons
   listMatch = WDiff listMatch
-  optionMatch = WDiff optionMatch
   ioMap = WDiff ioMap
   writer = WDiff writer
   runWriter = WDiff runWriter

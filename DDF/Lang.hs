@@ -21,28 +21,27 @@
     PartialTypeSignatures,
     NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Prod) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Map, module DDF.Dual) where
 import DDF.Bool
 import DDF.Char
-import DDF.Prod
 import DDF.Double
 import DDF.Float
-import Data.Constraint
+import DDF.Map
+import DDF.Dual
 
-import qualified Control.Monad.Writer as M
+import qualified DDF.Meta.Dual as M
+import qualified Control.Monad.Writer as M (Writer)
 import qualified GHC.Float as M
 import qualified Prelude as M
+import qualified Data.Map as M
 
-class (Bool r, Char r, Double r, Float r, Prod r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Map r, Dual r) => Lang r where
   fix :: r h ((a -> a) -> a)
   left :: r h (a -> M.Either a b)
   right :: r h (b -> M.Either a b)
   sumMatch :: r h ((a -> c) -> (b -> c) -> M.Either a b -> c)
   unit :: r h ()
   exfalso :: r h (Void -> a)
-  nothing :: r h (M.Maybe a)
-  just :: r h (a -> M.Maybe a)
-  optionMatch :: r h (b -> (a -> b) -> M.Maybe a -> b)
   ioRet :: r h (a -> M.IO a)
   ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)
   ioMap :: r h ((a -> b) -> M.IO a -> M.IO b)
@@ -164,8 +163,14 @@ instance Lang r => BiFunctor r Either where
 instance Prod r => BiFunctor r (,) where
   bimap = lam3 $ \l r p -> mkProd2 (app l (zro1 p)) (app r (fst1 p))
 
+instance Dual r => BiFunctor r M.Dual where
+  bimap = lam2 $ \l r -> dual `com2` bimap2 l r `com2` runDual
+
 instance Lang r => Functor r (Writer w) where
   map = lam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
+
+instance Lang r => Functor r (M.Map k) where
+  map = mapMap
 
 instance (Lang r, Monoid r w) => Applicative r (Writer w) where
   pure = com2 writer (flip2 mkProd zero)

@@ -58,6 +58,22 @@ instance Float Show where
   floatDivide = name "divide"
   floatExp = name "exp"
 
+instance Option Show where
+  nothing = name "nothing"
+  just = name "just"
+  optionMatch = name "optionMatch"
+
+instance Map Show where
+  empty = name "empty"
+  singleton = name "singleton"
+  lookup = name "lookup"
+  alter = name "alter"
+  mapMap = name "mapMap"
+
+instance Dual Show where
+  dual = name "dual"
+  runDual = name "runDual"
+
 instance Lang Show where
   fix = name "fix"
   left = name "left"
@@ -65,14 +81,11 @@ instance Lang Show where
   sumMatch = name "sumMatch"
   unit = name "unit"
   exfalso = name "exfalso"
-  nothing = name "nothing"
-  just = name "just"
   ioRet = name "ioRet"
   ioBind = name "ioBind"
   nil = name "nil"
   cons = name "cons"
   listMatch = name "listMatch"
-  optionMatch = name "optionMatch"
   ioMap = name "ioMap"
   writer = name "writer"
   runWriter = name "runWriter"

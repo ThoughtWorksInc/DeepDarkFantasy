@@ -1,4 +1,3 @@
-
 > {-# LANGUAGE
 >   NoImplicitPrelude,
 >   MultiParamTypeClasses,
@@ -26,6 +25,7 @@
 > import qualified Control.Monad as M
 > import Prelude (Integer)
 > import qualified Prelude as M
+> import qualified DDF.Meta.Dual as M
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
@@ -64,7 +64,7 @@ and minimize (comp x) by taking derivative of x, and decrease it whenever it is 
 >     go :: Integer -> M.Double -> m M.Double
 >     go i w | i < 200 = do
 >       doIter i w
->       go (1 + i) $ w - 0.001 * M.snd (runEval (runWDiff $ noEnv comp) () (w, 1))
+>       go (1 + i) $ w - 0.001 * M.dualDiff (runEval (runWDiff $ noEnv comp) () $ M.Dual (w, 1))
 
 noEnv comp assume the term (which is a De Brujin Index term) need no environment (is free)
 and it is a finally tagless term, with WDiff interpreter being implicitly applied,

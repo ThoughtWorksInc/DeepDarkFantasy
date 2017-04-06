@@ -1,3 +1,4 @@
+
 {-# LANGUAGE NoImplicitPrelude,
   LambdaCase #-}
 
@@ -6,11 +7,13 @@ module DDF.Eval where
 import DDF.ImportMeta
 import DDF.Lang
 import qualified Prelude as M
-import qualified Control.Monad.Writer as M
+import qualified Control.Monad.Writer as M (WriterT(WriterT), runWriter)
 import qualified Control.Monad.State as M
 import qualified GHC.Float as M
 import qualified Data.Functor.Identity as M
 import qualified Data.Bool as M
+import qualified Data.Map as M.Map
+import qualified DDF.Meta.Dual as M
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
@@ -50,6 +53,24 @@ instance Float Eval where
   floatDivide = comb (/)
   floatExp = comb M.exp
 
+instance Option Eval where
+  nothing = comb M.Nothing
+  just = comb M.Just
+  optionMatch = comb $ \l r -> \case
+                              M.Nothing -> l
+                              M.Just x -> r x
+
+instance Map Eval where
+  empty = comb M.Map.empty
+  singleton = comb M.Map.singleton
+  lookup = comb M.Map.lookup
+  alter = comb M.Map.alter
+  mapMap = comb M.fmap
+
+instance Dual Eval where
+  dual = comb M.Dual
+  runDual = comb M.runDual
+
 instance Lang Eval where
   fix = comb loop
     where loop x = x $ loop x
@@ -60,8 +81,6 @@ instance Lang Eval where
                              M.Right x -> r x
   unit = comb ()
   exfalso = comb absurd
-  nothing = comb M.Nothing
-  just = comb M.Just
   ioRet = comb M.return
   ioBind = comb (>>=)
   nil = comb []
@@ -69,9 +88,6 @@ instance Lang Eval where
   listMatch = comb $ \l r -> \case
                             [] -> l
                             x:xs -> r x xs
-  optionMatch = comb $ \l r -> \case
-                              M.Nothing -> l
-                              M.Just x -> r x
   ioMap = comb M.fmap
   writer = comb (M.WriterT . M.Identity)
   runWriter = comb M.runWriter

@@ -1,11 +1,15 @@
-
-{-# LANGUAGE NoImplicitPrelude, RankNTypes #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  RankNTypes,
+  InstanceSigs,
+  ScopedTypeVariables
+#-}
 
 module DDF.GWDiff (module DDF.GWDiff, module DDF.Diff) where
 import DDF.Lang
 import qualified Prelude as M
-import Data.Proxy
 import DDF.Diff
+import qualified Data.Map as M
 
 newtype GWDiff r h x = GWDiff {runGWDiff :: forall v. Vector r v => Proxy v -> r (Diff v h) (Diff v x)}
 
@@ -27,35 +31,53 @@ instance Prod r => Prod (GWDiff r) where
   zro = GWDiff $ M.const zro
   fst = GWDiff $ M.const fst
 
-instance (Double r, Prod r) => Double (GWDiff r) where
-  double x = GWDiff $ M.const $ mkProd2 (double x) zero
+instance Dual r => Dual (GWDiff r) where
+  dual = GWDiff $ M.const $ dual
+  runDual = GWDiff $ M.const $ runDual
+
+instance (Double r, Dual r) => Double (GWDiff r) where
+  double x = GWDiff $ M.const $ mkDual2 (double x) zero
   doublePlus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
   doubleMinus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
   doubleMult = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (mult2 (zro1 l) (zro1 r))
-      (plus2 (mult2 (zro1 l) (fst1 r)) (mult2 (zro1 r) (fst1 l)))
+    mkDual2 (mult2 (dualOrig1 l) (dualOrig1 r))
+      (plus2 (mult2 (dualOrig1 l) (dualDiff1 r)) (mult2 (dualOrig1 r) (dualDiff1 l)))
   doubleDivide = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (zro1 r))
-      (divide2 (minus2 (mult2 (zro1 r) (fst1 l)) (mult2 (zro1 l) (fst1 r)))
-        (mult2 (zro1 r) (zro1 r)))
-  doubleExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (doubleExp1 (zro1 x)) (mult2 (doubleExp1 (zro1 x)) (fst1 x))
+    mkDual2 (divide2 (dualOrig1 l) (dualOrig1 r))
+      (divide2 (minus2 (mult2 (dualOrig1 r) (dualDiff1 l)) (mult2 (dualOrig1 l) (dualDiff1 r)))
+        (mult2 (dualOrig1 r) (dualOrig1 r)))
+  doubleExp = GWDiff $ M.const $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) $ lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x))
 
 instance Lang r => Float (GWDiff r) where
-  float x = GWDiff $ M.const $ mkProd2 (float x) zero
+  float x = GWDiff $ M.const $ mkDual2 (float x) zero
   floatPlus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (plus2 (zro1 l) (zro1 r)) (plus2 (fst1 l) (fst1 r))
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
   floatMinus = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (minus2 (zro1 l) (zro1 r)) (minus2 (fst1 l) (fst1 r))
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
   floatMult = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (mult2 (float2Double1 (zro1 l)) (zro1 r))
-      (plus2 (mult2 (float2Double1 (zro1 l)) (fst1 r)) (mult2 (float2Double1 (zro1 r)) (fst1 l)))
+    mkDual2 (mult2 (float2Double1 (dualOrig1 l)) (dualOrig1 r))
+      (plus2 (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)) (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)))
   floatDivide = GWDiff $ M.const $ lam2 $ \l r ->
-    mkProd2 (divide2 (zro1 l) (float2Double1 (zro1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (zro1 r)) (fst1 l)) (mult2 (float2Double1 (zro1 l)) (fst1 r)))
-        (float2Double1 (mult2 (float2Double1 (zro1 r)) (zro1 r))))
-  floatExp = GWDiff $ M.const $ lam $ \x -> mkProd2 (floatExp1 (zro1 x)) (mult2 (float2Double1 (floatExp1 (zro1 x))) (fst1 x))
+    mkDual2 (divide2 (dualOrig1 l) (float2Double1 (dualOrig1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)) (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)))
+        (float2Double1 (mult2 (float2Double1 (dualOrig1 r)) (dualOrig1 r))))
+  floatExp = GWDiff $ M.const $ lam $ \x -> let_2 (floatExp1 (dualOrig1 x)) $ lam $ \e -> mkDual2 e (mult2 (float2Double1 e) (dualDiff1 x))
+
+instance Option r => Option (GWDiff r) where
+  nothing = GWDiff $ M.const nothing
+  just = GWDiff $ M.const just
+  optionMatch = GWDiff $ M.const optionMatch
+
+instance Map r => Map (GWDiff r) where
+  empty = GWDiff $ M.const empty
+  singleton = GWDiff $ M.const singleton
+  lookup :: forall h k a. Ord k => GWDiff r h (k -> M.Map k a -> Maybe a)
+  lookup = GWDiff $ \(_ :: Proxy v) -> withDict (diffOrd (Proxy :: Proxy (v, k))) lookup
+  alter :: forall h k a. Ord k => GWDiff r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = GWDiff $ \(_ :: Proxy v) -> withDict (diffOrd (Proxy :: Proxy (v, k))) alter
+  mapMap = GWDiff $ M.const mapMap
 
 instance Lang r => Lang (GWDiff r) where
   fix = GWDiff $ M.const fix
@@ -64,14 +86,11 @@ instance Lang r => Lang (GWDiff r) where
   sumMatch = GWDiff $ M.const sumMatch
   unit = GWDiff $ M.const unit
   exfalso = GWDiff $ M.const exfalso
-  nothing = GWDiff $ M.const nothing
-  just = GWDiff $ M.const just
   ioRet = GWDiff $ M.const ioRet
   ioBind = GWDiff $ M.const ioBind
   nil = GWDiff $ M.const nil
   cons = GWDiff $ M.const cons
   listMatch = GWDiff $ M.const listMatch
-  optionMatch = GWDiff $ M.const optionMatch
   ioMap = GWDiff $ M.const ioMap
   writer = GWDiff $ M.const writer
   runWriter = GWDiff $ M.const runWriter

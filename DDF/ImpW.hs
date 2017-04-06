@@ -42,7 +42,7 @@ instance Prod r => Prod (ImpW r) where
   mkProd = NoImpW mkProd
   zro = NoImpW zro
   fst = NoImpW fst
-
+  
 instance (Prod r, Double r) => Double (ImpW r) where
   double = NoImpW . double
   doubleExp = NoImpW doubleExp
@@ -59,6 +59,22 @@ instance (Prod r, Float r) => Float (ImpW r) where
   floatMult = NoImpW floatMult
   floatDivide = NoImpW floatDivide
 
+instance (Prod r, Option r) => Option (ImpW r) where
+  nothing = NoImpW nothing
+  just = NoImpW just
+  optionMatch = NoImpW optionMatch
+
+instance Map r => Map (ImpW r) where
+  empty = NoImpW empty
+  singleton = NoImpW singleton
+  lookup = NoImpW lookup
+  alter = NoImpW alter
+  mapMap = NoImpW mapMap
+
+instance Dual r => Dual (ImpW r) where
+  dual = NoImpW dual
+  runDual = NoImpW runDual
+
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
@@ -67,9 +83,6 @@ instance Lang r => Lang (ImpW r) where
   ioMap = NoImpW ioMap
   ioBind = NoImpW ioBind
   unit = NoImpW unit
-  nothing = NoImpW nothing
-  just = NoImpW just
-  optionMatch = NoImpW optionMatch
   exfalso = NoImpW exfalso
   fix = NoImpW fix
   left = NoImpW left

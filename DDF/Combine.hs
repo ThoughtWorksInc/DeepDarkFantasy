@@ -41,6 +41,22 @@ instance (Float l, Float r) => Float (Combine l r) where
   floatDivide = Combine floatDivide floatDivide
   floatExp = Combine floatExp floatExp
 
+instance (Option l, Option r) => Option (Combine l r) where
+  nothing = Combine nothing nothing
+  just = Combine just just
+  optionMatch = Combine optionMatch optionMatch
+
+instance (Map l, Map r) => Map (Combine l r) where
+  empty = Combine empty empty
+  lookup = Combine lookup lookup
+  singleton = Combine singleton singleton
+  alter = Combine alter alter
+  mapMap = Combine mapMap mapMap
+
+instance (Dual l, Dual r) => Dual (Combine l r) where
+  dual = Combine dual dual
+  runDual = Combine runDual runDual
+
 instance (Lang l, Lang r) => Lang (Combine l r) where
   fix = Combine fix fix
   left = Combine left left
@@ -48,9 +64,6 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   sumMatch = Combine sumMatch sumMatch
   unit = Combine unit unit
   exfalso = Combine exfalso exfalso
-  nothing = Combine nothing nothing
-  just = Combine just just
-  optionMatch = Combine optionMatch optionMatch
   ioRet = Combine ioRet ioRet
   ioBind = Combine ioBind ioBind
   ioMap = Combine ioMap ioMap

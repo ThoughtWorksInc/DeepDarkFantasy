@@ -19,3 +19,4 @@ zro1 = app zro
 fst1 = app fst
 mkProd1 = app mkProd
 mkProd2 = app2 mkProd
+curry1 = app curry

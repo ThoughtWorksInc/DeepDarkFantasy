@@ -16,6 +16,8 @@ You should already read DDF.Poly before this.
 > import DDF.Eval
 > import DDF.GWDiff
 > import DDF.ImpW
+> import DDF.WithDiff
+> import qualified DDF.Meta.Dual as M
 
 Recall in poly, we constructed a function Double -> Double,
 with argument being the weight, and do gradient descend to found a solution.
@@ -111,7 +113,7 @@ Getting random weights...
 >         doIter i lossVal (M.show weight)
 >         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig
 >           where
->             (lossVal, lossDiff) = lossE $ xor (reifyE weight)
+>             M.Dual (lossVal, lossDiff) = lossE $ xor (reifyE weight)
 >       go _ weight _ _ _ _ orig = M.return $ orig weight
 
 > main :: IO ()

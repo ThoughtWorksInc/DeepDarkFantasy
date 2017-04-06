@@ -40,6 +40,22 @@ instance Float r => Float (UnHOAS r) where
   floatDivide = UnHOAS floatDivide
   floatExp = UnHOAS floatExp
 
+instance Option r => Option (UnHOAS r) where
+  nothing = UnHOAS nothing
+  just = UnHOAS just
+  optionMatch = UnHOAS optionMatch
+
+instance Map r => Map (UnHOAS r) where
+  empty = UnHOAS empty
+  singleton = UnHOAS singleton
+  alter = UnHOAS alter
+  lookup = UnHOAS lookup
+  mapMap = UnHOAS mapMap
+
+instance Dual r => Dual (UnHOAS r) where
+  dual = UnHOAS dual
+  runDual = UnHOAS runDual
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   fix = UnHOAS fix
@@ -48,14 +64,11 @@ instance Lang r => Lang (UnHOAS r) where
   sumMatch = UnHOAS sumMatch
   unit = UnHOAS unit
   exfalso = UnHOAS exfalso
-  nothing = UnHOAS nothing
-  just = UnHOAS just
   ioRet = UnHOAS ioRet
   ioBind = UnHOAS ioBind
   nil = UnHOAS nil
   cons = UnHOAS cons
   listMatch = UnHOAS listMatch
-  optionMatch = UnHOAS optionMatch
   ioMap = UnHOAS ioMap
   writer = UnHOAS writer
   runWriter = UnHOAS runWriter
