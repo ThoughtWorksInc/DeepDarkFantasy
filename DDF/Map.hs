@@ -33,6 +33,9 @@ instance Ord l => Ord (M.Dual l r) where
 instance Ord M.Double where
   diffOrd _ = Dict
 
+instance Ord M.Float where
+  diffOrd _ = Dict
+
 class (Prod r, Option r) => Map r where
   empty :: r h (M.Map k a)
   singleton :: r h (k -> a -> M.Map k a)
