@@ -70,7 +70,7 @@ A: I am trying to add a neural network demo.
 
 This is heavily inspired by [Neural Networks, Types, and Functional Programming](http://colah.github.io/posts/2015-09-NN-Types-FP/), and my colleague, [Yang Bo](https://github.com/Atry).
 
-Also, I'd like to thanks [dram](https://github.com/dramforever) for getting it to work without Incoherent Instances, and fixing it on cabal & travis.
+Also, I'd like to thanks [dram](https://github.com/dramforever) for getting it to work without Incoherent Instances, and fixing it on stack, cabal & travis.
 
 And, You can be the next contributor!
 
