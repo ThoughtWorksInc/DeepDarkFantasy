@@ -16,7 +16,7 @@ Of course, I must still be able to train the network.
 They all had their own special gradient structure to propagate loss accordingly. 
 
 However, in the end of the day, what is updated is only container of double (or other representation of real).
-Having those construct only make you right networks easier, but does not offer fundamentally different learning capability.
+Having those construct only make you write networks easier, but does not offer fundamentally different learning capability.
 
 ----------
 
