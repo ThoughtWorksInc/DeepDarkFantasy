@@ -37,6 +37,9 @@ class DBI (repr :: * -> * -> *) where
   s :: repr h b -> repr (a, h) b
   abs :: repr (a, h) b -> repr h (a -> b)
   app :: repr h (a -> b) -> repr h a -> repr h b
+  -- | We use a variant of HOAS so it can be compile to DBI, which is more compositional (No Negative Occurence).
+  -- It require explicit lifting of variables.
+  -- Use lam to do automatic lifting of variables.
   hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
   hoas f = abs $ f z
   com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
