@@ -3,6 +3,7 @@
 module DDF.Size where
 
 import DDF.Lang
+import qualified DDF.Map as Map
 
 newtype Size h x = Size {runSize :: Int}
 
@@ -42,7 +43,7 @@ instance Float Size where
   floatDivide = one
   floatExp = one
 
-instance Map Size where
+instance Map.Map Size where
   mapMap = one
   alter = one
   empty = one
@@ -57,6 +58,8 @@ instance Prod Size where
 instance Dual Size where
   dual = one
   runDual = one
+
+instance Bimap Size where
 
 instance Lang Size where
   fix = one

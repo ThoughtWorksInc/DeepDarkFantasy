@@ -3,6 +3,7 @@
 module DDF.ImpW where
 
 import DDF.Lang
+import qualified DDF.Map as Map
 
 data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
 data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
@@ -64,12 +65,14 @@ instance (Prod r, Option r) => Option (ImpW r) where
   just = NoImpW just
   optionMatch = NoImpW optionMatch
 
-instance Map r => Map (ImpW r) where
-  empty = NoImpW empty
-  singleton = NoImpW singleton
-  lookup = NoImpW lookup
-  alter = NoImpW alter
-  mapMap = NoImpW mapMap
+instance Map.Map r => Map.Map (ImpW r) where
+  empty = NoImpW Map.empty
+  singleton = NoImpW Map.singleton
+  lookup = NoImpW Map.lookup
+  alter = NoImpW Map.alter
+  mapMap = NoImpW Map.mapMap
+
+instance Bimap r => Bimap (ImpW r) where
 
 instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual

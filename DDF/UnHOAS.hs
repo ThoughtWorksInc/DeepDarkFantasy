@@ -3,6 +3,7 @@
 module DDF.UnHOAS where
 
 import DDF.Lang
+import qualified DDF.Map as Map
 
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
@@ -45,12 +46,14 @@ instance Option r => Option (UnHOAS r) where
   just = UnHOAS just
   optionMatch = UnHOAS optionMatch
 
-instance Map r => Map (UnHOAS r) where
-  empty = UnHOAS empty
-  singleton = UnHOAS singleton
-  alter = UnHOAS alter
-  lookup = UnHOAS lookup
-  mapMap = UnHOAS mapMap
+instance Map.Map r => Map.Map (UnHOAS r) where
+  empty = UnHOAS Map.empty
+  singleton = UnHOAS Map.singleton
+  alter = UnHOAS Map.alter
+  lookup = UnHOAS Map.lookup
+  mapMap = UnHOAS Map.mapMap
+
+instance Bimap r => Bimap (UnHOAS r) where
 
 instance Dual r => Dual (UnHOAS r) where
   dual = UnHOAS dual

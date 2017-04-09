@@ -16,6 +16,7 @@ source-repository head
 
 library
   exposed-modules:
+    DDF.Bimap
     DDF.Bool
     DDF.Char
     DDF.Combine
@@ -46,8 +47,9 @@ library
     mtl -any,
     random -any,
     constraints -any,
-    containers -any
-  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans -Werror
+    containers -any,
+    bimap -any
+  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
   default-language: Haskell2010
 
 Test-Suite TestPoly

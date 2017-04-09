@@ -21,12 +21,12 @@
     PartialTypeSignatures,
     NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Map, module DDF.Dual) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Bimap, module DDF.Dual) where
 import DDF.Bool
 import DDF.Char
 import DDF.Double
 import DDF.Float
-import DDF.Map
+import DDF.Bimap
 import DDF.Dual
 
 import qualified DDF.Meta.Dual as M
@@ -34,8 +34,9 @@ import qualified Control.Monad.Writer as M (Writer)
 import qualified GHC.Float as M
 import qualified Prelude as M
 import qualified Data.Map as M
+import qualified DDF.Map as Map
 
-class (Bool r, Char r, Double r, Float r, Map r, Dual r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
   fix :: r h ((a -> a) -> a)
   left :: r h (a -> M.Either a b)
   right :: r h (b -> M.Either a b)
@@ -170,7 +171,7 @@ instance Lang r => Functor r (Writer w) where
   map = lam $ \f -> com2 writer (com2 (bimap2 f id) runWriter)
 
 instance Lang r => Functor r (M.Map k) where
-  map = mapMap
+  map = Map.mapMap
 
 instance (Lang r, Monoid r w) => Applicative r (Writer w) where
   pure = com2 writer (flip2 mkProd zero)

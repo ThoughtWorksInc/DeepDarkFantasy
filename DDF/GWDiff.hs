@@ -10,6 +10,7 @@ import DDF.Lang
 import qualified Prelude as M
 import DDF.Diff
 import qualified Data.Map as M
+import qualified DDF.Map as Map
 
 newtype GWDiff r h x = GWDiff {runGWDiff :: forall v. Vector r v => Proxy v -> r (Diff v h) (Diff v x)}
 
@@ -70,14 +71,16 @@ instance Option r => Option (GWDiff r) where
   just = GWDiff $ M.const just
   optionMatch = GWDiff $ M.const optionMatch
 
-instance Map r => Map (GWDiff r) where
-  empty = GWDiff $ M.const empty
-  singleton = GWDiff $ M.const singleton
-  lookup :: forall h k a. Ord k => GWDiff r h (k -> M.Map k a -> Maybe a)
-  lookup = GWDiff $ \(_ :: Proxy v) -> withDict (diffOrd (Proxy :: Proxy (v, k))) lookup
-  alter :: forall h k a. Ord k => GWDiff r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = GWDiff $ \(_ :: Proxy v) -> withDict (diffOrd (Proxy :: Proxy (v, k))) alter
-  mapMap = GWDiff $ M.const mapMap
+instance Map.Map r => Map.Map (GWDiff r) where
+  empty = GWDiff $ M.const Map.empty
+  singleton = GWDiff $ M.const Map.singleton
+  lookup :: forall h k a. Map.Ord k => GWDiff r h (k -> M.Map k a -> Maybe a)
+  lookup = GWDiff $ \(_ :: Proxy v) -> withDict (Map.diffOrd (Proxy :: Proxy (v, k))) Map.lookup
+  alter :: forall h k a. Map.Ord k => GWDiff r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = GWDiff $ \(_ :: Proxy v) -> withDict (Map.diffOrd (Proxy :: Proxy (v, k))) Map.alter
+  mapMap = GWDiff $ M.const Map.mapMap
+
+instance Bimap r => Bimap (GWDiff r) where
 
 instance Lang r => Lang (GWDiff r) where
   fix = GWDiff $ M.const fix

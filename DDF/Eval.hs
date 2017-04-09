@@ -1,6 +1,7 @@
-
-{-# LANGUAGE NoImplicitPrelude,
-  LambdaCase #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  LambdaCase
+#-}
 
 module DDF.Eval where
 
@@ -14,6 +15,7 @@ import qualified Data.Functor.Identity as M
 import qualified Data.Bool as M
 import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
+import qualified DDF.Map as Map
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
@@ -60,12 +62,14 @@ instance Option Eval where
                               M.Nothing -> l
                               M.Just x -> r x
 
-instance Map Eval where
+instance Map.Map Eval where
   empty = comb M.Map.empty
   singleton = comb M.Map.singleton
   lookup = comb M.Map.lookup
   alter = comb M.Map.alter
   mapMap = comb M.fmap
+
+instance Bimap Eval where
 
 instance Dual Eval where
   dual = comb M.Dual

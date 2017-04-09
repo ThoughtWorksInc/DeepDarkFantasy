@@ -10,6 +10,7 @@ module DDF.WDiff where
 import DDF.Lang
 import DDF.Diff
 import qualified Data.Map as M
+import qualified DDF.Map as Map
 
 newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 
@@ -71,14 +72,16 @@ instance Option r => Option (WDiff r v) where
   just = WDiff just
   optionMatch = WDiff optionMatch
 
-instance Map r => Map (WDiff r v) where
-  empty = WDiff empty
-  singleton = WDiff singleton
-  lookup :: forall h k a. Ord k => WDiff r v h (k -> M.Map k a -> Maybe a)
-  lookup = withDict (diffOrd (Proxy :: Proxy (v, k))) (WDiff lookup)
-  alter :: forall h k a. Ord k => WDiff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = withDict (diffOrd (Proxy :: Proxy (v, k))) (WDiff alter)
-  mapMap = WDiff mapMap
+instance Map.Map r => Map.Map (WDiff r v) where
+  empty = WDiff Map.empty
+  singleton = WDiff Map.singleton
+  lookup :: forall h k a. Map.Ord k => WDiff r v h (k -> M.Map k a -> Maybe a)
+  lookup = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (WDiff Map.lookup)
+  alter :: forall h k a. Map.Ord k => WDiff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (WDiff Map.alter)
+  mapMap = WDiff Map.mapMap
+
+instance Bimap r => Bimap (WDiff r v) where
 
 instance (Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix

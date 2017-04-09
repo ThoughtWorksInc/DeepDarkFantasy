@@ -3,6 +3,7 @@
 module DDF.Combine where
 
 import DDF.Lang
+import qualified DDF.Map as Map
 
 data Combine l r h x = Combine (l h x) (r h x)
 
@@ -46,12 +47,14 @@ instance (Option l, Option r) => Option (Combine l r) where
   just = Combine just just
   optionMatch = Combine optionMatch optionMatch
 
-instance (Map l, Map r) => Map (Combine l r) where
-  empty = Combine empty empty
-  lookup = Combine lookup lookup
-  singleton = Combine singleton singleton
-  alter = Combine alter alter
-  mapMap = Combine mapMap mapMap
+instance (Map.Map l, Map.Map r) => Map.Map (Combine l r) where
+  empty = Combine Map.empty Map.empty
+  lookup = Combine Map.lookup Map.lookup
+  singleton = Combine Map.singleton Map.singleton
+  alter = Combine Map.alter Map.alter
+  mapMap = Combine Map.mapMap Map.mapMap
+
+instance (Bimap l, Bimap r) => Bimap (Combine l r) where
 
 instance (Dual l, Dual r) => Dual (Combine l r) where
   dual = Combine dual dual

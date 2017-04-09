@@ -4,6 +4,7 @@ module DDF.Show (module DDF.Show) where
 
 import DDF.Lang
 import qualified Prelude as M
+import qualified DDF.Map as Map
 
 data AST = Leaf M.String | App M.String AST [AST] | Lam M.String [M.String] AST
 
@@ -63,12 +64,14 @@ instance Option Show where
   just = name "just"
   optionMatch = name "optionMatch"
 
-instance Map Show where
+instance Map.Map Show where
   empty = name "empty"
   singleton = name "singleton"
   lookup = name "lookup"
   alter = name "alter"
   mapMap = name "mapMap"
+
+instance Bimap Show where
 
 instance Dual Show where
   dual = name "dual"
