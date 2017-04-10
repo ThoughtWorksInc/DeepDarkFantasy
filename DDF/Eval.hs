@@ -24,7 +24,7 @@ comb = Eval . M.const
 instance DBI Eval where
   z = Eval M.fst
   s (Eval a) = Eval $ a . M.snd
-  abs (Eval f) = Eval $ \a h -> f (h, a)
+  abs (Eval f) = Eval $ \h a -> f (a, h)
   app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
 
 instance Bool Eval where
