@@ -11,6 +11,7 @@ import DDF.Lang
 import DDF.Diff
 import qualified Data.Map as M
 import qualified DDF.Map as Map
+import DDF.Vector
 
 newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 

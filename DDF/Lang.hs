@@ -28,6 +28,8 @@ import DDF.Double
 import DDF.Float
 import DDF.Bimap
 import DDF.Dual
+import DDF.Meta.InfDiff
+import DDF.Vector
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
@@ -79,24 +81,6 @@ instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
 
 instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
 
-class Monoid r g => Group r g where
-  invert :: r h (g -> g)
-  minus :: r h (g -> g -> g)
-  default invert :: DBI r => r h (g -> g)
-  invert = minus1 zero
-  default minus :: DBI r => r h (g -> g -> g)
-  minus = lam2 $ \x y -> plus2 x (invert1 y)
-  {-# MINIMAL (invert | minus) #-}
-
-class Group r v => Vector r v where
-  mult :: r h (M.Double -> v -> v)
-  divide :: r h (v -> M.Double -> v)
-  default mult :: Double r => r h (M.Double -> v -> v)
-  mult = lam2 $ \x y -> divide2 y (recip1 x)
-  default divide :: Double r => r h (v -> M.Double -> v)
-  divide = lam2 $ \x y -> mult2 (recip1 y) x
-  {-# MINIMAL (mult | divide) #-}
-
 instance Lang r => Monoid r () where
   zero = unit
   plus = const1 $ const1 unit
@@ -108,17 +92,6 @@ instance Lang r => Group r () where
 instance Lang r => Vector r () where
   mult = const1 $ const1 unit
   divide = const1 $ const1 unit
-
-instance Double r => Monoid r M.Double where
-  zero = doubleZero
-  plus = doublePlus
-
-instance Double r => Group r M.Double where
-  minus = doubleMinus
-
-instance Double r => Vector r M.Double where
-  mult = doubleMult
-  divide = doubleDivide
 
 instance Float r => Monoid r M.Float where
   zero = floatZero
@@ -217,18 +190,9 @@ fix2 = app2 fix
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
-mult1 = app mult
-mult2 = app2 mult
-divide2 = app2 divide
-invert1 = app invert
-minus1 = app minus
-divide1 = app divide
-recip = divide1 doubleOne
-recip1 = app recip
 writer1 = app writer
 runWriter1 = app runWriter
 ioBind2 = app2 ioBind
-minus2 = app2 minus
 float2Double1 = app float2Double
 doubleExp1 = app doubleExp
 floatExp1 = app floatExp

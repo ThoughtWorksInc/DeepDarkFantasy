@@ -2,12 +2,11 @@
 
 module DDF.InfDiff where
 
+import DDF.Meta.InfDiff
 import DDF.Lang
-import DDF.Combine
-import DDF.GWDiff
+import DDF.Combine()
+import DDF.GWDiff()
 import qualified DDF.Map as Map
-
-newtype InfDiff r h x = InfDiff {runInfDiff :: Combine r (GWDiff (InfDiff r)) h x}
 
 instance DBI r => DBI (InfDiff r) where
   z = InfDiff z

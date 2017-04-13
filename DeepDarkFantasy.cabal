@@ -32,7 +32,10 @@ library
     DDF.InfDiff
     DDF.Lang
     DDF.Map
+    DDF.Meta.Combine
     DDF.Meta.Dual
+    DDF.Meta.GWDiff
+    DDF.Meta.InfDiff
     DDF.Option
     DDF.Poly
     DDF.Prod
@@ -40,6 +43,7 @@ library
     DDF.Size
     DDF.UnHOAS
     DDF.Util
+    DDF.Vector
     DDF.WDiff
     DDF.WithDiff
     DDF.Xor

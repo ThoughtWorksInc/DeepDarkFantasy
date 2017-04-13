@@ -1,11 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module DDF.Combine where
+module DDF.Combine (module DDF.Meta.Combine) where
 
+import DDF.Meta.Combine
 import DDF.Lang
 import qualified DDF.Map as Map
-
-data Combine l r h x = Combine (l h x) (r h x)
 
 instance (DBI l, DBI r) => DBI (Combine l r) where
   z = Combine z z

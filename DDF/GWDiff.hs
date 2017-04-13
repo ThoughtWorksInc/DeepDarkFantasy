@@ -5,14 +5,14 @@
   ScopedTypeVariables
 #-}
 
-module DDF.GWDiff (module DDF.GWDiff, module DDF.Diff) where
+module DDF.GWDiff (module DDF.GWDiff, module DDF.Meta.GWDiff, module DDF.Diff) where
 import DDF.Lang
 import qualified Prelude as M
 import DDF.Diff
+import DDF.Meta.GWDiff
 import qualified Data.Map as M
 import qualified DDF.Map as Map
-
-newtype GWDiff r h x = GWDiff {runGWDiff :: forall v. Vector r v => Proxy v -> r (Diff v h) (Diff v x)}
+import DDF.Vector
 
 instance DBI r => DBI (GWDiff r) where
   z = GWDiff (M.const z)
