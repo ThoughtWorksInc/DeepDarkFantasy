@@ -29,6 +29,7 @@ library
     DDF.GWDiff
     DDF.ImportMeta
     DDF.ImpW
+    DDF.InfDiff
     DDF.Lang
     DDF.Map
     DDF.Meta.Dual
