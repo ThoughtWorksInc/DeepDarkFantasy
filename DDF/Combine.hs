@@ -1,8 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module DDF.Combine (module DDF.Meta.Combine) where
+module DDF.Combine where
 
-import DDF.Meta.Combine
+import DDF.Meta.Interpreter
 import DDF.Lang
 import qualified DDF.Map as Map
 
@@ -79,3 +79,4 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   state = Combine state state
   runState = Combine runState runState
   putStrLn = Combine putStrLn putStrLn
+  nextDiff p = Combine (nextDiff p) (nextDiff p)

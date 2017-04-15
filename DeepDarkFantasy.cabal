@@ -32,10 +32,8 @@ library
     DDF.InfDiff
     DDF.Lang
     DDF.Map
-    DDF.Meta.Combine
+    DDF.Meta.Interpreter
     DDF.Meta.Dual
-    DDF.Meta.GWDiff
-    DDF.Meta.InfDiff
     DDF.Option
     DDF.Poly
     DDF.Prod
@@ -54,7 +52,7 @@ library
     constraints -any,
     containers -any,
     bimap -any
-  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
+  ghc-options: -Werror -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
   default-language: Haskell2010
 
 Test-Suite TestPoly

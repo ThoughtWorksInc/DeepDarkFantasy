@@ -5,8 +5,6 @@ module DDF.UnHOAS where
 import DDF.Lang
 import qualified DDF.Map as Map
 
-newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
-
 instance DBI repr => DBI (UnHOAS repr) where
   z = UnHOAS z
   s (UnHOAS x) = UnHOAS $ s x
@@ -79,3 +77,4 @@ instance Lang r => Lang (UnHOAS r) where
   state = UnHOAS state
   runState = UnHOAS runState
   putStrLn = UnHOAS putStrLn
+  nextDiff p = UnHOAS (nextDiff p)

@@ -8,7 +8,6 @@
 module DDF.WithDiff where
 
 import DDF.Lang
-import DDF.Diff
 import qualified Prelude as M
 
 class Monoid r w => WithDiff r w where

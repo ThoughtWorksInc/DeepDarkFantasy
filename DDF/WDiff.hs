@@ -2,18 +2,17 @@
   NoImplicitPrelude,
   ExplicitForAll,
   InstanceSigs,
-  ScopedTypeVariables
+  ScopedTypeVariables,
+  TypeApplications,
+  FlexibleContexts
 #-}
 
 module DDF.WDiff where
 
 import DDF.Lang
-import DDF.Diff
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 import DDF.Vector
-
-newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 
 instance DBI r => DBI (WDiff r v) where
   z = WDiff z
@@ -104,3 +103,4 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
   state = WDiff state
   runState = WDiff runState
   putStrLn = WDiff putStrLn
+  nextDiff p = WDiff (nextDiff p)

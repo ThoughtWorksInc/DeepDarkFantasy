@@ -25,11 +25,11 @@ name = Show . M.const . M.const . Leaf
 
 instance DBI Show where
   z = Show $ M.const $ Leaf . show . M.flip (-) 1
-  s (Show v) = Show $ \vars -> v vars . M.flip (-) 1
-  abs (Show f) = Show $ \vars x -> lamAST (show x) (f vars (x + 1))
-  app (Show f) (Show x) = Show $ \vars h -> appAST (f vars h) (x vars h)
-  hoas f = Show $ \(v:vars) h ->
-    lamAST v (runShow (f $ Show $ M.const $ M.const $ Leaf v) vars (h + 1))
+  s (Show v) = Show $ \va -> v va . M.flip (-) 1
+  abs (Show f) = Show $ \va x -> lamAST (show x) (f va (x + 1))
+  app (Show f) (Show x) = Show $ \va h -> appAST (f va h) (x va h)
+  hoas f = Show $ \(v:va) h ->
+    lamAST v (runShow (f $ Show $ M.const $ M.const $ Leaf v) va (h + 1))
 
 instance Bool Show where
   bool = name . show
@@ -97,3 +97,4 @@ instance Lang Show where
   state = name "state"
   runState = name "runState"
   putStrLn = name "putStrLn"
+  nextDiff _ = name "nextDiff"

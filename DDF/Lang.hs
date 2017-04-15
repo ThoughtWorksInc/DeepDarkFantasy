@@ -21,15 +21,15 @@
     PartialTypeSignatures,
     NoImplicitPrelude #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Bimap, module DDF.Dual) where
+module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Bimap, module DDF.Dual, module DDF.Diff) where
 import DDF.Bool
 import DDF.Char
 import DDF.Double
 import DDF.Float
 import DDF.Bimap
 import DDF.Dual
-import DDF.Meta.InfDiff
 import DDF.Vector
+import DDF.Diff
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
@@ -62,6 +62,7 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
   state :: r h ((x -> (y, x)) -> State x y)
   runState :: r h (State x y -> (x -> (y, x)))
   putStrLn :: r h (String -> IO ())
+  nextDiff :: Vector (InfDiff Eval) v => Proxy v -> r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
 
 class Reify r x where
   reify :: x -> r h x

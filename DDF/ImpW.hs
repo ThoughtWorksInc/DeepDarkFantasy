@@ -5,20 +5,9 @@ module DDF.ImpW where
 import DDF.Lang
 import qualified DDF.Map as Map
 
-data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
-data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
-
 runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
 runImpW (ImpW x) = RunImpW x
 runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
-
-type RunImpWR repr h x = forall r. (forall w. Weight w => repr h (w -> x) -> r) -> r
-
-runImpW2RunImpWR :: RunImpW repr h x -> RunImpWR repr h x
-runImpW2RunImpWR (RunImpW x) = \f -> f x
-
-runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
-runImpWR2RunImpW f = f RunImpW
 
 instance Prod r => DBI (ImpW r) where
   z = NoImpW z
@@ -98,3 +87,4 @@ instance Lang r => Lang (ImpW r) where
   state = NoImpW state
   runState = NoImpW runState
   putStrLn = NoImpW putStrLn
+  nextDiff p = NoImpW $ nextDiff p

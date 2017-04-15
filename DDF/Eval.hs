@@ -17,8 +17,6 @@ import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
 
-newtype Eval h x = Eval {runEval :: h -> x}
-
 comb = Eval . M.const
 
 instance DBI Eval where
@@ -100,3 +98,4 @@ instance Lang Eval where
   state = comb M.state
   runState = comb M.runState
   putStrLn = comb M.putStrLn
+  nextDiff p = comb (\x -> runGWDiff (combineRight (runInfDiff x)) p)

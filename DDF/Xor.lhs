@@ -12,9 +12,9 @@ You should already read DDF.Poly before this.
 > import DDF.Util
 > import DDF.Lang
 > import DDF.Show
-> import DDF.Combine
-> import DDF.Eval
-> import DDF.GWDiff
+> import DDF.Combine ()
+> import DDF.Eval ()
+> import DDF.GWDiff ()
 > import DDF.ImpW
 > import DDF.WithDiff
 > import qualified DDF.Meta.Dual as M

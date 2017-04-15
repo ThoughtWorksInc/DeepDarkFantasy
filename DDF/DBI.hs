@@ -22,10 +22,6 @@
 
 module DDF.DBI (module DDF.DBI, module DDF.ImportMeta) where
 import qualified Prelude as P
-import DDF.Util
-import System.Random
-import Data.Constraint
-import Data.Constraint.Forall
 import DDF.ImportMeta
 
 class Monoid r m where
@@ -120,23 +116,3 @@ plus2 = app2 plus
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
-
-instance Weight () where weightCon = Sub Dict
-
-instance Weight P.Double where weightCon = Sub Dict
-
-instance (Weight l, Weight r) => Weight (l, r) where
-  weightCon :: forall con. (con (), con P.Float, con P.Double, ForallV (ProdCon con)) :- con (l, r)
-  weightCon = Sub (mapDict (prodCon \\ (instV :: (ForallV (ProdCon con) :- ProdCon con l r))) (Dict \\ weightCon @l @con \\ weightCon @r @con))
-
-class ProdCon con l r where
-  prodCon :: (con l, con r) :- con (l, r)
-
-instance ProdCon Random l r where prodCon = Sub Dict
-
-instance ProdCon RandRange l r where prodCon = Sub Dict
-
-instance ProdCon P.Show l r where prodCon = Sub Dict
-
-class Weight w where
-  weightCon :: (con (), con P.Float, con P.Double, ForallV (ProdCon con)) :- con w

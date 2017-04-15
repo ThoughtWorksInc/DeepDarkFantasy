@@ -2,7 +2,7 @@
 
 module DDF.InfDiff where
 
-import DDF.Meta.InfDiff
+import DDF.Diff
 import DDF.Lang
 import DDF.Combine()
 import DDF.GWDiff()
@@ -80,3 +80,4 @@ instance Lang r => Lang (InfDiff r) where
   state = InfDiff state
   runState = InfDiff runState
   putStrLn = InfDiff putStrLn
+  nextDiff p = InfDiff $ nextDiff p

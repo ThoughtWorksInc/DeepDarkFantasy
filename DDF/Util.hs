@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module DDF.Util where
+module DDF.Util (module DDF.Util, module System.Random) where
 
 import System.Random
 import GHC.Float

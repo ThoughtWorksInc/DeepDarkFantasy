@@ -20,13 +20,13 @@
 > import DDF.Util
 > import DDF.Lang
 > import DDF.Show
-> import DDF.Eval
-> import DDF.WDiff
+> import DDF.WDiff ()
 > import qualified Control.Monad as M
 > import Prelude (Integer)
 > import qualified Prelude as M
 > import qualified DDF.Meta.Dual as M
 > import DDF.Vector
+> import DDF.Eval ()
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.

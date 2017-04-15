@@ -5,11 +5,10 @@
   ScopedTypeVariables
 #-}
 
-module DDF.GWDiff (module DDF.GWDiff, module DDF.Meta.GWDiff, module DDF.Diff) where
+module DDF.GWDiff (module DDF.Diff) where
 import DDF.Lang
 import qualified Prelude as M
 import DDF.Diff
-import DDF.Meta.GWDiff
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 import DDF.Vector
@@ -102,3 +101,4 @@ instance Lang r => Lang (GWDiff r) where
   state = GWDiff $ M.const state
   runState = GWDiff $ M.const runState
   putStrLn = GWDiff $ M.const putStrLn
+  nextDiff p = GWDiff $ M.const (nextDiff p)
