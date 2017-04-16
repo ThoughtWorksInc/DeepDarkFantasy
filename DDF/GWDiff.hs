@@ -101,3 +101,4 @@ instance Lang r => Lang (GWDiff r) where
   runState = GWDiff $ M.const runState
   putStrLn = GWDiff $ M.const putStrLn
   nextDiff p = GWDiff $ M.const (nextDiff p)
+  infDiffGet = GWDiff $ \p -> infDiffGet `com2` nextDiff p

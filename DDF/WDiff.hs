@@ -4,7 +4,8 @@
   InstanceSigs,
   ScopedTypeVariables,
   TypeApplications,
-  FlexibleContexts
+  FlexibleContexts,
+  UndecidableInstances
 #-}
 
 module DDF.WDiff where
@@ -12,6 +13,7 @@ module DDF.WDiff where
 import DDF.Lang
 import qualified Data.Map as M
 import qualified DDF.Map as Map
+import DDF.InfDiff ()
 
 instance DBI r => DBI (WDiff r v) where
   z = WDiff z
@@ -82,7 +84,7 @@ instance Map.Map r => Map.Map (WDiff r v) where
 
 instance Bimap r => Bimap (WDiff r v) where
 
-instance (Vector r v, Lang r) => Lang (WDiff r v) where
+instance (Vector (InfDiff Eval) v, Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix
   left = WDiff left
   right = WDiff right
@@ -103,3 +105,4 @@ instance (Vector r v, Lang r) => Lang (WDiff r v) where
   runState = WDiff runState
   putStrLn = WDiff putStrLn
   nextDiff p = WDiff (nextDiff p)
+  infDiffGet = WDiff $ infDiffGet `com2` nextDiff (Proxy :: Proxy v)

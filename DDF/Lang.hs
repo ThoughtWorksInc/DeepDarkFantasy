@@ -63,6 +63,7 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
   runState :: r h (State x y -> (x -> (y, x)))
   putStrLn :: r h (String -> IO ())
   nextDiff :: Vector (InfDiff Eval) v => Proxy v -> r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
+  infDiffGet :: r h (InfDiff Eval () x -> x)
 
 class Reify r x where
   reify :: x -> r h x

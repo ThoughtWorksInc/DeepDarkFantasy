@@ -78,3 +78,4 @@ instance Lang r => Lang (UnHOAS r) where
   runState = UnHOAS runState
   putStrLn = UnHOAS putStrLn
   nextDiff p = UnHOAS (nextDiff p)
+  infDiffGet = UnHOAS infDiffGet

@@ -98,3 +98,4 @@ instance Lang Show where
   runState = name "runState"
   putStrLn = name "putStrLn"
   nextDiff _ = name "nextDiff"
+  infDiffGet = name "infDiffGet"

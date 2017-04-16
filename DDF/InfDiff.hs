@@ -81,6 +81,7 @@ instance Lang r => Lang (InfDiff r) where
   runState = InfDiff runState
   putStrLn = InfDiff putStrLn
   nextDiff p = InfDiff $ nextDiff p
+  infDiffGet = InfDiff infDiffGet
 
-diffInf :: Vector (InfDiff r) v => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
+diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v) => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
 diffInf p (InfDiff (Combine _ (GWDiff f))) = f p

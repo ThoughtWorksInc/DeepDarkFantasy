@@ -99,3 +99,4 @@ instance Lang Eval where
   runState = comb M.runState
   putStrLn = comb M.putStrLn
   nextDiff p = comb (\x -> runGWDiff (combineRight (runInfDiff x)) p)
+  infDiffGet = comb (($ ()) . runEval . combineLeft . runInfDiff)

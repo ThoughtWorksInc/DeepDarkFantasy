@@ -80,3 +80,4 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   runState = Combine runState runState
   putStrLn = Combine putStrLn putStrLn
   nextDiff p = Combine (nextDiff p) (nextDiff p)
+  infDiffGet = Combine infDiffGet infDiffGet

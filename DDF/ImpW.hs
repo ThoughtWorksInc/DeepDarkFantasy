@@ -88,3 +88,4 @@ instance Lang r => Lang (ImpW r) where
   runState = NoImpW runState
   putStrLn = NoImpW putStrLn
   nextDiff p = NoImpW $ nextDiff p
+  infDiffGet = NoImpW infDiffGet

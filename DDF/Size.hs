@@ -82,3 +82,4 @@ instance Lang Size where
   runState = one
   putStrLn = one
   nextDiff _ = one
+  infDiffGet = one
