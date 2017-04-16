@@ -37,6 +37,7 @@ library
     DDF.Option
     DDF.Poly
     DDF.Prod
+    DDF.RTDiff
     DDF.Show
     DDF.Size
     DDF.UnHOAS

@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleContexts #-}
 
 module DDF.InfDiff where
 
@@ -81,3 +81,6 @@ instance Lang r => Lang (InfDiff r) where
   runState = InfDiff runState
   putStrLn = InfDiff putStrLn
   nextDiff p = InfDiff $ nextDiff p
+
+diffInf :: Vector (InfDiff r) v => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
+diffInf p (InfDiff (Combine _ (GWDiff f))) = f p

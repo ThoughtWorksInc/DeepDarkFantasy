@@ -25,7 +25,6 @@
 > import Prelude (Integer)
 > import qualified Prelude as M
 > import qualified DDF.Meta.Dual as M
-> import DDF.Vector
 > import DDF.Eval ()
 
 Importing files and opening language extension...

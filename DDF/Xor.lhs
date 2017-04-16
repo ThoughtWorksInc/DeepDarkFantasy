@@ -18,7 +18,6 @@ You should already read DDF.Poly before this.
 > import DDF.ImpW
 > import DDF.WithDiff
 > import qualified DDF.Meta.Dual as M
-> import DDF.Vector
 
 Recall in poly, we constructed a function Double -> Double,
 with argument being the weight, and do gradient descend to found a solution.

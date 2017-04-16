@@ -11,7 +11,6 @@ import qualified Prelude as M
 import DDF.Diff
 import qualified Data.Map as M
 import qualified DDF.Map as Map
-import DDF.Vector
 
 instance DBI r => DBI (GWDiff r) where
   z = GWDiff (M.const z)

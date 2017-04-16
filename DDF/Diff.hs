@@ -11,7 +11,7 @@
   ConstraintKinds
 #-}
 
-module DDF.Diff (module DDF.Diff, module DDF.Meta.Interpreter) where
+module DDF.Diff (module DDF.Diff, module DDF.Meta.Interpreter, module DDF.Vector) where
 
 import DDF.Vector
 import DDF.Meta.Interpreter

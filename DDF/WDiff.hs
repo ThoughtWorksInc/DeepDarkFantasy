@@ -12,7 +12,6 @@ module DDF.WDiff where
 import DDF.Lang
 import qualified Data.Map as M
 import qualified DDF.Map as Map
-import DDF.Vector
 
 instance DBI r => DBI (WDiff r v) where
   z = WDiff z
