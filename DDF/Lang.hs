@@ -64,6 +64,9 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
   putStrLn :: r h (String -> IO ())
   nextDiff :: Vector (InfDiff Eval) v => Proxy v -> r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
   infDiffGet :: r h (InfDiff Eval () x -> x)
+  intLang :: Proxy r -> Dict (Lang (DiffInt r))
+  litInfDiff :: DiffInt r () x -> r h (InfDiff Eval () x)
+  infDiffApp :: r h (InfDiff Eval () (a -> b) -> InfDiff Eval () a -> InfDiff Eval () b)
 
 class Reify r x where
   reify :: x -> r h x
@@ -202,3 +205,4 @@ sumMatch2 = app2 sumMatch
 state1 = app state
 runState1 = app runState
 runState2 = app2 runState
+infDiffApp1 = app infDiffApp

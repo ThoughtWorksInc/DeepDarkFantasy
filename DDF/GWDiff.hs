@@ -2,7 +2,9 @@
   NoImplicitPrelude,
   RankNTypes,
   InstanceSigs,
-  ScopedTypeVariables
+  ScopedTypeVariables,
+  TypeFamilies,
+  TypeApplications
 #-}
 
 module DDF.GWDiff (module DDF.Diff) where
@@ -102,3 +104,8 @@ instance Lang r => Lang (GWDiff r) where
   putStrLn = GWDiff $ M.const putStrLn
   nextDiff p = GWDiff $ M.const (nextDiff p)
   infDiffGet = GWDiff $ \p -> infDiffGet `com2` nextDiff p
+  infDiffApp = GWDiff $ M.const infDiffApp
+  intLang _ = intLang @r Proxy
+  litInfDiff x = GWDiff $ \_ -> litInfDiff x
+
+type instance DiffInt (GWDiff r) = DiffInt r

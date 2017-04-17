@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables #-}
 
 module DDF.UnHOAS where
 
@@ -79,3 +79,8 @@ instance Lang r => Lang (UnHOAS r) where
   putStrLn = UnHOAS putStrLn
   nextDiff p = UnHOAS (nextDiff p)
   infDiffGet = UnHOAS infDiffGet
+  intLang _ = intLang @r Proxy
+  infDiffApp = UnHOAS infDiffApp
+  litInfDiff x = UnHOAS $ litInfDiff x
+
+type instance DiffInt (UnHOAS r) = DiffInt r

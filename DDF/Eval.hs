@@ -1,12 +1,12 @@
 {-# LANGUAGE
   NoImplicitPrelude,
-  LambdaCase
+  LambdaCase,
+  TypeFamilies
 #-}
 
 module DDF.Eval where
 
 import DDF.ImportMeta
-import DDF.Lang
 import qualified Prelude as M
 import qualified Control.Monad.Writer as M (WriterT(WriterT), runWriter)
 import qualified Control.Monad.State as M
@@ -16,6 +16,8 @@ import qualified Data.Bool as M
 import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
+import DDF.Lang
+import DDF.InfDiff ()
 
 comb = Eval . M.const
 
@@ -100,3 +102,11 @@ instance Lang Eval where
   putStrLn = comb M.putStrLn
   nextDiff p = comb (\x -> runGWDiff (combineRight (runInfDiff x)) p)
   infDiffGet = comb (($ ()) . runEval . combineLeft . runInfDiff)
+  intLang _ = Dict
+  litInfDiff x = comb x
+  infDiffApp = comb func where
+    func :: InfDiff Eval () (x -> y) -> InfDiff Eval () x -> InfDiff Eval () y
+    func (InfDiff (Combine fl (GWDiff fr))) (InfDiff (Combine xl (GWDiff xr))) =
+      InfDiff (Combine (app fl xl) (GWDiff $ \p -> func (fr p) (xr p)))
+
+type instance DiffInt Eval = InfDiff Eval

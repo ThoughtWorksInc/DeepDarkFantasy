@@ -10,7 +10,8 @@
   NoMonomorphismRestriction,
   ConstraintKinds,
   DataKinds,
-  FlexibleContexts
+  FlexibleContexts,
+  GADTs
 #-}
 
 module DDF.Diff (module DDF.Diff, module DDF.Meta.Interpreter, module DDF.Vector) where
@@ -47,10 +48,4 @@ newtype InfDiff r h x = InfDiff {runInfDiff :: Combine r (GWDiff (InfDiff r)) h 
 
 newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
 
-type family InfDiffEnv h where
-  InfDiffEnv (a, h) = (InfDiffEnv a, InfDiffEnv h)
-  InfDiffEnv h = InfDiff Eval () h
-
-type family InfDiffTerm h where
-  InfDiffTerm (a -> b) = InfDiffTerm a -> InfDiffTerm b
-  InfDiffTerm x = InfDiff Eval () x
+type family DiffInt (r :: * -> * -> *) :: * -> * -> *

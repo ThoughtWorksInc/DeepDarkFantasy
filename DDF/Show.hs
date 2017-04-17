@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
 
 module DDF.Show (module DDF.Show) where
 
@@ -99,3 +99,8 @@ instance Lang Show where
   putStrLn = name "putStrLn"
   nextDiff _ = name "nextDiff"
   infDiffGet = name "infDiffGet"
+  infDiffApp = name "infDiffApp"
+  intLang _ = Dict
+  litInfDiff (Show sh) = Show $ \va h -> appAST (Leaf "tower") (sh va h)
+
+type instance DiffInt Show = Show

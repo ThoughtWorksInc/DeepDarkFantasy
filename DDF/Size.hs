@@ -1,7 +1,8 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
 
 module DDF.Size where
 
+import DDF.UInt
 import DDF.Lang
 import qualified DDF.Map as Map
 
@@ -83,3 +84,8 @@ instance Lang Size where
   putStrLn = one
   nextDiff _ = one
   infDiffGet = one
+  litInfDiff _ = one
+  intLang _ = Dict
+  infDiffApp = one
+
+type instance DiffInt Size = UInt

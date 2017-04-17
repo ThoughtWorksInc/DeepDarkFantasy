@@ -31,16 +31,15 @@ library
     DDF.ImpW
     DDF.InfDiff
     DDF.Lang
-    DDF.LiftDiff
     DDF.Map
     DDF.Meta.Interpreter
     DDF.Meta.Dual
     DDF.Option
     DDF.Poly
     DDF.Prod
-    DDF.RTDiff
     DDF.Show
     DDF.Size
+    DDF.UInt
     DDF.UnHOAS
     DDF.Util
     DDF.Vector

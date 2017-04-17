@@ -5,7 +5,8 @@
   ScopedTypeVariables,
   TypeApplications,
   FlexibleContexts,
-  UndecidableInstances
+  UndecidableInstances,
+  TypeFamilies
 #-}
 
 module DDF.WDiff where
@@ -106,3 +107,8 @@ instance (Vector (InfDiff Eval) v, Vector r v, Lang r) => Lang (WDiff r v) where
   putStrLn = WDiff putStrLn
   nextDiff p = WDiff (nextDiff p)
   infDiffGet = WDiff $ infDiffGet `com2` nextDiff (Proxy :: Proxy v)
+  intLang _ = intLang @r Proxy
+  litInfDiff x = WDiff $ litInfDiff x
+  infDiffApp = WDiff infDiffApp
+
+type instance DiffInt (WDiff r v) = DiffInt r

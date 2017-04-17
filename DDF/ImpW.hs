@@ -1,4 +1,12 @@
-{-# LANGUAGE NoImplicitPrelude, RankNTypes, InstanceSigs, ScopedTypeVariables, ExistentialQuantification #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  RankNTypes,
+  InstanceSigs,
+  ScopedTypeVariables,
+  ExistentialQuantification,
+  TypeFamilies,
+  TypeApplications
+#-}
 
 module DDF.ImpW where
 
@@ -89,3 +97,8 @@ instance Lang r => Lang (ImpW r) where
   putStrLn = NoImpW putStrLn
   nextDiff p = NoImpW $ nextDiff p
   infDiffGet = NoImpW infDiffGet
+  infDiffApp = NoImpW infDiffApp
+  litInfDiff x = NoImpW (litInfDiff x)
+  intLang _ = intLang @r Proxy
+
+type instance DiffInt (ImpW r) = DiffInt r

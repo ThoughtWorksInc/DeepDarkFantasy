@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables #-}
 
 module DDF.Combine where
 
@@ -81,3 +81,8 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   putStrLn = Combine putStrLn putStrLn
   nextDiff p = Combine (nextDiff p) (nextDiff p)
   infDiffGet = Combine infDiffGet infDiffGet
+  infDiffApp = Combine infDiffApp infDiffApp
+  intLang _ = intLang @l Proxy `withDict` (intLang @r Proxy `withDict` Dict)
+  litInfDiff (Combine l r) = Combine (litInfDiff l) (litInfDiff r)
+
+type instance DiffInt (Combine l r) = Combine (DiffInt l) (DiffInt r)

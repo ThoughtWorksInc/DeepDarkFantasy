@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, FlexibleContexts #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleContexts, ScopedTypeVariables, TypeApplications, TypeFamilies #-}
 
 module DDF.InfDiff where
 
@@ -82,6 +82,11 @@ instance Lang r => Lang (InfDiff r) where
   putStrLn = InfDiff putStrLn
   nextDiff p = InfDiff $ nextDiff p
   infDiffGet = InfDiff infDiffGet
+  infDiffApp = InfDiff infDiffApp
+  intLang _ = intLang @r Proxy
+  litInfDiff x = InfDiff $ litInfDiff (Combine x x)
+
+type instance DiffInt (InfDiff r) = DiffInt r
 
 diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v) => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
 diffInf p (InfDiff (Combine _ (GWDiff f))) = f p
