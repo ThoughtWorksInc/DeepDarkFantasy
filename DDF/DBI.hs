@@ -28,29 +28,30 @@ class Monoid r m where
   zero :: r h m
   plus :: r h (m -> m -> m)
 
-class DBI (repr :: * -> * -> *) where
-  z :: repr (a, h) a
-  s :: repr h b -> repr (a, h) b
-  abs :: repr (a, h) b -> repr h (a -> b)
-  app :: repr h (a -> b) -> repr h a -> repr h b
+class DBI (r :: * -> * -> *) where
+  z :: r (a, h) a
+  s :: r h b -> r (a, h) b
+  abs :: r (a, h) b -> r h (a -> b)
+  app :: r h (a -> b) -> r h a -> r h b
   -- | We use a variant of HOAS so it can be compile to DBI, which is more compositional (No Negative Occurence).
   -- It require explicit lifting of variables.
   -- Use lam to do automatic lifting of variables.
-  hoas :: (repr (a, h) a -> repr (a, h) b) -> repr h (a -> b)
+  hoas :: (r (a, h) a -> r (a, h) b) -> r h (a -> b)
   hoas f = abs $ f z
-  com :: repr h ((b -> c) -> (a -> b) -> (a -> c))
+  liftEnv :: r () x -> r h x
+  com :: r h ((b -> c) -> (a -> b) -> (a -> c))
   com = lam3 $ \f g x -> app f (app g x)
-  flip :: repr h ((a -> b -> c) -> (b -> a -> c))
+  flip :: r h ((a -> b -> c) -> (b -> a -> c))
   flip = lam3 $ \f b a -> app2 f a b
-  id :: repr h (a -> a)
+  id :: r h (a -> a)
   id = lam $ \x -> x
-  const :: repr h (a -> b -> a)
+  const :: r h (a -> b -> a)
   const = lam2 $ \x _ -> x
-  scomb :: repr h ((a -> b -> c) -> (a -> b) -> (a -> c))
+  scomb :: r h ((a -> b -> c) -> (a -> b) -> (a -> c))
   scomb = lam3 $ \f x arg -> app2 f arg (app x arg)
-  dup :: repr h ((a -> a -> b) -> (a -> b))
+  dup :: r h ((a -> a -> b) -> (a -> b))
   dup = lam2 $ \f x -> app2 f x x
-  let_ :: repr h (a -> (a -> b) -> b)
+  let_ :: r h (a -> (a -> b) -> b)
   let_ = flip1 id
 
 const1 = app const

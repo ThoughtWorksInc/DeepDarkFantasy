@@ -1,7 +1,8 @@
 {-# LANGUAGE
   NoImplicitPrelude,
   LambdaCase,
-  TypeFamilies
+  TypeFamilies,
+  FlexibleContexts
 #-}
 
 module DDF.Eval where
@@ -26,6 +27,7 @@ instance DBI Eval where
   s (Eval a) = Eval $ a . M.snd
   abs (Eval f) = Eval $ \h a -> f (a, h)
   app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
+  liftEnv (Eval x) = Eval $ \_ -> x ()
 
 instance Bool Eval where
   bool = comb
@@ -108,5 +110,9 @@ instance Lang Eval where
     func :: InfDiff Eval () (x -> y) -> InfDiff Eval () x -> InfDiff Eval () y
     func (InfDiff (Combine fl (GWDiff fr))) (InfDiff (Combine xl (GWDiff xr))) =
       InfDiff (Combine (app fl xl) (GWDiff $ \p -> func (fr p) (xr p)))
+  rtDiffDiff _ _ = Sub Dict
+  rtdd _ = Dict
 
+type instance RTDiff Eval x = ()
 type instance DiffInt Eval = InfDiff Eval
+type instance DiffVector Eval v = Vector (InfDiff Eval) v

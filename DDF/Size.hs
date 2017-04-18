@@ -15,6 +15,7 @@ instance DBI Size where
   s (Size x) = (Size x)
   app (Size l) (Size r) = Size (l + r)
   abs (Size l) = Size (1 + l)
+  liftEnv (Size l) = Size l
 
 instance Bool Size where
   bool _ = one
@@ -87,5 +88,8 @@ instance Lang Size where
   litInfDiff _ = one
   intLang _ = Dict
   infDiffApp = one
+  rtDiffDiff _ _ = Sub Dict
+  rtdd _ = Dict
 
+type instance RTDiff Size x = ()
 type instance DiffInt Size = UInt

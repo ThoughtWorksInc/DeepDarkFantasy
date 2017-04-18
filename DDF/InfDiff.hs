@@ -13,6 +13,7 @@ instance DBI r => DBI (InfDiff r) where
   s (InfDiff x) = InfDiff (s x)
   abs (InfDiff x) = InfDiff (abs x)
   app (InfDiff f) (InfDiff x) = InfDiff (app f x)
+  liftEnv (InfDiff x) = InfDiff (liftEnv x)
 
 instance Prod r => Prod (InfDiff r) where
   zro = InfDiff zro
@@ -85,8 +86,12 @@ instance Lang r => Lang (InfDiff r) where
   infDiffApp = InfDiff infDiffApp
   intLang _ = intLang @r Proxy
   litInfDiff x = InfDiff $ litInfDiff (Combine x x)
+  rtDiffDiff _ p = rtDiffDiff @r Proxy p
+  rtdd _ = rtdd @r Proxy
 
+type instance RTDiff (InfDiff r) x = RTDiff r x
 type instance DiffInt (InfDiff r) = DiffInt r
+type instance DiffVector (InfDiff r) v = DiffVector r v
 
-diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v) => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
+diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v, DiffVector r v, RTDiff r v) => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
 diffInf p (InfDiff (Combine _ (GWDiff f))) = f p

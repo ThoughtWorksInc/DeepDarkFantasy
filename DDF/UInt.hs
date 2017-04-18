@@ -12,6 +12,7 @@ instance DBI UInt where
   s _ = UInt
   abs _ = UInt
   app _ _ = UInt
+  liftEnv _ = UInt
 
 instance Bool UInt where
   bool _ = UInt
@@ -84,5 +85,8 @@ instance Lang UInt where
   intLang _ = Dict
   litInfDiff _ = UInt
   infDiffApp = UInt
+  rtDiffDiff _ _ = Sub Dict
+  rtdd _ = Dict
 
+type instance RTDiff UInt x = ()
 type instance DiffInt UInt = UInt

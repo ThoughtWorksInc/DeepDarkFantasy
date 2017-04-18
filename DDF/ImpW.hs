@@ -28,6 +28,8 @@ instance Prod r => DBI (ImpW r) where
   app (NoImpW f) (ImpW x) = ImpW (lam $ \w -> app (conv f) (app (conv x) w))
   abs (ImpW f) = ImpW (flip1 $ abs f)
   abs (NoImpW x) = NoImpW (abs x)
+  liftEnv (NoImpW x) = NoImpW $ liftEnv x
+  liftEnv (ImpW x) = ImpW $ liftEnv x
 
 instance (Prod r, Bool r) => Bool (ImpW r) where
   bool = NoImpW . bool
@@ -100,5 +102,9 @@ instance Lang r => Lang (ImpW r) where
   infDiffApp = NoImpW infDiffApp
   litInfDiff x = NoImpW (litInfDiff x)
   intLang _ = intLang @r Proxy
+  rtDiffDiff _ p = rtDiffDiff @r Proxy p
+  rtdd _ = rtdd @r Proxy
 
+type instance RTDiff (ImpW r) x = RTDiff r x
 type instance DiffInt (ImpW r) = DiffInt r
+type instance DiffVector (ImpW r) v = DiffVector r v

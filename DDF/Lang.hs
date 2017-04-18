@@ -1,25 +1,26 @@
 {-# LANGUAGE
-    MultiParamTypeClasses,
-    RankNTypes,
-    ScopedTypeVariables,
-    FlexibleInstances,
-    FlexibleContexts,
-    UndecidableInstances,
-    PolyKinds,
-    LambdaCase,
-    NoMonomorphismRestriction,
-    TypeFamilies,
-    LiberalTypeSynonyms,
-    FunctionalDependencies,
-    ExistentialQuantification,
-    InstanceSigs,
-    TupleSections,
-    ConstraintKinds,
-    DefaultSignatures,
-    TypeOperators,
-    TypeApplications,
-    PartialTypeSignatures,
-    NoImplicitPrelude #-}
+  MultiParamTypeClasses,
+  RankNTypes,
+  ScopedTypeVariables,
+  FlexibleInstances,
+  FlexibleContexts,
+  UndecidableInstances,
+  PolyKinds,
+  LambdaCase,
+  NoMonomorphismRestriction,
+  TypeFamilies,
+  LiberalTypeSynonyms,
+  FunctionalDependencies,
+  ExistentialQuantification,
+  InstanceSigs,
+  TupleSections,
+  ConstraintKinds,
+  DefaultSignatures,
+  TypeOperators,
+  TypeApplications,
+  PartialTypeSignatures,
+  NoImplicitPrelude
+#-}
 
 module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Bimap, module DDF.Dual, module DDF.Diff) where
 import DDF.Bool
@@ -62,11 +63,15 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
   state :: r h ((x -> (y, x)) -> State x y)
   runState :: r h (State x y -> (x -> (y, x)))
   putStrLn :: r h (String -> IO ())
-  nextDiff :: Vector (InfDiff Eval) v => Proxy v -> r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
-  infDiffGet :: r h (InfDiff Eval () x -> x)
+  nextDiff :: (DiffVector r v, RTDiff r x, RTDiff r v) => Proxy v -> r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
+  infDiffGet :: RTDiff r x => r h (InfDiff Eval () x -> x)
+  rtDiffDiff :: forall v x. (DiffVector r v, RTDiff r v) => Proxy r -> Proxy (v, x) -> RTDiff r x :- RTDiff r (Diff v x)
   intLang :: Proxy r -> Dict (Lang (DiffInt r))
   litInfDiff :: DiffInt r () x -> r h (InfDiff Eval () x)
   infDiffApp :: r h (InfDiff Eval () (a -> b) -> InfDiff Eval () a -> InfDiff Eval () b)
+  infDiffAppApp :: r h (InfDiff Eval () (a -> b -> c) -> InfDiff Eval () a -> InfDiff Eval () b -> InfDiff Eval () c)
+  infDiffAppApp = lam2 $ \f x -> infDiffApp1 $ infDiffApp2 f x
+  rtdd :: Proxy r -> Dict (RTDiff r M.Double)
 
 class Reify r x where
   reify :: x -> r h x
@@ -206,3 +211,6 @@ state1 = app state
 runState1 = app runState
 runState2 = app2 runState
 infDiffApp1 = app infDiffApp
+infDiffApp2 = app2 infDiffApp
+infDiffAppApp1 = app infDiffAppApp
+nextDiff1 p = app $ nextDiff p

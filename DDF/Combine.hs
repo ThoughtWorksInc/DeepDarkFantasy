@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables, NoMonomorphismRestriction #-}
 
 module DDF.Combine where
 
@@ -12,6 +12,7 @@ instance (DBI l, DBI r) => DBI (Combine l r) where
   app (Combine fl fr) (Combine xl xr) = Combine (app fl xl) (app fr xr)
   abs (Combine l r) = Combine (abs l) (abs r)
   hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l _ -> l) (hoas $ \x -> case f (Combine z x) of Combine _ r -> r)
+  liftEnv (Combine l r) = Combine (liftEnv l) (liftEnv r)
 
 instance (Bool l, Bool r) => Bool (Combine l r) where
   bool x = Combine (bool x) (bool x)
@@ -84,5 +85,9 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   infDiffApp = Combine infDiffApp infDiffApp
   intLang _ = intLang @l Proxy `withDict` (intLang @r Proxy `withDict` Dict)
   litInfDiff (Combine l r) = Combine (litInfDiff l) (litInfDiff r)
+  rtDiffDiff _ p = Sub (Dict \\ rtDiffDiff @l Proxy p *** rtDiffDiff @r Proxy p)
+  rtdd _ = rtdd @l Proxy `withDict` (rtdd @r Proxy `withDict` Dict)
 
+type instance RTDiff (Combine l r) x = (RTDiff l x, RTDiff r x)
 type instance DiffInt (Combine l r) = Combine (DiffInt l) (DiffInt r)
+type instance DiffVector (Combine l r) v = (DiffVector l v, DiffVector r v)

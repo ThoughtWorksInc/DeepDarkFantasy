@@ -19,6 +19,7 @@ instance DBI r => DBI (GWDiff r) where
   s (GWDiff x) = GWDiff (\p -> s $ x p)
   app (GWDiff f) (GWDiff x) = GWDiff (\p -> app (f p) (x p))
   abs (GWDiff x) = GWDiff (\p -> abs $ x p)
+  liftEnv (GWDiff x) = GWDiff (\p -> liftEnv $ x p)
 
 instance Bool r => Bool (GWDiff r) where
   bool x = GWDiff $ M.const $ bool x
@@ -102,10 +103,15 @@ instance Lang r => Lang (GWDiff r) where
   state = GWDiff $ M.const state
   runState = GWDiff $ M.const runState
   putStrLn = GWDiff $ M.const putStrLn
-  nextDiff p = GWDiff $ M.const (nextDiff p)
-  infDiffGet = GWDiff $ \p -> infDiffGet `com2` nextDiff p
   infDiffApp = GWDiff $ M.const infDiffApp
   intLang _ = intLang @r Proxy
   litInfDiff x = GWDiff $ \_ -> litInfDiff x
+  nextDiff p = GWDiff $ \_ -> nextDiff p
+  infDiffGet :: forall h x. RTDiff (GWDiff r) x => GWDiff r h (InfDiff Eval () x -> x)
+  infDiffGet = GWDiff $ \(p :: Proxy v) -> ((infDiffGet `com2` nextDiff p) \\ rtDiffDiff @r @v @x Proxy Proxy)
+  rtDiffDiff _ p = rtDiffDiff @r Proxy p
+  rtdd _ = rtdd @r Proxy
 
+type instance RTDiff (GWDiff r) x = RTDiff r x 
 type instance DiffInt (GWDiff r) = DiffInt r
+type instance DiffVector (GWDiff r) v = DiffVector r v

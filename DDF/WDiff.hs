@@ -22,6 +22,7 @@ instance DBI r => DBI (WDiff r v) where
   abs (WDiff f) = WDiff $ abs f
   app (WDiff f) (WDiff x) = WDiff $ app f x
   hoas f = WDiff $ hoas (\x -> runWDiff $ f $ WDiff x)
+  liftEnv (WDiff x) = WDiff $ liftEnv x
 
 instance Bool r => Bool (WDiff r v) where
   bool x = WDiff $ bool x
@@ -85,7 +86,7 @@ instance Map.Map r => Map.Map (WDiff r v) where
 
 instance Bimap r => Bimap (WDiff r v) where
 
-instance (Vector (InfDiff Eval) v, Vector r v, Lang r) => Lang (WDiff r v) where
+instance (DiffVector r v, Vector r v, Lang r, RTDiff r v) => Lang (WDiff r v) where
   fix = WDiff fix
   left = WDiff left
   right = WDiff right
@@ -106,9 +107,14 @@ instance (Vector (InfDiff Eval) v, Vector r v, Lang r) => Lang (WDiff r v) where
   runState = WDiff runState
   putStrLn = WDiff putStrLn
   nextDiff p = WDiff (nextDiff p)
-  infDiffGet = WDiff $ infDiffGet `com2` nextDiff (Proxy :: Proxy v)
+  infDiffGet :: forall h x. RTDiff (WDiff r v) x => WDiff r v h (InfDiff Eval () x -> x)
+  infDiffGet = WDiff $ (infDiffGet `com2` nextDiff (Proxy :: Proxy v)) \\ rtDiffDiff @r @v @x Proxy Proxy
   intLang _ = intLang @r Proxy
   litInfDiff x = WDiff $ litInfDiff x
   infDiffApp = WDiff infDiffApp
+  rtDiffDiff _ p = rtDiffDiff @r Proxy p
+  rtdd _ = rtdd @r Proxy
 
+type instance RTDiff (WDiff r v) x = RTDiff r x 
 type instance DiffInt (WDiff r v) = DiffInt r
+type instance DiffVector (WDiff r _) v = DiffVector r v
