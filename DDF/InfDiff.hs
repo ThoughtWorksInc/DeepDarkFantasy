@@ -2,10 +2,10 @@
 
 module DDF.InfDiff where
 
-import DDF.Diff
+import DDF.Meta.Diff
 import DDF.DLang
-import DDF.Combine()
-import DDF.GWDiff()
+import DDF.Combine ()
+import DDF.GDiff ()
 import qualified DDF.Map as Map
 
 instance DBI r => DBI (InfDiff r) where
@@ -95,5 +95,5 @@ type instance RTDiff (InfDiff r) x = RTDiff r x
 type instance DiffInt (InfDiff r) = DiffInt r
 type instance DiffVector (InfDiff r) v = DiffVector r v
 
-diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v, DiffVector r v, RTDiff r v) => Proxy v -> InfDiff r () x -> InfDiff r () (Diff v x)
-diffInf p (InfDiff (Combine _ (GWDiff f))) = f p
+diffInf :: (Vector (InfDiff Eval) v, Vector (InfDiff r) v, DiffVector r v, RTDiff r v) => Proxy v -> InfDiff r () x -> InfDiff r () (DiffType v x)
+diffInf p (InfDiff (Combine _ (GDiff f))) = f p

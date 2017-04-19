@@ -5,7 +5,17 @@
   FlexibleInstances
 #-}
 
-module DDF.Lang (module DDF.Lang, module DDF.Bool, module DDF.Char, module DDF.Double, module DDF.Float, module DDF.Bimap, module DDF.Dual, module DDF.Diff) where
+module DDF.Lang (
+  module DDF.Lang,
+  module DDF.Bool,
+  module DDF.Char,
+  module DDF.Double,
+  module DDF.Float,
+  module DDF.Bimap,
+  module DDF.Dual,
+  module DDF.Meta.Diff
+) where
+
 import DDF.Bool
 import DDF.Char
 import DDF.Double
@@ -13,7 +23,7 @@ import DDF.Float
 import DDF.Bimap
 import DDF.Dual
 import DDF.Vector
-import DDF.Diff
+import DDF.Meta.Diff
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)

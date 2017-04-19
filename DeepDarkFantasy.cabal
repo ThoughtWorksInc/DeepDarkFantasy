@@ -27,7 +27,7 @@ library
     DDF.Dual
     DDF.Eval
     DDF.Float
-    DDF.GWDiff
+    DDF.GDiff
     DDF.ImportMeta
     DDF.ImpW
     DDF.InfDiff
@@ -35,6 +35,7 @@ library
     DDF.LiftDiff
     DDF.Map
     DDF.Meta.Interpreter
+    DDF.Meta.Diff
     DDF.Meta.Dual
     DDF.Option
     DDF.Poly
@@ -45,7 +46,6 @@ library
     DDF.UnHOAS
     DDF.Util
     DDF.Vector
-    DDF.WDiff
     DDF.WithDiff
     DDF.Xor
   build-depends:

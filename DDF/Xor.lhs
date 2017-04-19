@@ -14,7 +14,7 @@ You should already read DDF.Poly before this.
 > import DDF.Show
 > import DDF.Combine ()
 > import DDF.Eval ()
-> import DDF.GWDiff ()
+> import DDF.GDiff ()
 > import DDF.ImpW
 > import DDF.WithDiff
 > import qualified DDF.Meta.Dual as M
@@ -95,7 +95,7 @@ Now we are good to implement the train function!
 
 > findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (Int -> M.Double -> M.String -> m ()) -> m XOR
 > findXor rand doAST doIter = case runImpW $ noEnv xorNet of
->   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GWDiff Eval)) () (w -> XOR)) -> do
+>   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GDiff Eval)) () (w -> XOR)) -> do
 >     doAST $ xorS vars 0
 
 printing weights. now you will see a list of gibberish
@@ -107,9 +107,9 @@ Getting random weights...
 >     (go (diff xorE) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
 >         ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0 (xorEv ())) \\ weightCon @w @M.Show
 >     where
->       diff :: GWDiff Eval () x -> Diff w x
->       diff x = ((runEval (runGWDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)) \\ weightCon @w @(Vector (InfDiff Eval))
->       go :: M.Show w => (Diff w (w -> XOR)) -> w -> (w -> Diff w w) -> (Diff w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
+>       diff :: GDiff Eval () x -> DiffType w x
+>       diff x = ((runEval (runGDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)) \\ weightCon @w @(Vector (InfDiff Eval))
+>       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
 >       go xor weight reifyE lossE update i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)
 >         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig

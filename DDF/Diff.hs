@@ -1,71 +1,122 @@
 {-# LANGUAGE
-  RankNTypes,
+  NoImplicitPrelude,
+  ExplicitForAll,
+  InstanceSigs,
   ScopedTypeVariables,
   TypeApplications,
-  TypeFamilies,
-  KindSignatures,
-  MultiParamTypeClasses,
-  FlexibleInstances,
-  NoMonomorphismRestriction,
-  ConstraintKinds,
-  DataKinds,
-  FlexibleContexts
+  FlexibleContexts,
+  UndecidableInstances,
+  TypeFamilies
 #-}
 
-module DDF.Diff (module DDF.Diff, module DDF.Meta.Interpreter, module DDF.Vector) where
+module DDF.Diff where
 
-import DDF.Vector
-import DDF.Meta.Interpreter
-import DDF.Meta.Dual
-import Data.Map
+import DDF.DLang
+import qualified Data.Map as M
+import qualified DDF.Map as Map
+import DDF.InfDiff ()
 
-type family Diff (v :: *) (x :: *)
-type instance Diff v () = ()
-type instance Diff v (l, r) = (Diff v l, Diff v r)
-type instance Diff v (l -> r) = Diff v l -> Diff v r
-type instance Diff v Void = Void
-type instance Diff v Double = Dual Double v
-type instance Diff v Float = Dual Float v
-type instance Diff v (Writer l r) = Writer (Diff v l) (Diff v r)
-type instance Diff v (IO l) = IO (Diff v l)
-type instance Diff v (Maybe l) = Maybe (Diff v l)
-type instance Diff v [l] = [Diff v l]
-type instance Diff v (Either l r) = Either (Diff v l) (Diff v r)
-type instance Diff v (State l r) = State (Diff v l) (Diff v r)
-type instance Diff v Bool = Bool
-type instance Diff v Char = Char
-type instance Diff v (Map k val) = Map (Diff v k) (Diff v val)
-type instance Diff v (Dual l r) = Dual (Diff v l) (Diff v r)
-type instance Diff v (InfDiff Eval () x) = InfDiff Eval () x
+instance DBI r => DBI (Diff r v) where
+  z = Diff z
+  s (Diff x) = Diff $ s x
+  abs (Diff f) = Diff $ abs f
+  app (Diff f) (Diff x) = Diff $ app f x
+  hoas f = Diff $ hoas (\x -> runDiff $ f $ Diff x)
+  liftEnv (Diff x) = Diff $ liftEnv x
 
-newtype GWDiff r h x = GWDiff {runGWDiff :: forall v. (Vector (InfDiff Eval) v, Vector r v, DiffVector r v, RTDiff r v) =>
-  Proxy v -> r (Diff v h) (Diff v x)}
+instance Bool r => Bool (Diff r v) where
+  bool x = Diff $ bool x
+  ite = Diff ite
 
-newtype InfDiff r h x = InfDiff {runInfDiff :: Combine r (GWDiff (InfDiff r)) h x}
+instance Char r => Char (Diff r v) where
+  char = Diff . char
 
-newtype WDiff r v h x = WDiff {runWDiff :: r (Diff v h) (Diff v x)}
+instance Prod r => Prod (Diff r v) where
+  mkProd = Diff mkProd
+  zro = Diff zro
+  fst = Diff fst
 
-type family DiffInt (r :: * -> * -> *) :: * -> * -> *
+instance Dual r => Dual (Diff r v) where
+  dual = Diff $ dual
+  runDual = Diff $ runDual
 
-type family DiffVector (r :: * -> * -> *) v :: Constraint
+instance (Vector r v, Double r, Dual r) => Double (Diff r v) where
+  double x = Diff $ mkDual2 (double x) zero
+  doublePlus = Diff $ lam2 $ \l r ->
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
+  doubleMinus = Diff $ lam2 $ \l r ->
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
+  doubleMult = Diff $ lam2 $ \l r ->
+    mkDual2 (mult2 (dualOrig1 l) (dualOrig1 r))
+      (plus2 (mult2 (dualOrig1 l) (dualDiff1 r)) (mult2 (dualOrig1 r) (dualDiff1 l)))
+  doubleDivide = Diff $ lam2 $ \l r ->
+    mkDual2 (divide2 (dualOrig1 l) (dualOrig1 r))
+      (divide2 (minus2 (mult2 (dualOrig1 r) (dualDiff1 l)) (mult2 (dualOrig1 l) (dualDiff1 r)))
+        (mult2 (dualOrig1 r) (dualOrig1 r)))
+  doubleExp = Diff $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x)))
 
-type family RTDiff (r :: * -> * -> *) x :: Constraint
+instance (Vector r v, Lang r) => Float (Diff r v) where
+  float x = Diff $ mkDual2 (float x) zero
+  floatPlus = Diff $ lam2 $ \l r ->
+    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
+  floatMinus = Diff $ lam2 $ \l r ->
+    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
+  floatMult = Diff $ lam2 $ \l r ->
+    mkDual2 (mult2 (float2Double1 (dualOrig1 l)) (dualOrig1 r))
+      (plus2 (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)) (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)))
+  floatDivide = Diff $ lam2 $ \l r ->
+    mkDual2 (divide2 (dualOrig1 l) (float2Double1 (dualOrig1 r)))
+      (divide2 (minus2 (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)) (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)))
+        (float2Double1 (mult2 (float2Double1 (dualOrig1 r)) (dualOrig1 r))))
+  floatExp = Diff (lam $ \x -> let_2 (floatExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 (float2Double1 e) (dualDiff1 x))))
 
-type family LiftDiff (x :: *)
-type instance LiftDiff () = ()
-type instance LiftDiff (l, r) = (LiftDiff l, LiftDiff r)
-type instance LiftDiff (l -> r) = LiftDiff l -> LiftDiff r
-type instance LiftDiff Void = Void
-type instance LiftDiff Double = InfDiff Eval () Double
-type instance LiftDiff Float = InfDiff Eval () Float
-type instance LiftDiff (Writer l r) = Writer (LiftDiff l) (LiftDiff r)
-type instance LiftDiff (IO l) = IO (LiftDiff l)
-type instance LiftDiff (Maybe l) = Maybe (LiftDiff l)
-type instance LiftDiff [l] = [LiftDiff l]
-type instance LiftDiff (Either l r) = Either (LiftDiff l) (LiftDiff r)
-type instance LiftDiff (State l r) = State (LiftDiff l) (LiftDiff r)
-type instance LiftDiff Bool = Bool
-type instance LiftDiff Char = Char
-type instance LiftDiff (Map k val) = Map (LiftDiff k) (LiftDiff val)
-type instance LiftDiff (Dual l r) = Dual (LiftDiff l) (LiftDiff r)
-type instance LiftDiff (InfDiff Eval () x) = LiftDiff x
+instance Option r => Option (Diff r v) where
+  nothing = Diff nothing
+  just = Diff just
+  optionMatch = Diff optionMatch
+
+instance Map.Map r => Map.Map (Diff r v) where
+  empty = Diff Map.empty
+  singleton = Diff Map.singleton
+  lookup :: forall h k a. Map.Ord k => Diff r v h (k -> M.Map k a -> Maybe a)
+  lookup = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.lookup)
+  alter :: forall h k a. Map.Ord k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.alter)
+  mapMap = Diff Map.mapMap
+
+instance Bimap r => Bimap (Diff r v) where
+
+instance (Vector r v, Lang r) => Lang (Diff r v) where
+  fix = Diff fix
+  left = Diff left
+  right = Diff right
+  sumMatch = Diff sumMatch
+  unit = Diff unit
+  exfalso = Diff exfalso
+  ioRet = Diff ioRet
+  ioBind = Diff ioBind
+  nil = Diff nil
+  cons = Diff cons
+  listMatch = Diff listMatch
+  ioMap = Diff ioMap
+  writer = Diff writer
+  runWriter = Diff runWriter
+  float2Double = Diff $ bimap2 float2Double id
+  double2Float = Diff $ bimap2 double2Float id
+  state = Diff state
+  runState = Diff runState
+  putStrLn = Diff putStrLn
+
+instance (DiffVector r v, Vector r v, DLang r, RTDiff r v) => DLang (Diff r v) where
+  nextDiff p = Diff (nextDiff p)
+  infDiffGet :: forall h x. RTDiff (Diff r v) x => Diff r v h (InfDiff Eval () x -> x)
+  infDiffGet = Diff $ (infDiffGet `com2` nextDiff (Proxy :: Proxy v)) \\ rtDiffDiff @r @v @x Proxy Proxy
+  intDLang _ = intDLang @r Proxy
+  litInfDiff x = Diff $ litInfDiff x
+  infDiffApp = Diff infDiffApp
+  rtDiffDiff _ p = rtDiffDiff @r Proxy p
+  rtdd _ = rtdd @r Proxy
+
+type instance RTDiff (Diff r v) x = RTDiff r x 
+type instance DiffInt (Diff r v) = DiffInt r
+type instance DiffVector (Diff r _) v = DiffVector r v

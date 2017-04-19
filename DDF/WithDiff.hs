@@ -11,10 +11,10 @@ import DDF.DLang
 import qualified Prelude as M
 
 class Monoid r w => WithDiff r w where
-  withDiff :: r h ((w -> x) -> w -> Diff x w)
+  withDiff :: r h ((w -> x) -> w -> DiffType x w)
 
 withDiff1 = app withDiff
-selfWithDiff :: (DBI r, WithDiff r w) => r h (w -> Diff w w)
+selfWithDiff :: (DBI r, WithDiff r w) => r h (w -> DiffType w w)
 selfWithDiff = withDiff1 id
 
 instance DLang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict

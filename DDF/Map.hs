@@ -11,11 +11,11 @@ import DDF.Prod
 import qualified Prelude as M
 import qualified Data.Map as M
 import DDF.Option
-import DDF.Diff
+import DDF.Meta.Diff
 import qualified DDF.Meta.Dual as M
 
 class M.Ord x => Ord x where
-  diffOrd :: Proxy (v, x) -> Dict (Ord (Diff v x))
+  diffOrd :: Proxy (v, x) -> Dict (Ord (DiffType v x))
   liftDiffOrd :: Proxy x -> Dict (Ord (LiftDiff x))
 
 instance Ord () where

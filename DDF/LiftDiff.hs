@@ -106,7 +106,7 @@ instance DLang r => DLang (LiftInfDiff r) where
   infDiffApp = LiftInfDiff id
   nextDiff = nextDiffAux where
     nextDiffAux :: forall v h x. (DiffVector (LiftInfDiff r) v, RTDiff (LiftInfDiff r) x, RTDiff (LiftInfDiff r) v) =>
-      Proxy v -> LiftInfDiff r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
+      Proxy v -> LiftInfDiff r h (InfDiff Eval () x -> InfDiff Eval () (DiffType v x))
     nextDiffAux (_ :: Proxy v) = LiftInfDiff $ diffLiftDiff @r @x @v Proxy
   litInfDiff (LiftInfDiff x) = LiftInfDiff $ liftEnv x
   intDLang _ = Dict
@@ -139,14 +139,14 @@ instance (DLang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (x -> y
     diffLiftDiffDiff @r (Proxy :: Proxy (v, x)) `withDict` (diffLiftDiffDiff @r (Proxy :: Proxy (v, y)) `withDict` Dict)
 
 diff :: forall r v h x. (DLang r, DiffVector r v, DiffLiftDiff r v, DiffLiftDiff r x, RTDiff r x, RTDiff r v, InfDiffLiftDiff r v) =>
-  Proxy v -> LiftInfDiff r h (x -> Diff v x)
+  Proxy v -> LiftInfDiff r h (x -> DiffType v x)
 diff _ = LiftInfDiff $ runLiftInfDiff $ nextDiff @_ @v @x @h Proxy
 
 diffDD :: forall r. (DiffVector r M.Double, DLang r, RTDiff r M.Double, RTDiff r (M.Double -> M.Double), InfDiffLiftDiff r M.Double) =>
-  LiftInfDiff r () ((M.Double -> M.Double) -> Diff M.Double (M.Double -> M.Double))
+  LiftInfDiff r () ((M.Double -> M.Double) -> DiffType M.Double (M.Double -> M.Double))
 diffDD = diff Proxy
 
-diffDDE :: LiftInfDiff Eval () ((M.Double -> M.Double) -> Diff M.Double (M.Double -> M.Double))
+diffDDE :: LiftInfDiff Eval () ((M.Double -> M.Double) -> DiffType M.Double (M.Double -> M.Double))
 diffDDE = diffDD
 
 instance DBI r => InfDiffLiftDiff r M.Double where
@@ -161,7 +161,7 @@ class LiftDiffInfDiff r x where
   liftDiffInfDiff :: forall h. r h (LiftDiff x -> InfDiff Eval () x)
 
 class DiffLiftDiff (r :: * -> * -> *) x where
-  diffLiftDiff :: forall v h. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> r h (LiftDiff x -> LiftDiff (Diff v x))
-  unDiffLiftDiff :: forall v h. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> r h (LiftDiff (Diff v x) -> LiftDiff x)
-  diffLiftDiffDiff :: forall v. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> Dict (DiffLiftDiff r (Diff v x))
+  diffLiftDiff :: forall v h. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> r h (LiftDiff x -> LiftDiff (DiffType v x))
+  unDiffLiftDiff :: forall v h. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> r h (LiftDiff (DiffType v x) -> LiftDiff x)
+  diffLiftDiffDiff :: forall v. (RTDiff r v, DiffVector r v, DiffLiftDiff r v, InfDiffLiftDiff r v) => Proxy (v, x) -> Dict (DiffLiftDiff r (DiffType v x))
   
