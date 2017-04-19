@@ -3,7 +3,7 @@
 module DDF.Combine where
 
 import DDF.Meta.Interpreter
-import DDF.Lang
+import DDF.DLang
 import qualified DDF.Map as Map
 
 instance (DBI l, DBI r) => DBI (Combine l r) where
@@ -60,7 +60,7 @@ instance (Dual l, Dual r) => Dual (Combine l r) where
   dual = Combine dual dual
   runDual = Combine runDual runDual
 
-instance (Lang l, Lang r) => Lang (Combine l r) where
+instance (DLang l, DLang r) => DLang (Combine l r) where
   fix = Combine fix fix
   left = Combine left left
   right = Combine right right
@@ -83,7 +83,7 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   nextDiff p = Combine (nextDiff p) (nextDiff p)
   infDiffGet = Combine infDiffGet infDiffGet
   infDiffApp = Combine infDiffApp infDiffApp
-  intLang _ = intLang @l Proxy `withDict` (intLang @r Proxy `withDict` Dict)
+  intDLang _ = intDLang @l Proxy `withDict` (intDLang @r Proxy `withDict` Dict)
   litInfDiff (Combine l r) = Combine (litInfDiff l) (litInfDiff r)
   rtDiffDiff _ p = Sub (Dict \\ rtDiffDiff @l Proxy p *** rtDiffDiff @r Proxy p)
   rtdd _ = rtdd @l Proxy `withDict` (rtdd @r Proxy `withDict` Dict)

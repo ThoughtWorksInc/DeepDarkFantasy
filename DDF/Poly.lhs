@@ -18,7 +18,7 @@
 > module DDF.Poly where
 > import Control.Monad (when)
 > import DDF.Util
-> import DDF.Lang
+> import DDF.DLang
 > import DDF.Show
 > import DDF.WDiff ()
 > import qualified Control.Monad as M
@@ -31,7 +31,7 @@ Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
-> poly :: forall repr h. Lang repr => repr h (M.Double -> M.Double)
+> poly :: forall repr h. DLang repr => repr h (M.Double -> M.Double)
 > poly = lam $ \x -> plus2 (mult2 x x) (plus2 (mult2 (double 2.0) x) (double 3.0))
 
 poly x = x * x + (2 * x + 3)

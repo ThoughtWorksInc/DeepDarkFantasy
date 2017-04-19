@@ -10,10 +10,10 @@
 
 module DDF.ImpW where
 
-import DDF.Lang
+import DDF.DLang
 import qualified DDF.Map as Map
 
-runImpW :: forall repr h x. Lang repr => ImpW repr h x -> RunImpW repr h x
+runImpW :: forall repr h x. DLang repr => ImpW repr h x -> RunImpW repr h x
 runImpW (ImpW x) = RunImpW x
 runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
 
@@ -77,7 +77,7 @@ instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual
   runDual = NoImpW runDual
 
-instance Lang r => Lang (ImpW r) where
+instance DLang r => DLang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
   listMatch = NoImpW listMatch
@@ -101,7 +101,7 @@ instance Lang r => Lang (ImpW r) where
   infDiffGet = NoImpW infDiffGet
   infDiffApp = NoImpW infDiffApp
   litInfDiff x = NoImpW (litInfDiff x)
-  intLang _ = intLang @r Proxy
+  intDLang _ = intDLang @r Proxy
   rtDiffDiff _ p = rtDiffDiff @r Proxy p
   rtdd _ = rtdd @r Proxy
 

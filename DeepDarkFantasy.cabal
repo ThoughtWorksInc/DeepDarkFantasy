@@ -22,6 +22,7 @@ library
     DDF.Combine
     DDF.DBI
     DDF.Diff
+    DDF.DLang
     DDF.Double
     DDF.Dual
     DDF.Eval
@@ -30,7 +31,6 @@ library
     DDF.ImportMeta
     DDF.ImpW
     DDF.InfDiff
-    DDF.Lang
     DDF.LiftDiff
     DDF.Map
     DDF.Meta.Interpreter

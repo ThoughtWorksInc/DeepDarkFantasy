@@ -2,7 +2,7 @@
 
 module DDF.UnHOAS where
 
-import DDF.Lang
+import DDF.DLang
 import qualified DDF.Map as Map
 
 instance DBI repr => DBI (UnHOAS repr) where
@@ -58,7 +58,7 @@ instance Dual r => Dual (UnHOAS r) where
   dual = UnHOAS dual
   runDual = UnHOAS runDual
 
-instance Lang r => Lang (UnHOAS r) where
+instance DLang r => DLang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   fix = UnHOAS fix
   left = UnHOAS left
@@ -80,7 +80,7 @@ instance Lang r => Lang (UnHOAS r) where
   putStrLn = UnHOAS putStrLn
   nextDiff p = UnHOAS (nextDiff p)
   infDiffGet = UnHOAS infDiffGet
-  intLang _ = intLang @r Proxy
+  intDLang _ = intDLang @r Proxy
   infDiffApp = UnHOAS infDiffApp
   litInfDiff x = UnHOAS $ litInfDiff x
   rtDiffDiff _ p = rtDiffDiff @r Proxy p

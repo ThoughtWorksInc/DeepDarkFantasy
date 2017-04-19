@@ -3,7 +3,7 @@
 module DDF.InfDiff where
 
 import DDF.Diff
-import DDF.Lang
+import DDF.DLang
 import DDF.Combine()
 import DDF.GWDiff()
 import qualified DDF.Map as Map
@@ -44,7 +44,7 @@ instance (Dual r, Double r) => Double (InfDiff r) where
   doubleDivide = InfDiff doubleDivide
   doubleExp = InfDiff doubleExp
 
-instance Lang r => Float (InfDiff r) where
+instance DLang r => Float (InfDiff r) where
   float x = InfDiff (float x)
   floatPlus = InfDiff floatPlus
   floatMinus = InfDiff floatMinus
@@ -61,7 +61,7 @@ instance Map.Map r => Map.Map (InfDiff r) where
 
 instance Bimap r => Bimap (InfDiff r) where
 
-instance Lang r => Lang (InfDiff r) where
+instance DLang r => DLang (InfDiff r) where
   fix = InfDiff fix
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float
@@ -84,7 +84,7 @@ instance Lang r => Lang (InfDiff r) where
   nextDiff p = InfDiff $ nextDiff p
   infDiffGet = InfDiff infDiffGet
   infDiffApp = InfDiff infDiffApp
-  intLang _ = intLang @r Proxy
+  intDLang _ = intDLang @r Proxy
   litInfDiff x = InfDiff $ litInfDiff (Combine x x)
   rtDiffDiff _ p = rtDiffDiff @r Proxy p
   rtdd _ = rtdd @r Proxy

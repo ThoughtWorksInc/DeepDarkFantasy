@@ -16,7 +16,7 @@
 
 module DDF.LiftDiff where
 
-import DDF.Lang
+import DDF.DLang
 import DDF.InfDiff ()
 import DDF.Eval ()
 import qualified DDF.Map as Map
@@ -65,23 +65,23 @@ instance Bool r => Bool (LiftInfDiff r) where
 instance Char r => Char (LiftInfDiff r) where
   char c = LiftInfDiff $ char c
 
-instance Lang r => Float (LiftInfDiff r) where
-  float d = LiftInfDiff $ litInfDiff $ intLang @r Proxy `withDict` float d
-  floatPlus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` floatPlus
-  floatMinus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` floatMinus
-  floatMult = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` floatMult
-  floatDivide = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` floatDivide
-  floatExp = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intLang @r Proxy `withDict` floatExp
+instance DLang r => Float (LiftInfDiff r) where
+  float d = LiftInfDiff $ litInfDiff $ intDLang @r Proxy `withDict` float d
+  floatPlus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` floatPlus
+  floatMinus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` floatMinus
+  floatMult = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` floatMult
+  floatDivide = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` floatDivide
+  floatExp = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` floatExp
 
-instance Lang r => Double (LiftInfDiff r) where
-  double d = LiftInfDiff $ litInfDiff $ intLang @r Proxy `withDict` double d
-  doublePlus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` doublePlus
-  doubleMinus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` doubleMinus
-  doubleMult = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` doubleMult
-  doubleDivide = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intLang @r Proxy `withDict` doubleDivide
-  doubleExp = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intLang @r Proxy `withDict` doubleExp
+instance DLang r => Double (LiftInfDiff r) where
+  double d = LiftInfDiff $ litInfDiff $ intDLang @r Proxy `withDict` double d
+  doublePlus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doublePlus
+  doubleMinus = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleMinus
+  doubleMult = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleMult
+  doubleDivide = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleDivide
+  doubleExp = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleExp
 
-instance Lang r => Lang (LiftInfDiff r) where
+instance DLang r => DLang (LiftInfDiff r) where
   fix = LiftInfDiff fix
   left = LiftInfDiff left
   right = LiftInfDiff right
@@ -104,10 +104,10 @@ instance Lang r => Lang (LiftInfDiff r) where
     nextDiffAux :: forall v h x. (DiffVector (LiftInfDiff r) v, RTDiff (LiftInfDiff r) x, RTDiff (LiftInfDiff r) v) =>
       Proxy v -> LiftInfDiff r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
     nextDiffAux (_ :: Proxy v) = LiftInfDiff $ diffLiftDiff @r @x @v Proxy
-  float2Double = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intLang @r Proxy `withDict` float2Double
-  double2Float = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intLang @r Proxy `withDict` double2Float
+  float2Double = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` float2Double
+  double2Float = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` double2Float
   litInfDiff (LiftInfDiff x) = LiftInfDiff $ liftEnv x
-  intLang _ = Dict
+  intDLang _ = Dict
   rtDiffDiff _ (p :: Proxy (v, x)) = Sub $ (diffLiftDiffDiff @r (Proxy :: Proxy (v, x)) `withDict` (Dict \\ rtDiffDiff @r Proxy p))
   infDiffGet = LiftInfDiff id
   rtdd _ = rtdd @r Proxy `withDict` Dict
@@ -116,19 +116,19 @@ type instance DiffInt (LiftInfDiff r) = LiftInfDiff r
 type instance RTDiff (LiftInfDiff r) x = (DiffLiftDiff r x, RTDiff r x)
 type instance DiffVector (LiftInfDiff r) v = (DiffLiftDiff r v, DiffVector r v, InfDiffLiftDiff r v)
 
-instance Lang r => DiffLiftDiff r M.Double where
+instance DLang r => DiffLiftDiff r M.Double where
   unDiffLiftDiff _ = dualOrig
   diffLiftDiff (_ :: Proxy (v, M.Double)) = rtdd @r Proxy `withDict` (hoas $ \x ->
-    mkDual2 x (infDiffLiftDiff1 $ infDiffApp2 (litInfDiff $ intLang @r Proxy `withDict` dualDiff) $ nextDiff1 (Proxy :: Proxy v) x))
+    mkDual2 x (infDiffLiftDiff1 $ infDiffApp2 (litInfDiff $ intDLang @r Proxy `withDict` dualDiff) $ nextDiff1 (Proxy :: Proxy v) x))
   diffLiftDiffDiff _ = Dict
 
-instance (Lang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (M.Dual x y) where
+instance (DLang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (M.Dual x y) where
   diffLiftDiff (_ :: Proxy (v, M.Dual x y)) = bimap2 (diffLiftDiff @r @x @v Proxy) (diffLiftDiff @r @y @v Proxy)
   unDiffLiftDiff (_ :: Proxy (v, M.Dual x y)) = bimap2 (unDiffLiftDiff @r @x @v Proxy) (unDiffLiftDiff @r @y @v Proxy)
   diffLiftDiffDiff (_ :: Proxy (v, M.Dual x y)) =
     diffLiftDiffDiff @r (Proxy :: Proxy (v, x)) `withDict` (diffLiftDiffDiff @r (Proxy :: Proxy (v, y)) `withDict` Dict)
 
-instance (Lang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (x -> y) where
+instance (DLang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (x -> y) where
   diffLiftDiff (_ :: Proxy (v, x -> y)) =
     lam $ \f -> diffLiftDiff (Proxy :: Proxy (v, y)) `com2` f `com2` unDiffLiftDiff (Proxy :: Proxy (v, x))
   unDiffLiftDiff (_ :: Proxy (v, x -> y)) =
@@ -136,11 +136,11 @@ instance (Lang r, DiffLiftDiff r x, DiffLiftDiff r y) => DiffLiftDiff r (x -> y)
   diffLiftDiffDiff (_ :: Proxy (v, x -> y)) =
     diffLiftDiffDiff @r (Proxy :: Proxy (v, x)) `withDict` (diffLiftDiffDiff @r (Proxy :: Proxy (v, y)) `withDict` Dict)
 
-diff :: forall r v h x. (Lang r, DiffVector r v, DiffLiftDiff r v, DiffLiftDiff r x, RTDiff r x, RTDiff r v, InfDiffLiftDiff r v) =>
+diff :: forall r v h x. (DLang r, DiffVector r v, DiffLiftDiff r v, DiffLiftDiff r x, RTDiff r x, RTDiff r v, InfDiffLiftDiff r v) =>
   Proxy v -> LiftInfDiff r h (x -> Diff v x)
 diff _ = LiftInfDiff $ runLiftInfDiff $ nextDiff @_ @v @x @h Proxy
 
-diffDD :: forall r. (DiffVector r M.Double, Lang r, RTDiff r M.Double, RTDiff r (M.Double -> M.Double), InfDiffLiftDiff r M.Double) =>
+diffDD :: forall r. (DiffVector r M.Double, DLang r, RTDiff r M.Double, RTDiff r (M.Double -> M.Double), InfDiffLiftDiff r M.Double) =>
   LiftInfDiff r () ((M.Double -> M.Double) -> Diff M.Double (M.Double -> M.Double))
 diffDD = diff Proxy
 

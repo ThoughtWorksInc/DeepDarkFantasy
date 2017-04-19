@@ -10,7 +10,7 @@ You should already read DDF.Poly before this.
 > import Data.Proxy
 > import Data.Constraint
 > import DDF.Util
-> import DDF.Lang
+> import DDF.DLang
 > import DDF.Show
 > import DDF.Combine ()
 > import DDF.Eval ()
@@ -36,7 +36,7 @@ Weight also form a Vector so we can combine weights (update it), scale it (to co
 
 Let's start by constructing a weight.
 
-> doubleWeight :: Lang repr => ImpW repr h M.Double
+> doubleWeight :: DLang repr => ImpW repr h M.Double
 > doubleWeight = ImpW id
 
 Note that we are just manipulating AST.
@@ -53,13 +53,13 @@ With weight and sigmoid we can construct a neuron of type ((M.Double, M.Double) 
 The weight should be a pair of M.Double, each as a scale on the actual input, with a bias.
 We then add the two scaled input, with the bias, and pass them into sigmoid.
 
-> scaleAdd :: Lang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
+> scaleAdd :: DLang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
 > scaleAdd = ImpW $ lam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (plus2 (fst1 w) (fst1 p))
 
-> withBias :: Lang repr => ImpW repr h (M.Double -> M.Double)
+> withBias :: DLang repr => ImpW repr h (M.Double -> M.Double)
 > withBias = ImpW $ plus
 
-> neuron :: Lang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
+> neuron :: DLang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
 > neuron = com2 (com2 sigmoid withBias) scaleAdd
 > neuron1 = app neuron
 
@@ -70,25 +70,25 @@ Now, the hidden layer of type (M.Double, M.Double) -> ((M.Double, M.Double), (M.
 And finally, the whole NN:
 
 > type XOR = (M.Double, M.Double) -> M.Double
-> xorNet :: Lang repr => ImpW repr h XOR
+> xorNet :: DLang repr => ImpW repr h XOR
 > xorNet = neuron `com2` (bimap2 scaleAdd scaleAdd) `com2` hidden
 
 But before we can train it, we need to define the dataset and the loss function.
 
-> l2 :: Lang repr => repr h (M.Double -> M.Double -> M.Double)
+> l2 :: DLang repr => repr h (M.Double -> M.Double -> M.Double)
 > l2 = lam2 $ \l r -> (mult2 (minus2 l r) (minus2 l r))
 > l22 = app2 l2
 
-> eval :: Lang repr => repr h (XOR -> ((M.Double, M.Double), M.Double) -> M.Double)
+> eval :: DLang repr => repr h (XOR -> ((M.Double, M.Double), M.Double) -> M.Double)
 > eval = lam2 $ \xor p -> l22 (app xor (zro1 p)) (fst1 p)
 
-> dataset :: Lang repr => repr h [((M.Double, M.Double), M.Double)]
+> dataset :: DLang repr => repr h [((M.Double, M.Double), M.Double)]
 > dataset = cons2 (build 0 0 0) (cons2 (build 0 1 1) (cons2 (build 1 0 1) (cons2 (build 1 1 0) nil)))
 >   where build l r ret = mkProd2 (mkProd2 (double l) (double r)) (double ret)
 
 However, unlike Poly, there are more than one datapoint, so we need to use a list, and map xor onto it.
 
-> loss :: Lang repr => repr h (XOR -> M.Double)
+> loss :: DLang repr => repr h (XOR -> M.Double)
 > loss = lam $ \xor -> fix2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
 
 Now we are good to implement the train function!

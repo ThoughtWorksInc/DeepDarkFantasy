@@ -2,7 +2,7 @@
 
 module DDF.Show (module DDF.Show) where
 
-import DDF.Lang
+import DDF.DLang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 
@@ -78,7 +78,7 @@ instance Dual Show where
   dual = name "dual"
   runDual = name "runDual"
 
-instance Lang Show where
+instance DLang Show where
   fix = name "fix"
   left = name "left"
   right = name "right"
@@ -101,7 +101,7 @@ instance Lang Show where
   nextDiff _ = name "nextDiff"
   infDiffGet = name "infDiffGet"
   infDiffApp = name "infDiffApp"
-  intLang _ = Dict
+  intDLang _ = Dict
   litInfDiff (Show sh) = Show $ \va h -> appAST (Leaf "tower") (sh va h)
   rtDiffDiff _ _ = Sub Dict
   rtdd _ = Dict

@@ -17,7 +17,7 @@ import qualified Data.Bool as M
 import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
-import DDF.Lang
+import DDF.DLang
 import DDF.InfDiff ()
 
 comb = Eval . M.const
@@ -77,7 +77,7 @@ instance Dual Eval where
   dual = comb M.Dual
   runDual = comb M.runDual
 
-instance Lang Eval where
+instance DLang Eval where
   fix = comb loop
     where loop x = x $ loop x
   left = comb M.Left
@@ -104,7 +104,7 @@ instance Lang Eval where
   putStrLn = comb M.putStrLn
   nextDiff p = comb (\x -> runGWDiff (combineRight (runInfDiff x)) p)
   infDiffGet = comb (($ ()) . runEval . combineLeft . runInfDiff)
-  intLang _ = Dict
+  intDLang _ = Dict
   litInfDiff x = comb x
   infDiffApp = comb func where
     func :: InfDiff Eval () (x -> y) -> InfDiff Eval () x -> InfDiff Eval () y

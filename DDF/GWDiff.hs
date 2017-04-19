@@ -8,7 +8,7 @@
 #-}
 
 module DDF.GWDiff (module DDF.Diff) where
-import DDF.Lang
+import DDF.DLang
 import qualified Prelude as M
 import DDF.Diff
 import qualified Data.Map as M
@@ -52,7 +52,7 @@ instance (Double r, Dual r) => Double (GWDiff r) where
         (mult2 (dualOrig1 r) (dualOrig1 r)))
   doubleExp = GWDiff $ M.const $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) $ lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x))
 
-instance Lang r => Float (GWDiff r) where
+instance DLang r => Float (GWDiff r) where
   float x = GWDiff $ M.const $ mkDual2 (float x) zero
   floatPlus = GWDiff $ M.const $ lam2 $ \l r ->
     mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
@@ -83,7 +83,7 @@ instance Map.Map r => Map.Map (GWDiff r) where
 
 instance Bimap r => Bimap (GWDiff r) where
 
-instance Lang r => Lang (GWDiff r) where
+instance DLang r => DLang (GWDiff r) where
   fix = GWDiff $ M.const fix
   left = GWDiff $ M.const left
   right = GWDiff $ M.const right
@@ -104,7 +104,7 @@ instance Lang r => Lang (GWDiff r) where
   runState = GWDiff $ M.const runState
   putStrLn = GWDiff $ M.const putStrLn
   infDiffApp = GWDiff $ M.const infDiffApp
-  intLang _ = intLang @r Proxy
+  intDLang _ = intDLang @r Proxy
   litInfDiff x = GWDiff $ \_ -> litInfDiff x
   nextDiff p = GWDiff $ \_ -> nextDiff p
   infDiffGet :: forall h x. RTDiff (GWDiff r) x => GWDiff r h (InfDiff Eval () x -> x)

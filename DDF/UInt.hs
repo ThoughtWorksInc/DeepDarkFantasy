@@ -2,7 +2,7 @@
 
 module DDF.UInt where
 
-import DDF.Lang
+import DDF.DLang
 import qualified DDF.Map as Map
 
 data UInt h x = UInt
@@ -60,7 +60,7 @@ instance Option UInt where
   just = UInt
   optionMatch = UInt
 
-instance Lang UInt where
+instance DLang UInt where
   fix = UInt
   left = UInt
   right = UInt
@@ -82,7 +82,7 @@ instance Lang UInt where
   putStrLn = UInt
   nextDiff _ = UInt
   infDiffGet = UInt
-  intLang _ = Dict
+  intDLang _ = Dict
   litInfDiff _ = UInt
   infDiffApp = UInt
   rtDiffDiff _ _ = Sub Dict

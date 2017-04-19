@@ -3,7 +3,7 @@
 module DDF.Size where
 
 import DDF.UInt
-import DDF.Lang
+import DDF.DLang
 import qualified DDF.Map as Map
 
 newtype Size h x = Size {runSize :: Int}
@@ -63,7 +63,7 @@ instance Dual Size where
 
 instance Bimap Size where
 
-instance Lang Size where
+instance DLang Size where
   fix = one
   left = one
   right = one
@@ -86,7 +86,7 @@ instance Lang Size where
   nextDiff _ = one
   infDiffGet = one
   litInfDiff _ = one
-  intLang _ = Dict
+  intDLang _ = Dict
   infDiffApp = one
   rtDiffDiff _ _ = Sub Dict
   rtdd _ = Dict
