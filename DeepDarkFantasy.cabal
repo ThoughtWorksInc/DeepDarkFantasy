@@ -1,5 +1,5 @@
 name: DeepDarkFantasy
-version: 0.2017.4.9
+version: 0.2017.4.19
 cabal-version: 1.12
 build-type: Simple
 license: Apache
@@ -58,7 +58,7 @@ library
     constraints -any,
     containers -any,
     bimap -any
-  ghc-options: -Werror -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
+  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
   default-language: Haskell2010
 
 Test-Suite TestPoly
