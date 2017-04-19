@@ -1,3 +1,4 @@
+
 {-# LANGUAGE
   RankNTypes,
   ScopedTypeVariables,
@@ -41,8 +42,8 @@ newtype GDiff r h x = GDiff {runGDiff :: forall v. Vector r v => Proxy v -> Diff
 
 newtype RTInfDiff r h x = RTInfDiff {runRTInfDiff :: Combine r (GDiff (RTInfDiff r)) h x}
 
-newtype InfDiff r v h x = InfDiff {runInfDiff :: Combine r (Diff (RTInfDiff r) v) h x}
+newtype InfDiff r v h x = InfDiff {runInfDiff :: Combine r (Diff (InfDiff r v) v) h x}
 
-newtype GInfDiff r h x = GInfDiff {runGInfDiff :: forall v. Vector r v => Proxy v -> InfDiff r v h x}
+newtype GInfDiff r h x = GInfDiff {runGInfDiff :: forall v. (Vector r v, Vector (InfDiff r v) v) => Proxy v -> InfDiff r v h x}
 
 newtype Diff r v h x = Diff {runDiff :: r (DiffType v h) (DiffType v x)}
