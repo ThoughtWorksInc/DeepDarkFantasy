@@ -60,7 +60,7 @@ instance Option UInt where
   just = UInt
   optionMatch = UInt
 
-instance DLang UInt where
+instance Lang UInt where
   fix = UInt
   left = UInt
   right = UInt
@@ -80,6 +80,8 @@ instance DLang UInt where
   state = UInt
   runState = UInt
   putStrLn = UInt
+
+instance DLang UInt where
   nextDiff _ = UInt
   infDiffGet = UInt
   intDLang _ = Dict

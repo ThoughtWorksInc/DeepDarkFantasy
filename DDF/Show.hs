@@ -78,7 +78,7 @@ instance Dual Show where
   dual = name "dual"
   runDual = name "runDual"
 
-instance DLang Show where
+instance Lang Show where
   fix = name "fix"
   left = name "left"
   right = name "right"
@@ -98,6 +98,8 @@ instance DLang Show where
   state = name "state"
   runState = name "runState"
   putStrLn = name "putStrLn"
+
+instance DLang Show where
   nextDiff _ = name "nextDiff"
   infDiffGet = name "infDiffGet"
   infDiffApp = name "infDiffApp"

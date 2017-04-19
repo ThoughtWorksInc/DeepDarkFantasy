@@ -77,7 +77,7 @@ instance Dual Eval where
   dual = comb M.Dual
   runDual = comb M.runDual
 
-instance DLang Eval where
+instance Lang Eval where
   fix = comb loop
     where loop x = x $ loop x
   left = comb M.Left
@@ -102,6 +102,8 @@ instance DLang Eval where
   state = comb M.state
   runState = comb M.runState
   putStrLn = comb M.putStrLn
+
+instance DLang Eval where
   nextDiff p = comb (\x -> runGWDiff (combineRight (runInfDiff x)) p)
   infDiffGet = comb (($ ()) . runEval . combineLeft . runInfDiff)
   intDLang _ = Dict

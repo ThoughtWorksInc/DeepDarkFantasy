@@ -55,7 +55,7 @@ instance (Vector r v, Double r, Dual r) => Double (WDiff r v) where
         (mult2 (dualOrig1 r) (dualOrig1 r)))
   doubleExp = WDiff $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x)))
 
-instance (Vector r v, DLang r) => Float (WDiff r v) where
+instance (Vector r v, Lang r) => Float (WDiff r v) where
   float x = WDiff $ mkDual2 (float x) zero
   floatPlus = WDiff $ lam2 $ \l r ->
     mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
@@ -86,7 +86,7 @@ instance Map.Map r => Map.Map (WDiff r v) where
 
 instance Bimap r => Bimap (WDiff r v) where
 
-instance (DiffVector r v, Vector r v, DLang r, RTDiff r v) => DLang (WDiff r v) where
+instance (Vector r v, Lang r) => Lang (WDiff r v) where
   fix = WDiff fix
   left = WDiff left
   right = WDiff right
@@ -106,6 +106,8 @@ instance (DiffVector r v, Vector r v, DLang r, RTDiff r v) => DLang (WDiff r v) 
   state = WDiff state
   runState = WDiff runState
   putStrLn = WDiff putStrLn
+
+instance (DiffVector r v, Vector r v, DLang r, RTDiff r v) => DLang (WDiff r v) where
   nextDiff p = WDiff (nextDiff p)
   infDiffGet :: forall h x. RTDiff (WDiff r v) x => WDiff r v h (InfDiff Eval () x -> x)
   infDiffGet = WDiff $ (infDiffGet `com2` nextDiff (Proxy :: Proxy v)) \\ rtDiffDiff @r @v @x Proxy Proxy

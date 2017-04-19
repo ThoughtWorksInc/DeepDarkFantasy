@@ -81,7 +81,7 @@ instance DLang r => Double (LiftInfDiff r) where
   doubleDivide = LiftInfDiff $ infDiffAppApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleDivide
   doubleExp = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` doubleExp
 
-instance DLang r => DLang (LiftInfDiff r) where
+instance DLang r => Lang (LiftInfDiff r) where
   fix = LiftInfDiff fix
   left = LiftInfDiff left
   right = LiftInfDiff right
@@ -99,13 +99,15 @@ instance DLang r => DLang (LiftInfDiff r) where
   state = LiftInfDiff state
   runState = LiftInfDiff runState
   putStrLn = LiftInfDiff putStrLn
+  float2Double = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` float2Double
+  double2Float = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` double2Float
+
+instance DLang r => DLang (LiftInfDiff r) where
   infDiffApp = LiftInfDiff id
   nextDiff = nextDiffAux where
     nextDiffAux :: forall v h x. (DiffVector (LiftInfDiff r) v, RTDiff (LiftInfDiff r) x, RTDiff (LiftInfDiff r) v) =>
       Proxy v -> LiftInfDiff r h (InfDiff Eval () x -> InfDiff Eval () (Diff v x))
     nextDiffAux (_ :: Proxy v) = LiftInfDiff $ diffLiftDiff @r @x @v Proxy
-  float2Double = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` float2Double
-  double2Float = LiftInfDiff $ infDiffApp1 $ litInfDiff $ intDLang @r Proxy `withDict` double2Float
   litInfDiff (LiftInfDiff x) = LiftInfDiff $ liftEnv x
   intDLang _ = Dict
   rtDiffDiff _ (p :: Proxy (v, x)) = Sub $ (diffLiftDiffDiff @r (Proxy :: Proxy (v, x)) `withDict` (Dict \\ rtDiffDiff @r Proxy p))

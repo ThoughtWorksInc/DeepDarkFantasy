@@ -60,7 +60,7 @@ instance (Dual l, Dual r) => Dual (Combine l r) where
   dual = Combine dual dual
   runDual = Combine runDual runDual
 
-instance (DLang l, DLang r) => DLang (Combine l r) where
+instance (Lang l, Lang r) => Lang (Combine l r) where
   fix = Combine fix fix
   left = Combine left left
   right = Combine right right
@@ -80,6 +80,8 @@ instance (DLang l, DLang r) => DLang (Combine l r) where
   state = Combine state state
   runState = Combine runState runState
   putStrLn = Combine putStrLn putStrLn
+
+instance (DLang l, DLang r) => DLang (Combine l r) where
   nextDiff p = Combine (nextDiff p) (nextDiff p)
   infDiffGet = Combine infDiffGet infDiffGet
   infDiffApp = Combine infDiffApp infDiffApp

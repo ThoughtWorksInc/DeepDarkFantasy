@@ -77,7 +77,7 @@ instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual
   runDual = NoImpW runDual
 
-instance DLang r => DLang (ImpW r) where
+instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
   listMatch = NoImpW listMatch
@@ -97,6 +97,8 @@ instance DLang r => DLang (ImpW r) where
   state = NoImpW state
   runState = NoImpW runState
   putStrLn = NoImpW putStrLn
+
+instance DLang r => DLang (ImpW r) where
   nextDiff p = NoImpW $ nextDiff p
   infDiffGet = NoImpW infDiffGet
   infDiffApp = NoImpW infDiffApp

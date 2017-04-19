@@ -58,7 +58,7 @@ instance Dual r => Dual (UnHOAS r) where
   dual = UnHOAS dual
   runDual = UnHOAS runDual
 
-instance DLang r => DLang (UnHOAS r) where
+instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   fix = UnHOAS fix
   left = UnHOAS left
@@ -78,6 +78,8 @@ instance DLang r => DLang (UnHOAS r) where
   state = UnHOAS state
   runState = UnHOAS runState
   putStrLn = UnHOAS putStrLn
+
+instance DLang r => DLang (UnHOAS r) where
   nextDiff p = UnHOAS (nextDiff p)
   infDiffGet = UnHOAS infDiffGet
   intDLang _ = intDLang @r Proxy

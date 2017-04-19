@@ -63,7 +63,7 @@ instance Dual Size where
 
 instance Bimap Size where
 
-instance DLang Size where
+instance Lang Size where
   fix = one
   left = one
   right = one
@@ -83,6 +83,8 @@ instance DLang Size where
   state = one
   runState = one
   putStrLn = one
+
+instance DLang Size where
   nextDiff _ = one
   infDiffGet = one
   litInfDiff _ = one

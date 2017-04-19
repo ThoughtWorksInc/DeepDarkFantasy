@@ -31,6 +31,7 @@ library
     DDF.ImportMeta
     DDF.ImpW
     DDF.InfDiff
+    DDF.Lang
     DDF.LiftDiff
     DDF.Map
     DDF.Meta.Interpreter

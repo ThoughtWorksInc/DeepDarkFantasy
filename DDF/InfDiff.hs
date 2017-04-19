@@ -44,7 +44,7 @@ instance (Dual r, Double r) => Double (InfDiff r) where
   doubleDivide = InfDiff doubleDivide
   doubleExp = InfDiff doubleExp
 
-instance DLang r => Float (InfDiff r) where
+instance Lang r => Float (InfDiff r) where
   float x = InfDiff (float x)
   floatPlus = InfDiff floatPlus
   floatMinus = InfDiff floatMinus
@@ -61,7 +61,7 @@ instance Map.Map r => Map.Map (InfDiff r) where
 
 instance Bimap r => Bimap (InfDiff r) where
 
-instance DLang r => DLang (InfDiff r) where
+instance Lang r => Lang (InfDiff r) where
   fix = InfDiff fix
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float
@@ -81,6 +81,8 @@ instance DLang r => DLang (InfDiff r) where
   state = InfDiff state
   runState = InfDiff runState
   putStrLn = InfDiff putStrLn
+
+instance DLang r => DLang (InfDiff r) where
   nextDiff p = InfDiff $ nextDiff p
   infDiffGet = InfDiff infDiffGet
   infDiffApp = InfDiff infDiffApp
