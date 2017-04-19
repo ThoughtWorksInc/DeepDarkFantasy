@@ -82,13 +82,3 @@ instance Lang UInt where
   putStrLn = UInt
 
 instance DLang UInt where
-  nextDiff _ = UInt
-  infDiffGet = UInt
-  intDLang _ = Dict
-  litInfDiff _ = UInt
-  infDiffApp = UInt
-  rtDiffDiff _ _ = Sub Dict
-  rtdd _ = Dict
-
-type instance RTDiff UInt x = ()
-type instance DiffInt UInt = UInt

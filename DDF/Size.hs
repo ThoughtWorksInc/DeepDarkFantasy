@@ -2,7 +2,6 @@
 
 module DDF.Size where
 
-import DDF.UInt
 import DDF.DLang
 import qualified DDF.Map as Map
 
@@ -85,13 +84,3 @@ instance Lang Size where
   putStrLn = one
 
 instance DLang Size where
-  nextDiff _ = one
-  infDiffGet = one
-  litInfDiff _ = one
-  intDLang _ = Dict
-  infDiffApp = one
-  rtDiffDiff _ _ = Sub Dict
-  rtdd _ = Dict
-
-type instance RTDiff Size x = ()
-type instance DiffInt Size = UInt

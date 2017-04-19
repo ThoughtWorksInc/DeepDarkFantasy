@@ -99,14 +99,3 @@ instance Lang r => Lang (ImpW r) where
   putStrLn = NoImpW putStrLn
 
 instance DLang r => DLang (ImpW r) where
-  nextDiff p = NoImpW $ nextDiff p
-  infDiffGet = NoImpW infDiffGet
-  infDiffApp = NoImpW infDiffApp
-  litInfDiff x = NoImpW (litInfDiff x)
-  intDLang _ = intDLang @r Proxy
-  rtDiffDiff _ p = rtDiffDiff @r Proxy p
-  rtdd _ = rtdd @r Proxy
-
-type instance RTDiff (ImpW r) x = RTDiff r x
-type instance DiffInt (ImpW r) = DiffInt r
-type instance DiffVector (ImpW r) v = DiffVector r v

@@ -82,14 +82,3 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   putStrLn = Combine putStrLn putStrLn
 
 instance (DLang l, DLang r) => DLang (Combine l r) where
-  nextDiff p = Combine (nextDiff p) (nextDiff p)
-  infDiffGet = Combine infDiffGet infDiffGet
-  infDiffApp = Combine infDiffApp infDiffApp
-  intDLang _ = intDLang @l Proxy `withDict` (intDLang @r Proxy `withDict` Dict)
-  litInfDiff (Combine l r) = Combine (litInfDiff l) (litInfDiff r)
-  rtDiffDiff _ p = Sub (Dict \\ rtDiffDiff @l Proxy p *** rtDiffDiff @r Proxy p)
-  rtdd _ = rtdd @l Proxy `withDict` (rtdd @r Proxy `withDict` Dict)
-
-type instance RTDiff (Combine l r) x = (RTDiff l x, RTDiff r x)
-type instance DiffInt (Combine l r) = Combine (DiffInt l) (DiffInt r)
-type instance DiffVector (Combine l r) v = (DiffVector l v, DiffVector r v)

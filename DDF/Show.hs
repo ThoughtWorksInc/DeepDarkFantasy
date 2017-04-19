@@ -100,13 +100,3 @@ instance Lang Show where
   putStrLn = name "putStrLn"
 
 instance DLang Show where
-  nextDiff _ = name "nextDiff"
-  infDiffGet = name "infDiffGet"
-  infDiffApp = name "infDiffApp"
-  intDLang _ = Dict
-  litInfDiff (Show sh) = Show $ \va h -> appAST (Leaf "tower") (sh va h)
-  rtDiffDiff _ _ = Sub Dict
-  rtdd _ = Dict
-
-type instance RTDiff Show x = ()
-type instance DiffInt Show = Show

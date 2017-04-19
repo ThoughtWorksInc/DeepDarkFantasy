@@ -18,7 +18,6 @@ import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
 import DDF.DLang
-import DDF.InfDiff ()
 
 comb = Eval . M.const
 
@@ -104,17 +103,3 @@ instance Lang Eval where
   putStrLn = comb M.putStrLn
 
 instance DLang Eval where
-  nextDiff p = comb (\x -> runGDiff (combineRight (runInfDiff x)) p)
-  infDiffGet = comb (($ ()) . runEval . combineLeft . runInfDiff)
-  intDLang _ = Dict
-  litInfDiff x = comb x
-  infDiffApp = comb func where
-    func :: InfDiff Eval () (x -> y) -> InfDiff Eval () x -> InfDiff Eval () y
-    func (InfDiff (Combine fl (GDiff fr))) (InfDiff (Combine xl (GDiff xr))) =
-      InfDiff (Combine (app fl xl) (GDiff $ \p -> func (fr p) (xr p)))
-  rtDiffDiff _ _ = Sub Dict
-  rtdd _ = Dict
-
-type instance RTDiff Eval x = ()
-type instance DiffInt Eval = InfDiff Eval
-type instance DiffVector Eval v = Vector (InfDiff Eval) v

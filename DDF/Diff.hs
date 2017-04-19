@@ -14,7 +14,6 @@ module DDF.Diff where
 import DDF.DLang
 import qualified Data.Map as M
 import qualified DDF.Map as Map
-import DDF.InfDiff ()
 
 instance DBI r => DBI (Diff r v) where
   z = Diff z
@@ -107,16 +106,4 @@ instance (Vector r v, Lang r) => Lang (Diff r v) where
   runState = Diff runState
   putStrLn = Diff putStrLn
 
-instance (DiffVector r v, Vector r v, DLang r, RTDiff r v) => DLang (Diff r v) where
-  nextDiff p = Diff (nextDiff p)
-  infDiffGet :: forall h x. RTDiff (Diff r v) x => Diff r v h (InfDiff Eval () x -> x)
-  infDiffGet = Diff $ (infDiffGet `com2` nextDiff (Proxy :: Proxy v)) \\ rtDiffDiff @r @v @x Proxy Proxy
-  intDLang _ = intDLang @r Proxy
-  litInfDiff x = Diff $ litInfDiff x
-  infDiffApp = Diff infDiffApp
-  rtDiffDiff _ p = rtDiffDiff @r Proxy p
-  rtdd _ = rtdd @r Proxy
-
-type instance RTDiff (Diff r v) x = RTDiff r x 
-type instance DiffInt (Diff r v) = DiffInt r
-type instance DiffVector (Diff r _) v = DiffVector r v
+instance (Vector r v, DLang r) => DLang (Diff r v) where

@@ -1,3 +1,4 @@
+
 > {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
@@ -18,7 +19,6 @@ You should already read DDF.Poly before this.
 > import DDF.ImpW
 > import DDF.WithDiff
 > import qualified DDF.Meta.Dual as M
-> import DDF.InfDiff ()
 
 Recall in poly, we constructed a function Double -> Double,
 with argument being the weight, and do gradient descend to found a solution.
@@ -108,7 +108,7 @@ Getting random weights...
 >         ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0 (xorEv ())) \\ weightCon @w @M.Show
 >     where
 >       diff :: GDiff Eval () x -> DiffType w x
->       diff x = ((runEval (runGDiff x (Proxy :: Proxy w)) ()) \\ weightCon @w @(Vector Eval)) \\ weightCon @w @(Vector (InfDiff Eval))
+>       diff x = ((runEval (runDiff (runGDiff x (Proxy :: Proxy w))) ()) \\ weightCon @w @(Vector Eval))
 >       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
 >       go xor weight reifyE lossE update i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)

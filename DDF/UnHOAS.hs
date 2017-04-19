@@ -80,14 +80,3 @@ instance Lang r => Lang (UnHOAS r) where
   putStrLn = UnHOAS putStrLn
 
 instance DLang r => DLang (UnHOAS r) where
-  nextDiff p = UnHOAS (nextDiff p)
-  infDiffGet = UnHOAS infDiffGet
-  intDLang _ = intDLang @r Proxy
-  infDiffApp = UnHOAS infDiffApp
-  litInfDiff x = UnHOAS $ litInfDiff x
-  rtDiffDiff _ p = rtDiffDiff @r Proxy p
-  rtdd _ = rtdd @r Proxy
-
-type instance RTDiff (UnHOAS r) x = RTDiff r x
-type instance DiffInt (UnHOAS r) = DiffInt r
-type instance DiffVector (UnHOAS r) v = DiffVector r v

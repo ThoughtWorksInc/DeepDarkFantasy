@@ -11,6 +11,7 @@ module DDF.GDiff (module DDF.Meta.Diff) where
 import DDF.DLang
 import qualified Prelude as M
 import DDF.Meta.Diff
+import DDF.Diff ()
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
@@ -38,34 +39,20 @@ instance Dual r => Dual (GDiff r) where
   runDual = GDiff $ M.const $ runDual
 
 instance (Double r, Dual r) => Double (GDiff r) where
-  double x = GDiff $ M.const $ mkDual2 (double x) zero
-  doublePlus = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
-  doubleMinus = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
-  doubleMult = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (mult2 (dualOrig1 l) (dualOrig1 r))
-      (plus2 (mult2 (dualOrig1 l) (dualDiff1 r)) (mult2 (dualOrig1 r) (dualDiff1 l)))
-  doubleDivide = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (divide2 (dualOrig1 l) (dualOrig1 r))
-      (divide2 (minus2 (mult2 (dualOrig1 r) (dualDiff1 l)) (mult2 (dualOrig1 l) (dualDiff1 r)))
-        (mult2 (dualOrig1 r) (dualOrig1 r)))
-  doubleExp = GDiff $ M.const $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) $ lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x))
+  double x = GDiff $ M.const $ double x
+  doublePlus = GDiff $ M.const $ doublePlus
+  doubleMinus = GDiff $ M.const $ doubleMinus
+  doubleMult = GDiff $ M.const $ doubleMult
+  doubleDivide = GDiff $ M.const $ doubleDivide
+  doubleExp = GDiff $ M.const $ doubleExp
 
 instance Lang r => Float (GDiff r) where
-  float x = GDiff $ M.const $ mkDual2 (float x) zero
-  floatPlus = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
-  floatMinus = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (minus2 (dualOrig1 l) (dualOrig1 r)) (minus2 (dualDiff1 l) (dualDiff1 r))
-  floatMult = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (mult2 (float2Double1 (dualOrig1 l)) (dualOrig1 r))
-      (plus2 (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)) (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)))
-  floatDivide = GDiff $ M.const $ lam2 $ \l r ->
-    mkDual2 (divide2 (dualOrig1 l) (float2Double1 (dualOrig1 r)))
-      (divide2 (minus2 (mult2 (float2Double1 (dualOrig1 r)) (dualDiff1 l)) (mult2 (float2Double1 (dualOrig1 l)) (dualDiff1 r)))
-        (float2Double1 (mult2 (float2Double1 (dualOrig1 r)) (dualOrig1 r))))
-  floatExp = GDiff $ M.const $ lam $ \x -> let_2 (floatExp1 (dualOrig1 x)) $ lam $ \e -> mkDual2 e (mult2 (float2Double1 e) (dualDiff1 x))
+  float x = GDiff $ M.const $ float x
+  floatPlus = GDiff $ M.const $ floatPlus
+  floatMinus = GDiff $ M.const $ floatMinus
+  floatMult = GDiff $ M.const $ floatMult
+  floatDivide = GDiff $ M.const $ floatDivide
+  floatExp = GDiff $ M.const $ floatExp
 
 instance Option r => Option (GDiff r) where
   nothing = GDiff $ M.const nothing
@@ -98,22 +85,10 @@ instance Lang r => Lang (GDiff r) where
   ioMap = GDiff $ M.const ioMap
   writer = GDiff $ M.const writer
   runWriter = GDiff $ M.const runWriter
-  float2Double = GDiff $ M.const $ bimap2 float2Double id
-  double2Float = GDiff $ M.const $ bimap2 double2Float id
+  float2Double = GDiff $ M.const float2Double
+  double2Float = GDiff $ M.const double2Float
   state = GDiff $ M.const state
   runState = GDiff $ M.const runState
   putStrLn = GDiff $ M.const putStrLn
 
 instance DLang r => DLang (GDiff r) where
-  infDiffApp = GDiff $ M.const infDiffApp
-  intDLang _ = intDLang @r Proxy
-  litInfDiff x = GDiff $ \_ -> litInfDiff x
-  nextDiff p = GDiff $ \_ -> nextDiff p
-  infDiffGet :: forall h x. RTDiff (GDiff r) x => GDiff r h (InfDiff Eval () x -> x)
-  infDiffGet = GDiff $ \(p :: Proxy v) -> ((infDiffGet `com2` nextDiff p) \\ rtDiffDiff @r @v @x Proxy Proxy)
-  rtDiffDiff _ p = rtDiffDiff @r Proxy p
-  rtdd _ = rtdd @r Proxy
-
-type instance RTDiff (GDiff r) x = RTDiff r x 
-type instance DiffInt (GDiff r) = DiffInt r
-type instance DiffVector (GDiff r) v = DiffVector r v
