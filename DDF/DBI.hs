@@ -117,3 +117,5 @@ plus2 = app2 plus
 
 noEnv :: repr () x -> repr () x
 noEnv = P.id
+
+scomb2 = app2 scomb

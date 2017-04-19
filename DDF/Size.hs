@@ -62,12 +62,14 @@ instance Dual Size where
 
 instance Bimap Size where
 
+instance Unit Size where
+  unit = one
+
 instance Lang Size where
   fix = one
   left = one
   right = one
   sumMatch = one
-  unit = one
   exfalso = one
   ioRet = one
   ioBind = one

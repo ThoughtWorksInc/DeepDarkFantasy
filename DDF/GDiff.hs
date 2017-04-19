@@ -70,12 +70,14 @@ instance Map.Map r => Map.Map (GDiff r) where
 
 instance Bimap r => Bimap (GDiff r) where
 
+instance Unit r => Unit (GDiff r) where
+  unit = GDiff $ M.const unit
+
 instance Lang r => Lang (GDiff r) where
   fix = GDiff $ M.const fix
   left = GDiff $ M.const left
   right = GDiff $ M.const right
   sumMatch = GDiff $ M.const sumMatch
-  unit = GDiff $ M.const unit
   exfalso = GDiff $ M.const exfalso
   ioRet = GDiff $ M.const ioRet
   ioBind = GDiff $ M.const ioBind

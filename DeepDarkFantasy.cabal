@@ -45,6 +45,8 @@ library
     DDF.Size
     DDF.UInt
     DDF.UnHOAS
+    DDF.Unit
+    DDF.UnLiftEnv
     DDF.Util
     DDF.Vector
     DDF.WithDiff

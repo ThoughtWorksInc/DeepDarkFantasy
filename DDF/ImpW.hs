@@ -13,9 +13,9 @@ module DDF.ImpW where
 import DDF.DLang
 import qualified DDF.Map as Map
 
-runImpW :: forall repr h x. DLang repr => ImpW repr h x -> RunImpW repr h x
+runImpW :: forall r h x. Unit r => ImpW r h x -> RunImpW r h x
 runImpW (ImpW x) = RunImpW x
-runImpW (NoImpW x) = RunImpW (const1 x :: repr h (() -> x))
+runImpW (NoImpW x) = RunImpW (const1 x :: r h (() -> x))
 
 instance Prod r => DBI (ImpW r) where
   z = NoImpW z
@@ -77,6 +77,9 @@ instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual
   runDual = NoImpW runDual
 
+instance (Prod r, Unit r) => Unit (ImpW r) where
+  unit = NoImpW unit
+
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
@@ -84,7 +87,6 @@ instance Lang r => Lang (ImpW r) where
   ioRet = NoImpW ioRet
   ioMap = NoImpW ioMap
   ioBind = NoImpW ioBind
-  unit = NoImpW unit
   exfalso = NoImpW exfalso
   fix = NoImpW fix
   left = NoImpW left

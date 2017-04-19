@@ -59,12 +59,14 @@ instance Map.Map r => Map.Map (GInfDiff r) where
   alter = GInfDiff $ \_ -> Map.alter
   mapMap = GInfDiff $ \_ -> Map.mapMap
 
+instance Unit r => Unit (GInfDiff r) where
+  unit = GInfDiff $ \_ -> unit
+
 instance Lang r => Lang (GInfDiff r) where
   fix = GInfDiff $ \_ -> fix
   left = GInfDiff $ \_ -> left
   right = GInfDiff $ \_ -> right
   sumMatch = GInfDiff $ \_ -> sumMatch
-  unit = GInfDiff $ \_ -> unit
   exfalso = GInfDiff $ \_ -> exfalso
   ioRet = GInfDiff $ \_ -> ioRet
   ioBind = GInfDiff $ \_ -> ioBind

@@ -85,12 +85,14 @@ instance Map.Map r => Map.Map (Diff r v) where
 
 instance Bimap r => Bimap (Diff r v) where
 
+instance Unit r => Unit (Diff r v) where
+  unit = Diff unit
+
 instance (Vector r v, Lang r) => Lang (Diff r v) where
   fix = Diff fix
   left = Diff left
   right = Diff right
   sumMatch = Diff sumMatch
-  unit = Diff unit
   exfalso = Diff exfalso
   ioRet = Diff ioRet
   ioBind = Diff ioBind

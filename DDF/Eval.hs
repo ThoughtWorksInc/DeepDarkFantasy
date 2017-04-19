@@ -76,6 +76,9 @@ instance Dual Eval where
   dual = comb M.Dual
   runDual = comb M.runDual
 
+instance Unit Eval where
+  unit = comb ()
+
 instance Lang Eval where
   fix = comb loop
     where loop x = x $ loop x
@@ -84,7 +87,6 @@ instance Lang Eval where
   sumMatch = comb $ \l r -> \case
                              M.Left x -> l x
                              M.Right x -> r x
-  unit = comb ()
   exfalso = comb absurd
   ioRet = comb M.return
   ioBind = comb (>>=)

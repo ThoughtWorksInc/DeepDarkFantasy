@@ -78,12 +78,14 @@ instance Dual Show where
   dual = name "dual"
   runDual = name "runDual"
 
+instance Unit Show where
+  unit = name "unit"
+
 instance Lang Show where
   fix = name "fix"
   left = name "left"
   right = name "right"
   sumMatch = name "sumMatch"
-  unit = name "unit"
   exfalso = name "exfalso"
   ioRet = name "ioRet"
   ioBind = name "ioBind"

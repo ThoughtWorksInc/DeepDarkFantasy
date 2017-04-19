@@ -60,12 +60,14 @@ instance Option UInt where
   just = UInt
   optionMatch = UInt
 
+instance Unit UInt where
+  unit = UInt
+
 instance Lang UInt where
   fix = UInt
   left = UInt
   right = UInt
   sumMatch = UInt
-  unit = UInt
   exfalso = UInt
   ioRet = UInt
   ioBind = UInt

@@ -60,12 +60,14 @@ instance Map.Map r => Map.Map (InfDiff r v) where
   alter = InfDiff Map.alter
   mapMap = InfDiff Map.mapMap
 
+instance Unit r => Unit (InfDiff r v) where
+  unit = InfDiff unit
+
 instance (Vector (InfDiff r v) v, Lang r) => Lang (InfDiff r v) where
   fix = InfDiff fix
   left = InfDiff left
   right = InfDiff right
   sumMatch = InfDiff sumMatch
-  unit = InfDiff unit
   exfalso = InfDiff exfalso
   ioRet = InfDiff ioRet
   ioBind = InfDiff ioBind

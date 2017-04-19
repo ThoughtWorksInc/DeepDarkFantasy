@@ -61,6 +61,9 @@ instance Map.Map r => Map.Map (RTInfDiff r) where
 
 instance Bimap r => Bimap (RTInfDiff r) where
 
+instance Unit r => Unit (RTInfDiff r) where
+  unit = RTInfDiff unit
+
 instance Lang r => Lang (RTInfDiff r) where
   fix = RTInfDiff fix
   float2Double = RTInfDiff float2Double
@@ -68,7 +71,6 @@ instance Lang r => Lang (RTInfDiff r) where
   left = RTInfDiff left
   right = RTInfDiff right
   sumMatch = RTInfDiff sumMatch
-  unit = RTInfDiff unit
   exfalso = RTInfDiff exfalso
   ioBind = RTInfDiff ioBind
   ioMap = RTInfDiff ioMap
@@ -84,5 +86,5 @@ instance Lang r => Lang (RTInfDiff r) where
 
 instance DLang r => DLang (RTInfDiff r) where
 
-diffInf :: Vector (RTInfDiff r) v => Proxy v -> RTInfDiff r () x -> RTInfDiff r () (DiffType v x)
-diffInf p (RTInfDiff (Combine _ (GDiff f))) = runDiff $ f p
+diffInf :: (Vector (RTInfDiff r) v, DBI r) => Proxy v -> RTInfDiff r () x -> RTInfDiff r h (DiffType v x)
+diffInf p (RTInfDiff (Combine _ (GDiff f))) = liftEnv $ runDiff $ f p

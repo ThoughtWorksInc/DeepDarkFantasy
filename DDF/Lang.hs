@@ -13,7 +13,8 @@ module DDF.Lang (
   module DDF.Float,
   module DDF.Bimap,
   module DDF.Dual,
-  module DDF.Meta.Diff
+  module DDF.Meta.Diff,
+  module DDF.Unit
 ) where
 
 import DDF.Bool
@@ -24,6 +25,7 @@ import DDF.Bimap
 import DDF.Dual
 import DDF.Vector
 import DDF.Meta.Diff
+import DDF.Unit
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
@@ -32,12 +34,11 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r) => Lang r where
   fix :: r h ((a -> a) -> a)
   left :: r h (a -> M.Either a b)
   right :: r h (b -> M.Either a b)
   sumMatch :: r h ((a -> c) -> (b -> c) -> M.Either a b -> c)
-  unit :: r h ()
   exfalso :: r h (Void -> a)
   ioRet :: r h (a -> M.IO a)
   ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)

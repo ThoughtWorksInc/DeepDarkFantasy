@@ -58,13 +58,15 @@ instance Dual r => Dual (UnHOAS r) where
   dual = UnHOAS dual
   runDual = UnHOAS runDual
 
+instance Unit r => Unit (UnHOAS r) where
+  unit = UnHOAS unit
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   fix = UnHOAS fix
   left = UnHOAS left
   right = UnHOAS right
   sumMatch = UnHOAS sumMatch
-  unit = UnHOAS unit
   exfalso = UnHOAS exfalso
   ioRet = UnHOAS ioRet
   ioBind = UnHOAS ioBind
