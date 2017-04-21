@@ -65,11 +65,16 @@ instance (Unit r, Map.Map r) => Map.Map (UnLiftEnv r) where
 
 instance (Unit r, Bimap r) => Bimap (UnLiftEnv r) where
 
-instance Lang r => Lang (UnLiftEnv r) where
-  fix = unLiftEnv fix
+instance (Prod r, Unit r, Sum r) => Sum (UnLiftEnv r) where
   left = unLiftEnv left
   right = unLiftEnv right
   sumMatch = unLiftEnv sumMatch
+
+instance (Prod r, Unit r, Int r) => Int (UnLiftEnv r) where
+  int = unLiftEnv . int
+
+instance Lang r => Lang (UnLiftEnv r) where
+  fix = unLiftEnv fix
   exfalso = unLiftEnv exfalso
   ioRet = unLiftEnv ioRet
   ioBind = unLiftEnv ioBind

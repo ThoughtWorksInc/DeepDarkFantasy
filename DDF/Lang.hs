@@ -14,7 +14,9 @@ module DDF.Lang (
   module DDF.Bimap,
   module DDF.Dual,
   module DDF.Meta.Diff,
-  module DDF.Unit
+  module DDF.Unit,
+  module DDF.Sum,
+  module DDF.Int
 ) where
 
 import DDF.Bool
@@ -26,6 +28,8 @@ import DDF.Dual
 import DDF.Vector
 import DDF.Meta.Diff
 import DDF.Unit
+import DDF.Sum
+import DDF.Int
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
@@ -34,11 +38,8 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r) => Lang r where
   fix :: r h ((a -> a) -> a)
-  left :: r h (a -> M.Either a b)
-  right :: r h (b -> M.Either a b)
-  sumMatch :: r h ((a -> c) -> (b -> c) -> M.Either a b -> c)
   exfalso :: r h (Void -> a)
   ioRet :: r h (a -> M.IO a)
   ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)
@@ -126,7 +127,7 @@ instance Lang r => Monoid r [a] where
 instance Lang r => Functor r [] where
   map = lam $ \f -> fix1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
 
-instance Lang r => BiFunctor r Either where
+instance Lang r => BiFunctor r M.Either where
   bimap = lam2 $ \l r -> sumMatch2 (com2 left l) (com2 right r)
 
 instance Prod r => BiFunctor r (,) where
@@ -191,7 +192,6 @@ ioBind2 = app2 ioBind
 float2Double1 = app float2Double
 doubleExp1 = app doubleExp
 floatExp1 = app floatExp
-sumMatch2 = app2 sumMatch
 state1 = app state
 runState1 = app runState
 runState2 = app2 runState

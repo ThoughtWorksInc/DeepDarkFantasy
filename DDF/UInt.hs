@@ -63,11 +63,16 @@ instance Option UInt where
 instance Unit UInt where
   unit = UInt
 
-instance Lang UInt where
-  fix = UInt
+instance Sum UInt where
   left = UInt
   right = UInt
   sumMatch = UInt
+
+instance Int UInt where
+  int _ = UInt
+
+instance Lang UInt where
+  fix = UInt
   exfalso = UInt
   ioRet = UInt
   ioBind = UInt

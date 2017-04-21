@@ -36,6 +36,7 @@ type instance DiffType v Bool = Bool
 type instance DiffType v Char = Char
 type instance DiffType v (Map k val) = Map (DiffType v k) (DiffType v val)
 type instance DiffType v (Dual l r) = Dual (DiffType v l) (DiffType v r)
+type instance DiffType v Int = Int
 
 newtype GDiff r h x = GDiff {runGDiff :: forall v. Vector r v => Proxy v -> Diff r v h x}
 

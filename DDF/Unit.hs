@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module DDF.Unit (module DDF.DBI, module DDF.Unit) where
 
 import DDF.DBI

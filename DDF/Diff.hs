@@ -88,11 +88,16 @@ instance Bimap r => Bimap (Diff r v) where
 instance Unit r => Unit (Diff r v) where
   unit = Diff unit
 
-instance (Vector r v, Lang r) => Lang (Diff r v) where
-  fix = Diff fix
+instance Sum r => Sum (Diff r v) where
   left = Diff left
   right = Diff right
   sumMatch = Diff sumMatch
+
+instance Int r => Int (Diff r v) where
+  int = Diff . int
+
+instance (Vector r v, Lang r) => Lang (Diff r v) where
+  fix = Diff fix
   exfalso = Diff exfalso
   ioRet = Diff ioRet
   ioBind = Diff ioBind

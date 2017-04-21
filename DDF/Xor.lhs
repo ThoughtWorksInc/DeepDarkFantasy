@@ -1,5 +1,4 @@
-
-> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes #-}
+> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes, NoImplicitPrelude #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
 You should already read DDF.Poly before this.
@@ -93,7 +92,7 @@ However, unlike Poly, there are more than one datapoint, so we need to use a lis
 
 Now we are good to implement the train function!
 
-> findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (Int -> M.Double -> M.String -> m ()) -> m XOR
+> findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (M.Int -> M.Double -> M.String -> m ()) -> m XOR
 > findXor rand doAST doIter = case runImpW $ noEnv xorNet of
 >   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GDiff Eval)) () (w -> XOR)) -> do
 >     doAST $ xorS vars 0
@@ -109,7 +108,7 @@ Getting random weights...
 >     where
 >       diff :: GDiff Eval () x -> DiffType w x
 >       diff x = ((runEval (runDiff (runGDiff x (Proxy :: Proxy w))) ()) \\ weightCon @w @(Vector Eval))
->       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> Int -> (w -> XOR) -> m XOR
+>       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> M.Int -> (w -> XOR) -> m XOR
 >       go xor weight reifyE lossE update i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)
 >         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig

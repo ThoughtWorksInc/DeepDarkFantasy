@@ -3,9 +3,10 @@
 module DDF.Size where
 
 import DDF.Lang
+import qualified Prelude as M
 import qualified DDF.Map as Map
 
-newtype Size h x = Size {runSize :: Int}
+newtype Size h x = Size {runSize :: M.Int}
 
 one = Size 1
 
@@ -65,11 +66,16 @@ instance Bimap Size where
 instance Unit Size where
   unit = one
 
-instance Lang Size where
-  fix = one
+instance Sum Size where
   left = one
   right = one
   sumMatch = one
+
+instance Int Size where
+  int _ = one
+
+instance Lang Size where
+  fix = one
   exfalso = one
   ioRet = one
   ioBind = one

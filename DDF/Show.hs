@@ -81,11 +81,16 @@ instance Dual Show where
 instance Unit Show where
   unit = name "unit"
 
-instance Lang Show where
-  fix = name "fix"
+instance Sum Show where
   left = name "left"
   right = name "right"
   sumMatch = name "sumMatch"
+
+instance Int Show where
+  int = name . show
+
+instance Lang Show where
+  fix = name "fix"
   exfalso = name "exfalso"
   ioRet = name "ioRet"
   ioBind = name "ioBind"

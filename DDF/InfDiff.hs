@@ -64,13 +64,18 @@ instance Bimap r => Bimap (InfDiff r) where
 instance Unit r => Unit (InfDiff r) where
   unit = InfDiff unit
 
+instance Sum r => Sum (InfDiff r) where
+  left = InfDiff left
+  right = InfDiff right
+  sumMatch = InfDiff sumMatch
+
+instance Int r => Int (InfDiff r) where
+  int = InfDiff . int
+
 instance Lang r => Lang (InfDiff r) where
   fix = InfDiff fix
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float
-  left = InfDiff left
-  right = InfDiff right
-  sumMatch = InfDiff sumMatch
   exfalso = InfDiff exfalso
   ioBind = InfDiff ioBind
   ioMap = InfDiff ioMap

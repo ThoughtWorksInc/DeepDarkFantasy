@@ -17,11 +17,11 @@
   DefaultSignatures,
   TypeOperators,
   TypeApplications,
-  PartialTypeSignatures
+  PartialTypeSignatures,
+  NoImplicitPrelude
 #-}
 
 module DDF.DBI (module DDF.DBI, module DDF.ImportMeta) where
-import qualified Prelude as P
 import DDF.ImportMeta
 
 class Monoid r m where
@@ -99,7 +99,7 @@ instance {-# OVERLAPPABLE #-} NTS repr l r => NT repr l r where
     conv = convS
 
 instance {-# OVERLAPPING #-} NT repr x x where
-    conv = P.id
+    conv x = x
 
 lam :: forall repr a b h. DBI repr =>
   ((forall k. NT repr (a, h) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
@@ -116,6 +116,6 @@ app2 f a = app (app f a)
 plus2 = app2 plus
 
 noEnv :: repr () x -> repr () x
-noEnv = P.id
+noEnv x = x
 
 scomb2 = app2 scomb

@@ -80,6 +80,14 @@ instance Dual r => Dual (ImpW r) where
 instance (Prod r, Unit r) => Unit (ImpW r) where
   unit = NoImpW unit
 
+instance (Prod r, Sum r) => Sum (ImpW r) where
+  left = NoImpW left
+  right = NoImpW right
+  sumMatch = NoImpW sumMatch
+
+instance (Prod r, Int r) => Int (ImpW r) where
+  int = NoImpW . int
+
 instance Lang r => Lang (ImpW r) where
   nil = NoImpW nil
   cons = NoImpW cons
@@ -89,9 +97,6 @@ instance Lang r => Lang (ImpW r) where
   ioBind = NoImpW ioBind
   exfalso = NoImpW exfalso
   fix = NoImpW fix
-  left = NoImpW left
-  right = NoImpW right
-  sumMatch = NoImpW sumMatch
   writer = NoImpW writer
   runWriter = NoImpW runWriter
   float2Double = NoImpW float2Double

@@ -30,6 +30,7 @@ library
     DDF.ImportMeta
     DDF.ImpW
     DDF.InfDiff
+    DDF.Int
     DDF.Lang
     DDF.Map
     DDF.Meta.Interpreter
@@ -40,6 +41,7 @@ library
     DDF.Prod
     DDF.Show
     DDF.Size
+    DDF.Sum
     DDF.UInt
     DDF.UnHOAS
     DDF.Unit

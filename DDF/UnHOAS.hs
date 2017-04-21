@@ -61,12 +61,17 @@ instance Dual r => Dual (UnHOAS r) where
 instance Unit r => Unit (UnHOAS r) where
   unit = UnHOAS unit
 
-instance Lang r => Lang (UnHOAS r) where
-  float2Double = UnHOAS float2Double
-  fix = UnHOAS fix
+instance Sum r => Sum (UnHOAS r) where
   left = UnHOAS left
   right = UnHOAS right
   sumMatch = UnHOAS sumMatch
+
+instance Int r => Int (UnHOAS r) where
+  int = UnHOAS . int
+
+instance Lang r => Lang (UnHOAS r) where
+  float2Double = UnHOAS float2Double
+  fix = UnHOAS fix
   exfalso = UnHOAS exfalso
   ioRet = UnHOAS ioRet
   ioBind = UnHOAS ioBind

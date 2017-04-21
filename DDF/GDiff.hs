@@ -73,11 +73,16 @@ instance Bimap r => Bimap (GDiff r) where
 instance Unit r => Unit (GDiff r) where
   unit = GDiff $ M.const unit
 
-instance Lang r => Lang (GDiff r) where
-  fix = GDiff $ M.const fix
+instance Sum r => Sum (GDiff r) where
   left = GDiff $ M.const left
   right = GDiff $ M.const right
   sumMatch = GDiff $ M.const sumMatch
+
+instance Int r => Int (GDiff r) where
+  int x = GDiff $ M.const $ int x
+
+instance Lang r => Lang (GDiff r) where
+  fix = GDiff $ M.const fix
   exfalso = GDiff $ M.const exfalso
   ioRet = GDiff $ M.const ioRet
   ioBind = GDiff $ M.const ioBind

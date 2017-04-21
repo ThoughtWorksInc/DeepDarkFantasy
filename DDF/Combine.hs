@@ -63,11 +63,16 @@ instance (Dual l, Dual r) => Dual (Combine l r) where
 instance (Unit l, Unit r) => Unit (Combine l r) where
   unit = Combine unit unit
 
-instance (Lang l, Lang r) => Lang (Combine l r) where
-  fix = Combine fix fix
+instance (Sum l, Sum r) => Sum (Combine l r) where
   left = Combine left left
   right = Combine right right
   sumMatch = Combine sumMatch sumMatch
+
+instance (Int l, Int r) => Int (Combine l r) where
+  int x = Combine (int x) (int x)
+
+instance (Lang l, Lang r) => Lang (Combine l r) where
+  fix = Combine fix fix
   exfalso = Combine exfalso exfalso
   ioRet = Combine ioRet ioRet
   ioBind = Combine ioBind ioBind
