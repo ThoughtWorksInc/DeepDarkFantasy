@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, MultiParamTypeClasses, PartialTypeSignatures, FlexibleInstances #-}
 
 module DDF.UInt where
 
@@ -74,10 +74,18 @@ instance Int UInt where
 instance Fix UInt where
   fix = UInt
 
+instance Functor UInt x where
+  map = UInt
+
+instance Applicative UInt x where
+  ap = UInt
+  pure = UInt
+
+instance Monad UInt x where
+  join = UInt
+  bind = UInt
+
 instance IO UInt where
-  ioRet = UInt
-  ioBind = UInt
-  ioMap = UInt
   putStrLn = UInt
 
 instance List UInt where

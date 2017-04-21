@@ -4,7 +4,10 @@
   InstanceSigs,
   ScopedTypeVariables,
   TypeFamilies,
-  TypeApplications
+  TypeApplications,
+  MultiParamTypeClasses,
+  FlexibleInstances,
+  FlexibleContexts
 #-}
 
 module DDF.GDiff (module DDF.Meta.Diff) where
@@ -84,10 +87,18 @@ instance Int r => Int (GDiff r) where
 instance Fix r => Fix (GDiff r) where
   fix = GDiff $ M.const fix
 
+instance Functor r M.IO => Functor (GDiff r) M.IO where
+  map = GDiff $ M.const map
+
+instance Applicative r M.IO => Applicative (GDiff r) M.IO where
+  pure = GDiff $ M.const pure
+  ap = GDiff $ M.const ap
+
+instance Monad r M.IO => Monad (GDiff r) M.IO where
+  bind = GDiff $ M.const bind
+  join = GDiff $ M.const join
+
 instance IO r => IO (GDiff r) where
-  ioRet = GDiff $ M.const ioRet
-  ioBind = GDiff $ M.const ioBind
-  ioMap = GDiff $ M.const ioMap
   putStrLn = GDiff $ M.const putStrLn
 
 instance List r => List (GDiff r) where

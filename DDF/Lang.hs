@@ -114,7 +114,7 @@ instance Lang r => Monoid r [a] where
   zero = nil
   plus = listAppend
 
-instance Lang r => Functor r [] where
+instance {-# INCOHERENT #-} Lang r => Functor r [] where
   map = lam $ \f -> fix1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
 
 instance Lang r => BiFunctor r M.Either where
@@ -149,16 +149,6 @@ instance Lang r => Applicative r (State l) where
 instance Lang r => Monad r (State l) where
   join = lam $ \x -> state1 $ lam $ \st -> let_2 (runState2 x st) (uncurry1 runState)
 
-instance Lang r => Functor r M.IO where
-  map = ioMap
-
-instance Lang r => Applicative r M.IO where
-  pure = ioRet
-  ap = lam2 $ \f x -> ioBind2 f (flip2 ioMap x)
-
-instance Lang r => Monad r M.IO where
-  bind = ioBind
-
 instance Lang r => Functor r M.Maybe where
   map = lam $ \func -> optionMatch2 nothing (com2 just func)
 
@@ -174,7 +164,6 @@ optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
 writer1 = app writer
 runWriter1 = app runWriter
-ioBind2 = app2 ioBind
 float2Double1 = app float2Double
 doubleExp1 = app doubleExp
 floatExp1 = app floatExp

@@ -1,4 +1,12 @@
-{-# LANGUAGE NoImplicitPrelude, FlexibleContexts, ScopedTypeVariables, TypeApplications, TypeFamilies #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  FlexibleContexts,
+  ScopedTypeVariables,
+  TypeApplications,
+  TypeFamilies,
+  FlexibleInstances,
+  MultiParamTypeClasses
+#-}
 
 module DDF.InfDiff where
 
@@ -7,6 +15,7 @@ import DDF.Lang
 import DDF.Combine ()
 import DDF.GDiff ()
 import qualified DDF.Map as Map
+import qualified Prelude as M
 
 instance DBI r => DBI (InfDiff r) where
   z = InfDiff z
@@ -80,10 +89,18 @@ instance List r => List (InfDiff r) where
   cons = InfDiff cons
   listMatch = InfDiff listMatch
 
+instance Functor r M.IO => Functor (InfDiff r) M.IO where
+  map = InfDiff map
+
+instance Applicative r M.IO => Applicative (InfDiff r) M.IO where
+  pure = InfDiff pure
+  ap = InfDiff ap
+
+instance Monad r M.IO => Monad (InfDiff r) M.IO where
+  bind = InfDiff bind
+  join = InfDiff join
+
 instance IO r => IO (InfDiff r) where
-  ioBind = InfDiff ioBind
-  ioMap = InfDiff ioMap
-  ioRet = InfDiff ioRet
   putStrLn = InfDiff putStrLn
 
 instance Lang r => Lang (InfDiff r) where

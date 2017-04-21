@@ -6,12 +6,14 @@
   TypeApplications,
   FlexibleContexts,
   UndecidableInstances,
-  TypeFamilies
+  TypeFamilies,
+  MultiParamTypeClasses
 #-}
 
 module DDF.Diff where
 
 import DDF.Lang
+import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
@@ -100,15 +102,23 @@ instance Fix r => Fix (Diff r v) where
   fix = Diff fix
 
 instance IO r => IO (Diff r v) where
-  ioRet = Diff ioRet
-  ioBind = Diff ioBind
-  ioMap = Diff ioMap
   putStrLn = Diff putStrLn
 
 instance List r => List (Diff r v) where
   nil = Diff nil
   cons = Diff cons
   listMatch = Diff listMatch
+
+instance Functor r M.IO => Functor (Diff r v) M.IO where
+  map = Diff map
+
+instance Applicative r M.IO => Applicative (Diff r v) M.IO where
+  pure = Diff pure
+  ap = Diff ap
+
+instance Monad r M.IO => Monad (Diff r v) M.IO where
+  bind = Diff bind
+  join = Diff join
 
 instance (Vector r v, Lang r) => Lang (Diff r v) where
   exfalso = Diff exfalso

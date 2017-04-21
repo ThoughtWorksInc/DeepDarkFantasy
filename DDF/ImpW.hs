@@ -5,7 +5,9 @@
   ScopedTypeVariables,
   ExistentialQuantification,
   TypeFamilies,
-  TypeApplications
+  TypeApplications,
+  FlexibleInstances,
+  MultiParamTypeClasses
 #-}
 
 module DDF.ImpW where
@@ -89,9 +91,6 @@ instance (Prod r, Int r) => Int (ImpW r) where
   int = NoImpW . int
 
 instance (Prod r, IO r) => IO (ImpW r) where
-  ioRet = NoImpW ioRet
-  ioMap = NoImpW ioMap
-  ioBind = NoImpW ioBind
   putStrLn = NoImpW putStrLn
 
 instance (Prod r, List r) => List (ImpW r) where
@@ -101,6 +100,17 @@ instance (Prod r, List r) => List (ImpW r) where
 
 instance (Prod r, Fix r) => Fix (ImpW r) where
   fix = NoImpW fix
+
+instance (Prod r, Functor r x) => Functor (ImpW r) x where
+  map = NoImpW map
+
+instance (Prod r, Applicative r x) => Applicative (ImpW r) x where
+  ap = NoImpW ap
+  pure = NoImpW pure
+
+instance (Prod r, Monad r x) => Monad (ImpW r) x where
+  join = NoImpW join
+  bind = NoImpW bind
 
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso

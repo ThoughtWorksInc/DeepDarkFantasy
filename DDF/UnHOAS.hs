@@ -1,4 +1,11 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  TypeFamilies,
+  TypeApplications,
+  ScopedTypeVariables,
+  FlexibleInstances,
+  MultiParamTypeClasses
+#-}
 
 module DDF.UnHOAS where
 
@@ -72,10 +79,18 @@ instance Int r => Int (UnHOAS r) where
 instance Fix r => Fix (UnHOAS r) where
   fix = UnHOAS fix
 
+instance Functor r x => Functor (UnHOAS r) x where
+  map = UnHOAS map
+
+instance Applicative r x => Applicative (UnHOAS r) x where
+  pure = UnHOAS pure
+  ap = UnHOAS ap
+
+instance Monad r x => Monad (UnHOAS r) x where
+  join = UnHOAS join
+  bind = UnHOAS bind
+
 instance IO r => IO (UnHOAS r) where
-  ioMap = UnHOAS ioMap
-  ioRet = UnHOAS ioRet
-  ioBind = UnHOAS ioBind
   putStrLn = UnHOAS putStrLn
 
 instance List r => List (UnHOAS r) where

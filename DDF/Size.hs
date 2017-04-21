@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, MultiParamTypeClasses, FlexibleInstances #-}
 
 module DDF.Size where
 
@@ -75,9 +75,6 @@ instance Int Size where
   int _ = one
 
 instance IO Size where
-  ioRet = one
-  ioBind = one
-  ioMap = one
   putStrLn = one
 
 instance Fix Size where
@@ -87,6 +84,17 @@ instance List Size where
   nil = one
   cons = one
   listMatch = one
+
+instance Functor Size x where
+  map = one
+
+instance Applicative Size x where
+  pure = one
+  ap = one
+
+instance Monad Size x where
+  bind = one
+  join = one
 
 instance Lang Size where
   exfalso = one

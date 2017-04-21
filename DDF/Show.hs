@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude, TypeFamilies, MultiParamTypeClasses, FlexibleInstances #-}
 
 module DDF.Show where
 
@@ -98,10 +98,18 @@ instance Fix Show where
   fix = name "fix"
 
 instance IO Show where
-  ioRet = name "ioRet"
-  ioBind = name "ioBind"
-  ioMap = name "ioMap"
   putStrLn = name "putStrLn"
+
+instance Functor Show x where
+  map = name "map"
+
+instance Applicative Show x where
+  pure = name "pure"
+  ap = name "ap"
+
+instance Monad Show x where
+  join = name "join"
+  bind = name "bind"
 
 instance Lang Show where
   exfalso = name "exfalso"

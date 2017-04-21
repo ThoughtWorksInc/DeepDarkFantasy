@@ -66,14 +66,14 @@ flip1 = app flip
 flip2 = app2 flip
 let_2 = app2 let_
 
-class Functor r f where
+class DBI r => Functor r f where
   map ::  r h ((a -> b) -> (f a -> f b))
 
 class Functor r a => Applicative r a where
   pure :: r h (x -> a x)
   ap :: r h (a (x -> y) -> a x -> a y)
 
-class (DBI r, Applicative r m) => Monad r m where
+class Applicative r m => Monad r m where
   bind :: r h (m a -> (a -> m b) -> m b)
   join :: r h (m (m a) -> m a)
   join = lam $ \m -> bind2 m id

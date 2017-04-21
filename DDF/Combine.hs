@@ -1,4 +1,13 @@
-{-# LANGUAGE NoImplicitPrelude, TypeFamilies, TypeApplications, ScopedTypeVariables, NoMonomorphismRestriction #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  TypeFamilies,
+  TypeApplications,
+  ScopedTypeVariables,
+  NoMonomorphismRestriction,
+  MultiParamTypeClasses,
+  FlexibleInstances,
+  FlexibleContexts
+#-}
 
 module DDF.Combine where
 
@@ -79,10 +88,18 @@ instance (List l, List r) => List (Combine l r) where
   cons = Combine cons cons
   listMatch = Combine listMatch listMatch
 
+instance (Functor l m, Functor r m) => Functor (Combine l r) m where
+  map = Combine map map
+
+instance (Applicative l m, Applicative r m) => Applicative (Combine l r) m where
+  pure = Combine pure pure
+  ap = Combine ap ap
+
+instance (Monad l m, Monad r m) => Monad (Combine l r) m where
+  bind = Combine bind bind
+  join = Combine join join
+
 instance (IO l, IO r) => IO (Combine l r) where
-  ioRet = Combine ioRet ioRet
-  ioBind = Combine ioBind ioBind
-  ioMap = Combine ioMap ioMap
   putStrLn = Combine putStrLn putStrLn
 
 instance (Lang l, Lang r) => Lang (Combine l r) where

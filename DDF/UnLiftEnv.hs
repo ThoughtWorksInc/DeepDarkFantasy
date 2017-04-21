@@ -1,4 +1,9 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  NoMonomorphismRestriction,
+  FlexibleInstances,
+  MultiParamTypeClasses
+#-}
 
 module DDF.UnLiftEnv where
 
@@ -77,15 +82,23 @@ instance (Unit r, Prod r, Fix r) => Fix (UnLiftEnv r) where
   fix = unLiftEnv fix
 
 instance (Prod r, IO r) => IO (UnLiftEnv r) where
-  ioRet = unLiftEnv ioRet
-  ioBind = unLiftEnv ioBind
-  ioMap = unLiftEnv ioMap
   putStrLn = unLiftEnv putStrLn
 
 instance (Unit r, Prod r, List r) => List (UnLiftEnv r) where
   nil = unLiftEnv nil
   cons = unLiftEnv cons
   listMatch = unLiftEnv listMatch
+
+instance (Prod r, Unit r, Functor r m) => Functor (UnLiftEnv r) m where
+  map = unLiftEnv map
+
+instance (Prod r, Unit r, Applicative r m) => Applicative (UnLiftEnv r) m where
+  pure = unLiftEnv pure
+  ap = unLiftEnv ap
+
+instance (Prod r, Unit r, Monad r m) => Monad (UnLiftEnv r) m where
+  bind = unLiftEnv bind
+  join = unLiftEnv join
 
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso

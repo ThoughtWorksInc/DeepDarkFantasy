@@ -2,7 +2,8 @@
   NoImplicitPrelude,
   LambdaCase,
   TypeFamilies,
-  FlexibleContexts
+  FlexibleContexts,
+  MultiParamTypeClasses
 #-}
 
 module DDF.Eval where
@@ -100,10 +101,18 @@ instance List Eval where
                             [] -> l
                             x:xs -> r x xs
 
+instance Functor Eval M.IO where
+  map = comb M.fmap
+
+instance Applicative Eval M.IO where
+  pure = comb M.pure
+  ap = comb M.ap
+
+instance Monad Eval M.IO where
+  join = comb M.join
+  bind = comb (>>=)
+
 instance IO Eval where
-  ioRet = comb M.return
-  ioBind = comb (>>=)
-  ioMap = comb M.fmap
   putStrLn = comb M.putStrLn
 
 instance Lang Eval where
