@@ -3,8 +3,8 @@
 module DDF.Combine where
 
 import DDF.Meta.Interpreter
-import DDF.DLang
 import qualified DDF.Map as Map
+import DDF.Lang
 
 instance (DBI l, DBI r) => DBI (Combine l r) where
   z = Combine z z
@@ -82,5 +82,3 @@ instance (Lang l, Lang r) => Lang (Combine l r) where
   state = Combine state state
   runState = Combine runState runState
   putStrLn = Combine putStrLn putStrLn
-
-instance (DLang l, DLang r) => DLang (Combine l r) where

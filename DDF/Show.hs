@@ -1,8 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude, TypeFamilies #-}
 
-module DDF.Show (module DDF.Show) where
+module DDF.Show where
 
-import DDF.DLang
+import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 
@@ -100,5 +100,3 @@ instance Lang Show where
   state = name "state"
   runState = name "runState"
   putStrLn = name "putStrLn"
-
-instance DLang Show where

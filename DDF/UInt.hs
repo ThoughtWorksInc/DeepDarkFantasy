@@ -2,7 +2,7 @@
 
 module DDF.UInt where
 
-import DDF.DLang
+import DDF.Lang
 import qualified DDF.Map as Map
 
 data UInt h x = UInt
@@ -82,5 +82,3 @@ instance Lang UInt where
   state = UInt
   runState = UInt
   putStrLn = UInt
-
-instance DLang UInt where

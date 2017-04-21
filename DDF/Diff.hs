@@ -11,7 +11,7 @@
 
 module DDF.Diff where
 
-import DDF.DLang
+import DDF.Lang
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
@@ -107,5 +107,3 @@ instance (Vector r v, Lang r) => Lang (Diff r v) where
   state = Diff state
   runState = Diff runState
   putStrLn = Diff putStrLn
-
-instance (Vector r v, DLang r) => DLang (Diff r v) where

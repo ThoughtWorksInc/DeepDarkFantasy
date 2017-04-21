@@ -1,9 +1,8 @@
-
 {-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
 
 module DDF.UnLiftEnv where
 
-import DDF.DLang
+import DDF.Lang
 import qualified DDF.Map as Map
 
 newtype UnLiftEnv r h x = UnLiftEnv {runUnLiftEnv :: r () (h -> x)}
@@ -85,5 +84,3 @@ instance Lang r => Lang (UnLiftEnv r) where
   float2Double = unLiftEnv float2Double
   double2Float = unLiftEnv double2Float
   putStrLn = unLiftEnv putStrLn
-
-instance DLang r => DLang (UnLiftEnv r) where

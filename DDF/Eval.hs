@@ -17,7 +17,7 @@ import qualified Data.Bool as M
 import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
-import DDF.DLang
+import DDF.Lang
 
 comb = Eval . M.const
 
@@ -103,5 +103,3 @@ instance Lang Eval where
   state = comb M.state
   runState = comb M.runState
   putStrLn = comb M.putStrLn
-
-instance DLang Eval where

@@ -3,7 +3,7 @@
 module DDF.InfDiff where
 
 import DDF.Meta.Diff
-import DDF.DLang
+import DDF.Lang
 import DDF.Combine ()
 import DDF.GDiff ()
 import qualified DDF.Map as Map
@@ -83,8 +83,6 @@ instance Lang r => Lang (InfDiff r) where
   state = InfDiff state
   runState = InfDiff runState
   putStrLn = InfDiff putStrLn
-
-instance DLang r => DLang (InfDiff r) where
 
 diffInf :: (Vector (InfDiff r) v, DBI r) => Proxy v -> InfDiff r () x -> InfDiff r h (DiffType v x)
 diffInf p (InfDiff (Combine _ (GDiff f))) = liftEnv $ runDiff $ f p

@@ -10,7 +10,7 @@
 
 module DDF.ImpW where
 
-import DDF.DLang
+import DDF.Lang
 import qualified DDF.Map as Map
 
 runImpW :: forall r h x. Unit r => ImpW r h x -> RunImpW r h x
@@ -99,5 +99,3 @@ instance Lang r => Lang (ImpW r) where
   state = NoImpW state
   runState = NoImpW runState
   putStrLn = NoImpW putStrLn
-
-instance DLang r => DLang (ImpW r) where

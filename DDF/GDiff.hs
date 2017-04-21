@@ -8,7 +8,7 @@
 #-}
 
 module DDF.GDiff (module DDF.Meta.Diff) where
-import DDF.DLang
+import DDF.Lang
 import qualified Prelude as M
 import DDF.Meta.Diff
 import DDF.Diff ()
@@ -92,5 +92,3 @@ instance Lang r => Lang (GDiff r) where
   state = GDiff $ M.const state
   runState = GDiff $ M.const runState
   putStrLn = GDiff $ M.const putStrLn
-
-instance DLang r => DLang (GDiff r) where

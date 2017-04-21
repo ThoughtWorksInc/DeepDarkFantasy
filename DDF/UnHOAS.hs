@@ -2,7 +2,7 @@
 
 module DDF.UnHOAS where
 
-import DDF.DLang
+import DDF.Lang
 import qualified DDF.Map as Map
 
 instance DBI repr => DBI (UnHOAS repr) where
@@ -80,5 +80,3 @@ instance Lang r => Lang (UnHOAS r) where
   state = UnHOAS state
   runState = UnHOAS runState
   putStrLn = UnHOAS putStrLn
-
-instance DLang r => DLang (UnHOAS r) where

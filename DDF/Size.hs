@@ -2,7 +2,7 @@
 
 module DDF.Size where
 
-import DDF.DLang
+import DDF.Lang
 import qualified DDF.Map as Map
 
 newtype Size h x = Size {runSize :: Int}
@@ -84,5 +84,3 @@ instance Lang Size where
   state = one
   runState = one
   putStrLn = one
-
-instance DLang Size where
