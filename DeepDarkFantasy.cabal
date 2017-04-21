@@ -28,11 +28,11 @@ library
     DDF.Eval
     DDF.Float
     DDF.GDiff
-    DDF.GInfDiff
     DDF.ImportMeta
     DDF.ImpW
     DDF.InfDiff
     DDF.Lang
+    DDF.LiftInfDiff
     DDF.Map
     DDF.Meta.Interpreter
     DDF.Meta.Diff
@@ -40,7 +40,6 @@ library
     DDF.Option
     DDF.Poly
     DDF.Prod
-    DDF.RTInfDiff
     DDF.Show
     DDF.Size
     DDF.UInt
