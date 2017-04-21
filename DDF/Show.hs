@@ -89,19 +89,25 @@ instance Sum Show where
 instance Int Show where
   int = name . show
 
-instance Lang Show where
-  fix = name "fix"
-  exfalso = name "exfalso"
-  ioRet = name "ioRet"
-  ioBind = name "ioBind"
+instance List Show where
   nil = name "nil"
   cons = name "cons"
   listMatch = name "listMatch"
+
+instance Fix Show where
+  fix = name "fix"
+
+instance IO Show where
+  ioRet = name "ioRet"
+  ioBind = name "ioBind"
   ioMap = name "ioMap"
+  putStrLn = name "putStrLn"
+
+instance Lang Show where
+  exfalso = name "exfalso"
   writer = name "writer"
   runWriter = name "runWriter"
   float2Double = name "float2Double"
   double2Float = name "double2Float"
   state = name "state"
   runState = name "runState"
-  putStrLn = name "putStrLn"

@@ -96,19 +96,25 @@ instance Sum r => Sum (Diff r v) where
 instance Int r => Int (Diff r v) where
   int = Diff . int
 
-instance (Vector r v, Lang r) => Lang (Diff r v) where
+instance Fix r => Fix (Diff r v) where
   fix = Diff fix
-  exfalso = Diff exfalso
+
+instance IO r => IO (Diff r v) where
   ioRet = Diff ioRet
   ioBind = Diff ioBind
+  ioMap = Diff ioMap
+  putStrLn = Diff putStrLn
+
+instance List r => List (Diff r v) where
   nil = Diff nil
   cons = Diff cons
   listMatch = Diff listMatch
-  ioMap = Diff ioMap
+
+instance (Vector r v, Lang r) => Lang (Diff r v) where
+  exfalso = Diff exfalso
   writer = Diff writer
   runWriter = Diff runWriter
   float2Double = Diff $ bimap2 float2Double id
   double2Float = Diff $ bimap2 double2Float id
   state = Diff state
   runState = Diff runState
-  putStrLn = Diff putStrLn

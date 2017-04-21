@@ -16,7 +16,8 @@ module DDF.Lang (
   module DDF.Meta.Diff,
   module DDF.Unit,
   module DDF.Sum,
-  module DDF.Int
+  module DDF.Int,
+  module DDF.IO
 ) where
 
 import DDF.Bool
@@ -30,6 +31,7 @@ import DDF.Meta.Diff
 import DDF.Unit
 import DDF.Sum
 import DDF.Int
+import DDF.IO
 
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
@@ -38,26 +40,14 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r) => Lang r where
-  fix :: r h ((a -> a) -> a)
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r) => Lang r where
   exfalso :: r h (Void -> a)
-  ioRet :: r h (a -> M.IO a)
-  ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)
-  ioMap :: r h ((a -> b) -> M.IO a -> M.IO b)
-  nil :: r h [a]
-  cons :: r h (a -> [a] -> [a])
-  listMatch :: r h (b -> (a -> [a] -> b) -> [a] -> b)
-  listAppend :: r h ([a] -> [a] -> [a])
-  listAppend = lam2 $ \l r -> fix2 (lam $ \self -> listMatch2 r (lam2 $ \a as -> cons2 a (app self as))) l
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))
   float2Double :: r h (M.Float -> M.Double)
   double2Float :: r h (M.Double -> M.Float)
-  undefined :: r h a
-  undefined = fix1 id
   state :: r h ((x -> (y, x)) -> State x y)
   runState :: r h (State x y -> (x -> (y, x)))
-  putStrLn :: r h (String -> IO ())
 
 class Reify r x where
   reify :: x -> r h x
@@ -179,10 +169,6 @@ instance Lang r => Applicative r M.Maybe where
 instance Lang r => Monad r M.Maybe where
   bind = lam2 $ \x func -> optionMatch3 nothing func x
 
-cons2 = app2 cons
-listMatch2 = app2 listMatch
-fix1 = app fix
-fix2 = app2 fix
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch

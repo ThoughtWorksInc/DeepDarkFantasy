@@ -71,19 +71,25 @@ instance (Sum l, Sum r) => Sum (Combine l r) where
 instance (Int l, Int r) => Int (Combine l r) where
   int x = Combine (int x) (int x)
 
-instance (Lang l, Lang r) => Lang (Combine l r) where
+instance (Fix l, Fix r) => Fix (Combine l r) where
   fix = Combine fix fix
-  exfalso = Combine exfalso exfalso
-  ioRet = Combine ioRet ioRet
-  ioBind = Combine ioBind ioBind
-  ioMap = Combine ioMap ioMap
+
+instance (List l, List r) => List (Combine l r) where
   nil = Combine nil nil
   cons = Combine cons cons
   listMatch = Combine listMatch listMatch
+
+instance (IO l, IO r) => IO (Combine l r) where
+  ioRet = Combine ioRet ioRet
+  ioBind = Combine ioBind ioBind
+  ioMap = Combine ioMap ioMap
+  putStrLn = Combine putStrLn putStrLn
+
+instance (Lang l, Lang r) => Lang (Combine l r) where
+  exfalso = Combine exfalso exfalso
   runWriter = Combine runWriter runWriter
   writer = Combine writer writer
   double2Float = Combine double2Float double2Float
   float2Double = Combine float2Double float2Double
   state = Combine state state
   runState = Combine runState runState
-  putStrLn = Combine putStrLn putStrLn

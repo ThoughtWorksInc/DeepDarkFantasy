@@ -116,14 +116,14 @@ Getting random weights...
 >             M.Dual (lossVal, lossDiff) = lossE $ xor (reifyE weight)
 >       go _ weight _ _ _ _ orig = M.return $ orig weight
 
-> main :: IO ()
+> main :: M.IO ()
 > main = do
 >   g <- getStdGen
 >   xorTrained <- findXor g print (\i d w -> when (isSquare i) $ do
 >     print d
 >     M.putStrLn w
 >     M.putStrLn "")
->   let doXor :: M.Double -> M.Double -> IO ()
+>   let doXor :: M.Double -> M.Double -> M.IO ()
 >       doXor l r = M.putStrLn $ M.show l ++ " xor " ++ M.show r ++ " is " ++ (M.show $ xorTrained (l, r))
 >   doXor 0 0
 >   doXor 0 1

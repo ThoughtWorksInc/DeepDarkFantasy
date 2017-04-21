@@ -69,19 +69,25 @@ instance Sum r => Sum (UnHOAS r) where
 instance Int r => Int (UnHOAS r) where
   int = UnHOAS . int
 
-instance Lang r => Lang (UnHOAS r) where
-  float2Double = UnHOAS float2Double
+instance Fix r => Fix (UnHOAS r) where
   fix = UnHOAS fix
-  exfalso = UnHOAS exfalso
+
+instance IO r => IO (UnHOAS r) where
+  ioMap = UnHOAS ioMap
   ioRet = UnHOAS ioRet
   ioBind = UnHOAS ioBind
+  putStrLn = UnHOAS putStrLn
+
+instance List r => List (UnHOAS r) where
   nil = UnHOAS nil
   cons = UnHOAS cons
   listMatch = UnHOAS listMatch
-  ioMap = UnHOAS ioMap
+
+instance Lang r => Lang (UnHOAS r) where
+  float2Double = UnHOAS float2Double
+  exfalso = UnHOAS exfalso
   writer = UnHOAS writer
   runWriter = UnHOAS runWriter
   double2Float = UnHOAS double2Float
   state = UnHOAS state
   runState = UnHOAS runState
-  putStrLn = UnHOAS putStrLn

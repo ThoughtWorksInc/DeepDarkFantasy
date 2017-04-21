@@ -102,7 +102,7 @@ plugging it back to the equation, we can verify that (4 * 4) + 2 * 4 + 3 is inde
 
 Now the main function:
 
-> main :: IO ()
+> main :: M.IO ()
 > main = do
 >   d <- solve print printSquare
 >   M.putStrLn $ "x is: " ++ (show d)

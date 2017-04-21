@@ -73,19 +73,25 @@ instance (Prod r, Unit r, Sum r) => Sum (UnLiftEnv r) where
 instance (Prod r, Unit r, Int r) => Int (UnLiftEnv r) where
   int = unLiftEnv . int
 
-instance Lang r => Lang (UnLiftEnv r) where
+instance (Unit r, Prod r, Fix r) => Fix (UnLiftEnv r) where
   fix = unLiftEnv fix
-  exfalso = unLiftEnv exfalso
+
+instance (Prod r, IO r) => IO (UnLiftEnv r) where
   ioRet = unLiftEnv ioRet
   ioBind = unLiftEnv ioBind
   ioMap = unLiftEnv ioMap
+  putStrLn = unLiftEnv putStrLn
+
+instance (Unit r, Prod r, List r) => List (UnLiftEnv r) where
   nil = unLiftEnv nil
   cons = unLiftEnv cons
   listMatch = unLiftEnv listMatch
+
+instance Lang r => Lang (UnLiftEnv r) where
+  exfalso = unLiftEnv exfalso
   writer = unLiftEnv writer
   runWriter = unLiftEnv runWriter
   state = unLiftEnv state
   runState = unLiftEnv runState
   float2Double = unLiftEnv float2Double
   double2Float = unLiftEnv double2Float
-  putStrLn = unLiftEnv putStrLn

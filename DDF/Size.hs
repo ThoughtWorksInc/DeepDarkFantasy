@@ -74,19 +74,25 @@ instance Sum Size where
 instance Int Size where
   int _ = one
 
-instance Lang Size where
-  fix = one
-  exfalso = one
+instance IO Size where
   ioRet = one
   ioBind = one
   ioMap = one
+  putStrLn = one
+
+instance Fix Size where
+  fix = one
+
+instance List Size where
   nil = one
   cons = one
   listMatch = one
+
+instance Lang Size where
+  exfalso = one
   writer = one
   runWriter = one
   float2Double = one
   double2Float = one
   state = one
   runState = one
-  putStrLn = one

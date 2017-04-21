@@ -71,19 +71,25 @@ instance Sum UInt where
 instance Int UInt where
   int _ = UInt
 
-instance Lang UInt where
+instance Fix UInt where
   fix = UInt
-  exfalso = UInt
+
+instance IO UInt where
   ioRet = UInt
   ioBind = UInt
   ioMap = UInt
+  putStrLn = UInt
+
+instance List UInt where
   nil = UInt
   cons = UInt
   listMatch = UInt
+
+instance Lang UInt where
+  exfalso = UInt
   runWriter = UInt
   writer = UInt
   double2Float = UInt
   float2Double = UInt
   state = UInt
   runState = UInt
-  putStrLn = UInt

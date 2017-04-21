@@ -72,22 +72,28 @@ instance Sum r => Sum (InfDiff r) where
 instance Int r => Int (InfDiff r) where
   int = InfDiff . int
 
-instance Lang r => Lang (InfDiff r) where
+instance Fix r => Fix (InfDiff r) where
   fix = InfDiff fix
-  float2Double = InfDiff float2Double
-  double2Float = InfDiff double2Float
-  exfalso = InfDiff exfalso
-  ioBind = InfDiff ioBind
-  ioMap = InfDiff ioMap
-  ioRet = InfDiff ioRet
+
+instance List r => List (InfDiff r) where
   nil = InfDiff nil
   cons = InfDiff cons
   listMatch = InfDiff listMatch
+
+instance IO r => IO (InfDiff r) where
+  ioBind = InfDiff ioBind
+  ioMap = InfDiff ioMap
+  ioRet = InfDiff ioRet
+  putStrLn = InfDiff putStrLn
+
+instance Lang r => Lang (InfDiff r) where
+  float2Double = InfDiff float2Double
+  double2Float = InfDiff double2Float
+  exfalso = InfDiff exfalso
   writer = InfDiff writer
   runWriter = InfDiff runWriter
   state = InfDiff state
   runState = InfDiff runState
-  putStrLn = InfDiff putStrLn
 
 diffInf :: (Vector (InfDiff r) v, DBI r) => Proxy v -> InfDiff r () x -> InfDiff r h (DiffType v x)
 diffInf p (InfDiff (Combine _ (GDiff f))) = liftEnv $ runDiff $ f p

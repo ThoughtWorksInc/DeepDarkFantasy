@@ -81,19 +81,25 @@ instance Sum r => Sum (GDiff r) where
 instance Int r => Int (GDiff r) where
   int x = GDiff $ M.const $ int x
 
-instance Lang r => Lang (GDiff r) where
+instance Fix r => Fix (GDiff r) where
   fix = GDiff $ M.const fix
-  exfalso = GDiff $ M.const exfalso
+
+instance IO r => IO (GDiff r) where
   ioRet = GDiff $ M.const ioRet
   ioBind = GDiff $ M.const ioBind
+  ioMap = GDiff $ M.const ioMap
+  putStrLn = GDiff $ M.const putStrLn
+
+instance List r => List (GDiff r) where
   nil = GDiff $ M.const nil
   cons = GDiff $ M.const cons
   listMatch = GDiff $ M.const listMatch
-  ioMap = GDiff $ M.const ioMap
+
+instance Lang r => Lang (GDiff r) where
+  exfalso = GDiff $ M.const exfalso
   writer = GDiff $ M.const writer
   runWriter = GDiff $ M.const runWriter
   float2Double = GDiff $ M.const float2Double
   double2Float = GDiff $ M.const double2Float
   state = GDiff $ M.const state
   runState = GDiff $ M.const runState
-  putStrLn = GDiff $ M.const putStrLn

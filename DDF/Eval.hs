@@ -89,22 +89,28 @@ instance Sum Eval where
 instance Int Eval where
   int = comb
 
-instance Lang Eval where
+instance Fix Eval where
   fix = comb loop
     where loop x = x $ loop x
-  exfalso = comb absurd
-  ioRet = comb M.return
-  ioBind = comb (>>=)
+
+instance List Eval where
   nil = comb []
   cons = comb (:)
   listMatch = comb $ \l r -> \case
                             [] -> l
                             x:xs -> r x xs
+
+instance IO Eval where
+  ioRet = comb M.return
+  ioBind = comb (>>=)
   ioMap = comb M.fmap
+  putStrLn = comb M.putStrLn
+
+instance Lang Eval where
+  exfalso = comb absurd
   writer = comb (M.WriterT . M.Identity)
   runWriter = comb M.runWriter
   float2Double = comb M.float2Double
   double2Float = comb M.double2Float
   state = comb M.state
   runState = comb M.runState
-  putStrLn = comb M.putStrLn

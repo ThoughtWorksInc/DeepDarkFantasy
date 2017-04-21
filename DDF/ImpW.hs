@@ -88,19 +88,25 @@ instance (Prod r, Sum r) => Sum (ImpW r) where
 instance (Prod r, Int r) => Int (ImpW r) where
   int = NoImpW . int
 
-instance Lang r => Lang (ImpW r) where
-  nil = NoImpW nil
-  cons = NoImpW cons
-  listMatch = NoImpW listMatch
+instance (Prod r, IO r) => IO (ImpW r) where
   ioRet = NoImpW ioRet
   ioMap = NoImpW ioMap
   ioBind = NoImpW ioBind
-  exfalso = NoImpW exfalso
+  putStrLn = NoImpW putStrLn
+
+instance (Prod r, List r) => List (ImpW r) where
+  nil = NoImpW nil
+  cons = NoImpW cons
+  listMatch = NoImpW listMatch
+
+instance (Prod r, Fix r) => Fix (ImpW r) where
   fix = NoImpW fix
+
+instance Lang r => Lang (ImpW r) where
+  exfalso = NoImpW exfalso
   writer = NoImpW writer
   runWriter = NoImpW runWriter
   float2Double = NoImpW float2Double
   double2Float = NoImpW double2Float
   state = NoImpW state
   runState = NoImpW runState
-  putStrLn = NoImpW putStrLn
