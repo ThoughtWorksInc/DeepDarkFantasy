@@ -66,13 +66,23 @@ instance Option Show where
   optionMatch = name "optionMatch"
 
 instance Map.Map Show where
-  empty = name "empty"
-  singleton = name "singleton"
-  lookup = name "lookup"
-  alter = name "alter"
-  mapMap = name "mapMap"
+  empty = name "Map.empty"
+  singleton = name "Map.singleton"
+  lookup = name "Map.lookup"
+  alter = name "Map.alter"
+  mapMap = name "Map.mapMap"
 
 instance Bimap Show where
+  size = name "size"
+  lookupL = name "lookupL"
+  lookupR = name "lookupR"
+  toMapL = name "toMapL"
+  toMapR = name "toMapR"
+  updateL = name "updateL"
+  updateR = name "updateR"
+  empty = name "empty"
+  singleton = name "singleton"
+  insert = name "insert"
 
 instance Dual Show where
   dual = name "dual"

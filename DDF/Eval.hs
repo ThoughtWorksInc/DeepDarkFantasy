@@ -19,6 +19,7 @@ import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
 import DDF.Lang
+import qualified Data.Bimap as M.Bimap
 
 comb = Eval . M.const
 
@@ -67,11 +68,21 @@ instance Option Eval where
 instance Map.Map Eval where
   empty = comb M.Map.empty
   singleton = comb M.Map.singleton
-  lookup = comb M.Map.lookup
+  lookup = flip1 $ comb M.Map.lookup
   alter = comb M.Map.alter
   mapMap = comb M.fmap
 
 instance Bimap Eval where
+  size = comb M.Bimap.size
+  lookupL = flip1 $ comb M.Bimap.lookup
+  lookupR = flip1 $ comb M.Bimap.lookupR
+  toMapL = comb M.Bimap.toMap
+  toMapR = comb M.Bimap.toMapR
+  empty = comb M.Bimap.empty
+  singleton = comb $ \(a, b) -> M.Bimap.singleton a b
+  insert = comb $ \(a, b) -> M.Bimap.insert a b
+  updateL = comb M.Bimap.update
+  updateR = comb M.Bimap.updateR
 
 instance Dual Eval where
   dual = comb M.Dual

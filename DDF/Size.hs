@@ -62,6 +62,16 @@ instance Dual Size where
   runDual = one
 
 instance Bimap Size where
+  updateL = one
+  updateR = one
+  singleton = one
+  empty = one
+  insert = one
+  lookupL = one
+  lookupR = one
+  size = one
+  toMapL = one
+  toMapR = one
 
 instance Unit Size where
   unit = one

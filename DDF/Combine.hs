@@ -64,6 +64,16 @@ instance (Map.Map l, Map.Map r) => Map.Map (Combine l r) where
   mapMap = Combine Map.mapMap Map.mapMap
 
 instance (Bimap l, Bimap r) => Bimap (Combine l r) where
+  size = Combine size size
+  empty = Combine empty empty
+  singleton = Combine singleton singleton
+  lookupL = Combine lookupL lookupL
+  lookupR = Combine lookupR lookupR
+  toMapL = Combine toMapL toMapL
+  toMapR = Combine toMapR toMapR
+  insert = Combine insert insert
+  updateL = Combine updateL updateL
+  updateR = Combine updateR updateR
 
 instance (Dual l, Dual r) => Dual (Combine l r) where
   dual = Combine dual dual

@@ -74,6 +74,16 @@ instance Map.Map r => Map.Map (ImpW r) where
   mapMap = NoImpW Map.mapMap
 
 instance Bimap r => Bimap (ImpW r) where
+  size = NoImpW size
+  lookupL = NoImpW lookupL
+  lookupR = NoImpW lookupR
+  singleton = NoImpW singleton
+  empty = NoImpW empty
+  insert = NoImpW insert
+  toMapL = NoImpW toMapL
+  toMapR = NoImpW toMapR
+  updateL = NoImpW updateL
+  updateR = NoImpW updateR
 
 instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual

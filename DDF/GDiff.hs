@@ -15,7 +15,6 @@ import DDF.Lang
 import qualified Prelude as M
 import DDF.Meta.Diff
 import DDF.Diff ()
-import qualified Data.Map as M
 import qualified DDF.Map as Map
 
 instance DBI r => DBI (GDiff r) where
@@ -65,13 +64,21 @@ instance Option r => Option (GDiff r) where
 instance Map.Map r => Map.Map (GDiff r) where
   empty = GDiff $ M.const Map.empty
   singleton = GDiff $ M.const Map.singleton
-  lookup :: forall h k a. Map.Ord k => GDiff r h (k -> M.Map k a -> Maybe a)
-  lookup = GDiff $ \(_ :: Proxy v) -> withDict (Map.diffOrd (Proxy :: Proxy (v, k))) Map.lookup
-  alter :: forall h k a. Map.Ord k => GDiff r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = GDiff $ \(_ :: Proxy v) -> withDict (Map.diffOrd (Proxy :: Proxy (v, k))) Map.alter
+  lookup = GDiff $ M.const Map.lookup
+  alter = GDiff $ M.const Map.alter
   mapMap = GDiff $ M.const Map.mapMap
 
 instance Bimap r => Bimap (GDiff r) where
+  size = GDiff $ M.const size
+  lookupL = GDiff $ M.const lookupL
+  lookupR = GDiff $ M.const lookupR
+  empty = GDiff $ M.const empty
+  singleton = GDiff $ M.const singleton
+  insert = GDiff $ M.const insert
+  updateL = GDiff $ M.const updateL
+  updateR = GDiff $ M.const updateR
+  toMapL = GDiff $ M.const toMapL
+  toMapR = GDiff $ M.const toMapR
 
 instance Unit r => Unit (GDiff r) where
   unit = GDiff $ M.const unit

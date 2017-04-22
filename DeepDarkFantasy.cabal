@@ -10,6 +10,11 @@ description: Deep Dark Fantasy(DDF) is a domain specific language that allow one
 synopsis: A DSL for creating neural network.
 license-file: LICENSE
 
+Flag WError
+  Description: make warning error
+  Manual: True
+  Default: False
+
 source-repository head
   type: git
   location: https://github.com/ThoughtWorksInc/DeepDarkFantasy
@@ -61,6 +66,8 @@ library
     containers -any,
     bimap -any
   ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
+  if flag(WError)
+    ghc-options: -Werror
   default-language: Haskell2010
 
 Test-Suite TestPoly

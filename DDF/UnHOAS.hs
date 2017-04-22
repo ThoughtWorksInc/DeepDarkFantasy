@@ -60,6 +60,16 @@ instance Map.Map r => Map.Map (UnHOAS r) where
   mapMap = UnHOAS Map.mapMap
 
 instance Bimap r => Bimap (UnHOAS r) where
+  size = UnHOAS size
+  insert = UnHOAS insert
+  lookupL = UnHOAS lookupL
+  toMapL = UnHOAS toMapL
+  lookupR = UnHOAS lookupR
+  toMapR = UnHOAS toMapR
+  empty = UnHOAS empty
+  singleton = UnHOAS singleton
+  updateL = UnHOAS updateL
+  updateR = UnHOAS updateR
 
 instance Dual r => Dual (UnHOAS r) where
   dual = UnHOAS dual

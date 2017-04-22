@@ -69,6 +69,16 @@ instance Map.Map r => Map.Map (InfDiff r) where
   lookup = InfDiff Map.lookup
 
 instance Bimap r => Bimap (InfDiff r) where
+  size = InfDiff size
+  empty = InfDiff empty
+  singleton = InfDiff singleton
+  insert = InfDiff insert
+  lookupL = InfDiff lookupL
+  lookupR = InfDiff lookupR
+  toMapL = InfDiff toMapL
+  toMapR = InfDiff toMapR
+  updateL = InfDiff updateL
+  updateR = InfDiff updateR
 
 instance Unit r => Unit (InfDiff r) where
   unit = InfDiff unit

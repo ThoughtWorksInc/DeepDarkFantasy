@@ -18,6 +18,7 @@ import DDF.Vector
 import DDF.Meta.Interpreter
 import DDF.Meta.Dual
 import Data.Map
+import Data.Bimap
 
 type family DiffType (v :: *) (x :: *)
 type instance DiffType v () = ()
@@ -37,6 +38,7 @@ type instance DiffType v Char = Char
 type instance DiffType v (Map k val) = Map (DiffType v k) (DiffType v val)
 type instance DiffType v (Dual l r) = Dual (DiffType v l) (DiffType v r)
 type instance DiffType v Int = Int
+type instance DiffType v (Bimap a b) = Bimap (DiffType v a) (DiffType v b)
 
 newtype GDiff r h x = GDiff {runGDiff :: forall v. Vector r v => Proxy v -> Diff r v h x}
 

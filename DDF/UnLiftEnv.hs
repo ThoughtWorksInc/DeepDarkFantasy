@@ -69,6 +69,16 @@ instance (Unit r, Map.Map r) => Map.Map (UnLiftEnv r) where
   mapMap = unLiftEnv Map.mapMap
 
 instance (Unit r, Bimap r) => Bimap (UnLiftEnv r) where
+  size = unLiftEnv size
+  insert = unLiftEnv insert
+  lookupL = unLiftEnv lookupL
+  lookupR = unLiftEnv lookupR
+  empty = unLiftEnv empty
+  singleton = unLiftEnv singleton
+  toMapL = unLiftEnv toMapL
+  toMapR = unLiftEnv toMapR
+  updateL = unLiftEnv updateL
+  updateR = unLiftEnv updateR
 
 instance (Prod r, Unit r, Sum r) => Sum (UnLiftEnv r) where
   left = unLiftEnv left

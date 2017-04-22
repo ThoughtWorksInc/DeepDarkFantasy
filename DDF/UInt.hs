@@ -38,6 +38,16 @@ instance Float UInt where
   floatExp = UInt
 
 instance Bimap UInt where
+  size = UInt
+  empty = UInt
+  singleton = UInt
+  lookupL = UInt
+  lookupR = UInt
+  toMapL = UInt
+  toMapR = UInt
+  insert = UInt
+  updateL = UInt
+  updateR = UInt
 
 instance Dual UInt where
   dual = UInt

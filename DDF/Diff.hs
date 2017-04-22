@@ -16,6 +16,7 @@ import DDF.Lang
 import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
+import qualified Data.Bimap as M
 
 instance DBI r => DBI (Diff r v) where
   z = Diff z
@@ -79,13 +80,28 @@ instance Option r => Option (Diff r v) where
 instance Map.Map r => Map.Map (Diff r v) where
   empty = Diff Map.empty
   singleton = Diff Map.singleton
-  lookup :: forall h k a. Map.Ord k => Diff r v h (k -> M.Map k a -> Maybe a)
+  lookup :: forall h k a. Map.Ord k => Diff r v h (M.Map k a -> k -> Maybe a)
   lookup = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.lookup)
   alter :: forall h k a. Map.Ord k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.alter)
   mapMap = Diff Map.mapMap
 
 instance Bimap r => Bimap (Diff r v) where
+  size = Diff size
+  toMapL = Diff toMapL
+  toMapR = Diff toMapR
+  lookupL :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h (M.Bimap a b -> a -> Maybe b)
+  lookupL = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff lookupL))
+  lookupR :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h (M.Bimap a b -> b -> Maybe a)
+  lookupR = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff lookupR))
+  empty = Diff empty
+  singleton = Diff singleton
+  insert :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((a, b) -> M.Bimap a b -> M.Bimap a b)
+  insert = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff insert))
+  updateL :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
+  updateL = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff updateL))
+  updateR :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
+  updateR = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff updateR))
 
 instance Unit r => Unit (Diff r v) where
   unit = Diff unit

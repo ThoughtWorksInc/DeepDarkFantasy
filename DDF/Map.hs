@@ -41,6 +41,6 @@ instance Ord M.Float where
 class (Prod r, Option r) => Map r where
   empty :: r h (M.Map k a)
   singleton :: r h (k -> a -> M.Map k a)
-  lookup :: Ord k => r h (k -> M.Map k a -> Maybe a)
+  lookup :: Ord k => r h (M.Map k a -> k -> Maybe a)
   alter :: Ord k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   mapMap :: r h ((a -> b) -> M.Map k a -> M.Map k b)
