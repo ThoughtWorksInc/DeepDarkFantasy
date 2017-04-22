@@ -48,6 +48,8 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
   double2Float :: r h (M.Double -> M.Float)
   state :: r h ((x -> (y, x)) -> State x y)
   runState :: r h (State x y -> (x -> (y, x)))
+  iterate :: r h ((x -> x) -> x -> [x])
+  iterate = lam $ \f -> fix1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
 
 class Reify r x where
   reify :: x -> r h x
