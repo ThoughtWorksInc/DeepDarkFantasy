@@ -110,6 +110,13 @@ instance (Prod r, Unit r, Monad r m) => Monad (UnLiftEnv r) m where
   bind = unLiftEnv bind
   join = unLiftEnv join
 
+instance (Prod r, Unit r, VectorTF r) => VectorTF (UnLiftEnv r) where
+  zeroVTF = unLiftEnv zeroVTF
+  basisVTF = unLiftEnv basisVTF
+  plusVTF = unLiftEnv plusVTF
+  multVTF = unLiftEnv multVTF
+  vtfMatch = unLiftEnv vtfMatch
+
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso
   writer = unLiftEnv writer

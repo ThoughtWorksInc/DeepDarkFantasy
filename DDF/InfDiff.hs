@@ -113,6 +113,13 @@ instance Monad r M.IO => Monad (InfDiff r) M.IO where
 instance IO r => IO (InfDiff r) where
   putStrLn = InfDiff putStrLn
 
+instance (Dual r, VectorTF r) => VectorTF (InfDiff r) where
+  zeroVTF = InfDiff zeroVTF
+  basisVTF = InfDiff basisVTF
+  plusVTF = InfDiff plusVTF
+  multVTF = InfDiff multVTF
+  vtfMatch = InfDiff vtfMatch
+
 instance Lang r => Lang (InfDiff r) where
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float

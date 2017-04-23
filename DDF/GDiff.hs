@@ -10,10 +10,9 @@
   FlexibleContexts
 #-}
 
-module DDF.GDiff (module DDF.Meta.Diff) where
+module DDF.GDiff where
 import DDF.Lang
 import qualified Prelude as M
-import DDF.Meta.Diff
 import DDF.Diff ()
 import qualified DDF.Map as Map
 
@@ -47,6 +46,13 @@ instance (Double r, Dual r) => Double (GDiff r) where
   doubleMult = GDiff $ M.const $ doubleMult
   doubleDivide = GDiff $ M.const $ doubleDivide
   doubleExp = GDiff $ M.const $ doubleExp
+
+instance (Dual r, VectorTF r) => VectorTF (GDiff r) where
+  zeroVTF = GDiff $ M.const $ zeroVTF
+  basisVTF = GDiff $ M.const $ basisVTF
+  plusVTF = GDiff $ M.const $ plusVTF
+  multVTF = GDiff $ M.const $ multVTF
+  vtfMatch = GDiff $ M.const $ vtfMatch
 
 instance Lang r => Float (GDiff r) where
   float x = GDiff $ M.const $ float x

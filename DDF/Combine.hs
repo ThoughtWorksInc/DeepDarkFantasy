@@ -112,6 +112,13 @@ instance (Monad l m, Monad r m) => Monad (Combine l r) m where
 instance (IO l, IO r) => IO (Combine l r) where
   putStrLn = Combine putStrLn putStrLn
 
+instance (VectorTF l, VectorTF r) => VectorTF (Combine l r) where
+  zeroVTF = Combine zeroVTF zeroVTF
+  basisVTF = Combine basisVTF basisVTF
+  plusVTF = Combine plusVTF plusVTF
+  multVTF = Combine multVTF multVTF
+  vtfMatch = Combine vtfMatch vtfMatch
+
 instance (Lang l, Lang r) => Lang (Combine l r) where
   exfalso = Combine exfalso exfalso
   runWriter = Combine runWriter runWriter

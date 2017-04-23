@@ -83,7 +83,6 @@ class Applicative r m => Monad r m where
 class BiFunctor r p where
   bimap :: r h ((a -> b) -> (c -> d) -> p a c -> p b d)
 
-app3 f a b c = app (app2 f a b) c
 com2 = app2 com
 
 class NT repr l r where
@@ -111,7 +110,13 @@ lam2 f = lam $ \x -> lam $ \y -> f x y
 
 lam3 f = lam2 $ \a b -> lam $ \c -> f a b c
 
+lam4 f = lam3 $ \a b c -> lam $ \d -> f a b c d
+
 app2 f a = app (app f a)
+
+app3 f a b = app (app2 f a b)
+
+app4 f a b c = app (app3 f a b c)
 
 plus2 = app2 plus
 

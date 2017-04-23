@@ -8,6 +8,7 @@
 module DDF.WithDiff where
 import DDF.Lang
 import qualified Prelude as M
+import DDF.Diff ()
 
 class Monoid r w => WithDiff r w where
   withDiff :: r h ((w -> x) -> w -> DiffType x w)

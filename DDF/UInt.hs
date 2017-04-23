@@ -103,6 +103,13 @@ instance List UInt where
   cons = UInt
   listMatch = UInt
 
+instance VectorTF UInt where
+  zeroVTF = UInt
+  basisVTF = UInt
+  plusVTF = UInt
+  multVTF = UInt
+  vtfMatch = UInt
+
 instance Lang UInt where
   exfalso = UInt
   runWriter = UInt

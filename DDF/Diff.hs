@@ -17,7 +17,10 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 import qualified Data.Bimap as M
+import qualified DDF.Meta.Dual as M
+import qualified DDF.Meta.VectorTF as M
 
+type instance DiffType v (l -> r) = DiffType v l -> DiffType v r
 instance DBI r => DBI (Diff r v) where
   z = Diff z
   s (Diff x) = Diff $ s x
@@ -26,22 +29,27 @@ instance DBI r => DBI (Diff r v) where
   hoas f = Diff $ hoas (\x -> runDiff $ f $ Diff x)
   liftEnv (Diff x) = Diff $ liftEnv x
 
+type instance DiffType v M.Bool = M.Bool
 instance Bool r => Bool (Diff r v) where
   bool x = Diff $ bool x
   ite = Diff ite
 
+type instance DiffType v M.Char = M.Char
 instance Char r => Char (Diff r v) where
   char = Diff . char
 
+type instance DiffType v (l, r) = (DiffType v l, DiffType v r)
 instance Prod r => Prod (Diff r v) where
   mkProd = Diff mkProd
   zro = Diff zro
   fst = Diff fst
 
+type instance DiffType v (M.Dual l r) = M.Dual (DiffType v l) (DiffType v r)
 instance Dual r => Dual (Diff r v) where
   dual = Diff $ dual
   runDual = Diff $ runDual
 
+type instance DiffType v M.Double = M.Dual M.Double v
 instance (Vector r v, Double r, Dual r) => Double (Diff r v) where
   double x = Diff $ mkDual2 (double x) zero
   doublePlus = Diff $ lam2 $ \l r ->
@@ -57,6 +65,7 @@ instance (Vector r v, Double r, Dual r) => Double (Diff r v) where
         (mult2 (dualOrig1 r) (dualOrig1 r)))
   doubleExp = Diff $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x)))
 
+type instance DiffType v M.Float = M.Dual M.Float v
 instance (Vector r v, Lang r) => Float (Diff r v) where
   float x = Diff $ mkDual2 (float x) zero
   floatPlus = Diff $ lam2 $ \l r ->
@@ -72,11 +81,13 @@ instance (Vector r v, Lang r) => Float (Diff r v) where
         (float2Double1 (mult2 (float2Double1 (dualOrig1 r)) (dualOrig1 r))))
   floatExp = Diff (lam $ \x -> let_2 (floatExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 (float2Double1 e) (dualDiff1 x))))
 
+type instance DiffType v (Maybe l) = Maybe (DiffType v l)
 instance Option r => Option (Diff r v) where
   nothing = Diff nothing
   just = Diff just
   optionMatch = Diff optionMatch
 
+type instance DiffType v (M.Map k val) = M.Map (DiffType v k) (DiffType v val)
 instance Map.Map r => Map.Map (Diff r v) where
   empty = Diff Map.empty
   singleton = Diff Map.singleton
@@ -86,6 +97,7 @@ instance Map.Map r => Map.Map (Diff r v) where
   alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.alter)
   mapMap = Diff Map.mapMap
 
+type instance DiffType v (M.Bimap a b) = M.Bimap (DiffType v a) (DiffType v b)
 instance Bimap r => Bimap (Diff r v) where
   size = Diff size
   toMapL = Diff toMapL
@@ -103,23 +115,28 @@ instance Bimap r => Bimap (Diff r v) where
   updateR :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
   updateR = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff updateR))
 
+type instance DiffType v () = ()
 instance Unit r => Unit (Diff r v) where
   unit = Diff unit
 
+type instance DiffType v (M.Either l r) = M.Either (DiffType v l) (DiffType v r)
 instance Sum r => Sum (Diff r v) where
   left = Diff left
   right = Diff right
   sumMatch = Diff sumMatch
 
+type instance DiffType v M.Int = M.Int
 instance Int r => Int (Diff r v) where
   int = Diff . int
 
 instance Fix r => Fix (Diff r v) where
   fix = Diff fix
 
+type instance DiffType v (M.IO l) = M.IO (DiffType v l)
 instance IO r => IO (Diff r v) where
   putStrLn = Diff putStrLn
 
+type instance DiffType v [l] = [DiffType v l]
 instance List r => List (Diff r v) where
   nil = Diff nil
   cons = Diff cons
@@ -136,6 +153,17 @@ instance Monad r M.IO => Monad (Diff r v) M.IO where
   bind = Diff bind
   join = Diff join
 
+type instance DiffType v (M.VectorTF t f) = M.VectorTF (DiffType v t) (DiffType v f)
+instance (Dual r, VectorTF r, Vector r v) => VectorTF (Diff r v) where
+  zeroVTF = Diff zeroVTF
+  basisVTF = Diff basisVTF
+  plusVTF = Diff plusVTF
+  multVTF = Diff $ multVTF `com2` dualOrig
+  vtfMatch = Diff $ lam4 $ \ze b p m -> vtfMatch4 ze b p $ lam $ \x -> app m (mkDual2 x zero)
+
+type instance DiffType v Void = Void
+type instance DiffType v (Writer l r) = Writer (DiffType v l) (DiffType v r)
+type instance DiffType v (State l r) = State (DiffType v l) (DiffType v r)
 instance (Vector r v, Lang r) => Lang (Diff r v) where
   exfalso = Diff exfalso
   writer = Diff writer
@@ -144,3 +172,18 @@ instance (Vector r v, Lang r) => Lang (Diff r v) where
   double2Float = Diff $ bimap2 double2Float id
   state = Diff state
   runState = Diff runState
+
+instance Map.Ord () where
+  diffOrd _ = Dict
+
+instance Map.Ord a => Map.Ord [a] where
+  diffOrd (_ :: Proxy (v, [a])) = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) Dict
+
+instance Map.Ord l => Map.Ord (M.Dual l r) where
+  diffOrd (_ :: Proxy (v, M.Dual l r)) = withDict (Map.diffOrd (Proxy :: Proxy (v, l))) Dict
+
+instance Map.Ord M.Double where
+  diffOrd _ = Dict
+
+instance Map.Ord M.Float where
+  diffOrd _ = Dict

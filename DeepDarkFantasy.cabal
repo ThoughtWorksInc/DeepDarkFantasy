@@ -44,6 +44,7 @@ library
     DDF.Meta.Interpreter
     DDF.Meta.Diff
     DDF.Meta.Dual
+    DDF.Meta.VectorTF
     DDF.Option
     DDF.Poly
     DDF.Prod
@@ -56,6 +57,7 @@ library
     DDF.UnLiftEnv
     DDF.Util
     DDF.Vector
+    DDF.VectorTF
     DDF.WithDiff
     DDF.Xor
   build-depends:

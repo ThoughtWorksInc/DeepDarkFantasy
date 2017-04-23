@@ -122,6 +122,13 @@ instance (Prod r, Monad r x) => Monad (ImpW r) x where
   join = NoImpW join
   bind = NoImpW bind
 
+instance (Prod r, VectorTF r) => VectorTF (ImpW r) where
+  zeroVTF = NoImpW zeroVTF
+  basisVTF = NoImpW basisVTF
+  plusVTF = NoImpW plusVTF
+  multVTF = NoImpW multVTF
+  vtfMatch = NoImpW vtfMatch
+
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso
   writer = NoImpW writer

@@ -121,6 +121,13 @@ instance Monad Show x where
   join = name "join"
   bind = name "bind"
 
+instance VectorTF Show where
+  zeroVTF = name "zeroVTF"
+  basisVTF = name "basisVTF"
+  plusVTF = name "plusVTF"
+  multVTF = name "multVTF"
+  vtfMatch = name "vtfMatch"
+
 instance Lang Show where
   exfalso = name "exfalso"
   writer = name "writer"

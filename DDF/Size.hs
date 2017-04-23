@@ -106,6 +106,13 @@ instance Monad Size x where
   bind = one
   join = one
 
+instance VectorTF Size where
+  zeroVTF = one
+  basisVTF = one
+  plusVTF = one
+  multVTF = one
+  vtfMatch = one
+
 instance Lang Size where
   exfalso = one
   writer = one

@@ -12,31 +12,9 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import DDF.Option
 import DDF.Meta.Diff
-import qualified DDF.Meta.Dual as M
 
 class M.Ord x => Ord x where
   diffOrd :: Proxy (v, x) -> Dict (Ord (DiffType v x))
-
-instance Ord () where
-  diffOrd _ = Dict
-
-instance Ord a => Ord [a] where
-  diffOrd (_ :: Proxy (v, [a])) = withDict (diffOrd (Proxy :: Proxy (v, a))) Dict
-
-instance M.Eq l => M.Eq (M.Dual l r) where
-  M.Dual (l, _) == M.Dual (r, _) = l == r
-
-instance M.Ord l => M.Ord (M.Dual l r) where
-  M.Dual (l, _) `compare` M.Dual (r, _) = l `compare` r
-
-instance Ord l => Ord (M.Dual l r) where
-  diffOrd (_ :: Proxy (v, M.Dual l r)) = withDict (diffOrd (Proxy :: Proxy (v, l))) Dict
-
-instance Ord M.Double where
-  diffOrd _ = Dict
-
-instance Ord M.Float where
-  diffOrd _ = Dict
 
 class (Prod r, Option r) => Map r where
   empty :: r h (M.Map k a)

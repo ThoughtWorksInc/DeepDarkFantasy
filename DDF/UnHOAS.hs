@@ -108,6 +108,13 @@ instance List r => List (UnHOAS r) where
   cons = UnHOAS cons
   listMatch = UnHOAS listMatch
 
+instance VectorTF r => VectorTF (UnHOAS r) where
+  zeroVTF = UnHOAS zeroVTF
+  basisVTF = UnHOAS basisVTF
+  plusVTF = UnHOAS plusVTF
+  multVTF = UnHOAS multVTF
+  vtfMatch = UnHOAS vtfMatch
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   exfalso = UnHOAS exfalso
