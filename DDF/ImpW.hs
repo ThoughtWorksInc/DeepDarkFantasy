@@ -14,6 +14,7 @@ module DDF.ImpW where
 
 import DDF.Lang
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 runImpW :: forall r h x. Unit r => ImpW r h x -> RunImpW r h x
 runImpW (ImpW x) = RunImpW x
@@ -122,12 +123,12 @@ instance (Prod r, Monad r x) => Monad (ImpW r) x where
   join = NoImpW join
   bind = NoImpW bind
 
-instance (Prod r, VectorTF r) => VectorTF (ImpW r) where
-  zeroVTF = NoImpW zeroVTF
-  basisVTF = NoImpW basisVTF
-  plusVTF = NoImpW plusVTF
-  multVTF = NoImpW multVTF
-  vtfMatch = NoImpW vtfMatch
+instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (ImpW r) where
+  zero = NoImpW VTF.zero
+  basis = NoImpW VTF.basis
+  plus = NoImpW VTF.plus
+  mult = NoImpW VTF.mult
+  vtfMatch = NoImpW VTF.vtfMatch
 
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso

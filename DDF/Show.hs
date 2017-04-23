@@ -5,6 +5,7 @@ module DDF.Show where
 import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 data AST = Leaf M.String | App M.String AST [AST] | Lam M.String [M.String] AST
 
@@ -121,12 +122,12 @@ instance Monad Show x where
   join = name "join"
   bind = name "bind"
 
-instance VectorTF Show where
-  zeroVTF = name "zeroVTF"
-  basisVTF = name "basisVTF"
-  plusVTF = name "plusVTF"
-  multVTF = name "multVTF"
-  vtfMatch = name "vtfMatch"
+instance VTF.VectorTF Show where
+  zero = name "VTF.zero"
+  basis = name "VTF.basis"
+  plus = name "VTF.plus"
+  mult = name "VTF.mult"
+  vtfMatch = name "VTF.vtfMatch"
 
 instance Lang Show where
   exfalso = name "exfalso"

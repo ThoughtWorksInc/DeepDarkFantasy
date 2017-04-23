@@ -16,6 +16,7 @@ import DDF.Combine ()
 import DDF.GDiff ()
 import qualified DDF.Map as Map
 import qualified Prelude as M
+import qualified DDF.VectorTF as VTF
 
 instance DBI r => DBI (InfDiff r) where
   z = InfDiff z
@@ -113,12 +114,12 @@ instance Monad r M.IO => Monad (InfDiff r) M.IO where
 instance IO r => IO (InfDiff r) where
   putStrLn = InfDiff putStrLn
 
-instance (Dual r, VectorTF r) => VectorTF (InfDiff r) where
-  zeroVTF = InfDiff zeroVTF
-  basisVTF = InfDiff basisVTF
-  plusVTF = InfDiff plusVTF
-  multVTF = InfDiff multVTF
-  vtfMatch = InfDiff vtfMatch
+instance (Dual r, VTF.VectorTF r) => VTF.VectorTF (InfDiff r) where
+  zero = InfDiff VTF.zero
+  basis = InfDiff VTF.basis
+  plus = InfDiff VTF.plus
+  mult = InfDiff VTF.mult
+  vtfMatch = InfDiff VTF.vtfMatch
 
 instance Lang r => Lang (InfDiff r) where
   float2Double = InfDiff float2Double

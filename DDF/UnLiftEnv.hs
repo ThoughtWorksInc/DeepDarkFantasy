@@ -9,6 +9,7 @@ module DDF.UnLiftEnv where
 
 import DDF.Lang
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 newtype UnLiftEnv r h x = UnLiftEnv {runUnLiftEnv :: r () (h -> x)}
 
@@ -110,12 +111,12 @@ instance (Prod r, Unit r, Monad r m) => Monad (UnLiftEnv r) m where
   bind = unLiftEnv bind
   join = unLiftEnv join
 
-instance (Prod r, Unit r, VectorTF r) => VectorTF (UnLiftEnv r) where
-  zeroVTF = unLiftEnv zeroVTF
-  basisVTF = unLiftEnv basisVTF
-  plusVTF = unLiftEnv plusVTF
-  multVTF = unLiftEnv multVTF
-  vtfMatch = unLiftEnv vtfMatch
+instance (Prod r, Unit r, VTF.VectorTF r) => VTF.VectorTF (UnLiftEnv r) where
+  zero = unLiftEnv VTF.zero
+  basis = unLiftEnv VTF.basis
+  plus = unLiftEnv VTF.plus
+  mult = unLiftEnv VTF.mult
+  vtfMatch = unLiftEnv VTF.vtfMatch
 
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso

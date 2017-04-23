@@ -18,10 +18,10 @@ import qualified Data.Bool as M
 import qualified Data.Map as M.Map
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Map as Map
-import qualified DDF.Meta.VectorTF as M
+import qualified DDF.Meta.VectorTF as M.VTF
 import qualified Data.Bimap as M.Bimap
+import qualified DDF.VectorTF as VTF
 import DDF.Lang
-
 comb = Eval . M.const
 
 instance DBI Eval where
@@ -127,16 +127,16 @@ instance Monad Eval M.IO where
 instance IO Eval where
   putStrLn = comb M.putStrLn
 
-instance VectorTF Eval where
-  zeroVTF = comb M.ZeroVTF
-  basisVTF = comb M.BasisVTF
-  plusVTF = comb M.PlusVTF
-  multVTF = comb M.MultVTF
+instance VTF.VectorTF Eval where
+  zero = comb M.VTF.Zero
+  basis = comb M.VTF.Basis
+  plus = comb M.VTF.Plus
+  mult = comb M.VTF.Mult
   vtfMatch = comb $ \zr b p m -> \case
-                                 M.ZeroVTF -> zr
-                                 M.BasisVTF t -> b t
-                                 M.PlusVTF l r -> p l r
-                                 M.MultVTF l r -> m l r
+                                 M.VTF.Zero -> zr
+                                 M.VTF.Basis t -> b t
+                                 M.VTF.Plus l r -> p l r
+                                 M.VTF.Mult l r -> m l r
 
 instance Lang Eval where
   exfalso = comb absurd

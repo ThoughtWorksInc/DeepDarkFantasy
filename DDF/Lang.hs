@@ -17,8 +17,7 @@ module DDF.Lang (
   module DDF.Unit,
   module DDF.Sum,
   module DDF.Int,
-  module DDF.IO,
-  module DDF.VectorTF
+  module DDF.IO
 ) where
 
 import DDF.Bool
@@ -33,8 +32,8 @@ import DDF.Unit
 import DDF.Sum
 import DDF.Int
 import DDF.IO
-import DDF.VectorTF
 
+import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
 import qualified GHC.Float as M
@@ -42,7 +41,7 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VectorTF r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))

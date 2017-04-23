@@ -5,6 +5,7 @@ module DDF.Size where
 import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 newtype Size h x = Size {runSize :: M.Int}
 
@@ -106,11 +107,11 @@ instance Monad Size x where
   bind = one
   join = one
 
-instance VectorTF Size where
-  zeroVTF = one
-  basisVTF = one
-  plusVTF = one
-  multVTF = one
+instance VTF.VectorTF Size where
+  zero = one
+  basis = one
+  plus = one
+  mult = one
   vtfMatch = one
 
 instance Lang Size where

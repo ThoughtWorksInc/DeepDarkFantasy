@@ -4,6 +4,7 @@ module DDF.UInt where
 
 import DDF.Lang
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 data UInt h x = UInt
 
@@ -103,11 +104,11 @@ instance List UInt where
   cons = UInt
   listMatch = UInt
 
-instance VectorTF UInt where
-  zeroVTF = UInt
-  basisVTF = UInt
-  plusVTF = UInt
-  multVTF = UInt
+instance VTF.VectorTF UInt where
+  zero = UInt
+  basis = UInt
+  plus = UInt
+  mult = UInt
   vtfMatch = UInt
 
 instance Lang UInt where

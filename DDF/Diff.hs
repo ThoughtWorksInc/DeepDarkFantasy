@@ -19,6 +19,7 @@ import qualified DDF.Map as Map
 import qualified Data.Bimap as M
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Meta.VectorTF as M
+import qualified DDF.VectorTF as VTF
 
 type instance DiffType v (l -> r) = DiffType v l -> DiffType v r
 instance DBI r => DBI (Diff r v) where
@@ -154,12 +155,12 @@ instance Monad r M.IO => Monad (Diff r v) M.IO where
   join = Diff join
 
 type instance DiffType v (M.VectorTF t f) = M.VectorTF (DiffType v t) (DiffType v f)
-instance (Dual r, VectorTF r, Vector r v) => VectorTF (Diff r v) where
-  zeroVTF = Diff zeroVTF
-  basisVTF = Diff basisVTF
-  plusVTF = Diff plusVTF
-  multVTF = Diff $ multVTF `com2` dualOrig
-  vtfMatch = Diff $ lam4 $ \ze b p m -> vtfMatch4 ze b p $ lam $ \x -> app m (mkDual2 x zero)
+instance (Dual r, VTF.VectorTF r, Vector r v) => VTF.VectorTF (Diff r v) where
+  zero = Diff VTF.zero
+  basis = Diff VTF.basis
+  plus = Diff VTF.plus
+  mult = Diff $ VTF.mult `com2` dualOrig
+  vtfMatch = Diff $ lam4 $ \ze b p m -> VTF.vtfMatch4 ze b p $ lam $ \x -> app m (mkDual2 x zero)
 
 type instance DiffType v Void = Void
 type instance DiffType v (Writer l r) = Writer (DiffType v l) (DiffType v r)

@@ -11,6 +11,7 @@ module DDF.UnHOAS where
 
 import DDF.Lang
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 instance DBI repr => DBI (UnHOAS repr) where
   z = UnHOAS z
@@ -108,12 +109,12 @@ instance List r => List (UnHOAS r) where
   cons = UnHOAS cons
   listMatch = UnHOAS listMatch
 
-instance VectorTF r => VectorTF (UnHOAS r) where
-  zeroVTF = UnHOAS zeroVTF
-  basisVTF = UnHOAS basisVTF
-  plusVTF = UnHOAS plusVTF
-  multVTF = UnHOAS multVTF
-  vtfMatch = UnHOAS vtfMatch
+instance VTF.VectorTF r => VTF.VectorTF (UnHOAS r) where
+  zero = UnHOAS VTF.zero
+  basis = UnHOAS VTF.basis
+  plus = UnHOAS VTF.plus
+  mult = UnHOAS VTF.mult
+  vtfMatch = UnHOAS VTF.vtfMatch
 
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double

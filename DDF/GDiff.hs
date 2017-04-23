@@ -15,6 +15,7 @@ import DDF.Lang
 import qualified Prelude as M
 import DDF.Diff ()
 import qualified DDF.Map as Map
+import qualified DDF.VectorTF as VTF
 
 instance DBI r => DBI (GDiff r) where
   z = GDiff (M.const z)
@@ -47,12 +48,12 @@ instance (Double r, Dual r) => Double (GDiff r) where
   doubleDivide = GDiff $ M.const $ doubleDivide
   doubleExp = GDiff $ M.const $ doubleExp
 
-instance (Dual r, VectorTF r) => VectorTF (GDiff r) where
-  zeroVTF = GDiff $ M.const $ zeroVTF
-  basisVTF = GDiff $ M.const $ basisVTF
-  plusVTF = GDiff $ M.const $ plusVTF
-  multVTF = GDiff $ M.const $ multVTF
-  vtfMatch = GDiff $ M.const $ vtfMatch
+instance (Dual r, VTF.VectorTF r) => VTF.VectorTF (GDiff r) where
+  zero = GDiff $ M.const $ VTF.zero
+  basis = GDiff $ M.const $ VTF.basis
+  plus = GDiff $ M.const $ VTF.plus
+  mult = GDiff $ M.const $ VTF.mult
+  vtfMatch = GDiff $ M.const $ VTF.vtfMatch
 
 instance Lang r => Float (GDiff r) where
   float x = GDiff $ M.const $ float x
