@@ -111,6 +111,10 @@ instance VTF.VectorTF UInt where
   mult = UInt
   vtfMatch = UInt
 
+instance DiffWrapper UInt where
+  diffWrapper = UInt
+  runDiffWrapper = UInt
+
 instance Lang UInt where
   exfalso = UInt
   runWriter = UInt

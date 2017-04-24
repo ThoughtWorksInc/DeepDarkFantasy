@@ -118,6 +118,10 @@ instance (Prod r, Unit r, VTF.VectorTF r) => VTF.VectorTF (UnLiftEnv r) where
   mult = unLiftEnv VTF.mult
   vtfMatch = unLiftEnv VTF.vtfMatch
 
+instance (Prod r, Unit r, DiffWrapper r) => DiffWrapper (UnLiftEnv r) where
+  diffWrapper = unLiftEnv diffWrapper
+  runDiffWrapper = unLiftEnv runDiffWrapper
+
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso
   writer = unLiftEnv writer

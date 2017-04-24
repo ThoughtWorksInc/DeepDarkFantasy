@@ -27,6 +27,7 @@ library
     DDF.Combine
     DDF.DBI
     DDF.Diff
+    DDF.DiffWrapper
     DDF.Double
     DDF.Dual
     DDF.Eval
@@ -43,6 +44,7 @@ library
     DDF.Map
     DDF.Meta.Interpreter
     DDF.Meta.Diff
+    DDF.Meta.DiffWrapper
     DDF.Meta.Dual
     DDF.Meta.VectorTF
     DDF.Option

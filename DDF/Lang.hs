@@ -17,7 +17,8 @@ module DDF.Lang (
   module DDF.Unit,
   module DDF.Sum,
   module DDF.Int,
-  module DDF.IO
+  module DDF.IO,
+  module DDF.DiffWrapper
 ) where
 
 import DDF.Bool
@@ -32,6 +33,7 @@ import DDF.Unit
 import DDF.Sum
 import DDF.Int
 import DDF.IO
+import DDF.DiffWrapper
 
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.Dual as M
@@ -40,8 +42,12 @@ import qualified GHC.Float as M
 import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
+import qualified Data.Map as M.Map
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r) => Lang r where
+type FreeVector b = b -> M.Double
+type FreeVectorBuilder b = M.Map.Map b M.Double
+
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))
@@ -51,6 +57,8 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
   runState :: r h (State x y -> (x -> (y, x)))
   iterate :: r h ((x -> x) -> x -> [x])
   iterate = lam $ \f -> fix1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
+  buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> FreeVector b)
+  buildFreeVector = lam2 $ \fb b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
 
 class Reify r x where
   reify :: x -> r h x

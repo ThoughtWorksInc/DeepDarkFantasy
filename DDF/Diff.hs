@@ -7,7 +7,9 @@
   FlexibleContexts,
   UndecidableInstances,
   TypeFamilies,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  TypeOperators,
+  DataKinds
 #-}
 
 module DDF.Diff where
@@ -20,6 +22,7 @@ import qualified Data.Bimap as M
 import qualified DDF.Meta.Dual as M
 import qualified DDF.Meta.VectorTF as M
 import qualified DDF.VectorTF as VTF
+import qualified DDF.Meta.DiffWrapper as M.DW
 
 type instance DiffType v (l -> r) = DiffType v l -> DiffType v r
 instance DBI r => DBI (Diff r v) where
@@ -161,6 +164,11 @@ instance (Dual r, VTF.VectorTF r, Vector r v) => VTF.VectorTF (Diff r v) where
   plus = Diff VTF.plus
   mult = Diff $ VTF.mult `com2` dualOrig
   vtfMatch = Diff $ lam4 $ \ze b p m -> VTF.vtfMatch4 ze b p $ lam $ \x -> app m (mkDual2 x zero)
+
+type instance DiffType v (M.DW.DiffWrapper a x) = M.DW.DiffWrapper (v ': a) x
+instance DiffWrapper r => DiffWrapper (Diff r v) where
+  diffWrapper = Diff diffWrapper
+  runDiffWrapper = Diff runDiffWrapper
 
 type instance DiffType v Void = Void
 type instance DiffType v (Writer l r) = Writer (DiffType v l) (DiffType v r)

@@ -120,6 +120,10 @@ instance (VTF.VectorTF l, VTF.VectorTF r) => VTF.VectorTF (Combine l r) where
   mult = Combine VTF.mult VTF.mult
   vtfMatch = Combine VTF.vtfMatch VTF.vtfMatch
 
+instance (DiffWrapper l, DiffWrapper r) => DiffWrapper (Combine l r) where
+  diffWrapper = Combine diffWrapper diffWrapper
+  runDiffWrapper = Combine runDiffWrapper runDiffWrapper
+
 instance (Lang l, Lang r) => Lang (Combine l r) where
   exfalso = Combine exfalso exfalso
   runWriter = Combine runWriter runWriter

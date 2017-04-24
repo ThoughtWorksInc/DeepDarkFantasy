@@ -121,6 +121,10 @@ instance (Dual r, VTF.VectorTF r) => VTF.VectorTF (InfDiff r) where
   mult = InfDiff VTF.mult
   vtfMatch = InfDiff VTF.vtfMatch
 
+instance DiffWrapper r => DiffWrapper (InfDiff r) where
+  diffWrapper = InfDiff diffWrapper
+  runDiffWrapper = InfDiff runDiffWrapper
+
 instance Lang r => Lang (InfDiff r) where
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float

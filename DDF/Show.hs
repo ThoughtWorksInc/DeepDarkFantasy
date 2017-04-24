@@ -129,6 +129,10 @@ instance VTF.VectorTF Show where
   mult = name "VTF.mult"
   vtfMatch = name "VTF.vtfMatch"
 
+instance DiffWrapper Show where
+  diffWrapper = name "diffWrapper"
+  runDiffWrapper = name "runDiffWrapper"
+
 instance Lang Show where
   exfalso = name "exfalso"
   writer = name "writer"

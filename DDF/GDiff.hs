@@ -120,6 +120,10 @@ instance List r => List (GDiff r) where
   cons = GDiff $ M.const cons
   listMatch = GDiff $ M.const listMatch
 
+instance DiffWrapper r => DiffWrapper (GDiff r) where
+  diffWrapper = GDiff $ M.const diffWrapper
+  runDiffWrapper = GDiff $ M.const runDiffWrapper
+
 instance Lang r => Lang (GDiff r) where
   exfalso = GDiff $ M.const exfalso
   writer = GDiff $ M.const writer

@@ -114,6 +114,10 @@ instance VTF.VectorTF Size where
   mult = one
   vtfMatch = one
 
+instance DiffWrapper Size where
+  diffWrapper = one
+  runDiffWrapper = one
+
 instance Lang Size where
   exfalso = one
   writer = one

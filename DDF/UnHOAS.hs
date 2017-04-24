@@ -116,6 +116,10 @@ instance VTF.VectorTF r => VTF.VectorTF (UnHOAS r) where
   mult = UnHOAS VTF.mult
   vtfMatch = UnHOAS VTF.vtfMatch
 
+instance DiffWrapper r => DiffWrapper (UnHOAS r) where
+  diffWrapper = UnHOAS diffWrapper
+  runDiffWrapper = UnHOAS runDiffWrapper
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   exfalso = UnHOAS exfalso

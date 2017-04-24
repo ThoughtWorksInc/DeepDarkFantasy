@@ -2,7 +2,8 @@
   NoImplicitPrelude,
   ScopedTypeVariables,
   TypeApplications,
-  FlexibleInstances
+  FlexibleInstances,
+  NoMonomorphismRestriction
 #-}
 
 module DDF.Map (module DDF.Map, module DDF.Prod, module DDF.Option) where
@@ -22,3 +23,5 @@ class (Prod r, Option r) => Map r where
   lookup :: Ord k => r h (M.Map k a -> k -> Maybe a)
   alter :: Ord k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   mapMap :: r h ((a -> b) -> M.Map k a -> M.Map k b)
+
+lookup2 = app2 lookup

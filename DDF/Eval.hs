@@ -21,6 +21,7 @@ import qualified DDF.Map as Map
 import qualified DDF.Meta.VectorTF as M.VTF
 import qualified Data.Bimap as M.Bimap
 import qualified DDF.VectorTF as VTF
+import qualified DDF.Meta.DiffWrapper as M.DW
 import DDF.Lang
 comb = Eval . M.const
 
@@ -137,6 +138,10 @@ instance VTF.VectorTF Eval where
                                  M.VTF.Basis t -> b t
                                  M.VTF.Plus l r -> p l r
                                  M.VTF.Mult l r -> m l r
+
+instance DiffWrapper Eval where
+  diffWrapper = comb M.DW.DiffWrapper
+  runDiffWrapper = comb M.DW.runDiffWrapper
 
 instance Lang Eval where
   exfalso = comb absurd

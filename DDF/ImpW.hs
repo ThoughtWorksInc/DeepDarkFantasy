@@ -130,6 +130,10 @@ instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (ImpW r) where
   mult = NoImpW VTF.mult
   vtfMatch = NoImpW VTF.vtfMatch
 
+instance (Prod r, DiffWrapper r) => DiffWrapper (ImpW r) where
+  diffWrapper = NoImpW diffWrapper
+  runDiffWrapper = NoImpW runDiffWrapper
+
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso
   writer = NoImpW writer
