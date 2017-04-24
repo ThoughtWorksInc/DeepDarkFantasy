@@ -20,7 +20,6 @@ import qualified Data.Map as M
 import qualified DDF.Map as Map
 import qualified Data.Bimap as M
 import qualified DDF.Meta.Dual as M
-import qualified DDF.Meta.VectorTF as M
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
 import qualified Data.Functor.Foldable as M
@@ -132,7 +131,6 @@ instance Sum r => Sum (Diff r v) where
   right = Diff right
   sumMatch = Diff sumMatch
 
-type instance DiffType v M.Int = M.Int
 instance Int r => Int (Diff r v) where
   int = Diff . int
 
@@ -160,7 +158,6 @@ instance Monad r M.IO => Monad (Diff r v) M.IO where
   bind = Diff bind
   join = Diff join
 
-type instance DiffType v (M.VectorTF t f) = M.VectorTF (DiffType v t) (DiffType v f)
 instance (Dual r, VTF.VectorTF r, Vector r v) => VTF.VectorTF (Diff r v) where
   zero = Diff VTF.zero
   basis = Diff VTF.basis

@@ -2,7 +2,9 @@
   NoImplicitPrelude,
   NoMonomorphismRestriction,
   MultiParamTypeClasses,
-  FlexibleInstances
+  FlexibleInstances,
+  TypeFamilies,
+  ScopedTypeVariables
 #-}
 
 module DDF.Lang (
@@ -47,10 +49,11 @@ import qualified Data.Map as M
 import qualified DDF.Map as Map
 import qualified Data.Map as M.Map
 import qualified Data.Functor.Foldable as M
+import qualified Data.Bimap as M.Bimap
 
 type FreeVector b = b -> M.Double
 type FreeVectorBuilder b = M.Map.Map b M.Double
-
+type SVTFBuilder b = State (M.Bimap.Bimap (M.VTF.VectorTF b M.Int) M.Int) M.Int
 class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
@@ -63,6 +66,12 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
   iterate = lam $ \f -> y1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
   buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> FreeVector b)
   buildFreeVector = lam2 $ \fb b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
+  toSVTFBuilder :: Map.Ord b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
+  toSVTFBuilder = lam $ \x -> state1 $ lam $ \m ->
+    optionMatch3
+      (let_2 (size1 m) (lam $ \si -> mkProd2 si (insert2 (mkProd2 x si) m)))
+      (lam $ \xid -> mkProd2 xid m)
+      (lookupL2 m x)
 
 class Reify r x where
   reify :: x -> r h x
@@ -207,6 +216,24 @@ instance Lang r => Group r (M.Fix (M.VTF.VectorTF b)) where
 instance Lang r => Vector r (M.Fix (M.VTF.VectorTF b)) where
   mult = lam $ \d -> fix `com2` VTF.mult1 d
 
+instance (Map.Ord b, Lang r) => Monoid r (SVTFBuilder b) where
+  zero = toSVTFBuilder1 VTF.zero
+  plus = lam2 $ \l r -> l `bind2` (lam $ \lid -> r `bind2` (lam $ \rid -> toSVTFBuilder1 (VTF.plus2 lid rid)))
+
+instance (Map.Ord b, Lang r) => Group r (SVTFBuilder b) where
+  invert = mult1 (double (-1))
+
+instance (Map.Ord b, Lang r) => Vector r (SVTFBuilder b) where
+  mult = lam2 $ \d x -> x `bind2` (lam $ \xid -> toSVTFBuilder1 (VTF.mult2 d xid))
+
+type instance DiffType v (M.VTF.VectorTF t f) = M.VTF.VectorTF (DiffType v t) (DiffType v f)
+instance (Map.Ord b, Map.Ord f) => Map.Ord (M.VTF.VectorTF b f) where
+  diffOrd (_ :: Proxy (v, M.VTF.VectorTF b f)) = withDict (Map.diffOrd (Proxy :: Proxy (v, b))) $ withDict (Map.diffOrd (Proxy :: Proxy (v, f))) Dict
+
+type instance DiffType v M.Int = M.Int
+instance Map.Ord M.Int where
+  diffOrd _ = Dict
+
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
@@ -218,3 +245,4 @@ floatExp1 = app floatExp
 state1 = app state
 runState1 = app runState
 runState2 = app2 runState
+toSVTFBuilder1 = app toSVTFBuilder

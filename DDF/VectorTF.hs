@@ -16,3 +16,4 @@ class Double.Double r => VectorTF r where
 vtfMatch4 = Double.app4 vtfMatch
 plus2 = Double.app2 plus
 mult1 = Double.app mult
+mult2 = Double.app2 mult

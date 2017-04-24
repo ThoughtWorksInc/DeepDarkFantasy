@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
 
 module DDF.Bimap (module DDF.Bimap, module DDF.Prod, module DDF.Option) where
 
@@ -21,3 +21,7 @@ class (Int r, Map.Map r) => Bimap r where
   insert :: (Map.Ord a, Map.Ord b) => r h ((a, b) -> M.Bimap a b -> M.Bimap a b) 
   updateL :: (Map.Ord a, Map.Ord b) => r h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
   updateR :: (Map.Ord a, Map.Ord b) => r h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
+
+lookupL2 = app2 lookupL
+size1 = app size
+insert2 = app2 insert
