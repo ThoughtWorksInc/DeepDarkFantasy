@@ -122,6 +122,10 @@ instance (Prod r, Unit r, DiffWrapper r) => DiffWrapper (UnLiftEnv r) where
   diffWrapper = unLiftEnv diffWrapper
   runDiffWrapper = unLiftEnv runDiffWrapper
 
+instance (Prod r, Unit r, Fix r) => Fix (UnLiftEnv r) where
+  fix = unLiftEnv fix
+  runFix = unLiftEnv runFix
+
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso
   writer = unLiftEnv writer

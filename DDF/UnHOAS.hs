@@ -120,6 +120,10 @@ instance DiffWrapper r => DiffWrapper (UnHOAS r) where
   diffWrapper = UnHOAS diffWrapper
   runDiffWrapper = UnHOAS runDiffWrapper
 
+instance Fix r => Fix (UnHOAS r) where
+  fix = UnHOAS fix
+  runFix = UnHOAS runFix
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   exfalso = UnHOAS exfalso

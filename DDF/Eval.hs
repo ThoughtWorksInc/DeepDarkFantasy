@@ -22,7 +22,9 @@ import qualified DDF.Meta.VectorTF as M.VTF
 import qualified Data.Bimap as M.Bimap
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
+import qualified Data.Functor.Foldable as M
 import DDF.Lang
+
 comb = Eval . M.const
 
 instance DBI Eval where
@@ -142,6 +144,10 @@ instance VTF.VectorTF Eval where
 instance DiffWrapper Eval where
   diffWrapper = comb M.DW.DiffWrapper
   runDiffWrapper = comb M.DW.runDiffWrapper
+
+instance Fix Eval where
+  fix = comb M.Fix
+  runFix = comb M.unfix
 
 instance Lang Eval where
   exfalso = comb absurd

@@ -124,6 +124,10 @@ instance (DiffWrapper l, DiffWrapper r) => DiffWrapper (Combine l r) where
   diffWrapper = Combine diffWrapper diffWrapper
   runDiffWrapper = Combine runDiffWrapper runDiffWrapper
 
+instance (Fix l, Fix r) => Fix (Combine l r) where
+  fix = Combine fix fix
+  runFix = Combine runFix runFix
+
 instance (Lang l, Lang r) => Lang (Combine l r) where
   exfalso = Combine exfalso exfalso
   runWriter = Combine runWriter runWriter

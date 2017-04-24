@@ -134,6 +134,10 @@ instance (Prod r, DiffWrapper r) => DiffWrapper (ImpW r) where
   diffWrapper = NoImpW diffWrapper
   runDiffWrapper = NoImpW runDiffWrapper
 
+instance (Prod r, Fix r) => Fix (ImpW r) where
+  fix = NoImpW fix
+  runFix = NoImpW runFix
+
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso
   writer = NoImpW writer

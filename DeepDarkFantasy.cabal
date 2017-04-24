@@ -31,6 +31,7 @@ library
     DDF.Double
     DDF.Dual
     DDF.Eval
+    DDF.Fix
     DDF.Float
     DDF.GDiff
     DDF.ImportMeta
@@ -68,7 +69,8 @@ library
     random -any,
     constraints -any,
     containers -any,
-    bimap -any
+    bimap -any,
+    recursion-schemes -any
   ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
   if flag(WError)
     ghc-options: -Werror

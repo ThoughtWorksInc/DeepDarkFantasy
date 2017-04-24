@@ -125,6 +125,10 @@ instance DiffWrapper r => DiffWrapper (InfDiff r) where
   diffWrapper = InfDiff diffWrapper
   runDiffWrapper = InfDiff runDiffWrapper
 
+instance (DiffWrapper r, Fix r) => Fix (InfDiff r) where
+  fix = InfDiff fix
+  runFix = InfDiff runFix
+
 instance Lang r => Lang (InfDiff r) where
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float

@@ -133,6 +133,10 @@ instance DiffWrapper Show where
   diffWrapper = name "diffWrapper"
   runDiffWrapper = name "runDiffWrapper"
 
+instance Fix Show where
+  fix = name "fix"
+  runFix = name "runFix"
+
 instance Lang Show where
   exfalso = name "exfalso"
   writer = name "writer"

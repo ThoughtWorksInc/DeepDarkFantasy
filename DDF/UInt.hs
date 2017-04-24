@@ -115,6 +115,10 @@ instance DiffWrapper UInt where
   diffWrapper = UInt
   runDiffWrapper = UInt
 
+instance Fix UInt where
+  fix = UInt
+  runFix = UInt
+
 instance Lang UInt where
   exfalso = UInt
   runWriter = UInt

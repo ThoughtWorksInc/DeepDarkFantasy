@@ -118,6 +118,10 @@ instance DiffWrapper Size where
   diffWrapper = one
   runDiffWrapper = one
 
+instance Fix Size where
+  fix = one
+  runFix = one
+
 instance Lang Size where
   exfalso = one
   writer = one

@@ -18,7 +18,8 @@ module DDF.Lang (
   module DDF.Sum,
   module DDF.Int,
   module DDF.IO,
-  module DDF.DiffWrapper
+  module DDF.DiffWrapper,
+  module DDF.Fix
 ) where
 
 import DDF.Bool
@@ -34,6 +35,7 @@ import DDF.Sum
 import DDF.Int
 import DDF.IO
 import DDF.DiffWrapper
+import DDF.Fix
 
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.Dual as M
@@ -47,7 +49,7 @@ import qualified Data.Map as M.Map
 type FreeVector b = b -> M.Double
 type FreeVectorBuilder b = M.Map.Map b M.Double
 
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))

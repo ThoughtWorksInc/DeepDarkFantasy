@@ -124,6 +124,10 @@ instance DiffWrapper r => DiffWrapper (GDiff r) where
   diffWrapper = GDiff $ M.const diffWrapper
   runDiffWrapper = GDiff $ M.const runDiffWrapper
 
+instance DiffWrapper r => Fix (GDiff r) where
+  fix = GDiff $ M.const fix
+  runFix = GDiff $ M.const runFix
+
 instance Lang r => Lang (GDiff r) where
   exfalso = GDiff $ M.const exfalso
   writer = GDiff $ M.const writer
