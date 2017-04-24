@@ -172,6 +172,18 @@ instance Lang r => Applicative r M.Maybe where
 instance Lang r => Monad r M.Maybe where
   bind = lam2 $ \x func -> optionMatch3 nothing func x
 
+instance Lang r => Monoid r (FreeVector b) where
+  zero = const1 (double 0)
+  plus = lam3 $ \l r x -> app l x `plus2` app r x
+
+instance Lang r => Group r (FreeVector b) where
+  invert = lam2 $ \f x -> invert1 (app f x)
+  minus = lam3 $ \l r x -> app l x `minus2` app r x
+
+instance Lang r => Vector r (FreeVector b) where
+  mult = lam3 $ \d l x -> d `mult2` app l x
+  divide = lam3 $ \l d x -> app l x `divide2` d
+
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
