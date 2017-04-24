@@ -125,6 +125,10 @@ instance Fix r => Fix (UnHOAS r) where
   fix = UnHOAS fix
   runFix = UnHOAS runFix
 
+instance FreeVector r => FreeVector (UnHOAS r) where
+  freeVector = UnHOAS freeVector
+  runFreeVector = UnHOAS runFreeVector
+
 instance Lang r => Lang (UnHOAS r) where
   float2Double = UnHOAS float2Double
   exfalso = UnHOAS exfalso

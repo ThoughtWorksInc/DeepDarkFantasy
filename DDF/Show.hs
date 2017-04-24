@@ -138,6 +138,10 @@ instance Fix Show where
   fix = name "fix"
   runFix = name "runFix"
 
+instance FreeVector Show where
+  freeVector = name "freeVector"
+  runFreeVector = name "runFreeVector"
+
 instance Lang Show where
   exfalso = name "exfalso"
   writer = name "writer"

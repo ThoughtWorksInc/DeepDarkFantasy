@@ -123,6 +123,10 @@ instance Fix Size where
   fix = one
   runFix = one
 
+instance FreeVector Size where
+  freeVector = one
+  runFreeVector = one
+
 instance Lang Size where
   exfalso = one
   writer = one

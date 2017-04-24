@@ -23,6 +23,7 @@ import qualified Data.Bimap as M.Bimap
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
 import qualified Data.Functor.Foldable as M
+import qualified DDF.Meta.FreeVector as M
 import DDF.Lang
 
 comb = Eval . M.const
@@ -149,6 +150,10 @@ instance DiffWrapper Eval where
 instance Fix Eval where
   fix = comb M.Fix
   runFix = comb M.unfix
+
+instance FreeVector Eval where
+  freeVector = comb M.FreeVector
+  runFreeVector = comb M.runFreeVector
 
 instance Lang Eval where
   exfalso = comb absurd

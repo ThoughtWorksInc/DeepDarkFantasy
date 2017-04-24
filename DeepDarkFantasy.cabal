@@ -33,6 +33,7 @@ library
     DDF.Eval
     DDF.Fix
     DDF.Float
+    DDF.FreeVector
     DDF.GDiff
     DDF.ImportMeta
     DDF.ImpW
@@ -46,6 +47,7 @@ library
     DDF.Meta.Diff
     DDF.Meta.DiffWrapper
     DDF.Meta.Dual
+    DDF.Meta.FreeVector
     DDF.Meta.VectorTF
     DDF.Option
     DDF.Poly

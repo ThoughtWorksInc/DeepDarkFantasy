@@ -4,7 +4,8 @@
   MultiParamTypeClasses,
   NoMonomorphismRestriction,
   FlexibleContexts,
-  FlexibleInstances
+  FlexibleInstances,
+  TypeFamilies
 #-}
 
 module DDF.Vector where
@@ -21,6 +22,7 @@ class Monoid r g => Group r g where
   {-# MINIMAL (invert | minus) #-}
 
 class Group r v => Vector r v where
+  type Basis v :: *
   mult :: r h (M.Double -> v -> v)
   divide :: r h (v -> M.Double -> v)
   default mult :: Double r => r h (M.Double -> v -> v)
@@ -47,5 +49,6 @@ instance Double r => Group r M.Double where
   minus = doubleMinus
 
 instance Double r => Vector r M.Double where
+  type Basis M.Double = ()
   mult = doubleMult
   divide = doubleDivide

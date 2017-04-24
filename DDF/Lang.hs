@@ -21,7 +21,8 @@ module DDF.Lang (
   module DDF.Int,
   module DDF.IO,
   module DDF.DiffWrapper,
-  module DDF.Fix
+  module DDF.Fix,
+  module DDF.FreeVector
 ) where
 
 import DDF.Bool
@@ -38,6 +39,7 @@ import DDF.Int
 import DDF.IO
 import DDF.DiffWrapper
 import DDF.Fix
+import DDF.FreeVector
 
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.VectorTF as M.VTF
@@ -50,11 +52,11 @@ import qualified DDF.Map as Map
 import qualified Data.Map as M.Map
 import qualified Data.Functor.Foldable as M
 import qualified Data.Bimap as M.Bimap
+import qualified DDF.Meta.FreeVector as M
 
-type FreeVector b = b -> M.Double
 type FreeVectorBuilder b = M.Map.Map b M.Double
 type SVTFBuilder b = State (M.Bimap.Bimap (M.VTF.VectorTF b M.Int) M.Int) M.Int
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r) => Lang r where
+class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r, FreeVector r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))
@@ -64,8 +66,8 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
   runState :: r h (State x y -> (x -> (y, x)))
   iterate :: r h ((x -> x) -> x -> [x])
   iterate = lam $ \f -> y1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
-  buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> FreeVector b)
-  buildFreeVector = lam2 $ \fb b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
+  buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> M.FreeVector b M.Double)
+  buildFreeVector = lam $ \fb -> freeVector1 $ lam $ \b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
   toSVTFBuilder :: Map.Ord b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
   toSVTFBuilder = lam $ \x -> state1 $ lam $ \m ->
     optionMatch3
@@ -100,6 +102,7 @@ instance Lang r => Group r () where
   minus = const1 $ const1 unit
 
 instance Lang r => Vector r () where
+  type Basis () = Void
   mult = const1 $ const1 unit
   divide = const1 $ const1 unit
 
@@ -111,6 +114,7 @@ instance Float r => Group r M.Float where
   minus = floatMinus
 
 instance Lang r => Vector r M.Float where
+  type Basis M.Float = ()
   mult = com2 floatMult double2Float
   divide = com2 (flip2 com double2Float) floatDivide
 
@@ -122,6 +126,7 @@ instance (Prod repr, Group repr l, Group repr r) => Group repr (l, r) where
   invert = bimap2 invert invert
 
 instance (Prod repr, Double repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
+  type Basis (l, r) = M.Either (Basis l) (Basis r)
   mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
 instance (Double r, Monoid r v) => Monoid r (M.Double -> v) where
@@ -132,6 +137,7 @@ instance (Lang r, Group r v) => Group r (M.Double -> v) where
   invert = lam2 $ \l x -> app l (invert1 x)
 
 instance (Lang r, Vector r v) => Vector r (M.Double -> v) where
+  type Basis (M.Double -> v) = Basis v
   mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance Lang r => Monoid r [a] where
@@ -183,17 +189,18 @@ instance Lang r => Applicative r M.Maybe where
 instance Lang r => Monad r M.Maybe where
   bind = lam2 $ \x func -> optionMatch3 nothing func x
 
-instance Lang r => Monoid r (FreeVector b) where
-  zero = const1 (double 0)
-  plus = lam3 $ \l r x -> app l x `plus2` app r x
+instance Lang r => Monoid r (M.FreeVector b M.Double) where
+  zero = freeVector1 $ const1 (double 0)
+  plus = lam2 $ \l r -> freeVector1 $ lam $ \x -> runFreeVector2 l x `plus2` runFreeVector2 r x
 
-instance Lang r => Group r (FreeVector b) where
-  invert = lam2 $ \f x -> invert1 (app f x)
-  minus = lam3 $ \l r x -> app l x `minus2` app r x
+instance Lang r => Group r (M.FreeVector b M.Double) where
+  invert = lam $ \f -> freeVector1 $ lam $ \x -> invert1 (runFreeVector2 f x)
+  minus = lam2 $ \l r -> freeVector1 $ lam $ \x -> runFreeVector2 l x `minus2` runFreeVector2 r x
 
-instance Lang r => Vector r (FreeVector b) where
-  mult = lam3 $ \d l x -> d `mult2` app l x
-  divide = lam3 $ \l d x -> app l x `divide2` d
+instance Lang r => Vector r (M.FreeVector b M.Double) where
+  type Basis (M.FreeVector b M.Double) = b
+  mult = lam2 $ \d l -> freeVector1 $ lam $ \x -> d `mult2` runFreeVector2 l x
+  divide = lam2 $ \l d -> freeVector1 $ lam $ \x -> runFreeVector2 l x `divide2` d
 
 instance (Map.Ord b, Lang r) => Monoid r (FreeVectorBuilder b) where
   zero = Map.empty
@@ -203,6 +210,7 @@ instance (Map.Ord b, Lang r) => Group r (FreeVectorBuilder b) where
   invert = Map.mapMap1 invert
 
 instance (Map.Ord b, Lang r) => Vector r (FreeVectorBuilder b) where
+  type Basis (FreeVectorBuilder b) = b
   mult = Map.mapMap `com2` mult
   divide = lam2 $ \m d -> Map.mapMap2 (lam $ \x -> divide2 x d) m
 
@@ -214,6 +222,7 @@ instance Lang r => Group r (M.Fix (M.VTF.VectorTF b)) where
   invert = mult1 (double (-1))
 
 instance Lang r => Vector r (M.Fix (M.VTF.VectorTF b)) where
+  type Basis (M.Fix (M.VTF.VectorTF b)) = b
   mult = lam $ \d -> fix `com2` VTF.mult1 d
 
 instance (Map.Ord b, Lang r) => Monoid r (SVTFBuilder b) where
@@ -224,6 +233,7 @@ instance (Map.Ord b, Lang r) => Group r (SVTFBuilder b) where
   invert = mult1 (double (-1))
 
 instance (Map.Ord b, Lang r) => Vector r (SVTFBuilder b) where
+  type Basis (SVTFBuilder b) = b
   mult = lam2 $ \d x -> x `bind2` (lam $ \xid -> toSVTFBuilder1 (VTF.mult2 d xid))
 
 type instance DiffType v (M.VTF.VectorTF t f) = M.VTF.VectorTF (DiffType v t) (DiffType v f)

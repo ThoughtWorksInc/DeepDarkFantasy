@@ -139,6 +139,10 @@ instance (Prod r, Fix r) => Fix (ImpW r) where
   fix = NoImpW fix
   runFix = NoImpW runFix
 
+instance (Prod r, FreeVector r) => FreeVector (ImpW r) where
+  freeVector = NoImpW freeVector
+  runFreeVector = NoImpW runFreeVector
+
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso
   writer = NoImpW writer

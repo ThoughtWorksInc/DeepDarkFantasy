@@ -130,6 +130,10 @@ instance (DiffWrapper r, Fix r) => Fix (InfDiff r) where
   fix = InfDiff fix
   runFix = InfDiff runFix
 
+instance FreeVector r => FreeVector (InfDiff r) where
+  freeVector = InfDiff freeVector
+  runFreeVector = InfDiff runFreeVector
+
 instance Lang r => Lang (InfDiff r) where
   float2Double = InfDiff float2Double
   double2Float = InfDiff double2Float

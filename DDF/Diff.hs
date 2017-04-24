@@ -23,6 +23,7 @@ import qualified DDF.Meta.Dual as M
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
 import qualified Data.Functor.Foldable as M
+import qualified DDF.Meta.FreeVector as M
 
 type instance DiffType v (l -> r) = DiffType v l -> DiffType v r
 instance DBI r => DBI (Diff r v) where
@@ -174,6 +175,11 @@ type instance DiffType v (M.Fix f) = M.DW.DiffWrapper '[v] (f (M.Fix f))
 instance DiffWrapper r => Fix (Diff r v) where
   fix = Diff diffWrapper
   runFix = Diff runDiffWrapper
+
+type instance DiffType v (M.FreeVector a b) = M.FreeVector (DiffType v a) (DiffType v b)
+instance FreeVector r => FreeVector (Diff r v) where
+  freeVector = Diff freeVector
+  runFreeVector = Diff runFreeVector
 
 type instance DiffType v Void = Void
 type instance DiffType v (Writer l r) = Writer (DiffType v l) (DiffType v r)

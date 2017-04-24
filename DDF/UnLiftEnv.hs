@@ -127,6 +127,10 @@ instance (Prod r, Unit r, Fix r) => Fix (UnLiftEnv r) where
   fix = unLiftEnv fix
   runFix = unLiftEnv runFix
 
+instance (Prod r, Unit r, FreeVector r) => FreeVector (UnLiftEnv r) where
+  freeVector = unLiftEnv freeVector
+  runFreeVector = unLiftEnv runFreeVector
+
 instance Lang r => Lang (UnLiftEnv r) where
   exfalso = unLiftEnv exfalso
   writer = unLiftEnv writer

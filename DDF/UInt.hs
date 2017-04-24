@@ -120,6 +120,10 @@ instance Fix UInt where
   fix = UInt
   runFix = UInt
 
+instance FreeVector UInt where
+  freeVector = UInt
+  runFreeVector = UInt
+
 instance Lang UInt where
   exfalso = UInt
   runWriter = UInt
