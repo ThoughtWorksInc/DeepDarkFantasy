@@ -38,6 +38,7 @@ import DDF.DiffWrapper
 import DDF.Fix
 
 import qualified DDF.VectorTF as VTF
+import qualified DDF.Meta.VectorTF as M.VTF
 import qualified DDF.Meta.Dual as M
 import qualified Control.Monad.Writer as M (Writer)
 import qualified GHC.Float as M
@@ -45,6 +46,7 @@ import qualified Prelude as M
 import qualified Data.Map as M
 import qualified DDF.Map as Map
 import qualified Data.Map as M.Map
+import qualified Data.Functor.Foldable as M
 
 type FreeVector b = b -> M.Double
 type FreeVectorBuilder b = M.Map.Map b M.Double
@@ -194,6 +196,16 @@ instance (Map.Ord b, Lang r) => Group r (FreeVectorBuilder b) where
 instance (Map.Ord b, Lang r) => Vector r (FreeVectorBuilder b) where
   mult = Map.mapMap `com2` mult
   divide = lam2 $ \m d -> Map.mapMap2 (lam $ \x -> divide2 x d) m
+
+instance Lang r => Monoid r (M.Fix (M.VTF.VectorTF b)) where
+  zero = fix1 VTF.zero
+  plus = lam2 $ \l r -> fix1 $ l `VTF.plus2` r
+
+instance Lang r => Group r (M.Fix (M.VTF.VectorTF b)) where
+  invert = mult1 (double (-1))
+
+instance Lang r => Vector r (M.Fix (M.VTF.VectorTF b)) where
+  mult = lam $ \d -> fix `com2` VTF.mult1 d
 
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
