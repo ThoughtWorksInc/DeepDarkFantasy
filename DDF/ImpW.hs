@@ -109,8 +109,8 @@ instance (Prod r, List r) => List (ImpW r) where
   cons = NoImpW cons
   listMatch = NoImpW listMatch
 
-instance (Prod r, Fix r) => Fix (ImpW r) where
-  fix = NoImpW fix
+instance (Prod r, Y r) => Y (ImpW r) where
+  y = NoImpW y
 
 instance (Prod r, Functor r x) => Functor (ImpW r) x where
   map = NoImpW map

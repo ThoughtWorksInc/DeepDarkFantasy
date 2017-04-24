@@ -91,8 +91,8 @@ instance (Sum l, Sum r) => Sum (Combine l r) where
 instance (Int l, Int r) => Int (Combine l r) where
   int x = Combine (int x) (int x)
 
-instance (Fix l, Fix r) => Fix (Combine l r) where
-  fix = Combine fix fix
+instance (Y l, Y r) => Y (Combine l r) where
+  y = Combine y y
 
 instance (List l, List r) => List (Combine l r) where
   nil = Combine nil nil

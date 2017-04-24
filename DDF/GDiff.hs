@@ -98,8 +98,8 @@ instance Sum r => Sum (GDiff r) where
 instance Int r => Int (GDiff r) where
   int x = GDiff $ M.const $ int x
 
-instance Fix r => Fix (GDiff r) where
-  fix = GDiff $ M.const fix
+instance Y r => Y (GDiff r) where
+  y = GDiff $ M.const y
 
 instance Functor r M.IO => Functor (GDiff r) M.IO where
   map = GDiff $ M.const map

@@ -92,8 +92,8 @@ instance Sum r => Sum (InfDiff r) where
 instance Int r => Int (InfDiff r) where
   int = InfDiff . int
 
-instance Fix r => Fix (InfDiff r) where
-  fix = InfDiff fix
+instance Y r => Y (InfDiff r) where
+  y = InfDiff y
 
 instance List r => List (InfDiff r) where
   nil = InfDiff nil

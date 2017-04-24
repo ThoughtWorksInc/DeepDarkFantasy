@@ -105,8 +105,8 @@ instance List Show where
   cons = name "cons"
   listMatch = name "listMatch"
 
-instance Fix Show where
-  fix = name "fix"
+instance Y Show where
+  y = name "Y"
 
 instance IO Show where
   putStrLn = name "putStrLn"

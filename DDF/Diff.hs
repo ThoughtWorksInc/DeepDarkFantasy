@@ -133,8 +133,8 @@ type instance DiffType v M.Int = M.Int
 instance Int r => Int (Diff r v) where
   int = Diff . int
 
-instance Fix r => Fix (Diff r v) where
-  fix = Diff fix
+instance Y r => Y (Diff r v) where
+  y = Diff y
 
 type instance DiffType v (M.IO l) = M.IO (DiffType v l)
 instance IO r => IO (Diff r v) where

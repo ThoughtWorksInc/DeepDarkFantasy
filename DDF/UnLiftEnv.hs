@@ -89,8 +89,8 @@ instance (Prod r, Unit r, Sum r) => Sum (UnLiftEnv r) where
 instance (Prod r, Unit r, Int r) => Int (UnLiftEnv r) where
   int = unLiftEnv . int
 
-instance (Unit r, Prod r, Fix r) => Fix (UnLiftEnv r) where
-  fix = unLiftEnv fix
+instance (Unit r, Prod r, Y r) => Y (UnLiftEnv r) where
+  y = unLiftEnv y
 
 instance (Prod r, IO r) => IO (UnLiftEnv r) where
   putStrLn = unLiftEnv putStrLn

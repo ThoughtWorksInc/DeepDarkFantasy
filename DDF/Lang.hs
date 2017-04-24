@@ -56,7 +56,7 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
   state :: r h ((x -> (y, x)) -> State x y)
   runState :: r h (State x y -> (x -> (y, x)))
   iterate :: r h ((x -> x) -> x -> [x])
-  iterate = lam $ \f -> fix1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
+  iterate = lam $ \f -> y1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
   buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> FreeVector b)
   buildFreeVector = lam2 $ \fb b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
 
@@ -126,7 +126,7 @@ instance Lang r => Monoid r [a] where
   plus = listAppend
 
 instance {-# INCOHERENT #-} Lang r => Functor r [] where
-  map = lam $ \f -> fix1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
+  map = lam $ \f -> y1 $ lam $ \self -> listMatch2 nil (lam2 $ \x xs -> cons2 (app f x) $ app self xs)
 
 instance Lang r => BiFunctor r M.Either where
   bimap = lam2 $ \l r -> sumMatch2 (com2 left l) (com2 right r)

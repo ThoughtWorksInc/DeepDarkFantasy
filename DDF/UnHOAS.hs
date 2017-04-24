@@ -87,8 +87,8 @@ instance Sum r => Sum (UnHOAS r) where
 instance Int r => Int (UnHOAS r) where
   int = UnHOAS . int
 
-instance Fix r => Fix (UnHOAS r) where
-  fix = UnHOAS fix
+instance Y r => Y (UnHOAS r) where
+  y = UnHOAS y
 
 instance Functor r x => Functor (UnHOAS r) x where
   map = UnHOAS map

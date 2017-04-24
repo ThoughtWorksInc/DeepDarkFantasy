@@ -103,8 +103,8 @@ instance Sum Eval where
 instance Int Eval where
   int = comb
 
-instance Fix Eval where
-  fix = comb loop
+instance Y Eval where
+  y = comb loop
     where loop x = x $ loop x
 
 instance List Eval where

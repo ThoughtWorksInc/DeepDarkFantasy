@@ -82,8 +82,8 @@ instance Sum UInt where
 instance Int UInt where
   int _ = UInt
 
-instance Fix UInt where
-  fix = UInt
+instance Y UInt where
+  y = UInt
 
 instance Functor UInt x where
   map = UInt

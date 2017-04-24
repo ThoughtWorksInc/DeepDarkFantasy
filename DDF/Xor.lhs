@@ -88,7 +88,7 @@ But before we can train it, we need to define the dataset and the loss function.
 However, unlike Poly, there are more than one datapoint, so we need to use a list, and map xor onto it.
 
 > loss :: Lang repr => repr h (XOR -> M.Double)
-> loss = lam $ \xor -> fix2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
+> loss = lam $ \xor -> y2 (lam $ \self -> listMatch2 doubleZero (lam2 $ \x xs -> plus2 x (app self xs))) (map2 (app eval xor) dataset)
 
 Now we are good to implement the train function!
 

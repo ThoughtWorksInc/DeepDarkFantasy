@@ -88,8 +88,8 @@ instance Int Size where
 instance IO Size where
   putStrLn = one
 
-instance Fix Size where
-  fix = one
+instance Y Size where
+  y = one
 
 instance List Size where
   nil = one
