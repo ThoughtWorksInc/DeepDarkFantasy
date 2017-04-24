@@ -101,6 +101,8 @@ instance Map.Map r => Map.Map (Diff r v) where
   alter :: forall h k a. Map.Ord k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.alter)
   mapMap = Diff Map.mapMap
+  unionWith :: forall h k a. Map.Ord k => Diff r v h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWith = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.unionWith)
 
 type instance DiffType v (M.Bimap a b) = M.Bimap (DiffType v a) (DiffType v b)
 instance Bimap r => Bimap (Diff r v) where

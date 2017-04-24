@@ -63,6 +63,7 @@ instance (Map.Map l, Map.Map r) => Map.Map (Combine l r) where
   singleton = Combine Map.singleton Map.singleton
   alter = Combine Map.alter Map.alter
   mapMap = Combine Map.mapMap Map.mapMap
+  unionWith = Combine Map.unionWith Map.unionWith
 
 instance (Bimap l, Bimap r) => Bimap (Combine l r) where
   size = Combine size size

@@ -59,6 +59,7 @@ instance Map.Map r => Map.Map (UnHOAS r) where
   alter = UnHOAS Map.alter
   lookup = UnHOAS Map.lookup
   mapMap = UnHOAS Map.mapMap
+  unionWith = UnHOAS Map.unionWith
 
 instance Bimap r => Bimap (UnHOAS r) where
   size = UnHOAS size

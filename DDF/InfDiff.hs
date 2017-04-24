@@ -68,6 +68,7 @@ instance Map.Map r => Map.Map (InfDiff r) where
   alter = InfDiff Map.alter
   mapMap = InfDiff Map.mapMap
   lookup = InfDiff Map.lookup
+  unionWith = InfDiff Map.unionWith
 
 instance Bimap r => Bimap (InfDiff r) where
   size = InfDiff size

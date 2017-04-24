@@ -23,5 +23,9 @@ class (Prod r, Option r) => Map r where
   lookup :: Ord k => r h (M.Map k a -> k -> Maybe a)
   alter :: Ord k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   mapMap :: r h ((a -> b) -> M.Map k a -> M.Map k b)
+  unionWith :: Ord k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
 
 lookup2 = app2 lookup
+unionWith1 = app unionWith
+mapMap1 = app mapMap
+mapMap2 = app2 mapMap

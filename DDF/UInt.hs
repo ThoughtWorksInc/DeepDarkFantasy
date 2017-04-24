@@ -60,6 +60,7 @@ instance Map.Map UInt where
   lookup = UInt
   alter = UInt
   mapMap = UInt
+  unionWith = UInt
 
 instance Prod UInt where
   mkProd = UInt

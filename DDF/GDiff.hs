@@ -74,6 +74,7 @@ instance Map.Map r => Map.Map (GDiff r) where
   lookup = GDiff $ M.const Map.lookup
   alter = GDiff $ M.const Map.alter
   mapMap = GDiff $ M.const Map.mapMap
+  unionWith = GDiff $ M.const Map.unionWith
 
 instance Bimap r => Bimap (GDiff r) where
   size = GDiff $ M.const size

@@ -72,6 +72,7 @@ instance Map.Map Show where
   lookup = name "Map.lookup"
   alter = name "Map.alter"
   mapMap = name "Map.mapMap"
+  unionWith = name "Map.unionWith"
 
 instance Bimap Show where
   size = name "size"

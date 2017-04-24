@@ -73,6 +73,7 @@ instance Map.Map r => Map.Map (ImpW r) where
   lookup = NoImpW Map.lookup
   alter = NoImpW Map.alter
   mapMap = NoImpW Map.mapMap
+  unionWith = NoImpW Map.unionWith
 
 instance Bimap r => Bimap (ImpW r) where
   size = NoImpW size

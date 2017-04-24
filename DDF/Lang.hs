@@ -184,6 +184,17 @@ instance Lang r => Vector r (FreeVector b) where
   mult = lam3 $ \d l x -> d `mult2` app l x
   divide = lam3 $ \l d x -> app l x `divide2` d
 
+instance (Map.Ord b, Lang r) => Monoid r (FreeVectorBuilder b) where
+  zero = Map.empty
+  plus = Map.unionWith1 plus
+
+instance (Map.Ord b, Lang r) => Group r (FreeVectorBuilder b) where
+  invert = Map.mapMap1 invert
+
+instance (Map.Ord b, Lang r) => Vector r (FreeVectorBuilder b) where
+  mult = Map.mapMap `com2` mult
+  divide = lam2 $ \m d -> Map.mapMap2 (lam $ \x -> divide2 x d) m
+
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch

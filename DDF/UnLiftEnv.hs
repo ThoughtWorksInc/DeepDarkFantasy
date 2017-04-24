@@ -68,6 +68,7 @@ instance (Unit r, Map.Map r) => Map.Map (UnLiftEnv r) where
   lookup = unLiftEnv Map.lookup
   alter = unLiftEnv Map.alter
   mapMap = unLiftEnv Map.mapMap
+  unionWith = unLiftEnv Map.unionWith
 
 instance (Unit r, Bimap r) => Bimap (UnLiftEnv r) where
   size = unLiftEnv size
