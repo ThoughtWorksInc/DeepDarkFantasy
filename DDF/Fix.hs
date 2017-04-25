@@ -1,4 +1,4 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE NoMonomorphismRestriction, NoImplicitPrelude #-}
 
 module DDF.Fix (module DDF.Fix, module DDF.DBI) where
 
@@ -10,3 +10,4 @@ class DBI r => Fix r where
   runFix :: r h (M.Fix f -> f (M.Fix f))
 
 fix1 = app fix
+runFix1 = app runFix

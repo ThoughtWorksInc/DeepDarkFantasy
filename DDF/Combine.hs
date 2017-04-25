@@ -91,6 +91,8 @@ instance (Sum l, Sum r) => Sum (Combine l r) where
 
 instance (Int l, Int r) => Int (Combine l r) where
   int x = Combine (int x) (int x)
+  pred = Combine pred pred
+  isZero = Combine isZero isZero
 
 instance (Y l, Y r) => Y (Combine l r) where
   y = Combine y y

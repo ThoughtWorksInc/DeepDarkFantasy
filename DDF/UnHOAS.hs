@@ -87,6 +87,8 @@ instance Sum r => Sum (UnHOAS r) where
 
 instance Int r => Int (UnHOAS r) where
   int = UnHOAS . int
+  pred = UnHOAS pred
+  isZero = UnHOAS isZero
 
 instance Y r => Y (UnHOAS r) where
   y = UnHOAS y

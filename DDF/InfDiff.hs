@@ -46,7 +46,7 @@ instance Bool r => Bool (InfDiff r) where
 instance Char r => Char (InfDiff r) where
   char x = InfDiff (char x)
 
-instance (Dual r, Double r) => Double (InfDiff r) where
+instance Lang r => Double (InfDiff r) where
   double x = InfDiff (double x)
   doublePlus = InfDiff doublePlus
   doubleMinus = InfDiff doubleMinus
@@ -92,6 +92,8 @@ instance Sum r => Sum (InfDiff r) where
 
 instance Int r => Int (InfDiff r) where
   int = InfDiff . int
+  pred = InfDiff pred
+  isZero = InfDiff isZero
 
 instance Y r => Y (InfDiff r) where
   y = InfDiff y
@@ -115,7 +117,7 @@ instance Monad r M.IO => Monad (InfDiff r) M.IO where
 instance IO r => IO (InfDiff r) where
   putStrLn = InfDiff putStrLn
 
-instance (Dual r, VTF.VectorTF r) => VTF.VectorTF (InfDiff r) where
+instance Lang r => VTF.VectorTF (InfDiff r) where
   zero = InfDiff VTF.zero
   basis = InfDiff VTF.basis
   plus = InfDiff VTF.plus

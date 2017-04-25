@@ -11,6 +11,7 @@
 module DDF.Vector where
 import DDF.Double
 import qualified Prelude as M
+import DDF.Meta.FreeVector
 
 class Monoid r g => Group r g where
   invert :: r h (g -> g)
@@ -26,10 +27,11 @@ class Group r v => Vector r v where
   mult :: r h (M.Double -> v -> v)
   divide :: r h (v -> M.Double -> v)
   default mult :: Double r => r h (M.Double -> v -> v)
-  mult = lam2 $ \x y -> divide2 y (recip1 x)
+  mult = lam2 $ \x y -> divide2 y (app2 doubleDivide doubleOne x)
   default divide :: Double r => r h (v -> M.Double -> v)
-  divide = lam2 $ \x y -> mult2 (recip1 y) x
-  {-# MINIMAL (mult | divide) #-}
+  divide = lam2 $ \x y -> mult2 (app2 doubleDivide doubleOne y) x
+  toFreeVector :: r h (v -> FreeVector (Basis v) M.Double)
+  {-# MINIMAL (mult | divide), toFreeVector #-}
 
 minus2 = app2 minus
 mult1 = app mult
@@ -40,15 +42,4 @@ minus1 = app minus
 divide1 = app divide
 recip = divide1 doubleOne
 recip1 = app recip
-
-instance Double r => Monoid r M.Double where
-  zero = doubleZero
-  plus = doublePlus
-
-instance Double r => Group r M.Double where
-  minus = doubleMinus
-
-instance Double r => Vector r M.Double where
-  type Basis M.Double = ()
-  mult = doubleMult
-  divide = doubleDivide
+toFreeVector1 = app toFreeVector

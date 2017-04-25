@@ -82,6 +82,8 @@ instance Sum UInt where
 
 instance Int UInt where
   int _ = UInt
+  pred = UInt
+  isZero = UInt
 
 instance Y UInt where
   y = UInt

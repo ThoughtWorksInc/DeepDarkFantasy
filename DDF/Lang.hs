@@ -74,6 +74,21 @@ class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r,
       (let_2 (size1 m) (lam $ \si -> mkProd2 si (insert2 (mkProd2 x si) m)))
       (lam $ \xid -> mkProd2 xid m)
       (lookupL2 m x)
+  get :: r h (Maybe a -> a)
+  get = optionMatch2 undefined id
+  getVar :: r h (State x x)
+  getVar = state1 (dup1 mkProd)
+  update :: r h ((x -> x) -> State x ())
+  update = lam $ \f -> state1 $ lam $ \x -> mkProd2 unit (app f x)
+  updateWengert :: r h (M.Int -> M.Double -> M.Map.Map M.Int M.Double -> M.Map M.Int M.Double)
+  updateWengert = lam2 $ \i d -> Map.alter2 (optionMatch2 (just1 d) (just `com2` (plus1 d))) i
+  vtfCata :: r h ((M.VTF.VectorTF a b -> b) -> M.Fix (M.VTF.VectorTF a) -> b)
+  vtfCata = lam $ \f -> y1 $ lam $ \fx ->
+    VTF.vtfMatch4
+      (app f VTF.zero)
+      (f `com2` VTF.basis)
+      (lam2 $ \l r -> app f (VTF.plus2 (app fx l) (app fx r)))
+      (lam2 $ \d v -> app f (VTF.mult2 d (app fx v))) `com2` runFix
 
 class Reify r x where
   reify :: x -> r h x
@@ -103,6 +118,7 @@ instance Lang r => Group r () where
 
 instance Lang r => Vector r () where
   type Basis () = Void
+  toFreeVector = const1 $ freeVector1 exfalso
   mult = const1 $ const1 unit
   divide = const1 $ const1 unit
 
@@ -115,8 +131,12 @@ instance Float r => Group r M.Float where
 
 instance Lang r => Vector r M.Float where
   type Basis M.Float = ()
+  toFreeVector = freeVector `com2` const `com2` float2Double
   mult = com2 floatMult double2Float
   divide = com2 (flip2 com double2Float) floatDivide
+
+instance Lang r => Functor r (M.VTF.VectorTF b) where
+  map = lam $ \f -> VTF.vtfMatch4 VTF.zero VTF.basis (lam2 $ \l r -> app f l `VTF.plus2` app f r) (lam2 $ \d x -> d `VTF.mult2` app f x)
 
 instance (Prod repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
   zero = mkProd2 zero zero
@@ -125,8 +145,10 @@ instance (Prod repr, Monoid repr l, Monoid repr r) => Monoid repr (l, r) where
 instance (Prod repr, Group repr l, Group repr r) => Group repr (l, r) where
   invert = bimap2 invert invert
 
-instance (Prod repr, Double repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
+instance (Prod repr, Double repr, Sum repr, FreeVector repr, Vector repr l, Vector repr r) => Vector repr (l, r) where
   type Basis (l, r) = M.Either (Basis l) (Basis r)
+  toFreeVector = lam $ \p -> let_2 (toFreeVector1 $ zro1 p) $ lam $ \lfv -> let_2 (toFreeVector1 $ fst1 p) $ lam $ \rfv ->
+    freeVector1 $ sumMatch2 (runFreeVector1 lfv) (runFreeVector1 rfv)
   mult = lam $ \x -> bimap2 (mult1 x) (mult1 x)
 
 instance (Double r, Monoid r v) => Monoid r (M.Double -> v) where
@@ -138,6 +160,7 @@ instance (Lang r, Group r v) => Group r (M.Double -> v) where
 
 instance (Lang r, Vector r v) => Vector r (M.Double -> v) where
   type Basis (M.Double -> v) = Basis v
+  toFreeVector = lam $ \f -> toFreeVector1 $ app f (double 1)
   mult = lam3 $ \l r x -> app r (mult2 l x)
 
 instance Lang r => Monoid r [a] where
@@ -199,6 +222,7 @@ instance Lang r => Group r (M.FreeVector b M.Double) where
 
 instance Lang r => Vector r (M.FreeVector b M.Double) where
   type Basis (M.FreeVector b M.Double) = b
+  toFreeVector = id
   mult = lam2 $ \d l -> freeVector1 $ lam $ \x -> d `mult2` runFreeVector2 l x
   divide = lam2 $ \l d -> freeVector1 $ lam $ \x -> runFreeVector2 l x `divide2` d
 
@@ -211,6 +235,7 @@ instance (Map.Ord b, Lang r) => Group r (FreeVectorBuilder b) where
 
 instance (Map.Ord b, Lang r) => Vector r (FreeVectorBuilder b) where
   type Basis (FreeVectorBuilder b) = b
+  toFreeVector = buildFreeVector
   mult = Map.mapMap `com2` mult
   divide = lam2 $ \m d -> Map.mapMap2 (lam $ \x -> divide2 x d) m
 
@@ -218,11 +243,12 @@ instance Lang r => Monoid r (M.Fix (M.VTF.VectorTF b)) where
   zero = fix1 VTF.zero
   plus = lam2 $ \l r -> fix1 $ l `VTF.plus2` r
 
-instance Lang r => Group r (M.Fix (M.VTF.VectorTF b)) where
+instance (Map.Ord b, Lang r) => Group r (M.Fix (M.VTF.VectorTF b)) where
   invert = mult1 (double (-1))
 
-instance Lang r => Vector r (M.Fix (M.VTF.VectorTF b)) where
+instance (Map.Ord b, Lang r) => Vector r (M.Fix (M.VTF.VectorTF b)) where
   type Basis (M.Fix (M.VTF.VectorTF b)) = b
+  toFreeVector = buildFreeVector `com2` vtfCata1 (VTF.vtfMatch4 zero (flip2 Map.singleton (double 1)) plus mult)
   mult = lam $ \d -> fix `com2` VTF.mult1 d
 
 instance (Map.Ord b, Lang r) => Monoid r (SVTFBuilder b) where
@@ -234,6 +260,17 @@ instance (Map.Ord b, Lang r) => Group r (SVTFBuilder b) where
 
 instance (Map.Ord b, Lang r) => Vector r (SVTFBuilder b) where
   type Basis (SVTFBuilder b) = b
+  toFreeVector =
+    buildFreeVector `com2` flip2 id Map.empty `com2`
+    (lam $ \x -> zro `com2` (runState1 $ y2 (lam2 $ \fx i ->
+      map2 (lam $ \m -> mkProd2 (get1 $ Map.lookup2 (fst1 x) i) (get1 $ Map.lookup2 m i)) getVar `bind2`
+      (lam $ \p -> VTF.vtfMatch5
+        (return1 zero)
+        (lam $ \b -> return1 (Map.singleton2 b (fst1 p)))
+        (lam2 $ \lid rid -> map2 (const1 zero) (update1 (updateWengert2 lid (fst1 p) `com2` updateWengert2 rid (fst1 p))))
+        (lam2 $ \d xid -> map2 (const1 zero) (update1 (let_2 (d `mult2` (fst1 p)) (updateWengert1 xid))))
+        (zro1 p) `bind2` (lam $ \fvb -> ite3 (return1 fvb) (map2 (plus1 fvb) $ app fx (pred1 i)) (isZero1 i)))) (zro1 x))
+    `com2` Map.insert2 (zro1 x) (double 0)) `com2` bimap2 id toMapR `com2` flip2 runState empty
   mult = lam2 $ \d x -> x `bind2` (lam $ \xid -> toSVTFBuilder1 (VTF.mult2 d xid))
 
 type instance DiffType v (M.VTF.VectorTF t f) = M.VTF.VectorTF (DiffType v t) (DiffType v f)
@@ -243,6 +280,19 @@ instance (Map.Ord b, Map.Ord f) => Map.Ord (M.VTF.VectorTF b f) where
 type instance DiffType v M.Int = M.Int
 instance Map.Ord M.Int where
   diffOrd _ = Dict
+
+instance Double r => Monoid r M.Double where
+  zero = doubleZero
+  plus = doublePlus
+
+instance Double r => Group r M.Double where
+  minus = doubleMinus
+
+instance Lang r => Vector r M.Double where
+  type Basis M.Double = ()
+  toFreeVector = freeVector `com2` const
+  mult = doubleMult
+  divide = doubleDivide
 
 uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
@@ -256,3 +306,10 @@ state1 = app state
 runState1 = app runState
 runState2 = app2 runState
 toSVTFBuilder1 = app toSVTFBuilder
+double2Float1 = app double2Float
+get1 = app get
+return1 = app return
+update1 = app update
+updateWengert1 = app updateWengert
+updateWengert2 = app2 updateWengert
+vtfCata1 = app vtfCata

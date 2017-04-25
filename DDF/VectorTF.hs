@@ -14,6 +14,7 @@ class Double.Double r => VectorTF r where
   vtfMatch :: r h (a -> (t -> a) -> (f -> f -> a) -> (M.Double -> f -> a) -> M.VectorTF t f -> a)
 
 vtfMatch4 = Double.app4 vtfMatch
+vtfMatch5 = Double.app5 vtfMatch
 plus2 = Double.app2 plus
 mult1 = Double.app mult
 mult2 = Double.app2 mult

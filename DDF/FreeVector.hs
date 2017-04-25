@@ -10,4 +10,5 @@ class DBI r => FreeVector r where
   runFreeVector :: r h (M.FreeVector b d -> (b -> d))
 
 freeVector1 = app freeVector
+runFreeVector1 = app runFreeVector
 runFreeVector2 = app2 runFreeVector

@@ -55,7 +55,7 @@ instance Dual r => Dual (Diff r v) where
   runDual = Diff $ runDual
 
 type instance DiffType v M.Double = M.Dual M.Double v
-instance (Vector r v, Double r, Dual r) => Double (Diff r v) where
+instance (Vector r v, Lang r) => Double (Diff r v) where
   double x = Diff $ mkDual2 (double x) zero
   doublePlus = Diff $ lam2 $ \l r ->
     mkDual2 (plus2 (dualOrig1 l) (dualOrig1 r)) (plus2 (dualDiff1 l) (dualDiff1 r))
@@ -134,6 +134,8 @@ instance Sum r => Sum (Diff r v) where
 
 instance Int r => Int (Diff r v) where
   int = Diff . int
+  pred = Diff pred
+  isZero = Diff isZero
 
 instance Y r => Y (Diff r v) where
   y = Diff y
@@ -159,7 +161,7 @@ instance Monad r M.IO => Monad (Diff r v) M.IO where
   bind = Diff bind
   join = Diff join
 
-instance (Dual r, VTF.VectorTF r, Vector r v) => VTF.VectorTF (Diff r v) where
+instance (Vector r v, Lang r) => VTF.VectorTF (Diff r v) where
   zero = Diff VTF.zero
   basis = Diff VTF.basis
   plus = Diff VTF.plus

@@ -118,9 +118,13 @@ app3 f a b = app (app2 f a b)
 
 app4 f a b c = app (app3 f a b c)
 
+app5 f a b c d = app (app4 f a b c d)
+
 plus2 = app2 plus
 
 noEnv :: repr () x -> repr () x
 noEnv x = x
 
 scomb2 = app2 scomb
+plus1 = app plus
+dup1 = app dup

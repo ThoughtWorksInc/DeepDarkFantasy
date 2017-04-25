@@ -109,9 +109,9 @@ Getting random weights...
 >       diff :: GDiff Eval () x -> DiffType w x
 >       diff x = ((runEval (runDiff (runGDiff x (Proxy :: Proxy w))) ()) \\ weightCon @w @(Vector Eval))
 >       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> M.Int -> (w -> XOR) -> m XOR
->       go xor weight reifyE lossE update i orig | i <= 2500 = do
+>       go xor weight reifyE lossE updateW i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)
->         go xor (update 0.3 weight lossDiff) reifyE lossE update (1 + i) orig
+>         go xor (updateW 0.3 weight lossDiff) reifyE lossE updateW (1 + i) orig
 >           where
 >             M.Dual (lossVal, lossDiff) = lossE $ xor (reifyE weight)
 >       go _ weight _ _ _ _ orig = M.return $ orig weight

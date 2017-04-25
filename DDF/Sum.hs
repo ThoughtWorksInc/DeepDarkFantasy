@@ -10,3 +10,5 @@ class DBI r => Sum r where
   sumMatch :: r h ((a -> c) -> (b -> c) -> Either a b -> c)
 
 sumMatch2 = app2 sumMatch
+left1 = app left
+right1 = app right

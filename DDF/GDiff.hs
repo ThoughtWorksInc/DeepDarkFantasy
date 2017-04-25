@@ -40,7 +40,7 @@ instance Dual r => Dual (GDiff r) where
   dual = GDiff $ M.const $ dual
   runDual = GDiff $ M.const $ runDual
 
-instance (Double r, Dual r) => Double (GDiff r) where
+instance Lang r => Double (GDiff r) where
   double x = GDiff $ M.const $ double x
   doublePlus = GDiff $ M.const $ doublePlus
   doubleMinus = GDiff $ M.const $ doubleMinus
@@ -48,7 +48,7 @@ instance (Double r, Dual r) => Double (GDiff r) where
   doubleDivide = GDiff $ M.const $ doubleDivide
   doubleExp = GDiff $ M.const $ doubleExp
 
-instance (Dual r, VTF.VectorTF r) => VTF.VectorTF (GDiff r) where
+instance Lang r => VTF.VectorTF (GDiff r) where
   zero = GDiff $ M.const $ VTF.zero
   basis = GDiff $ M.const $ VTF.basis
   plus = GDiff $ M.const $ VTF.plus
@@ -98,6 +98,8 @@ instance Sum r => Sum (GDiff r) where
 
 instance Int r => Int (GDiff r) where
   int x = GDiff $ M.const $ int x
+  pred = GDiff $ M.const pred
+  isZero = GDiff $ M.const isZero
 
 instance Y r => Y (GDiff r) where
   y = GDiff $ M.const y
