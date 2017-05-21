@@ -13,7 +13,6 @@ instance DBI UInt where
   s _ = UInt
   abs _ = UInt
   app _ _ = UInt
-  liftEnv _ = UInt
 
 instance Bool UInt where
   bool _ = UInt

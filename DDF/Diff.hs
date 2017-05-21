@@ -32,7 +32,6 @@ instance DBI r => DBI (Diff r v) where
   abs (Diff f) = Diff $ abs f
   app (Diff f) (Diff x) = Diff $ app f x
   hoas f = Diff $ hoas (\x -> runDiff $ f $ Diff x)
-  liftEnv (Diff x) = Diff $ liftEnv x
 
 type instance DiffType v M.Bool = M.Bool
 instance Bool r => Bool (Diff r v) where

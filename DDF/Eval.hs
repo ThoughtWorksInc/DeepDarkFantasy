@@ -33,7 +33,6 @@ instance DBI Eval where
   s (Eval a) = Eval $ a . M.snd
   abs (Eval f) = Eval $ \h a -> f (a, h)
   app (Eval f) (Eval x) = Eval $ \h -> f h $ x h
-  liftEnv (Eval x) = Eval $ \_ -> x ()
 
 instance Bool Eval where
   bool = comb

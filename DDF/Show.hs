@@ -31,7 +31,6 @@ instance DBI Show where
   app (Show f) (Show x) = Show $ \va h -> appAST (f va h) (x va h)
   hoas f = Show $ \(v:va) h ->
     lamAST v (runShow (f $ Show $ M.const $ M.const $ Leaf v) va (h + 1))
-  liftEnv (Show x) = Show x
 
 instance Bool Show where
   bool = name . show

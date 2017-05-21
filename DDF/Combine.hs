@@ -22,7 +22,6 @@ instance (DBI l, DBI r) => DBI (Combine l r) where
   app (Combine fl fr) (Combine xl xr) = Combine (app fl xl) (app fr xr)
   abs (Combine l r) = Combine (abs l) (abs r)
   hoas f = Combine (hoas $ \x -> case f (Combine x z) of Combine l _ -> l) (hoas $ \x -> case f (Combine z x) of Combine _ r -> r)
-  liftEnv (Combine l r) = Combine (liftEnv l) (liftEnv r)
 
 instance (Bool l, Bool r) => Bool (Combine l r) where
   bool x = Combine (bool x) (bool x)

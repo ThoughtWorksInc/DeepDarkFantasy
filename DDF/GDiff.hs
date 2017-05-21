@@ -22,7 +22,6 @@ instance DBI r => DBI (GDiff r) where
   s (GDiff x) = GDiff (\p -> s $ x p)
   app (GDiff f) (GDiff x) = GDiff (\p -> app (f p) (x p))
   abs (GDiff x) = GDiff (\p -> abs $ x p)
-  liftEnv (GDiff x) = GDiff (\p -> liftEnv $ x p)
 
 instance Bool r => Bool (GDiff r) where
   bool x = GDiff $ M.const $ bool x

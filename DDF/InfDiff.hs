@@ -23,7 +23,6 @@ instance DBI r => DBI (InfDiff r) where
   s (InfDiff x) = InfDiff (s x)
   abs (InfDiff x) = InfDiff (abs x)
   app (InfDiff f) (InfDiff x) = InfDiff (app f x)
-  liftEnv (InfDiff x) = InfDiff (liftEnv x)
 
 instance Prod r => Prod (InfDiff r) where
   zro = InfDiff zro
@@ -145,5 +144,5 @@ instance Lang r => Lang (InfDiff r) where
   state = InfDiff state
   runState = InfDiff runState
 
-diffInf :: (Vector (InfDiff r) v, DBI r) => Proxy v -> InfDiff r () x -> InfDiff r h (DiffType v x)
-diffInf p (InfDiff (Combine _ (GDiff f))) = liftEnv $ runDiff $ f p
+-- diffInf :: (Vector (InfDiff r) v, DBI r) => Proxy v -> InfDiff r () x -> InfDiff r h (DiffType v x)
+-- diffInf p (InfDiff (Combine _ (GDiff f))) = liftEnv $ runDiff $ f p
