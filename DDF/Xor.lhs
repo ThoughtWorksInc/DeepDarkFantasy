@@ -53,7 +53,7 @@ The weight should be a pair of M.Double, each as a scale on the actual input, wi
 We then add the two scaled input, with the bias, and pass them into sigmoid.
 
 > scaleAdd :: Lang repr => ImpW repr h ((M.Double, M.Double) -> M.Double)
-> scaleAdd = ImpW $ lam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (mult2 (fst1 w) (fst1 p))
+> scaleAdd = ImpW $ lam2 $ \w p -> plus2 (mult2 (zro1 w) (zro1 p)) (plus2 (fst1 w) (fst1 p))
 
 > withBias :: Lang repr => ImpW repr h (M.Double -> M.Double)
 > withBias = ImpW $ plus
