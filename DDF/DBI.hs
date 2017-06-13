@@ -38,7 +38,6 @@ class DBI (r :: * -> * -> *) where
   -- Use lam to do automatic lifting of variables.
   hoas :: (r (a, h) a -> r (a, h) b) -> r h (a -> b)
   hoas f = abs $ f z
-  liftEnv :: r () x -> r h x
   com :: r h ((b -> c) -> (a -> b) -> (a -> c))
   com = lam3 $ \f g x -> app f (app g x)
   flip :: r h ((a -> b -> c) -> (b -> a -> c))
@@ -53,6 +52,9 @@ class DBI (r :: * -> * -> *) where
   dup = lam2 $ \f x -> app2 f x x
   let_ :: r h (a -> (a -> b) -> b)
   let_ = flip1 id
+
+class LiftEnv r where
+  liftEnv :: r () a -> r h a
 
 const1 = app const
 map2 = app2 map
@@ -101,11 +103,15 @@ instance {-# OVERLAPPING #-} NT repr x x where
     conv x = x
 
 lam :: forall repr a b h. DBI repr =>
-  ((forall k. NT repr (a, h) k => repr k a) -> (repr (a, h)) b) -> repr h (a -> b)
+  ((forall k. NT repr (a, h) k => repr k a) -> (repr (a, h)) b) ->
+  repr h (a -> b)
 lam f = hoas (\x -> f $ conv x)
 
 lam2 :: forall repr a b c h. DBI repr =>
-  ((forall k. NT repr (a, h) k => repr k a) -> (forall k. NT repr (b, (a, h)) k => repr k b) -> (repr (b, (a, h))) c) -> repr h (a -> b -> c)
+  ((forall k. NT repr (a, h) k => repr k a) ->
+   (forall k. NT repr (b, (a, h)) k => repr k b) ->
+   (repr (b, (a, h))) c) ->
+  repr h (a -> b -> c)
 lam2 f = lam $ \x -> lam $ \y -> f x y
 
 lam3 f = lam2 $ \a b -> lam $ \c -> f a b c

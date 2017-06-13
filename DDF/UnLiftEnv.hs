@@ -20,7 +20,6 @@ instance (Prod r, Unit r) => DBI (UnLiftEnv r) where
   s (UnLiftEnv x) = UnLiftEnv $ x `com2` fst
   abs (UnLiftEnv x) = UnLiftEnv $ curry1 $ x `com2` swap
   app (UnLiftEnv f) (UnLiftEnv x) = UnLiftEnv $ scomb2 f x
-  liftEnv (UnLiftEnv x) = UnLiftEnv $ x `com2` (const1 unit)
 
 instance (Dual r, Unit r) => Dual (UnLiftEnv r) where
   dual = unLiftEnv dual

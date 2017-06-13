@@ -18,7 +18,6 @@ instance DBI repr => DBI (UnHOAS repr) where
   s (UnHOAS x) = UnHOAS $ s x
   abs (UnHOAS x) = UnHOAS $ abs x
   app (UnHOAS f) (UnHOAS x) = UnHOAS $ app f x
-  liftEnv (UnHOAS x) = UnHOAS $ liftEnv x
 
 instance Bool r => Bool (UnHOAS r) where
   bool = UnHOAS . bool
