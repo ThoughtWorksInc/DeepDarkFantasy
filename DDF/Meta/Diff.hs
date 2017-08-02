@@ -21,6 +21,4 @@ type family DiffType (v :: *) (x :: *)
 
 newtype GDiff r h x = GDiff {runGDiff :: forall v. Vector r v => Proxy v -> Diff r v h x}
 
-newtype InfDiff r h x = InfDiff {runInfDiff :: Combine r (GDiff (InfDiff r)) h x}
-
 newtype Diff r v h x = Diff {runDiff :: r (DiffType v h) (DiffType v x)}
