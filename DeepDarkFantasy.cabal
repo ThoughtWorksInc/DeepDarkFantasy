@@ -37,7 +37,6 @@ library
     DDF.GDiff
     DDF.ImportMeta
     DDF.ImpW
-    DDF.InfDiff
     DDF.Int
     DDF.IO
     DDF.Lang
