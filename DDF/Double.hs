@@ -1,4 +1,7 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  NoMonomorphismRestriction
+#-}
 
 module DDF.Double (module DDF.Double, module DDF.DBI) where
 
@@ -16,3 +19,9 @@ class DBI r => Double r where
   doubleMult :: r h (M.Double -> M.Double -> M.Double)
   doubleDivide :: r h (M.Double -> M.Double -> M.Double)
   doubleExp :: r h (M.Double -> M.Double)
+
+doublePlus2 = app2 doublePlus
+doubleMinus2 = app2 doubleMinus
+doubleMult2 = app2 doubleMult
+doubleDivide2 = app2 doubleDivide
+doubleExp1 = app doubleExp
