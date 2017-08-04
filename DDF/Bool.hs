@@ -8,4 +8,6 @@ class DBI r => Bool r where
   bool :: M.Bool -> r h M.Bool
   ite :: r h (a -> a -> M.Bool -> a)
 
+ite1 = app ite
+ite2 = app2 ite
 ite3 = app3 ite

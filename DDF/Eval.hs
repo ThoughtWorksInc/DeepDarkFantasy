@@ -53,6 +53,7 @@ instance Double Eval where
   doubleMult = comb (*)
   doubleDivide = comb (/)
   doubleExp = comb M.exp
+  doubleEq = comb (==)
 
 instance Float Eval where
   float = comb

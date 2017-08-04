@@ -75,6 +75,16 @@ instance DBI r => DBI (P r) where
   app (Static _ fs) p = Unk (app fs (dynamic p))
   app e1 e2           = Open (\h -> app (app_open e1 h) (app_open e2 h))
 
+instance Bool r => Bool (P r) where
+  bool x = Static x (bool x)
+  ite = lam3 (\l r b -> app2 (f b) l r)
+    where
+      f :: P r h M.Bool -> P r h (a -> a -> a)
+      f (Static M.True _) = const
+      f (Static M.False _) = const1 id
+      f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
+      f x = Open (\h -> f (app_open x h))
+
 instance Double r => Double (P r) where
   double x = Static x (double x)
   doublePlus = abs (abs (f (s z) z))
@@ -116,6 +126,11 @@ instance Double r => Double (P r) where
       f (Static l _) = double (M.exp l) 
       f (Unk l) = Unk (doubleExp1 l)
       f l = Open (\h -> f (app_open l h))
+  doubleEq = abs (abs (f (s z) z)) where
+    f :: P r h M.Double -> P r h M.Double -> P r h M.Bool
+    f (Static l _) (Static r _) = bool (l == r)
+    f (Unk l) (Unk r) = Unk (doubleEq2 l r)
+    f l r = Open (\h -> f (app_open l h) (app_open r h))    
 
 pe :: Double repr => P repr () a -> repr () a
 pe = dynamic

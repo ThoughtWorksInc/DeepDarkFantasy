@@ -38,6 +38,7 @@ instance Double r => Double (UnHOAS r) where
   doubleMult = UnHOAS doubleMult
   doubleDivide = UnHOAS doubleDivide
   doubleExp = UnHOAS doubleExp
+  doubleEq = UnHOAS doubleEq
 
 instance Float r => Float (UnHOAS r) where
   float = UnHOAS . float

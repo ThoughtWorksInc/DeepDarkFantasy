@@ -28,6 +28,7 @@ instance Double UInt where
   doubleMult = UInt
   doubleDivide = UInt
   doubleExp = UInt
+  doubleEq = UInt
 
 instance Float UInt where
   float _ = UInt

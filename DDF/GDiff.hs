@@ -46,6 +46,7 @@ instance Lang r => Double (GDiff r) where
   doubleMult = GDiff $ M.const $ doubleMult
   doubleDivide = GDiff $ M.const $ doubleDivide
   doubleExp = GDiff $ M.const $ doubleExp
+  doubleEq = GDiff $ M.const $ doubleEq
 
 instance Lang r => VTF.VectorTF (GDiff r) where
   zero = GDiff $ M.const $ VTF.zero

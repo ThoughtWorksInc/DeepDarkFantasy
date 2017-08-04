@@ -13,9 +13,9 @@ one = Size 1
 
 instance DBI Size where
   z = one
-  s (Size x) = (Size x)
+  s (Size x) = Size x
   app (Size l) (Size r) = Size (l + r)
-  abs (Size l) = Size (1 + l)
+  abs (Size x) = Size x
 
 instance Bool Size where
   bool _ = one
@@ -36,6 +36,7 @@ instance Double Size where
   doubleMult = one
   doubleDivide = one
   doubleExp = one
+  doubleEq = one
 
 instance Float Size where
   float _ = one

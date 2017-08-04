@@ -42,6 +42,7 @@ instance (Double l, Double r) => Double (Combine l r) where
   doubleMult = Combine doubleMult doubleMult
   doubleDivide = Combine doubleDivide doubleDivide
   doubleExp = Combine doubleExp doubleExp
+  doubleEq = Combine doubleEq doubleEq
 
 instance (Float l, Float r) => Float (Combine l r) where
   float x = Combine (float x) (float x)

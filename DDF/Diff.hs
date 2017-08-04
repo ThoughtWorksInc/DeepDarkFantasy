@@ -68,6 +68,7 @@ instance (Vector r v, Lang r) => Double (Diff r v) where
       (divide2 (minus2 (mult2 (dualOrig1 r) (dualDiff1 l)) (mult2 (dualOrig1 l) (dualDiff1 r)))
         (mult2 (dualOrig1 r) (dualOrig1 r)))
   doubleExp = Diff $ lam $ \x -> let_2 (doubleExp1 (dualOrig1 x)) (lam $ \e -> mkDual2 e (mult2 e (dualDiff1 x)))
+  doubleEq = Diff $ lam2 $ \l r -> doubleEq2 (dualOrig1 l) (dualOrig1 r)
 
 type instance DiffType v M.Float = M.Dual M.Float v
 instance (Vector r v, Lang r) => Float (Diff r v) where

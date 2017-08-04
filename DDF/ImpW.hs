@@ -51,6 +51,7 @@ instance (Prod r, Double r) => Double (ImpW r) where
   doubleMinus = NoImpW doubleMinus
   doubleMult = NoImpW doubleMult
   doubleDivide = NoImpW doubleDivide
+  doubleEq = NoImpW doubleEq
 
 instance (Prod r, Float r) => Float (ImpW r) where
   float = NoImpW . float

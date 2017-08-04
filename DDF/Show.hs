@@ -51,6 +51,7 @@ instance Double Show where
   doubleMult = name "mult"
   doubleDivide = name "divide"
   doubleExp = name "exp"
+  doubleEq = name "eq"
 
 instance Float Show where
   float = name . show
