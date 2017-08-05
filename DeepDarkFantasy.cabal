@@ -73,7 +73,8 @@ library
     constraints -any,
     containers -any,
     bimap -any,
-    recursion-schemes -any
+    recursion-schemes -any,
+    constraint-unions -any
   ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
   if flag(WError)
     ghc-options: -Werror
