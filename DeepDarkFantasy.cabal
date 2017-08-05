@@ -1,5 +1,5 @@
 name: DeepDarkFantasy
-version: 0.2017.4.19
+version: 0.2017.8.4
 cabal-version: 1.12
 build-type: Simple
 license: Apache
@@ -18,7 +18,7 @@ Flag WError
 source-repository head
   type: git
   location: https://github.com/ThoughtWorksInc/DeepDarkFantasy
-
+             
 library
   exposed-modules:
     DDF.Bimap
@@ -49,11 +49,13 @@ library
     DDF.Meta.FreeVector
     DDF.Meta.VectorTF
     DDF.Option
+    DDF.PE
     DDF.Poly
     DDF.Prod
     DDF.Show
     DDF.Size
     DDF.Sum
+    DDF.Term
     DDF.UInt
     DDF.UnHOAS
     DDF.Unit
@@ -64,7 +66,6 @@ library
     DDF.WithDiff
     DDF.Xor
     DDF.Y
-    DDF.PE
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
     mtl -any,

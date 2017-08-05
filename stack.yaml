@@ -1,4 +1,9 @@
-resolver: lts-8.8
+resolver: lts-9.0
+
+packages:
+- location:
+    git: https://github.com/rampion/constraint-unions.git
+    commit: ce948dcf351a67fd8ba7e69fb975b76f2a1777a7
 
 extra-deps: []
 
