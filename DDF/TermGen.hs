@@ -41,16 +41,16 @@ mkT t = Term (t Proxy)
 type instance SubLC c DBI = ()
 
 instance SubL c DBI => DBI (Term c) where
-  z = mkT (\p -> z \\ subP @c @DBI p)
-  s (Term x) = mkT (\p -> s x \\ subP @c @DBI p)
-  abs (Term x) = mkT (\p -> abs x \\ subP @c @DBI p)
-  app (Term f) (Term x) = mkT (\p -> app f x \\ subP @c @DBI p)
+  z = mkTerm @DBI z
+  s (Term x) = mkTerm @DBI (s x)
+  abs (Term x) = mkTerm @DBI (abs x)
+  app (Term f) (Term x) = mkTerm @DBI (app f x)
 
 type instance SubLC c Bool = SubL c DBI
 
 instance SubL c Bool => Bool (Term c) where
-  bool x = mkT (\p -> bool x \\ subP @c @Bool p)
-  ite = mkT (\p -> ite \\ subP @c @Bool p)
+  bool x = mkTerm @Bool (bool x)
+  ite = mkTerm @Bool ite
 
 type instance SubLC c Int = SubL c Bool
 
@@ -217,6 +217,16 @@ instance SubL c Option => Option (Term c) where
   nothing = mkT (\p -> nothing \\ subP @c @Option p)
   just = mkT (\p -> just \\ subP @c @Option p)
   optionMatch = mkT (\p -> optionMatch \\ subP @c @Option p)
+
+mkTerm
+  :: forall r l h s.
+     (SubL l r)
+  => (forall (repr :: * -> * -> *).
+       (l repr, r repr) => repr h s)
+   -> Term l h s
+mkTerm f = Term k
+  where k :: forall repr. l repr => repr h s
+        k = f @repr \\ sub @l @r @repr
 
 genInstance :: Q [Dec]
 genInstance =
