@@ -224,7 +224,28 @@ instance SubL c Option => Option (Term c) where
 
 genInstance :: Q [Dec]
 genInstance =
-  M.mapM gen [''DBI, ''Double, ''Bool]
+  M.mapM gen [
+    ''DBI,
+    ''Double,
+    ''Bool,
+    ''Lang,
+    ''Fix,
+    ''Int,
+    ''Char,
+    ''Float,
+    ''VTF.VectorTF,
+    ''Map.Map,
+    ''Bimap,
+    ''Prod,
+    ''IO,
+    ''Unit,
+    ''Option,
+    ''Sum,
+    ''List,
+    ''Y,
+    ''Dual,
+    ''DiffWrapper,
+    ''FreeVector]
     where
       gen n = M.return $
         InstanceD

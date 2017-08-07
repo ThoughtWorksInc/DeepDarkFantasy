@@ -19,6 +19,4 @@ import DDF.Meta.Interpreter
 
 type family DiffType (v :: *) (x :: *)
 
-newtype GDiff r h x = GDiff {runGDiff :: forall v. Vector r v => Proxy v -> Diff r v h x}
-
 newtype Diff r v h x = Diff {runDiff :: r (DiffType v h) (DiffType v x)}

@@ -1,4 +1,11 @@
-> {-# LANGUAGE ScopedTypeVariables, NoMonomorphismRestriction, TypeApplications, RankNTypes, NoImplicitPrelude #-}
+> {-# LANGUAGE
+>   ScopedTypeVariables,
+>   NoMonomorphismRestriction,
+>   TypeApplications,
+>   RankNTypes,
+>   NoImplicitPrelude,
+>   ScopedTypeVariables
+> #-}
 
 This is the classical example of using sigmoid NN to approximate Xor.
 You should already read DDF.Poly before this.
@@ -7,14 +14,12 @@ You should already read DDF.Poly before this.
 > import qualified Prelude as M
 > import System.Random
 > import Control.Monad (when)
-> import Data.Proxy
 > import Data.Constraint
 > import DDF.Util
 > import DDF.Lang
 > import DDF.Show
-> import DDF.Combine ()
 > import DDF.Eval ()
-> import DDF.GDiff ()
+> import DDF.Term
 > import DDF.ImpW
 > import DDF.WithDiff
 > import qualified DDF.Meta.Dual as M
@@ -94,8 +99,8 @@ Now we are good to implement the train function!
 
 > findXor :: forall g m. (RandomGen g, M.Monad m) => g -> (AST -> m ()) -> (M.Int -> M.Double -> M.String -> m ()) -> m XOR
 > findXor rand doAST doIter = case runImpW $ noEnv xorNet of
->   RunImpW ((Combine (Show xorS) (Combine (Eval xorEv) xorE)) :: Weight w => Combine Show (Combine Eval (GDiff Eval)) () (w -> XOR)) -> do
->     doAST $ xorS vars 0
+>   RunImpW ((Term net) :: Weight w => Term Lang () (w -> XOR)) -> do
+>     doAST $ runShow net vars 0
 
 printing weights. now you will see a list of gibberish
 
@@ -103,11 +108,11 @@ printing weights. now you will see a list of gibberish
 
 Getting random weights...
 
->     (go (diff xorE) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
->         ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0 (xorEv ())) \\ weightCon @w @M.Show
+>     (go (diff net) initWeight (runEval selfWithDiff () \\ weightCon @w @(WithDiff Eval)) (diff loss)
+>         ((runEval (lam3 $ \d o n -> minus2 o (mult2 d n)) ()) \\ weightCon @w @(Vector Eval)) 0 (runEval net ())) \\ weightCon @w @M.Show
 >     where
->       diff :: GDiff Eval () x -> DiffType w x
->       diff x = ((runEval (runDiff (runGDiff x (Proxy :: Proxy w))) ()) \\ weightCon @w @(Vector Eval))
+>       diff :: forall x. Term Lang () x -> DiffType w x
+>       diff (Term x) = runEval (runDiff @_ @w (noEnv x)) () \\ weightCon @w @(Vector Eval)
 >       go :: M.Show w => (DiffType w (w -> XOR)) -> w -> (w -> DiffType w w) -> (DiffType w (XOR -> M.Double)) -> (M.Double -> w -> w -> w) -> M.Int -> (w -> XOR) -> m XOR
 >       go xor weight reifyE lossE updateW i orig | i <= 2500 = do
 >         doIter i lossVal (M.show weight)

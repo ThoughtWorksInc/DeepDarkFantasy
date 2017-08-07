@@ -15,11 +15,6 @@ import DDF.ImportMeta
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
-data Combine l r h x = Combine (l h x) (r h x)
-
-combineLeft (Combine l _) = l
-combineRight (Combine _ r) = r
-
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
 class ProdCon con l r where

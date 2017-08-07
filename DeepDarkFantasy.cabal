@@ -24,7 +24,6 @@ library
     DDF.Bimap
     DDF.Bool
     DDF.Char
-    DDF.Combine
     DDF.DBI
     DDF.Diff
     DDF.DiffWrapper
@@ -34,7 +33,6 @@ library
     DDF.Fix
     DDF.Float
     DDF.FreeVector
-    DDF.GDiff
     DDF.ImportMeta
     DDF.ImpW
     DDF.Int

@@ -17,7 +17,6 @@ import Control.Monad
 import DDF.Meta.Interpreter
 import Test.QuickCheck
 import DDF.Eval
-import DDF.Combine
 
 class TestEqual x where
   testEqual :: x -> x -> M.IO ()
