@@ -56,6 +56,7 @@ library
     DDF.Size
     DDF.Sum
     DDF.Term
+    DDF.TermGen
     DDF.UInt
     DDF.UnHOAS
     DDF.Unit
@@ -74,8 +75,9 @@ library
     containers -any,
     bimap -any,
     recursion-schemes -any,
-    constraint-unions -any
-  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans
+    constraint-unions -any,
+    template-haskell -any
+  ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans -Wno-partial-type-signatures
   if flag(WError)
     ghc-options: -Werror
   default-language: Haskell2010

@@ -8,6 +8,8 @@ packages:
 
 extra-deps: []
 
-flags: {}
+flags:
+  DeepDarkFantasy:
+    WError: true
 
 extra-package-dbs: []
