@@ -40,7 +40,6 @@ library
     DDF.Lang
     DDF.List
     DDF.Map
-    DDF.Meta.Interpreter
     DDF.Meta.Diff
     DDF.Meta.DiffWrapper
     DDF.Meta.Dual

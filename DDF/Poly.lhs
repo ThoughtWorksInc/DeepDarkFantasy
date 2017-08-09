@@ -25,7 +25,7 @@
 > import Prelude (Integer)
 > import qualified Prelude as M
 > import qualified DDF.Meta.Dual as M
-> import DDF.Eval ()
+> import DDF.Eval
 
 Importing files and opening language extension...
 So, our goal is to find x, where x * x + 2 * x + 3 = 27.

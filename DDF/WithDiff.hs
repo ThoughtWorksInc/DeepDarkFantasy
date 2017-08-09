@@ -17,8 +17,6 @@ withDiff1 = app withDiff
 selfWithDiff :: (DBI r, WithDiff r w) => r h (w -> DiffType w w)
 selfWithDiff = withDiff1 id
 
-instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
-
 instance Lang r => WithDiff r () where
   withDiff = const1 id
 

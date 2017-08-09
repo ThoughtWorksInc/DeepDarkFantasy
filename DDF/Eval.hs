@@ -165,3 +165,5 @@ instance Lang Eval where
   double2Float = comb M.double2Float
   state = comb M.state
   runState = comb M.runState
+
+newtype Eval h x = Eval {runEval :: h -> x}

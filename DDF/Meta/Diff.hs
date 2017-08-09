@@ -12,10 +12,9 @@
   FlexibleContexts
 #-}
 
-module DDF.Meta.Diff (module DDF.Meta.Diff, module DDF.Meta.Interpreter, module DDF.Vector) where
+module DDF.Meta.Diff (module DDF.Meta.Diff, module DDF.Vector) where
 
 import DDF.Vector
-import DDF.Meta.Interpreter
 
 type family DiffType (v :: *) (x :: *)
 

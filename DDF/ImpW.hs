@@ -7,18 +7,61 @@
   TypeFamilies,
   TypeApplications,
   FlexibleInstances,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  TypeOperators
 #-}
 
 module DDF.ImpW where
 
 import DDF.Lang
+import DDF.WithDiff
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
+import qualified Prelude as M
+
+class ProdCon con l r where
+  prodCon :: (con l, con r) :- con (l, r)
+
+instance ProdCon Random l r where prodCon = Sub Dict
+
+instance ProdCon RandRange l r where prodCon = Sub Dict
+
+instance ProdCon M.Show l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
+
+instance Lang repr => ProdCon (WithDiff repr) l r where prodCon = Sub Dict
+
+class Weight w where
+  weightCon :: (con (), con M.Float, con M.Double, ForallV (ProdCon con)) :- con w
+
+instance Weight () where weightCon = Sub Dict
+
+instance Weight M.Double where weightCon = Sub Dict
+
+instance Weight M.Float where weightCon = Sub Dict
+
+instance (Weight l, Weight r) => Weight (l, r) where
+  weightCon :: forall con. (con (), con M.Float, con M.Double, ForallV (ProdCon con)) :- con (l, r)
+  weightCon = Sub (mapDict (prodCon \\ (instV :: (ForallV (ProdCon con) :- ProdCon con l r))) (Dict \\ weightCon @l @con \\ weightCon @r @con))
 
 runImpW :: forall r h x. Unit r => ImpW r h x -> RunImpW r h x
 runImpW (ImpW x) = RunImpW x
 runImpW (NoImpW x) = RunImpW (const1 x :: r h (() -> x))
+
+data RunImpW repr h x = forall w. Weight w => RunImpW (repr h (w -> x))
+data ImpW repr h x = NoImpW (repr h x) | forall w. Weight w => ImpW (repr h (w -> x))
+type RunImpWR repr h x = forall r. (forall w. Weight w => repr h (w -> x) -> r) -> r
+
+runImpW2RunImpWR :: RunImpW repr h x -> RunImpWR repr h x
+runImpW2RunImpWR (RunImpW x) = \f -> f x
+
+runImpWR2RunImpW :: RunImpWR repr h x -> RunImpW repr h x
+runImpWR2RunImpW f = f RunImpW
 
 instance Prod r => DBI (ImpW r) where
   z = NoImpW z

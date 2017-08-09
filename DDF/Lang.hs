@@ -102,12 +102,6 @@ instance Lang r => Reify r M.Double where
 instance (Lang repr, Reify repr l, Reify repr r) => Reify repr (l, r) where
   reify (l, r) = mkProd2 (reify l) (reify r)
 
-instance Lang repr => ProdCon (Monoid repr) l r where prodCon = Sub Dict
-
-instance Lang repr => ProdCon (Reify repr) l r where prodCon = Sub Dict
-
-instance Lang repr => ProdCon (Vector repr) l r where prodCon = Sub Dict
-
 instance Lang r => Monoid r () where
   zero = unit
   plus = const1 $ const1 unit

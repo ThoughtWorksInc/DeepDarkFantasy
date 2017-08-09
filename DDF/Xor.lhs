@@ -22,6 +22,7 @@ You should already read DDF.Poly before this.
 > import DDF.Term
 > import DDF.ImpW
 > import DDF.WithDiff
+> import DDF.Eval
 > import qualified DDF.Meta.Dual as M
 
 Recall in poly, we constructed a function Double -> Double,

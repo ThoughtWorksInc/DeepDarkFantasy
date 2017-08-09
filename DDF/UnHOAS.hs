@@ -13,6 +13,8 @@ import DDF.Lang
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 
+newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
+
 instance DBI repr => DBI (UnHOAS repr) where
   z = UnHOAS z
   s (UnHOAS x) = UnHOAS $ s x
