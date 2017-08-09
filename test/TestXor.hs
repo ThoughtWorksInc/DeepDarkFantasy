@@ -1,6 +1,6 @@
 module Main where
 
-import DDF.Xor hiding (main)
+import DDF.Sam.Xor hiding (main)
 import Control.Monad
 import System.Exit (exitFailure)
 import System.Random

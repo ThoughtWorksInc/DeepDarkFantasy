@@ -16,6 +16,8 @@ appAST l r = appAST (Leaf $ show l) r
 lamAST str (Lam st l t) = Lam str (st:l) t
 lamAST str r = Lam str [] r
 
+vars = [pre : suf | suf <- "":M.map show [0..], pre <- ['a'..'z']]
+
 instance M.Show AST where
   show (Leaf f) = f
   show (App f x l) = "(" ++ f ++ " " ++ show x ++ M.concatMap ((" " ++) . show) l ++ ")"

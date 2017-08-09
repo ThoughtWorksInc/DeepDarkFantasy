@@ -10,7 +10,7 @@
 This is the classical example of using sigmoid NN to approximate Xor.
 You should already read DDF.Poly before this.
 
-> module DDF.Xor where
+> module DDF.Sam.Xor where
 > import qualified Prelude as M
 > import System.Random
 > import Control.Monad (when)

@@ -5,8 +5,6 @@ module DDF.Util (module DDF.Util, module System.Random) where
 import System.Random
 import GHC.Float
 
-vars = [pre : suf | suf <- "":map show [0..], pre <- ['a'..'z']]
-
 isSquare n = sq * sq == n
   where sq = floor $ sqrt (fromIntegral n::Double)
 

@@ -15,7 +15,7 @@
 >   EmptyCase
 > #-}
 
-> module DDF.Poly where
+> module DDF.Sam.Poly where
 > import Control.Monad (when)
 > import DDF.Util
 > import DDF.Lang

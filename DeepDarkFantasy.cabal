@@ -1,5 +1,5 @@
 name: DeepDarkFantasy
-version: 0.2017.8.8
+version: 0.2017.8.9
 cabal-version: 1.12
 build-type: Simple
 license: Apache
@@ -20,50 +20,49 @@ source-repository head
   location: https://github.com/ThoughtWorksInc/DeepDarkFantasy
              
 library
-  exposed-modules:
-    DDF.Bimap
-    DDF.Bool
-    DDF.Char
-    DDF.DBI
-    DDF.Diff
-    DDF.DiffWrapper
-    DDF.Double
-    DDF.Dual
-    DDF.Eval
-    DDF.Fix
-    DDF.Float
-    DDF.FreeVector
-    DDF.ImportMeta
-    DDF.ImpW
-    DDF.Int
-    DDF.IO
-    DDF.Lang
-    DDF.List
-    DDF.Map
-    DDF.Meta.Diff
-    DDF.Meta.DiffWrapper
-    DDF.Meta.Dual
-    DDF.Meta.FreeVector
-    DDF.Meta.VectorTF
-    DDF.Option
-    DDF.PE
-    DDF.Poly
-    DDF.Prod
-    DDF.Show
-    DDF.Size
-    DDF.Sum
-    DDF.Term
-    DDF.TermGen
-    DDF.UInt
-    DDF.UnHOAS
-    DDF.Unit
-    DDF.UnLiftEnv
-    DDF.Util
-    DDF.Vector
-    DDF.VectorTF
-    DDF.WithDiff
-    DDF.Xor
-    DDF.Y
+  exposed-modules: DDF.Bimap
+                   DDF.Bool
+                   DDF.Char
+                   DDF.DBI
+                   DDF.Diff
+                   DDF.DiffWrapper
+                   DDF.Double
+                   DDF.Dual
+                   DDF.Eval
+                   DDF.Fix
+                   DDF.Float
+                   DDF.FreeVector
+                   DDF.ImportMeta
+                   DDF.ImpW
+                   DDF.Int
+                   DDF.IO
+                   DDF.Lang
+                   DDF.List
+                   DDF.Map
+                   DDF.Meta.Diff
+                   DDF.Meta.DiffWrapper
+                   DDF.Meta.Dual
+                   DDF.Meta.FreeVector
+                   DDF.Meta.VectorTF
+                   DDF.Option
+                   DDF.PE
+                   DDF.Prod
+                   DDF.Sam.Poly
+                   DDF.Sam.Xor
+                   DDF.Show
+                   DDF.Size
+                   DDF.Sum
+                   DDF.Term
+                   DDF.TermGen
+                   DDF.UInt
+                   DDF.UnHOAS
+                   DDF.Unit
+                   DDF.UnLiftEnv
+                   DDF.Util
+                   DDF.Vector
+                   DDF.VectorTF
+                   DDF.WithDiff
+                   DDF.Y
   build-depends:
     base >= 4.9.0.0 && <= 4.9.1.0,
     mtl -any,
@@ -78,7 +77,7 @@ library
     ghc-options: -Werror
   default-language: Haskell2010
 
-Test-Suite TestPoly
+test-Suite TestPoly
   type: exitcode-stdio-1.0
   default-language: Haskell2010
   hs-source-dirs: test
@@ -88,9 +87,9 @@ Test-Suite TestPoly
     mtl -any,
     random -any,
     constraints -any,
-    DeepDarkFantasy
+    DeepDarkFantasy -any
 
-Test-Suite TestXor
+test-Suite TestXor
   type: exitcode-stdio-1.0
   default-language: Haskell2010
   hs-source-dirs: test
@@ -100,9 +99,9 @@ Test-Suite TestXor
     mtl -any,
     random -any,
     constraints -any,
-    DeepDarkFantasy
+    DeepDarkFantasy -any
 
-Test-Suite TestPE
+test-Suite TestPE
   type: exitcode-stdio-1.0
   default-language: Haskell2010
   hs-source-dirs: test
@@ -112,5 +111,5 @@ Test-Suite TestPE
     mtl -any,
     random -any,
     constraints -any,
-    QuickCheck,
-    DeepDarkFantasy
+    QuickCheck -any,
+    DeepDarkFantasy -any
