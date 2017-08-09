@@ -14,7 +14,6 @@ import qualified Prelude as M
 import Prelude ((>), (>=))
 import System.Exit (exitFailure)
 import Control.Monad
-import DDF.Meta.Interpreter
 import Test.QuickCheck
 import DDF.Eval
 
