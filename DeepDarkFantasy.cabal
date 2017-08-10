@@ -54,7 +54,6 @@ library
                    DDF.Sum
                    DDF.Term
                    DDF.TermGen
-                   DDF.UInt
                    DDF.UnHOAS
                    DDF.Unit
                    DDF.UnLiftEnv
