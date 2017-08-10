@@ -37,11 +37,13 @@ In fact, there isn't even a core language! All feature(function, double, back pr
 
 You should read the [blog](http://marisa.moe/2017/DLPL/) before anything.
 
-We have two example on using DDF to solve problem:
+We have a few example on using DDF:
 
-[solving polynomial equation](DDF/Poly.lhs)
+[Hello world](DDF/Sam/Hello.lhs)
 
-[training XOR Network](DDF/Xor.lhs)
+[Solving polynomial equation](DDF/Sam/Poly.lhs)
+
+[Training XOR Network](DDF/Sam/Xor.lhs)
 
 If you want to look into the code base, it is necessary to understand [Finally Tagless](http://www.cs.cornell.edu/info/projects/nuprl/PRLSeminar/PRLSeminar2011/Chung-chiehShan-FinallyTaglessPartiallyEevaluated.pdf).
 
