@@ -26,6 +26,8 @@ instance M.Show AST where
 newtype Show h a = Show {runShow :: [M.String] -> M.Int -> AST}
 name = Show . M.const . M.const . Leaf
 
+showAST (Show sh) = sh vars 0
+
 instance DBI Show where
   z = Show $ M.const $ Leaf . show . M.flip (-) 1
   s (Show v) = Show $ \va -> v va . M.flip (-) 1

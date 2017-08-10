@@ -13,3 +13,4 @@ class Y r => List r where
 
 cons2 = app2 cons
 listMatch2 = app2 listMatch
+listAppend2 = app2 listAppend

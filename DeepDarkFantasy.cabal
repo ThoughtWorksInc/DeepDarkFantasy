@@ -1,5 +1,5 @@
 name: DeepDarkFantasy
-version: 0.2017.8.9
+version: 0.2017.8.10
 cabal-version: 1.12
 build-type: Simple
 license: Apache
@@ -47,6 +47,7 @@ library
                    DDF.Option
                    DDF.PE
                    DDF.Prod
+                   DDF.Sam.Hello
                    DDF.Sam.Poly
                    DDF.Sam.Xor
                    DDF.Show
@@ -62,15 +63,14 @@ library
                    DDF.VectorTF
                    DDF.WithDiff
                    DDF.Y
-  build-depends:
-    base >= 4.9.0.0 && <= 4.9.1.0,
-    mtl -any,
-    random -any,
-    constraints -any,
-    containers -any,
-    bimap -any,
-    recursion-schemes -any,
-    template-haskell -any
+  build-depends: base >= 4.9.0.0 && <= 4.9.1.0,
+                 mtl -any,
+                 random -any,
+                 constraints -any,
+                 containers -any,
+                 bimap -any,
+                 recursion-schemes -any,
+                 template-haskell -any
   ghc-options: -Wall -Wno-type-defaults -Wno-missing-signatures -Wno-orphans -fwarn-tabs -ferror-spans -Wno-partial-type-signatures
   if flag(WError)
     ghc-options: -Werror
