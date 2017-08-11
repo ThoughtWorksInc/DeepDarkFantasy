@@ -7,10 +7,12 @@ import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 
-data AST = Node [M.String] M.String [AST]
+data Name = Prefix M.String | Infix M.String
+
+data AST = Node [M.String] Name [AST]
 
 appAST (Node [] n rest) x = Node [] n (rest ++ [x])
-appAST f x = Node [] (show f) [x]
+appAST f x = Node [] (Prefix (show f)) [x]
 
 lamAST str (Node abst n rest) = Node (str:abst) n rest
 
@@ -18,27 +20,36 @@ vars = [pre : suf | suf <- "":M.map show [0..], pre <- ['a'..'z']]
 
 leaf x = Node [] x []
 
-apps :: M.String -> [AST] -> M.String
-apps n rest = M.unwords (n:(M.map show rest))
+paren :: M.String -> M.String
+paren str = "(" ++ str ++ ")"
+
+apps :: Name -> [AST] -> M.String
+apps (Prefix n) rest = M.unwords (n:(M.map show rest))
+apps (Infix n) [] = n
+apps (Infix n) [l] = (n ++ " " ++ show l)
+apps (Infix n) [l, r] = show l ++ " " ++ n ++ " " ++ show r
+apps (Infix n) (l:r:rest) = apps (Prefix (paren (show l ++ " " ++ n ++ " " ++ show r))) rest
 
 instance M.Show AST where
-  show (Node [] n []) = n
-  show (Node [] n rest) = "(" ++ apps n rest ++ ")"
-  show (Node abst n rest) = "(\\" ++ M.unwords abst ++ " -> " ++ apps n rest ++ ")"
+  show (Node [] n []) = apps n []
+  show (Node [] n rest) = paren $ apps n rest
+  show (Node abst n rest) = paren ("\\" ++ M.unwords abst ++ " -> " ++ apps n rest)
 
 newtype Show h a = Show {runShow :: [M.String] -> M.Int -> AST}
 
-name = Show . M.const . M.const . leaf
+cname = Show . M.const . M.const . leaf
+name = cname . Prefix
+iname = cname . Infix
 
 showAST (Show sh) = sh vars 0
 
 instance DBI Show where
-  z = Show $ M.const $ leaf . show . M.flip (-) 1
+  z = Show $ M.const $ leaf . Prefix . show . M.flip (-) 1
   s (Show v) = Show $ \va -> v va . M.flip (-) 1
   abs (Show f) = Show $ \va x -> lamAST (show x) (f va (x + 1))
   app (Show f) (Show x) = Show $ \va h -> appAST (f va h) (x va h)
   hoas f = Show $ \(v:va) h ->
-    lamAST v (runShow (f $ Show $ M.const $ M.const $ leaf v) va (h + 1))
+    lamAST v (runShow (f $ Show $ M.const $ M.const $ leaf $ Prefix v) va (h + 1))
 
 instance Bool Show where
   bool = name . show
@@ -112,10 +123,10 @@ instance Int Show where
   isZero = name "isZero"
 
 instance List Show where
-  nil = name "nil"
-  cons = name "cons"
+  nil = name "[]"
+  cons = iname ":"
   listMatch = name "listMatch"
-  listAppend = name "++"
+  listAppend = iname "++"
 
 instance Y Show where
   y = name "Y"
