@@ -111,6 +111,7 @@ instance List Show where
   nil = name "nil"
   cons = name "cons"
   listMatch = name "listMatch"
+  listAppend = name "++"
 
 instance Y Show where
   y = name "Y"
