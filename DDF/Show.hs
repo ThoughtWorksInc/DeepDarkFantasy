@@ -7,34 +7,38 @@ import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 
-data AST = Leaf M.String | App M.String AST [AST] | Lam M.String [M.String] AST
+data AST = Node [M.String] M.String [AST]
 
-appAST (Leaf f) x = App f x []
-appAST (App f x l) r = App f x (l ++ [r])
-appAST l r = appAST (Leaf $ show l) r
+appAST (Node [] n rest) x = Node [] n (rest ++ [x])
+appAST f x = Node [] (show f) [x]
 
-lamAST str (Lam st l t) = Lam str (st:l) t
-lamAST str r = Lam str [] r
+lamAST str (Node abst n rest) = Node (str:abst) n rest
 
 vars = [pre : suf | suf <- "":M.map show [0..], pre <- ['a'..'z']]
 
+leaf x = Node [] x []
+
+apps :: M.String -> [AST] -> M.String
+apps n rest = M.unwords (n:(M.map show rest))
+
 instance M.Show AST where
-  show (Leaf f) = f
-  show (App f x l) = "(" ++ f ++ " " ++ show x ++ M.concatMap ((" " ++) . show) l ++ ")"
-  show (Lam str l t) = "(\\" ++ str ++ M.concatMap (" " ++) l ++ " -> " ++ show t ++ ")"
+  show (Node [] n []) = n
+  show (Node [] n rest) = "(" ++ apps n rest ++ ")"
+  show (Node abst n rest) = "(\\" ++ M.unwords abst ++ " -> " ++ apps n rest ++ ")"
 
 newtype Show h a = Show {runShow :: [M.String] -> M.Int -> AST}
-name = Show . M.const . M.const . Leaf
+
+name = Show . M.const . M.const . leaf
 
 showAST (Show sh) = sh vars 0
 
 instance DBI Show where
-  z = Show $ M.const $ Leaf . show . M.flip (-) 1
+  z = Show $ M.const $ leaf . show . M.flip (-) 1
   s (Show v) = Show $ \va -> v va . M.flip (-) 1
   abs (Show f) = Show $ \va x -> lamAST (show x) (f va (x + 1))
   app (Show f) (Show x) = Show $ \va h -> appAST (f va h) (x va h)
   hoas f = Show $ \(v:va) h ->
-    lamAST v (runShow (f $ Show $ M.const $ M.const $ Leaf v) va (h + 1))
+    lamAST v (runShow (f $ Show $ M.const $ M.const $ leaf v) va (h + 1))
 
 instance Bool Show where
   bool = name . show
