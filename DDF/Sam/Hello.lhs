@@ -30,6 +30,7 @@ Lang int is simply the constraint that int can interpret anything inside Lang.
 
 Well, we are just defining string literal, so it don't need the full power of Lang.
 Since string is list of char, using List and Char should be enough.
+This is better since maybe some interpreter (int) doesnt support the full Lang!
 Also note that we had manually select an enviromnet, instead of letting it be anything.
 The enviroment is simply (), which mean there's no free variable.
 
