@@ -3,7 +3,7 @@ version: 0.2017.8.12
 cabal-version: 1.12
 build-type: Simple
 license: Apache
-tested-with: GHC == 8.0.2
+tested-with: GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.1
 maintainer: lolisa@marisa.moe
 category: DSL
 description: Deep Dark Fantasy(DDF) is a domain specific language that allow one to automatically derive derivative of program in DDF. Hence, one can write neural network in DDF and use the derivative program for gradient descend. 
@@ -63,7 +63,7 @@ library
                    DDF.VectorTF
                    DDF.WithDiff
                    DDF.Y
-  build-depends: base >= 4.9.0.0 && <= 4.9.1.0,
+  build-depends: base >= 4.9.0.0 && <= 4.10.0.0,
                  mtl -any,
                  random -any,
                  constraints -any,
