@@ -82,7 +82,7 @@ test-Suite TestPoly
   hs-source-dirs: test
   main-is: TestPoly.hs
   build-depends:
-    base >= 4.9.0.0 && <= 4.9.1.0,
+    base >= 4.9.0.0 && < 5,
     mtl -any,
     random -any,
     constraints -any,
@@ -94,7 +94,7 @@ test-Suite TestXor
   hs-source-dirs: test
   main-is: TestXor.hs
   build-depends:
-    base >= 4.9.0.0 && <= 4.9.1.0,
+    base >= 4.9.0.0 && < 5,
     mtl -any,
     random -any,
     constraints -any,
@@ -106,7 +106,7 @@ test-Suite TestPE
   hs-source-dirs: test
   main-is: TestPE.hs
   build-depends:
-    base >= 4.9.0.0 && <= 4.9.1.0,
+    base >= 4.9.0.0 && < 5,
     mtl -any,
     random -any,
     constraints -any,
