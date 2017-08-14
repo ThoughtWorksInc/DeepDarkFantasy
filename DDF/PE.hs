@@ -13,13 +13,13 @@
 
 module DDF.PE where
 
-import DDF.DBI
-import DDF.Double
+import DDF.Lang
 import qualified Prelude as M
 
 data P repr h a where
   Unk :: repr h a -> P repr h a
   Static :: a -> (forall h'. repr h' a) -> P repr h a
+  Prod :: P repr h a -> P repr h b -> P repr h (a, b)
   StaFun :: (forall hout. EnvT repr (a, h) hout -> P repr hout b) -> P repr h (a -> b)
   Open   :: (forall hout. EnvT repr h hout -> P repr hout a) -> P repr h a
 
@@ -29,25 +29,27 @@ data EnvT repr hin hout where
   Weak :: EnvT repr h (a, h)
   Next :: EnvT repr hin hout -> EnvT repr (a, hin) (a, hout)
 
-dynamic:: DBI repr => P repr h a -> repr h a
+dynamic:: Prod repr => P repr h a -> repr h a
 dynamic (Unk x)      = x
 dynamic (Static _ x) = x
 dynamic (StaFun f)   = abs $ dynamic (f Dyn)
 dynamic (Open f)     = dynamic (f Dyn)
+dynamic (Prod l r)   = dynamic (mkProd2 l r)
 
-app_open :: DBI repr => P repr hin r -> EnvT repr hin hout -> P repr hout r
+app_open :: Prod repr => P repr hin r -> EnvT repr hin hout -> P repr hout r
 app_open e Dyn            = Unk (dynamic e)
 app_open (Static es ed) _ = Static es ed
 app_open (Open fs) h      = fs h
 app_open (StaFun fs) h    = abs (fs (Next h))
 app_open (Unk env) h      = Unk (app_unk env h) where
-  app_unk :: DBI repr => repr hin a -> EnvT repr hin hout -> repr hout a
+  app_unk :: Prod repr => repr hin a -> EnvT repr hin hout -> repr hout a
   app_unk e Dyn      = e
   app_unk e (Arg p)  = app (abs e) (dynamic p)
   app_unk e (Next h') = app (s (app_unk (abs e) h')) z
   app_unk e Weak     = s e
+app_open (Prod l r) h = Prod (app_open l h) (app_open r h)
 
-instance DBI r => DBI (P r) where
+instance Prod r => DBI (P r) where
   z = Open f where
     f :: EnvT r (a,h) hout -> P r hout a
     f Dyn       = Unk z
@@ -75,7 +77,7 @@ instance DBI r => DBI (P r) where
   app (Static _ fs) p = Unk (app fs (dynamic p))
   app e1 e2           = Open (\h -> app (app_open e1 h) (app_open e2 h))
 
-instance Bool r => Bool (P r) where
+instance (Prod r, Bool r) => Bool (P r) where
   bool x = Static x (bool x)
   ite = lam3 (\l r b -> app2 (f b) l r)
     where
@@ -85,7 +87,7 @@ instance Bool r => Bool (P r) where
       f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
       f x = Open (\h -> f (app_open x h))
 
-instance Double r => Double (P r) where
+instance (Prod r, Double r) => Double (P r) where
   double x = Static x (double x)
   doublePlus = abs (abs (f (s z) z))
     where
@@ -132,5 +134,22 @@ instance Double r => Double (P r) where
     f (Unk l) (Unk r) = Unk (doubleEq2 l r)
     f l r = Open (\h -> f (app_open l h) (app_open r h))    
 
-pe :: Double repr => P repr () a -> repr () a
+instance Prod r => Prod (P r) where
+  mkProd = abs (abs (Prod (s z) z))
+  zro = abs (f z)
+    where
+      f :: P r h (a, b) -> P r h a
+      f (Static (l, _) p) = Static l (zro1 p)
+      f (Prod l _) = l
+      f (Unk p) = Unk (zro1 p)
+      f p = Open (\h -> f (app_open p h))
+  fst = abs (f z)
+    where
+      f :: P r h (a, b) -> P r h b
+      f (Static (_, r) p) = Static r (fst1 p)
+      f (Prod _ r) = r
+      f (Unk p) = Unk (fst1 p)
+      f p = Open (\h -> f (app_open p h))
+
+pe :: Prod repr => P repr () a -> repr () a
 pe = dynamic

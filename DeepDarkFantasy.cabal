@@ -63,7 +63,7 @@ library
                    DDF.VectorTF
                    DDF.WithDiff
                    DDF.Y
-  build-depends: base >= 4.9.0.0 && <= 4.10.0.0,
+  build-depends: base >= 4.9.0.0 && < 5,
                  mtl -any,
                  random -any,
                  constraints -any,
