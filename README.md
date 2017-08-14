@@ -75,7 +75,9 @@ This is heavily inspired by [Neural Networks, Types, and Functional Programming]
 
 Also, I'd like to thanks [dram](https://github.com/dramforever) for getting it to work without Incoherent Instances, and fixing it on stack, cabal & travis.
 
-And, You can be the next contributor!
+And [izgzhen](https://github.com/izgzhen) helps with the initial version of Partial Evaluation.
+
+You can be the next contributor!
 
 ![I Want You](img/I_Want_You.png "Baka!")
 [image courtesy of Milk Mage](http://www.pixiv.net/member_illust.php?id=461351)
