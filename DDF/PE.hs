@@ -38,7 +38,7 @@ type instance K repr h M.Double = M.Double
 type instance K repr h (a -> b) = Fun repr h a b
 newtype Fun repr h a b = Fun {runFun :: forall hout. EnvT repr (a, h) hout -> P repr hout b}
 
-mkFun :: Prod repr => (forall hout. EnvT repr (a, h) hout -> P repr hout b) -> P repr h (a -> b)
+mkFun :: DBI repr => (forall hout. EnvT repr (a, h) hout -> P repr hout b) -> P repr h (a -> b)
 mkFun f = Known (Fun f) (abs $ dynamic (f Dyn)) (\h -> abs $ f $ Next h) (abs $ f $ Next Weak) (mkFun $ app_open (mkFun f))
 
 data EnvT repr hin hout where
@@ -47,12 +47,12 @@ data EnvT repr hin hout where
   Weak :: EnvT repr h (a, h)
   Next :: EnvT repr hin hout -> EnvT repr (a, hin) (a, hout)
 
-dynamic:: Prod repr => P repr h a -> repr h a
+dynamic:: DBI repr => P repr h a -> repr h a
 dynamic (Unk x)      = x
 dynamic (Open f)     = dynamic (f Dyn)
 dynamic (Known _ d _ _ _)  = d
 
-app_open :: Prod repr => P repr hin r -> EnvT repr hin hout -> P repr hout r
+app_open :: DBI repr => P repr hin r -> EnvT repr hin hout -> P repr hout r
 app_open (Open fs) h       = fs h
 app_open (Unk e) Dyn       = Unk e
 app_open (Unk e) (Arg p)   = Unk (app (abs e) (dynamic p))
@@ -60,7 +60,7 @@ app_open (Unk e) (Next h)  = app (s (app_open (Unk (abs e)) h)) z
 app_open (Unk e) Weak      = Unk (s e)
 app_open (Known _ _ x _ _) h = x h
 
-instance Prod r => DBI (P r) where
+instance DBI r => DBI (P r) where
   z = Open f where
     f :: EnvT r (a,h) hout -> P r hout a
     f Dyn      = Unk z
@@ -86,7 +86,7 @@ instance Prod r => DBI (P r) where
   app e1 e2 | isOpen e1 || isOpen e2 = Open (\h -> app (app_open e1 h) (app_open e2 h))
   app f x                            = Unk (app (dynamic f) (dynamic x))
 
-instance (Prod r, Bool r) => Bool (P r) where
+instance Bool r => Bool (P r) where
   bool x = Known x (bool x) (\_ -> bool x) (bool x) (mkFun (\_ -> bool x))
   ite = lam3 (\l r b -> app2 (f b) l r)
     where
@@ -96,7 +96,7 @@ instance (Prod r, Bool r) => Bool (P r) where
       f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
       f x@(Open _) = Open (\h -> f (app_open x h))
 
-instance (Prod r, Double r) => Double (P r) where
+instance Double r => Double (P r) where
   double x = Known x (double x) (\_ -> double x) (double x) (mkFun (\_ -> double x))
   doublePlus = abs (abs (f (s z) z))
     where
@@ -165,5 +165,5 @@ instance Prod r => Prod (P r) where
       f (Unk p) = Unk (fst1 p)
       f p = Open (\h -> f (app_open p h))
 
-pe :: Prod repr => P repr () a -> repr () a
+pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic
