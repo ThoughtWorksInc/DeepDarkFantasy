@@ -31,12 +31,8 @@ data P repr h a where
 
 isOpen (Open _) = M.True
 isOpen _ = M.False
+
 type family   K (repr :: * -> * -> *) h a
-type instance K repr h (a, b)   = (P repr h a, P repr h b)
-type instance K repr h M.Bool   = M.Bool
-type instance K repr h M.Double = M.Double
-type instance K repr h (a -> b) = Fun repr h a b
-newtype Fun repr h a b = Fun {runFun :: forall hout. EnvT repr (a, h) hout -> P repr hout b}
 
 mkFun :: DBI repr => (forall hout. EnvT repr (a, h) hout -> P repr hout b) -> P repr h (a -> b)
 mkFun f = Known (Fun f) (abs $ dynamic (f Dyn)) (\h -> abs $ f $ Next h) (abs $ f $ Next Weak) (mkFun $ app_open (mkFun f))
@@ -59,6 +55,9 @@ app_open (Unk e) (Arg p)   = Unk (app (abs e) (dynamic p))
 app_open (Unk e) (Next h)  = app (s (app_open (Unk (abs e)) h)) z
 app_open (Unk e) Weak      = Unk (s e)
 app_open (Known _ _ x _ _) h = x h
+
+type instance K repr h (a -> b) = Fun repr h a b
+newtype Fun repr h a b = Fun {runFun :: forall hout. EnvT repr (a, h) hout -> P repr hout b}
 
 instance DBI r => DBI (P r) where
   z = Open f where
@@ -86,6 +85,8 @@ instance DBI r => DBI (P r) where
   app e1 e2 | isOpen e1 || isOpen e2 = Open (\h -> app (app_open e1 h) (app_open e2 h))
   app f x                            = Unk (app (dynamic f) (dynamic x))
 
+type instance K repr h M.Bool = M.Bool
+
 instance Bool r => Bool (P r) where
   bool x = Known x (bool x) (\_ -> bool x) (bool x) (mkFun (\_ -> bool x))
   ite = lam3 (\l r b -> app2 (f b) l r)
@@ -95,6 +96,8 @@ instance Bool r => Bool (P r) where
       f (Known M.False _ _ _ _) = const1 id
       f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
       f x@(Open _) = Open (\h -> f (app_open x h))
+
+type instance K repr h M.Double = M.Double
 
 instance Double r => Double (P r) where
   double x = Known x (double x) (\_ -> double x) (double x) (mkFun (\_ -> double x))
@@ -143,6 +146,8 @@ instance Double r => Double (P r) where
     f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
     f l r = Unk (doubleEq2 (dynamic l) (dynamic r))
 
+type instance K repr h (a, b) = (P repr h a, P repr h b)
+
 instance Prod r => Prod (P r) where
   mkProd = abs (abs (f (s z) z))
     where
@@ -151,7 +156,7 @@ instance Prod r => Prod (P r) where
                 (mkProd2 (dynamic l) (dynamic r))
                 (\h -> mkProd2 (app_open l h) (app_open r h))
                 (s (mkProd2 l r))
-                (mkFun $ \x -> mkProd2 (app_open l x) (app_open r x))
+                (mkFun $ \h -> mkProd2 (app_open l h) (app_open r h))
   zro = abs (f z)
     where
       f :: P r h (a, b) -> P r h a
@@ -164,6 +169,32 @@ instance Prod r => Prod (P r) where
       f (Known (_, r) _ _ _ _) = r
       f (Unk p) = Unk (fst1 p)
       f p = Open (\h -> f (app_open p h))
+
+type instance K repr h (M.Either a b) = M.Either (P repr h a) (P repr h b)
+instance Sum r => Sum (P r) where
+  left = abs (f z)
+    where
+      f :: P r h a -> P r h (M.Either a b)
+      f x = Known (M.Left x)
+              (left1 $ dynamic x)
+              (\h -> left1 $ app_open x h)
+              (s $ left1 x)
+              (mkFun $ \h -> left1 (app_open x h))
+  right = abs (f z)
+    where
+      f :: P r h b -> P r h (M.Either a b)
+      f x = Known (M.Right x)
+              (right1 $ dynamic x)
+              (\h -> right1 $ app_open x h)
+              (s $ right1 x)
+              (mkFun $ \h -> right1 $ app_open x h)
+  sumMatch = abs $ abs $ abs (f (s (s z)) (s z) z)
+    where
+      f :: P r h (a -> c) -> P r h (b -> c) -> P r h (M.Either a b) -> P r h c
+      f l _ (Known (M.Left x) _ _ _ _) = app l x
+      f _ r (Known (M.Right x) _ _ _ _) = app r x
+      f l r (Unk x) = Unk $ sumMatch3 (dynamic l) (dynamic r) x
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
 
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic

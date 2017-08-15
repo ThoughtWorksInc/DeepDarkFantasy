@@ -118,7 +118,9 @@ lam3 f = lam2 $ \a b -> lam $ \c -> f a b c
 
 lam4 f = lam3 $ \a b c -> lam $ \d -> f a b c d
 
-app2 f a = app (app f a)
+app1 = app 
+
+app2 f a = app (app1 f a)
 
 app3 f a b = app (app2 f a b)
 
