@@ -175,7 +175,7 @@ instance Sum r => Sum (P r) where
   left = abs (f z)
     where
       f :: P r h a -> P r h (M.Either a b)
-      f x = Known (M.Left x)
+      f x = Known (Left x)
               (left1 $ dynamic x)
               (\h -> left1 $ app_open x h)
               (s $ left1 x)
@@ -183,7 +183,7 @@ instance Sum r => Sum (P r) where
   right = abs (f z)
     where
       f :: P r h b -> P r h (M.Either a b)
-      f x = Known (M.Right x)
+      f x = Known (Right x)
               (right1 $ dynamic x)
               (\h -> right1 $ app_open x h)
               (s $ right1 x)
@@ -195,6 +195,36 @@ instance Sum r => Sum (P r) where
       f _ r (Known (M.Right x) _ _ _ _) = app r x
       f l r (Unk x) = Unk $ sumMatch3 (dynamic l) (dynamic r) x
       f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
+
+instance Y r => Y (P r) where
+  y = Unk y -- naive strategy to avoid infinite loop in PE. Later might do infinite PE thx to laziness.
+
+type instance K repr h [a] = Maybe (P repr h a, P repr h [a])
+instance List repr => List (P repr) where
+  nil = Known Nothing nil (\_ -> nil) nil (mkFun $ \_ -> nil)
+  cons = abs $ abs (f (s z) z)
+    where
+      f :: P repr h a -> P repr h [a] -> P repr h [a]
+      f h t = Known (Just (h, t))
+                (cons2 (dynamic h) (dynamic t))
+                (\env -> cons2 (app_open h env) (app_open t env))
+                (s $ cons2 h t)
+                (mkFun $ \env -> cons2 (app_open h env) (app_open t env))
+  listMatch = abs $ abs $ abs (f (s $ s z) (s z) z)
+    where
+      f :: P repr h b -> P repr h (a -> [a] -> b) -> P repr h [a] -> P repr h b
+      f l _ (Known Nothing _ _ _ _) = l -- You know nothing, Jon Snow.
+      f _ r (Known (Just (h, t)) _ _ _ _) = app2 r h t
+      f l r (Unk x) = Unk $ listMatch3 (dynamic l) (dynamic r) x
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
+  listAppend = abs $ abs (f (s z) z)
+    where
+      f :: P repr h [a] -> P repr h [a] -> P repr h [a]
+      f (Known Nothing _ _ _ _) r = r
+      f (Known (Just (h, t)) _ _ _ _) r = cons2 h (listAppend2 t r)
+      f l (Known Nothing _ _ _ _) = l
+      f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
+      f l r = Unk (listAppend2 (dynamic l) (dynamic r))
 
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic
