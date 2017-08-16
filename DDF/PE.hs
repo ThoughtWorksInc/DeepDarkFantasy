@@ -86,7 +86,6 @@ instance DBI r => DBI (P r) where
   app f x                            = Unk (app (dynamic f) (dynamic x))
 
 type instance K repr h M.Bool = M.Bool
-
 instance Bool r => Bool (P r) where
   bool x = Known x (bool x) (\_ -> bool x) (bool x) (mkFun (\_ -> bool x))
   ite = lam3 (\l r b -> app2 (f b) l r)
@@ -98,7 +97,6 @@ instance Bool r => Bool (P r) where
       f x@(Open _) = Open (\h -> f (app_open x h))
 
 type instance K repr h M.Double = M.Double
-
 instance Double r => Double (P r) where
   double x = Known x (double x) (\_ -> double x) (double x) (mkFun (\_ -> double x))
   doublePlus = abs (abs (f (s z) z))
@@ -146,8 +144,50 @@ instance Double r => Double (P r) where
     f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
     f l r = Unk (doubleEq2 (dynamic l) (dynamic r))
 
-type instance K repr h (a, b) = (P repr h a, P repr h b)
+type instance K repr h M.Float = M.Float
+instance Float r => Float (P r) where
+  float x = Known x (float x) (\_ -> float x) (float x) (mkFun (\_ -> float x))
+  floatPlus = abs (abs (f (s z) z))
+    where
+      f :: P r h M.Float -> P r h M.Float -> P r h M.Float
+      f (Known l _ _ _ _) (Known r _ _ _ _) = float (l + r)
+      f (Known 0 _ _ _ _) r = r
+      f l (Known 0 _ _ _ _) = l
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
+      f l r = Unk (floatPlus2 (dynamic l) (dynamic r))
+  floatMult = abs (abs (f (s z) z))
+    where
+      f :: P r h M.Float -> P r h M.Float -> P r h M.Float
+      f (Known l _ _ _ _) (Known r _ _ _ _) = float (l * r)
+      f (Known 0 _ _ _ _) _ = float 0
+      f _ (Known 0 _ _ _ _) = float 0
+      f l (Known 1 _ _ _ _) = l
+      f (Known 1 _ _ _ _) r = r
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
+      f l r = Unk (floatMult2 (dynamic l) (dynamic r))
+  floatMinus = abs (abs (f (s z) z))
+    where
+      f :: P r h M.Float -> P r h M.Float -> P r h M.Float
+      f (Known l _ _ _ _) (Known r _ _ _ _) = float (l - r)
+      f l (Known 0 _ _ _ _) = l 
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
+      f l r = Unk (floatMinus2 (dynamic l) (dynamic r))
+  floatDivide = abs (abs (f (s z) z))
+    where
+      f :: P r h M.Float -> P r h M.Float -> P r h M.Float
+      f (Known l _ _ _ _) (Known r _ _ _ _) = float (l / r)
+      f (Known 0 _ _ _ _) _ = float 0
+      f l (Known 1 _ _ _ _) = l 
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
+      f l r = Unk (floatDivide2 (dynamic l) (dynamic r))
+  floatExp = abs (f z)
+    where
+      f :: P r h M.Float -> P r h M.Float
+      f (Known l _ _ _ _) = float (M.exp l) 
+      f (Unk l) = Unk (floatExp1 l)
+      f l@(Open _) = Open (\h -> f (app_open l h))
 
+type instance K repr h (a, b) = (P repr h a, P repr h b)
 instance Prod r => Prod (P r) where
   mkProd = abs (abs (f (s z) z))
     where

@@ -1,3 +1,5 @@
+{-# Language NoMonomorphismRestriction #-}
+
 module DDF.Float (module DDF.Float, module DDF.DBI) where
 
 import DDF.DBI
@@ -14,3 +16,13 @@ class DBI r => Float r where
   floatMult :: r h (M.Float -> M.Float -> M.Float)
   floatDivide :: r h (M.Float -> M.Float -> M.Float)
   floatExp :: r h (M.Float -> M.Float)
+
+floatPlus1 = app1 floatPlus
+floatPlus2 = app2 floatPlus
+floatMinus1 = app1 floatMinus
+floatMinus2 = app2 floatMinus
+floatMult1 = app1 floatMult
+floatMult2 = app2 floatMult
+floatDivide1 = app1 floatDivide
+floatDivide2 = app2 floatDivide
+floatExp1 = app1 floatExp

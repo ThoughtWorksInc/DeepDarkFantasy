@@ -294,7 +294,6 @@ optionMatch3 = app3 optionMatch
 writer1 = app writer
 runWriter1 = app runWriter
 float2Double1 = app float2Double
-floatExp1 = app floatExp
 state1 = app state
 runState1 = app runState
 runState2 = app2 runState
