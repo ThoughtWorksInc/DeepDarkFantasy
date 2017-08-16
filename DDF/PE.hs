@@ -10,7 +10,8 @@
   LambdaCase,
   FlexibleContexts,
   KindSignatures,
-  TypeFamilies
+  TypeFamilies,
+  TypeApplications
 #-}
 
 module DDF.PE where
@@ -37,10 +38,13 @@ know :: DBI repr =>
   P repr h a
 know a b c d = Known a b c d (mkFun c)
 
+static :: forall repr h a. DBI repr => (forall h'. (K repr h' a, repr h' a)) -> P repr h a
+static x = know (M.fst $ x @h) (M.snd x) (\_ -> static x) (static x)
+
 isOpen (Open _) = M.True
 isOpen _ = M.False
 
-type family   K (repr :: * -> * -> *) h a
+type family K (repr :: * -> * -> *) h a
 
 mkFun :: DBI repr => (forall hout. EnvT repr (a, h) hout -> P repr hout b) -> P repr h (a -> b)
 mkFun f = Known (Fun f) (abs $ dynamic (f Dyn)) (\h -> abs $ f $ Next h) (abs $ f $ Next Weak) (mkFun $ app_open (mkFun f))
@@ -95,7 +99,7 @@ instance DBI r => DBI (P r) where
 
 type instance K repr h M.Bool = M.Bool
 instance Bool r => Bool (P r) where
-  bool x = know x (bool x) (\_ -> bool x) (bool x)
+  bool x = static (x, bool x)
   ite = lam3 (\l r b -> app2 (f b) l r)
     where
       f :: P r h M.Bool -> P r h (a -> a -> a)
@@ -106,7 +110,7 @@ instance Bool r => Bool (P r) where
 
 type instance K repr h M.Double = M.Double
 instance Double r => Double (P r) where
-  double x = know x (double x) (\_ -> double x) (double x)
+  double x = static (x, double x)
   doublePlus = abs (abs (f (s z) z))
     where
       f :: P r h M.Double -> P r h M.Double -> P r h M.Double
@@ -154,7 +158,7 @@ instance Double r => Double (P r) where
 
 type instance K repr h M.Float = M.Float
 instance Float r => Float (P r) where
-  float x = know x (float x) (\_ -> float x) (float x)
+  float x = static (x, float x)
   floatPlus = abs (abs (f (s z) z))
     where
       f :: P r h M.Float -> P r h M.Float -> P r h M.Float
@@ -246,7 +250,7 @@ instance Y r => Y (P r) where
 
 type instance K repr h [a] = Maybe (P repr h a, P repr h [a])
 instance List repr => List (P repr) where
-  nil = know Nothing nil (\_ -> nil) nil
+  nil = static (Nothing, nil)
   cons = abs $ abs (f (s z) z)
     where
       f :: P repr h a -> P repr h [a] -> P repr h [a]
@@ -272,15 +276,14 @@ instance List repr => List (P repr) where
 
 type instance K repr h (Maybe a) = Maybe (P repr h a)
 instance Option repr => Option (P repr) where
-  nothing = know Nothing nothing (\_ -> nothing) nothing
+  nothing = static (Nothing, nothing)
   just = abs (f z)
     where
       f :: P repr h a -> P repr h (Maybe a)
-      f x = Known (Just x)
+      f x = know (Just x)
               (just1 $ dynamic x)
               (\h -> just1 $ app_open x h)
               (just1 $ s x)
-              (mkFun $ \h -> just1 $ app_open x h)
   optionMatch = abs $ abs $ abs (f (s (s z)) (s z) z)
     where
       f :: P repr h b -> P repr h (a -> b) -> P repr h (Maybe a) -> P repr h b
