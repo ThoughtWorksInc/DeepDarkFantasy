@@ -22,3 +22,4 @@ dual1 = app dual
 mkDual2 = app2 mkDual
 dualOrig1 = app dualOrig
 dualDiff1 = app dualDiff
+runDual1 = app1 runDual

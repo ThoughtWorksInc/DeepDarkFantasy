@@ -18,6 +18,7 @@ module DDF.PE where
 
 import DDF.Lang
 import qualified Prelude as M
+import qualified DDF.Meta.Dual as M
 
 data P repr h a where
   Open   :: (forall hout. EnvT repr h hout -> P repr hout a) -> P repr h a
@@ -90,7 +91,7 @@ instance DBI r => DBI (P r) where
     f Weak             = s (s p)
 
   abs (Unk f) = Unk (abs f)
-  abs o@(Open _) = mkFun (app_open o)
+  abs (Open o) = mkFun o
   abs (Known _ _ _ _ x) = x
 
   app (Known (Fun fs) _ _ _ _) p     = fs (Arg p)
@@ -106,7 +107,7 @@ instance Bool r => Bool (P r) where
       f (Known M.True _ _ _ _) = const
       f (Known M.False _ _ _ _) = const1 id
       f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
-      f x@(Open _) = Open (\h -> f (app_open x h))
+      f (Open x) = Open $ f . x
 
 type instance K repr h M.Double = M.Double
 instance Double r => Double (P r) where
@@ -149,7 +150,7 @@ instance Double r => Double (P r) where
       f :: P r h M.Double -> P r h M.Double
       f (Known l _ _ _ _) = double (M.exp l) 
       f (Unk l) = Unk (doubleExp1 l)
-      f l@(Open _) = Open (\h -> f (app_open l h))
+      f (Open x) = Open $ f . x
   doubleEq = abs (abs (f (s z) z)) where
     f :: P r h M.Double -> P r h M.Double -> P r h M.Bool
     f (Known l _ _ _ _) (Known r _ _ _ _) = bool (l == r)
@@ -197,7 +198,7 @@ instance Float r => Float (P r) where
       f :: P r h M.Float -> P r h M.Float
       f (Known l _ _ _ _) = float (M.exp l) 
       f (Unk l) = Unk (floatExp1 l)
-      f l@(Open _) = Open (\h -> f (app_open l h))
+      f (Open x) = Open $ f . x
 
 type instance K repr h (a, b) = (P repr h a, P repr h b)
 instance Prod r => Prod (P r) where
@@ -207,19 +208,19 @@ instance Prod r => Prod (P r) where
       f l r = know (l, r)
                 (mkProd2 (dynamic l) (dynamic r))
                 (\h -> mkProd2 (app_open l h) (app_open r h))
-                (s (mkProd2 l r))
+                (mkProd2 (s l) (s r))
   zro = abs (f z)
     where
       f :: P r h (a, b) -> P r h a
       f (Known (l, _) _ _ _ _) = l
       f (Unk p) = Unk (zro1 p)
-      f p = Open (\h -> f (app_open p h))
+      f (Open x) = Open $ f . x
   fst = abs (f z)
     where
       f :: P r h (a, b) -> P r h b
       f (Known (_, r) _ _ _ _) = r
       f (Unk p) = Unk (fst1 p)
-      f p = Open (\h -> f (app_open p h))
+      f (Open x) = Open $ f . x
 
 type instance K repr h (M.Either a b) = M.Either (P repr h a) (P repr h b)
 instance Sum r => Sum (P r) where
@@ -229,14 +230,14 @@ instance Sum r => Sum (P r) where
       f x = know (Left x)
               (left1 $ dynamic x)
               (\h -> left1 $ app_open x h)
-              (s $ left1 x)
+              (left1 $ s x)
   right = abs (f z)
     where
       f :: P r h b -> P r h (M.Either a b)
       f x = know (Right x)
               (right1 $ dynamic x)
               (\h -> right1 $ app_open x h)
-              (s $ right1 x)
+              (right1 $ s x)
   sumMatch = abs $ abs $ abs (f (s (s z)) (s z) z)
     where
       f :: P r h (a -> c) -> P r h (b -> c) -> P r h (M.Either a b) -> P r h c
@@ -257,7 +258,7 @@ instance List repr => List (P repr) where
       f h t = know (Just (h, t))
                 (cons2 (dynamic h) (dynamic t))
                 (\env -> cons2 (app_open h env) (app_open t env))
-                (s $ cons2 h t)
+                (cons2 (s h) (s t))
   listMatch = abs $ abs $ abs (f (s $ s z) (s z) z)
     where
       f :: P repr h b -> P repr h (a -> [a] -> b) -> P repr h [a] -> P repr h b
@@ -303,14 +304,37 @@ instance Int repr => Int (P repr) where
     where
       f :: P repr h M.Int -> P repr h M.Int
       f (Known i _ _ _ _) = int $ i - 1
-      f (Open x) = Open $ \h -> f $ x h
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ pred1 x
   isZero = abs (f z)
     where
       f :: P repr h M.Int -> P repr h M.Bool
       f (Known i _ _ _ _) = bool $ i == 0
-      f (Open x) = Open $ \h -> f $ x h
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ isZero1 x
+
+type instance K repr h (M.Dual l r) = (P repr h l, P repr h r)
+instance Dual repr => Dual (P repr) where
+  dual = abs (f z)
+    where
+      f :: P repr h (a, b) -> P repr h (M.Dual a b)
+      f (Known (l, r) _ _ _ _) =
+        know (l, r)
+          (mkDual2 (dynamic l) (dynamic r))
+          (\h -> mkDual2 (app_open l h) (app_open r h))
+          (s $ mkDual2 l r)
+      f (Open x) = Open $ f . x
+      f (Unk x) = Unk $ dual1 x
+  runDual = abs (f z)
+    where
+      f :: P repr h (M.Dual a b) -> P repr h (a, b)
+      f (Known (l, r) _ _ _ _) =
+        know (l, r)
+          (mkProd2 (dynamic l) (dynamic r))
+          (\h -> mkProd2 (app_open l h) (app_open r h))
+          (mkProd2 (s l) (s r))
+      f (Open x) = Open $ f . x
+      f (Unk x) = Unk $ runDual1 x
 
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic
