@@ -29,6 +29,14 @@ data P repr h a where
     (forall hh ht. (hh, ht) ~ h => P repr ht (hh -> a)) ->
     P repr h a
 
+know :: DBI repr =>
+  K repr h a ->
+  repr h a ->
+  (forall hout. EnvT repr h hout -> P repr hout a) ->
+  (forall any. P repr (any, h) a) ->
+  P repr h a
+know a b c d = Known a b c d (mkFun c)
+
 isOpen (Open _) = M.True
 isOpen _ = M.False
 
@@ -87,7 +95,7 @@ instance DBI r => DBI (P r) where
 
 type instance K repr h M.Bool = M.Bool
 instance Bool r => Bool (P r) where
-  bool x = Known x (bool x) (\_ -> bool x) (bool x) (mkFun (\_ -> bool x))
+  bool x = know x (bool x) (\_ -> bool x) (bool x)
   ite = lam3 (\l r b -> app2 (f b) l r)
     where
       f :: P r h M.Bool -> P r h (a -> a -> a)
@@ -98,7 +106,7 @@ instance Bool r => Bool (P r) where
 
 type instance K repr h M.Double = M.Double
 instance Double r => Double (P r) where
-  double x = Known x (double x) (\_ -> double x) (double x) (mkFun (\_ -> double x))
+  double x = know x (double x) (\_ -> double x) (double x)
   doublePlus = abs (abs (f (s z) z))
     where
       f :: P r h M.Double -> P r h M.Double -> P r h M.Double
@@ -146,7 +154,7 @@ instance Double r => Double (P r) where
 
 type instance K repr h M.Float = M.Float
 instance Float r => Float (P r) where
-  float x = Known x (float x) (\_ -> float x) (float x) (mkFun (\_ -> float x))
+  float x = know x (float x) (\_ -> float x) (float x)
   floatPlus = abs (abs (f (s z) z))
     where
       f :: P r h M.Float -> P r h M.Float -> P r h M.Float
@@ -192,11 +200,10 @@ instance Prod r => Prod (P r) where
   mkProd = abs (abs (f (s z) z))
     where
       f :: P r h a -> P r h b -> P r h (a, b)
-      f l r = Known (l, r)
+      f l r = know (l, r)
                 (mkProd2 (dynamic l) (dynamic r))
                 (\h -> mkProd2 (app_open l h) (app_open r h))
                 (s (mkProd2 l r))
-                (mkFun $ \h -> mkProd2 (app_open l h) (app_open r h))
   zro = abs (f z)
     where
       f :: P r h (a, b) -> P r h a
@@ -215,19 +222,17 @@ instance Sum r => Sum (P r) where
   left = abs (f z)
     where
       f :: P r h a -> P r h (M.Either a b)
-      f x = Known (Left x)
+      f x = know (Left x)
               (left1 $ dynamic x)
               (\h -> left1 $ app_open x h)
               (s $ left1 x)
-              (mkFun $ \h -> left1 (app_open x h))
   right = abs (f z)
     where
       f :: P r h b -> P r h (M.Either a b)
-      f x = Known (Right x)
+      f x = know (Right x)
               (right1 $ dynamic x)
               (\h -> right1 $ app_open x h)
               (s $ right1 x)
-              (mkFun $ \h -> right1 $ app_open x h)
   sumMatch = abs $ abs $ abs (f (s (s z)) (s z) z)
     where
       f :: P r h (a -> c) -> P r h (b -> c) -> P r h (M.Either a b) -> P r h c
@@ -241,15 +246,14 @@ instance Y r => Y (P r) where
 
 type instance K repr h [a] = Maybe (P repr h a, P repr h [a])
 instance List repr => List (P repr) where
-  nil = Known Nothing nil (\_ -> nil) nil (mkFun $ \_ -> nil)
+  nil = know Nothing nil (\_ -> nil) nil
   cons = abs $ abs (f (s z) z)
     where
       f :: P repr h a -> P repr h [a] -> P repr h [a]
-      f h t = Known (Just (h, t))
+      f h t = know (Just (h, t))
                 (cons2 (dynamic h) (dynamic t))
                 (\env -> cons2 (app_open h env) (app_open t env))
                 (s $ cons2 h t)
-                (mkFun $ \env -> cons2 (app_open h env) (app_open t env))
   listMatch = abs $ abs $ abs (f (s $ s z) (s z) z)
     where
       f :: P repr h b -> P repr h (a -> [a] -> b) -> P repr h [a] -> P repr h b
@@ -268,7 +272,7 @@ instance List repr => List (P repr) where
 
 type instance K repr h (Maybe a) = Maybe (P repr h a)
 instance Option repr => Option (P repr) where
-  nothing = Known Nothing nothing (\_ -> nothing) nothing (mkFun $ \_ -> nothing)
+  nothing = know Nothing nothing (\_ -> nothing) nothing
   just = abs (f z)
     where
       f :: P repr h a -> P repr h (Maybe a)
