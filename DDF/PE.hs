@@ -292,5 +292,25 @@ instance Option repr => Option (P repr) where
       f l r (Unk x) = Unk $ optionMatch3 (dynamic l) (dynamic r) x
       f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
 
+type instance K repr h M.Char = M.Char
+instance Char repr => Char (P repr) where
+  char x = static (x, char x)
+
+type instance K repr h M.Int = M.Int
+instance Int repr => Int (P repr) where
+  int x = static (x, int x)
+  pred = abs (f z)
+    where
+      f :: P repr h M.Int -> P repr h M.Int
+      f (Known i _ _ _ _) = int $ i - 1
+      f (Open x) = Open $ \h -> f $ x h
+      f (Unk x) = Unk $ pred1 x
+  isZero = abs (f z)
+    where
+      f :: P repr h M.Int -> P repr h M.Bool
+      f (Known i _ _ _ _) = bool $ i == 0
+      f (Open x) = Open $ \h -> f $ x h
+      f (Unk x) = Unk $ isZero1 x
+
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic
