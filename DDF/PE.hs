@@ -266,5 +266,24 @@ instance List repr => List (P repr) where
       f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
       f l r = Unk (listAppend2 (dynamic l) (dynamic r))
 
+type instance K repr h (Maybe a) = Maybe (P repr h a)
+instance Option repr => Option (P repr) where
+  nothing = Known Nothing nothing (\_ -> nothing) nothing (mkFun $ \_ -> nothing)
+  just = abs (f z)
+    where
+      f :: P repr h a -> P repr h (Maybe a)
+      f x = Known (Just x)
+              (just1 $ dynamic x)
+              (\h -> just1 $ app_open x h)
+              (just1 $ s x)
+              (mkFun $ \h -> just1 $ app_open x h)
+  optionMatch = abs $ abs $ abs (f (s (s z)) (s z) z)
+    where
+      f :: P repr h b -> P repr h (a -> b) -> P repr h (Maybe a) -> P repr h b
+      f l _ (Known Nothing _ _ _ _) = l
+      f _ r (Known (Just x) _ _ _ _) = app r x
+      f l r (Unk x) = Unk $ optionMatch3 (dynamic l) (dynamic r) x
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
+
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic
