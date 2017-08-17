@@ -3,6 +3,7 @@
 [![Hackage](https://img.shields.io/hackage/v/DeepDarkFantasy.svg)](http://hackage.haskell.org/package/DeepDarkFantasy)
 [![Join the chat at https://gitter.im/ThoughtWorksInc/DeepDarkFantasy](https://badges.gitter.im/ThoughtWorksInc/DeepDarkFantasy.svg)](https://gitter.im/ThoughtWorksInc/DeepDarkFantasy?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/ThoughtWorksInc/DeepDarkFantasy.svg?branch=master)](https://travis-ci.org/ThoughtWorksInc/DeepDarkFantasy)
+[![Coverage Status](https://coveralls.io/repos/github/ThoughtWorksInc/DeepDarkFantasy/badge.svg?branch=master)](https://coveralls.io/github/ThoughtWorksInc/DeepDarkFantasy?branch=master)
 
 ### What if we combine Functional Programming and Deep Learning?
 
