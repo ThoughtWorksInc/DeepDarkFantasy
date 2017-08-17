@@ -26,6 +26,6 @@ script:
 - stack test --coverage --no-terminal
 
 after_script:
-- mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc .
+- mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc dist
 - stack install hpc-coveralls
 - hpc-coveralls TestPE TestPoly TestXor
