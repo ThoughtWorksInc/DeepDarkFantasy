@@ -107,8 +107,8 @@ instance Bool r => Bool (P r) where
       f :: P r h M.Bool -> P r h (a -> a -> a)
       f (Known M.True _ _ _ _) = const
       f (Known M.False _ _ _ _) = const1 id
-      f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
       f (Open x) = Open $ f . x
+      f (Unk x) = Unk (lam2 (\l r -> ite3 l r (s (s x))))
 
 type instance K repr h M.Double = M.Double
 instance Double r => Double (P r) where
@@ -119,7 +119,7 @@ instance Double r => Double (P r) where
       f (Known l _ _ _ _) (Known r _ _ _ _) = double (l + r)
       f (Known 0 _ _ _ _) r = r
       f l (Known 0 _ _ _ _) = l
-      f l r | isOpen l || isOpen r = Open (\h -> doublePlus2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (doublePlus2 (dynamic l) (dynamic r))
   doubleMult = abs (abs (f (s z) z))
     where
@@ -129,14 +129,14 @@ instance Double r => Double (P r) where
       f _ (Known 0 _ _ _ _) = double 0
       f l (Known 1 _ _ _ _) = l
       f (Known 1 _ _ _ _) r = r
-      f l r | isOpen l || isOpen r = Open (\h -> doubleMult2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (doubleMult2 (dynamic l) (dynamic r))
   doubleMinus = abs (abs (f (s z) z))
     where
       f :: P r h M.Double -> P r h M.Double -> P r h M.Double
       f (Known l _ _ _ _) (Known r _ _ _ _) = double (l - r)
       f l (Known 0 _ _ _ _) = l 
-      f l r | isOpen l || isOpen r = Open (\h -> doubleMinus2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk $ doubleMinus2 (dynamic l) (dynamic r)
   doubleDivide = abs (abs (f (s z) z))
     where
@@ -144,18 +144,18 @@ instance Double r => Double (P r) where
       f (Known l _ _ _ _) (Known r _ _ _ _) = double (l / r)
       f (Known 0 _ _ _ _) _ = double 0
       f l (Known 1 _ _ _ _) = l 
-      f l r | isOpen l || isOpen r = Open (\h -> doubleDivide2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk $ doubleDivide2 (dynamic l) (dynamic r)
   doubleExp = abs (f z)
     where
       f :: P r h M.Double -> P r h M.Double
       f (Known l _ _ _ _) = double (M.exp l) 
-      f (Open x) = Open $ doubleExp1 . x
+      f (Open x) = Open $ f . x
       f (Unk l) = Unk $ doubleExp1 l
   doubleEq = abs (abs (f (s z) z)) where
     f :: P r h M.Double -> P r h M.Double -> P r h M.Bool
     f (Known l _ _ _ _) (Known r _ _ _ _) = bool (l == r)
-    f l r | isOpen l || isOpen r = Open (\h -> doubleEq2 (app_open l h) (app_open r h))
+    f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
     f l r = Unk (doubleEq2 (dynamic l) (dynamic r))
 
 type instance K repr h M.Float = M.Float
@@ -167,7 +167,7 @@ instance Float r => Float (P r) where
       f (Known l _ _ _ _) (Known r _ _ _ _) = float (l + r)
       f (Known 0 _ _ _ _) r = r
       f l (Known 0 _ _ _ _) = l
-      f l r | isOpen l || isOpen r = Open (\h -> floatPlus2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (floatPlus2 (dynamic l) (dynamic r))
   floatMult = abs (abs (f (s z) z))
     where
@@ -177,14 +177,14 @@ instance Float r => Float (P r) where
       f _ (Known 0 _ _ _ _) = float 0
       f l (Known 1 _ _ _ _) = l
       f (Known 1 _ _ _ _) r = r
-      f l r | isOpen l || isOpen r = Open (\h -> floatMult2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (floatMult2 (dynamic l) (dynamic r))
   floatMinus = abs (abs (f (s z) z))
     where
       f :: P r h M.Float -> P r h M.Float -> P r h M.Float
       f (Known l _ _ _ _) (Known r _ _ _ _) = float (l - r)
       f l (Known 0 _ _ _ _) = l 
-      f l r | isOpen l || isOpen r = Open (\h -> floatMinus2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (floatMinus2 (dynamic l) (dynamic r))
   floatDivide = abs (abs (f (s z) z))
     where
@@ -192,13 +192,13 @@ instance Float r => Float (P r) where
       f (Known l _ _ _ _) (Known r _ _ _ _) = float (l / r)
       f (Known 0 _ _ _ _) _ = float 0
       f l (Known 1 _ _ _ _) = l 
-      f l r | isOpen l || isOpen r = Open (\h -> floatDivide2 (app_open l h) (app_open r h))
+      f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
       f l r = Unk (floatDivide2 (dynamic l) (dynamic r))
   floatExp = abs (f z)
     where
       f :: P r h M.Float -> P r h M.Float
       f (Known l _ _ _ _) = float (M.exp l) 
-      f (Open x) = Open $ floatExp1 . x
+      f (Open x) = Open $ f . x
       f (Unk l) = Unk (floatExp1 l)
 
 type instance K repr h (a, b) = (P repr h a, P repr h b)
@@ -214,13 +214,13 @@ instance Prod r => Prod (P r) where
     where
       f :: P r h (a, b) -> P r h a
       f (Known (l, _) _ _ _ _) = l
-      f (Open x) = Open $ zro1 . x
+      f (Open x) = Open $ f . x
       f (Unk p) = Unk (zro1 p)
   fst = abs (f z)
     where
       f :: P r h (a, b) -> P r h b
       f (Known (_, r) _ _ _ _) = r
-      f (Open x) = Open $ fst1 . x
+      f (Open x) = Open $ f . x
       f (Unk p) = Unk (fst1 p)
 
 type instance K repr h (M.Either a b) = M.Either (P repr h a) (P repr h b)
@@ -244,8 +244,8 @@ instance Sum r => Sum (P r) where
       f :: P r h (a -> c) -> P r h (b -> c) -> P r h (M.Either a b) -> P r h c
       f l _ (Known (M.Left x) _ _ _ _) = app l x
       f _ r (Known (M.Right x) _ _ _ _) = app r x
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
       f l r (Unk x) = Unk $ sumMatch3 (dynamic l) (dynamic r) x
-      f l r (Open x) = Open $ \h -> sumMatch3 (app_open l h) (app_open r h) (x h)
 
 instance Y r => Y (P r) where
   y = Unk y -- naive strategy to avoid infinite loop in PE. Later might do infinite PE thx to laziness.
@@ -265,15 +265,15 @@ instance List repr => List (P repr) where
       f :: P repr h b -> P repr h (a -> [a] -> b) -> P repr h [a] -> P repr h b
       f l _ (Known Nothing _ _ _ _) = l -- You know nothing, Jon Snow.
       f _ r (Known (Just (h, t)) _ _ _ _) = app2 r h t
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
       f l r (Unk x) = Unk $ listMatch3 (dynamic l) (dynamic r) x
-      f l r (Open x) = Open $ \h -> listMatch3 (app_open l h) (app_open r h) (x h)
   listAppend = abs $ abs (f (s z) z)
     where
       f :: P repr h [a] -> P repr h [a] -> P repr h [a]
       f (Known Nothing _ _ _ _) r = r
       f (Known (Just (h, t)) _ _ _ _) r = cons2 h (listAppend2 t r)
       f l (Known Nothing _ _ _ _) = l
-      f l r | isOpen l || isOpen r = Open $ \h -> listAppend2 (app_open l h) (app_open r h)
+      f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
       f l r = Unk (listAppend2 (dynamic l) (dynamic r))
 
 type instance K repr h (Maybe a) = Maybe (P repr h a)
@@ -291,8 +291,8 @@ instance Option repr => Option (P repr) where
       f :: P repr h b -> P repr h (a -> b) -> P repr h (Maybe a) -> P repr h b
       f l _ (Known Nothing _ _ _ _) = l
       f _ r (Known (Just x) _ _ _ _) = app r x
+      f l r (Open x) = Open $ \h -> f (app_open l h) (app_open r h) (x h)
       f l r (Unk x) = Unk $ optionMatch3 (dynamic l) (dynamic r) x
-      f l r (Open x) = Open $ \h -> optionMatch3 (app_open l h) (app_open r h) (x h)
 
 type instance K repr h M.Char = M.Char
 instance Char repr => Char (P repr) where
@@ -305,13 +305,13 @@ instance Int repr => Int (P repr) where
     where
       f :: P repr h M.Int -> P repr h M.Int
       f (Known i _ _ _ _) = int $ i - 1
-      f (Open x) = Open $ pred1 . x
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ pred1 x
   isZero = abs (f z)
     where
       f :: P repr h M.Int -> P repr h M.Bool
       f (Known i _ _ _ _) = bool $ i == 0
-      f (Open x) = Open $ isZero1 . x
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ isZero1 x
 
 type instance K repr h (M.Dual l r) = (P repr h l, P repr h r)
@@ -324,7 +324,7 @@ instance Dual repr => Dual (P repr) where
           (mkDual2 (dynamic l) (dynamic r))
           (\h -> mkDual2 (app_open l h) (app_open r h))
           (s $ mkDual2 l r)
-      f (Open x) = Open $ dual1 . x
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ dual1 x
   runDual = abs (f z)
     where
@@ -334,7 +334,7 @@ instance Dual repr => Dual (P repr) where
           (mkProd2 (dynamic l) (dynamic r))
           (\h -> mkProd2 (app_open l h) (app_open r h))
           (mkProd2 (s l) (s r))
-      f (Open x) = Open $ runDual1 . x
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ runDual1 x
 
 type instance K repr h () = ()
@@ -359,7 +359,7 @@ instance IO repr => Applicative (P repr) M.IO where
     where
       f :: P repr h (M.IO (a -> b)) -> P repr h (M.IO a) -> P repr h (M.IO b)
       f (Known l _ _ _ _) (Known r _ _ _ _) = pure1 $ app l r
-      f l r | isOpen l || isOpen r = Open $ \h -> ap2 (app_open l h) (app_open r h)
+      f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
       f l r = Unk $ ap2 (dynamic l) (dynamic r)
 
 instance IO repr => Monad (P repr) M.IO where
@@ -367,7 +367,7 @@ instance IO repr => Monad (P repr) M.IO where
     where
       f :: P repr h (M.IO (M.IO a)) -> P repr h (M.IO a)
       f (Known l _ _ _ _) = l
-      f (Open x) = Open $ join1 . x
+      f (Open x) = Open $ f . x
       f (Unk x) = Unk $ join1 x
 
 instance IO repr => IO (P repr) where
