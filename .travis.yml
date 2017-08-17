@@ -26,7 +26,3 @@ install:
 
 script:
 - stack --coverage --no-terminal test
-
-after_script:
-- stack install hpc-coveralls
-- hpc-coveralls TestPoly TestXor TestPE
