@@ -12,7 +12,7 @@ As we all know, a neural network is just a computable math expression (and hence
 
 Of course, I must still be able to train the network.
 
-**Yes! I had add all the above construct, and I am planning to add more (tree, map, set, for example).** 
+**Yes! I had add all the above construct, and I am planning to add more.** 
 
 They all had their own special gradient structure to propagate loss accordingly. 
 
