@@ -25,4 +25,4 @@ install:
 - stack --no-terminal --install-ghc test --only-dependencies
 
 script:
-- stack --coverage --no-terminal test
+- stack test --coverage --no-terminal
