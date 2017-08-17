@@ -29,4 +29,5 @@ script:
 after_script:
 - mkdir dist
 - "mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc dist"
+- mv dist/hpc/DeepDarkFantasy dist/hpc/tix
 - hpc-coveralls TestPE TestPoly TestXor
