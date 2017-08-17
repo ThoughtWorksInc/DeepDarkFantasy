@@ -31,6 +31,9 @@ after_script:
 - "mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc dist"
 - mv dist/hpc/DeepDarkFantasy dist/hpc/tix
 - mv dist/hpc/combined/all dist/hpc/mix
-- cd dist/hpc/mix; for i in Deep*; do mv $i tmp; mkdir $i; mv tmp $i/$i;done; cd ../../../
+- cd dist/hpc/mix
+- for i in Deep*; do mv $i tmp; mkdir $i; mv tmp $i/$i;done
+- find . -type f -name '*.mix' -print0 | xargs -0 rename 's/(.mix)$//'
+- cd ../../../
 - hpc-coveralls TestPE TestPoly TestXor
 - find dist/hpc
