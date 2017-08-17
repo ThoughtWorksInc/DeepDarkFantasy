@@ -27,13 +27,5 @@ script:
 - stack install hpc-coveralls
 
 after_script:
-- mkdir dist
-- "mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc dist"
-- mv dist/hpc/DeepDarkFantasy dist/hpc/tix
-- mv dist/hpc/combined/all dist/hpc/mix
-- cd dist/hpc/mix
-- for i in Deep*; do mv $i tmp; mkdir $i; mv tmp $i/$i;done
-- find . -type f -name '*.hs.html' -print0 | xargs -0 rename 's/(.hs.html)$//'
-- cd ../../../
-- hpc-coveralls TestPE TestPoly TestXor
-- find dist/hpc
+- travis_retry curl -L https://github.com/rubik/stack-hpc-coveralls/releases/download/v0.0.4.0/shc-linux-x64-8.0.1.tar.bz2 | tar -xj
+- ./shc DeepDarkFantasy TestXor TestPoly TestPE
