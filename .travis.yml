@@ -27,6 +27,5 @@ script:
 - stack install hpc-coveralls
 
 after_script:
-- export COVERALLS_SERVICE_NAME=travis-ci
 - travis_retry curl -L https://github.com/rubik/stack-hpc-coveralls/releases/download/v0.0.4.0/shc-linux-x64-8.0.1.tar.bz2 | tar -xj
 - ./shc DeepDarkFantasy TestXor TestPoly TestPE
