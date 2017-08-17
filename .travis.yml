@@ -28,6 +28,5 @@ script:
 - stack test --coverage --no-terminal
 
 after_script:
-- export GHCVER=`stack ghc -- --version | grep -o '[0-9].*' | head`
-- travis_retry curl -L https://github.com/rubik/stack-hpc-coveralls/releases/download/v0.0.4.0/shc-linux-x64-$GHCVER.tar.bz2 | tar -xj
+- travis_retry curl -L https://github.com/rubik/stack-hpc-coveralls/releases/download/v0.0.4.0/shc-linux-x64-8.0.1.tar.bz2 | tar -xj
 - ./shc DeepDarkFantasy TestXor TestPoly TestPE  
