@@ -74,6 +74,9 @@ class DBI r => Functor r f where
 class Functor r a => Applicative r a where
   pure :: r h (x -> a x)
   ap :: r h (a (x -> y) -> a x -> a y)
+pure1 = app1 pure
+ap1 = app1 ap
+ap2 = app2 ap
 
 class Applicative r m => Monad r m where
   bind :: r h (m a -> (a -> m b) -> m b)
