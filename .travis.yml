@@ -24,9 +24,9 @@ install:
 
 script:
 - stack test --coverage --no-terminal
+- stack install hpc-coveralls
 
 after_script:
-- mkdir dit
+- mkdir dir
 - mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc dist
-- stack install hpc-coveralls
 - hpc-coveralls TestPE TestPoly TestXor
