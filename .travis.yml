@@ -2,7 +2,7 @@ language: generic
 sudo: false
 
 git:
-  submodules: false  # whether to recursively clone submodules
+  submodules: false
 
 cache:
   directories:
@@ -14,19 +14,18 @@ addons:
       - libgmp-dev
 
 before_install:
-# Download and unpack the stack executable
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 
 install:
-# This test is not the actual test. It just installs deps
 - stack --no-terminal --install-ghc test --only-dependencies
 
 script:
 - stack test --coverage --no-terminal
 
 after_script:
-- travis_retry curl -L https://github.com/rubik/stack-hpc-coveralls/releases/download/v0.0.4.0/shc-linux-x64-8.0.1.tar.bz2 | tar -xj
-- ./shc DeepDarkFantasy TestXor TestPoly TestPE  
+- mv `stack path | grep 'local-install-root:' | cut -d: -f2`/hpc .
+- stack install hpc-coveralls
+- hpc-coveralls TestPE TestPoly TestXor
