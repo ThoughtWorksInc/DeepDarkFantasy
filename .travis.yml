@@ -25,4 +25,8 @@ install:
 - stack --no-terminal --install-ghc test --only-dependencies
 
 script:
-- stack --no-terminal test
+- stack --coverage --no-terminal test
+
+after_script:
+- stack install hpc-coveralls
+- hpc-coveralls TestPoly TestXor TestPE
