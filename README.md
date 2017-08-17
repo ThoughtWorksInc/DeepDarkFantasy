@@ -51,7 +51,7 @@ If you want to look into the code base, it is necessary to understand [Finally T
 
 Q: How is the speed?
 
-A: Unoptimized. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf.
+A: Unoptimized. This is more of a proof of concept that we can use function in neural network, than something that can get you good kaggle score right off the shelf. We are working on Partial Evaluation.
 
 Q: Why does this work theoretically?
 
