@@ -1,1 +1,1 @@
-service-name: travis-ci
+- service-name: travis-ci
