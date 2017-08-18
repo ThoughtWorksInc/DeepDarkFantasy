@@ -61,9 +61,6 @@ import qualified Data.Functor.Foldable as M
 import qualified Data.Bimap as M.Bimap
 import qualified DDF.Meta.FreeVector as M
 
-class ObjOrdTrivial x
-instance ObjOrdTrivial x
-
 type FreeVectorBuilder b = M.Map.Map b M.Double
 type SVTFBuilder b = State (M.Bimap.Bimap (M.VTF.VectorTF b M.Int) M.Int) M.Int
 class (Ordering r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r, FreeVector r) => Lang r where

@@ -12,5 +12,8 @@ string (c:str) = cons2 (char c) (string str)
 
 class (List r, Unit r, Char r, Monad r M.IO) => IO r where
   putStrLn :: r h (String -> M.IO ())
+  ioMap :: r h ((a -> b) -> M.IO a -> M.IO b)
+  ioPure :: r h 
+  ioBind :: r h (M.IO a -> (a -> M.IO b) -> M.IO b)
 
 putStrLn1 = app putStrLn
