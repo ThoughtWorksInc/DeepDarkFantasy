@@ -1,14 +1,16 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  NoMonomorphismRestriction,
+  FlexibleContexts
+#-}
 
-module DDF.Int (module DDF.Int, module DDF.Bool) where
+module DDF.Int (module DDF.Int, module DDF.Ordering) where
 
-import DDF.Bool
+import DDF.Ordering
 import qualified Prelude as M
 
-class Bool r => Int r where
+class (ObjOrd r M.Int, Ordering r) => Int r where
   int :: M.Int -> r h M.Int
   pred :: r h (M.Int -> M.Int)
-  isZero :: r h (M.Int -> M.Bool)
 
 pred1 = app pred
-isZero1 = app isZero

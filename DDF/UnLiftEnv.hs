@@ -89,7 +89,6 @@ instance (Prod r, Sum r) => Sum (UnLiftEnv r) where
 
 instance (Prod r, Int r) => Int (UnLiftEnv r) where
   int = unLiftEnv . int
-  isZero = unLiftEnv isZero
   pred = unLiftEnv pred
 
 instance (Prod r, Y r) => Y (UnLiftEnv r) where

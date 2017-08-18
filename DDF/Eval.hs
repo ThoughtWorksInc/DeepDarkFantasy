@@ -109,7 +109,6 @@ instance Sum Eval where
 instance Int Eval where
   int = comb
   pred = comb ((-) 1)
-  isZero = comb (== 0)
 
 instance Y Eval where
   y = comb loop

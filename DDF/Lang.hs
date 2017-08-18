@@ -4,7 +4,11 @@
   MultiParamTypeClasses,
   FlexibleInstances,
   TypeFamilies,
-  ScopedTypeVariables
+  ScopedTypeVariables,
+  FlexibleContexts,
+  UndecidableInstances,
+  TypeApplications,
+  PartialTypeSignatures
 #-}
 
 module DDF.Lang (
@@ -68,14 +72,16 @@ class (Ordering r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, In
   runState :: r h (State x y -> (x -> (y, x)))
   iterate :: r h ((x -> x) -> x -> [x])
   iterate = lam $ \f -> y1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
-  buildFreeVector :: Map.Ord b => r h (FreeVectorBuilder b -> M.FreeVector b M.Double)
+  buildFreeVector :: Map.Ord r b => r h (FreeVectorBuilder b -> M.FreeVector b M.Double)
   buildFreeVector = lam $ \fb -> freeVector1 $ lam $ \b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
-  toSVTFBuilder :: Map.Ord b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
-  toSVTFBuilder = lam $ \x -> state1 $ lam $ \m ->
-    optionMatch3
-      (let_2 (size1 m) (lam $ \si -> mkProd2 si (insert2 (mkProd2 x si) m)))
-      (lam $ \xid -> mkProd2 xid m)
-      (lookupL2 m x)
+  toSVTFBuilder :: forall h b. Map.Ord r b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
+  toSVTFBuilder =
+    withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(Ord r)) (Proxy @(Ord r)) (Proxy @b) (Proxy @M.Int)) $
+      lam $ \x -> state1 $ lam $ \m ->
+        optionMatch3
+          (let_2 (size1 m) (lam $ \si -> mkProd2 si (insert2 (mkProd2 x si) m)))
+          (lam $ \xid -> mkProd2 xid m)
+          (lookupL2 m x)
   get :: r h (Maybe a -> a)
   get = optionMatch2 undefined id
   getVar :: r h (State x x)
@@ -222,14 +228,14 @@ instance Lang r => Vector r (M.FreeVector b M.Double) where
   mult = lam2 $ \d l -> freeVector1 $ lam $ \x -> d `mult2` runFreeVector2 l x
   divide = lam2 $ \l d -> freeVector1 $ lam $ \x -> runFreeVector2 l x `divide2` d
 
-instance (Map.Ord b, Lang r) => Monoid r (FreeVectorBuilder b) where
+instance (Map.Ord r b, Lang r) => Monoid r (FreeVectorBuilder b) where
   zero = Map.empty
   plus = Map.unionWith1 plus
 
-instance (Map.Ord b, Lang r) => Group r (FreeVectorBuilder b) where
+instance (Map.Ord r b, Lang r) => Group r (FreeVectorBuilder b) where
   invert = Map.mapMap1 invert
 
-instance (Map.Ord b, Lang r) => Vector r (FreeVectorBuilder b) where
+instance (Map.Ord r b, Lang r) => Vector r (FreeVectorBuilder b) where
   type Basis (FreeVectorBuilder b) = b
   toFreeVector = buildFreeVector
   mult = Map.mapMap `com2` mult
@@ -239,22 +245,22 @@ instance Lang r => Monoid r (M.Fix (M.VTF.VectorTF b)) where
   zero = fix1 VTF.zero
   plus = lam2 $ \l r -> fix1 $ l `VTF.plus2` r
 
-instance (Map.Ord b, Lang r) => Group r (M.Fix (M.VTF.VectorTF b)) where
+instance (Map.Ord r b, Lang r) => Group r (M.Fix (M.VTF.VectorTF b)) where
   invert = mult1 (double (-1))
 
-instance (Map.Ord b, Lang r) => Vector r (M.Fix (M.VTF.VectorTF b)) where
+instance (Map.Ord r b, Lang r) => Vector r (M.Fix (M.VTF.VectorTF b)) where
   type Basis (M.Fix (M.VTF.VectorTF b)) = b
   toFreeVector = buildFreeVector `com2` vtfCata1 (VTF.vtfMatch4 zero (flip2 Map.singleton (double 1)) plus mult)
   mult = lam $ \d -> fix `com2` VTF.mult1 d
 
-instance (Map.Ord b, Lang r) => Monoid r (SVTFBuilder b) where
+instance (Map.Ord r b, Lang r) => Monoid r (SVTFBuilder b) where
   zero = toSVTFBuilder1 VTF.zero
   plus = lam2 $ \l r -> l `bind2` (lam $ \lid -> r `bind2` (lam $ \rid -> toSVTFBuilder1 (VTF.plus2 lid rid)))
 
-instance (Map.Ord b, Lang r) => Group r (SVTFBuilder b) where
+instance (Map.Ord r b, Lang r) => Group r (SVTFBuilder b) where
   invert = mult1 (double (-1))
 
-instance (Map.Ord b, Lang r) => Vector r (SVTFBuilder b) where
+instance (Map.Ord r b, Lang r) => Vector r (SVTFBuilder b) where
   type Basis (SVTFBuilder b) = b
   toFreeVector =
     buildFreeVector `com2` flip2 id Map.empty `com2`
@@ -265,17 +271,21 @@ instance (Map.Ord b, Lang r) => Vector r (SVTFBuilder b) where
         (lam $ \b -> return1 (Map.singleton2 b (fst1 p)))
         (lam2 $ \lid rid -> map2 (const1 zero) (update1 (updateWengert2 lid (fst1 p) `com2` updateWengert2 rid (fst1 p))))
         (lam2 $ \d xid -> map2 (const1 zero) (update1 (let_2 (d `mult2` (fst1 p)) (updateWengert1 xid))))
-        (zro1 p) `bind2` (lam $ \fvb -> ite3 (return1 fvb) (map2 (plus1 fvb) $ app fx (pred1 i)) (isZero1 i)))) (zro1 x))
+        (zro1 p) `bind2` (lam $ \fvb -> ite3 (return1 fvb) (map2 (plus1 fvb) $ app fx (pred1 i)) (eq2 i (int 0))))) (zro1 x))
     `com2` Map.insert2 (zro1 x) (double 0)) `com2` bimap2 id toMapR `com2` flip2 runState empty
   mult = lam2 $ \d x -> x `bind2` (lam $ \xid -> toSVTFBuilder1 (VTF.mult2 d xid))
 
 type instance DiffType v (M.VTF.VectorTF t f) = M.VTF.VectorTF (DiffType v t) (DiffType v f)
-instance (Map.Ord b, Map.Ord f) => Map.Ord (M.VTF.VectorTF b f) where
-  diffOrd (_ :: Proxy (v, M.VTF.VectorTF b f)) = withDict (Map.diffOrd (Proxy :: Proxy (v, b))) $ withDict (Map.diffOrd (Proxy :: Proxy (v, f))) Dict
+instance (Ord r b, Ord r f, ObjOrd r (M.VTF.VectorTF b f), ObjOrd2 r M.VTF.VectorTF (Ord r) (Ord r)) => Ord r (M.VTF.VectorTF b f) where
+  diffOrd p (_ :: Proxy (v, _)) =
+    withDict (diffOrd p (Proxy @(v, b))) $
+    withDict (diffOrd p (Proxy @(v, f))) $
+    withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(Ord r)) (Proxy @(Ord r)) (Proxy @(DiffType v b)) (Proxy @(DiffType v f))) $
+    Dict
 
 type instance DiffType v M.Int = M.Int
-instance Map.Ord M.Int where
-  diffOrd _ = Dict
+instance Map.ObjOrd r M.Int => Map.Ord r M.Int where
+  diffOrd _ _ = Dict
 
 instance Double r => Monoid r M.Double where
   zero = doubleZero

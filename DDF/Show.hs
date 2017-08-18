@@ -120,7 +120,6 @@ instance Sum Show where
 instance Int Show where
   int = name . show
   pred = name "pred"
-  isZero = name "isZero"
 
 instance List Show where
   nil = name "[]"

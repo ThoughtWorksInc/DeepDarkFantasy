@@ -86,7 +86,6 @@ instance Sum Size where
 instance Int Size where
   int _ = one
   pred = one
-  isZero = one
 
 instance IO Size where
   putStrLn = one

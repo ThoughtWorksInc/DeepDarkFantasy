@@ -1,12 +1,17 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  NoMonomorphismRestriction,
+  FlexibleContexts
+#-}
 
 module DDF.VectorTF where
 
+import qualified DDF.Ordering as Ordering
 import qualified DDF.Double as Double
 import qualified DDF.Meta.VectorTF as M
 import qualified Prelude as M
 
-class Double.Double r => VectorTF r where
+class (Ordering.ObjOrd2 r M.VectorTF (Ordering.Ord r) (Ordering.Ord r), Double.Double r) => VectorTF r where
   zero :: r h (M.VectorTF t f)
   basis :: r h (t -> M.VectorTF t f)
   plus :: r h (f -> f -> M.VectorTF t f)

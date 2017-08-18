@@ -61,7 +61,6 @@ type instance SubLC c Int = SubL c Bool
 instance SubL c Int => Int (Term c) where
   pred = mkT @Int pred
   int x = mkT @Int (int x)
-  isZero = mkT @Int isZero
 
 type instance SubLC c Fix = SubL c DBI
 

@@ -309,12 +309,6 @@ instance Int repr => Int (P repr) where
       f (Known i _ _ _ _) = int $ i - 1
       f (Open x) = Open $ f . x
       f (Unk x) = Unk $ pred1 x
-  isZero = abs (f z)
-    where
-      f :: P repr h M.Int -> P repr h M.Bool
-      f (Known i _ _ _ _) = bool $ i == 0
-      f (Open x) = Open $ f . x
-      f (Unk x) = Unk $ isZero1 x
 
 type instance K repr h (M.Dual l r) = (P repr h l, P repr h r)
 instance Dual repr => Dual (P repr) where

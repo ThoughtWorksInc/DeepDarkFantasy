@@ -9,7 +9,8 @@
   TypeFamilies,
   MultiParamTypeClasses,
   TypeOperators,
-  DataKinds
+  DataKinds,
+  FlexibleInstances
 #-}
 
 module DDF.Diff where
@@ -135,7 +136,6 @@ instance Sum r => Sum (Diff r v) where
 instance Int r => Int (Diff r v) where
   int = Diff . int
   pred = Diff pred
-  isZero = Diff isZero
 
 instance Y r => Y (Diff r v) where
   y = Diff y
@@ -195,20 +195,20 @@ instance (Vector r v, Lang r) => Lang (Diff r v) where
   state = Diff state
   runState = Diff runState
 
-instance Map.Ord () where
+instance Ord r () where
   diffOrd _ = Dict
 
-instance Map.Ord a => Map.Ord [a] where
-  diffOrd (_ :: Proxy (v, [a])) = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) Dict
+instance Ord r a => Ord r [a] where
+  diffOrd p (_ :: Proxy (v, [a])) = withDict (Map.diffOrd p (Proxy :: Proxy (v, a))) Dict
 
-instance Map.Ord l => Map.Ord (M.Dual l r) where
-  diffOrd (_ :: Proxy (v, M.Dual l r)) = withDict (Map.diffOrd (Proxy :: Proxy (v, l))) Dict
+instance Ord repr l => Ord repr (M.Dual l r) where
+  diffOrd p (_ :: Proxy (v, M.Dual l r)) = withDict (Map.diffOrd p (Proxy :: Proxy (v, l))) Dict
 
-instance Map.Ord M.Double where
-  diffOrd _ = Dict
+instance Ord r M.Double where
+  diffOrd _ _ = Dict
 
-instance Map.Ord M.Float where
-  diffOrd _ = Dict
+instance Ord r M.Float where
+  diffOrd _ _ = Dict
 
 type instance DiffType v M.Ordering = M.Ordering
 instance (Vector r v, Ordering r) => Ordering (Diff r v) where
