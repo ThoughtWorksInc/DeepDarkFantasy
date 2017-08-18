@@ -137,3 +137,7 @@ instance Lang Size where
   double2Float = one
   state = one
   runState = one
+
+instance Ordering Size where
+  sel = one
+  ordering _ = one

@@ -26,6 +26,8 @@ import qualified Data.Functor.Foldable as M
 import qualified DDF.Meta.FreeVector as M
 import DDF.Lang
 
+newtype Eval h x = Eval {runEval :: h -> x}
+
 comb = Eval . M.const
 
 instance DBI Eval where
@@ -166,4 +168,9 @@ instance Lang Eval where
   state = comb M.state
   runState = comb M.runState
 
-newtype Eval h x = Eval {runEval :: h -> x}
+instance Ordering Eval where
+  ordering = comb
+  sel = comb f where
+    f x _ _ M.LT = x
+    f _ x _ M.EQ = x
+    f _ _ x M.GT = x

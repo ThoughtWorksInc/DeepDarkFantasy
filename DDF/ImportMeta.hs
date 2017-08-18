@@ -10,7 +10,8 @@ module DDF.ImportMeta (
   module Data.Proxy,
   module DDF.Util) where
 
-import Prelude (($), show, (+), (-), (*), (/), (.), (++), (>>=), (<=), (<), (==), compare, print, Maybe(Just, Nothing), String, (||), Either(Left, Right))
+import Prelude (
+  ($), show, (+), (-), (*), (/), (.), (++), (>>=), (<=), (<), (==), compare, print, Maybe(Just, Nothing), String, (||), Either(Left, Right))
 import Data.Void (Void, absurd)
 import Control.Monad.Writer (Writer)
 import Control.Monad.State (State)

@@ -141,3 +141,7 @@ instance Lang r => Lang (UnLiftEnv r) where
   runState = unLiftEnv runState
   float2Double = unLiftEnv float2Double
   double2Float = unLiftEnv double2Float
+
+instance (Prod r, Ordering r) => Ordering (UnLiftEnv r) where
+  sel = unLiftEnv sel
+  ordering = unLiftEnv . ordering

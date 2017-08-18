@@ -45,6 +45,7 @@ library
                    DDF.Meta.FreeVector
                    DDF.Meta.VectorTF
                    DDF.Option
+                   DDF.Ordering
                    DDF.PE
                    DDF.Prod
                    DDF.Sam.Hello

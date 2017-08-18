@@ -141,3 +141,7 @@ instance Lang r => Lang (UnHOAS r) where
   double2Float = UnHOAS double2Float
   state = UnHOAS state
   runState = UnHOAS runState
+
+instance Ordering r => Ordering (UnHOAS r) where
+  sel = UnHOAS sel
+  ordering = UnHOAS . ordering

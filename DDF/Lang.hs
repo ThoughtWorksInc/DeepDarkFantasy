@@ -9,13 +9,14 @@
 
 module DDF.Lang (
   module DDF.Lang,
+  module DDF.Bimap,
   module DDF.Bool,
   module DDF.Char,
   module DDF.Double,
-  module DDF.Float,
-  module DDF.Bimap,
   module DDF.Dual,
+  module DDF.Float,
   module DDF.Meta.Diff,
+  module DDF.Ordering,
   module DDF.Unit,
   module DDF.Sum,
   module DDF.Int,
@@ -40,6 +41,7 @@ import DDF.IO
 import DDF.DiffWrapper
 import DDF.Fix
 import DDF.FreeVector
+import DDF.Ordering
 
 import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.VectorTF as M.VTF
@@ -56,7 +58,7 @@ import qualified DDF.Meta.FreeVector as M
 
 type FreeVectorBuilder b = M.Map.Map b M.Double
 type SVTFBuilder b = State (M.Bimap.Bimap (M.VTF.VectorTF b M.Int) M.Int) M.Int
-class (Bool r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r, FreeVector r) => Lang r where
+class (Ordering r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, Int r, IO r, VTF.VectorTF r, DiffWrapper r, Fix r, FreeVector r) => Lang r where
   exfalso :: r h (Void -> a)
   writer :: r h ((a, w) -> M.Writer w a)
   runWriter :: r h (M.Writer w a -> (a, w))

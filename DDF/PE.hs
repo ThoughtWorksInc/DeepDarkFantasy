@@ -20,6 +20,8 @@ module DDF.PE where
 import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Meta.Dual as M
+--import qualified DDF.Map as Map
+--import qualified Data.Map as M
 
 data P repr h a where
   Open   :: (forall hout. EnvT repr h hout -> P repr hout a) -> P repr h a
@@ -372,6 +374,27 @@ instance IO repr => Monad (P repr) M.IO where
 
 instance IO repr => IO (P repr) where
   putStrLn = Unk putStrLn
+
+data MapPE (repr :: * -> * -> *) h k a :: * where
+  EmptyMap :: MapPE repr h k a
+  SingletonMap :: P repr h k -> P repr h a -> MapPE repr h k a
+
+{-
+type instance K repr h (M.Map k a) = MapPE repr h k a
+instance Map.Map repr => Map.Map (P repr) where
+  empty = static (EmptyMap, Map.empty)
+  singleton = abs $ abs $ f (s z) z where
+    f :: P repr h k -> P repr h a -> P repr h (M.Map k a)
+    f k a =
+      know (SingletonMap k a)
+        (Map.singleton2 (dynamic k) (dynamic a))
+        (\h -> f (app_open k h) (app_open a h))
+        (f (s k) (s a))
+  lookup = abs $ abs $ f (s z) z where
+    f :: P repr h (M.Map k a) -> P repr h k -> P repr h (Maybe a)
+    f (Known EmptyMap _ _ _ _) _ = nothing
+    f (Known (SingletonMap k a) _ _ _ _) r = ite3 (just1 a) nothing _
+-}
 
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic

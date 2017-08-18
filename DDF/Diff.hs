@@ -209,3 +209,8 @@ instance Map.Ord M.Double where
 
 instance Map.Ord M.Float where
   diffOrd _ = Dict
+
+type instance DiffType v M.Ordering = M.Ordering
+instance (Vector r v, Ordering r) => Ordering (Diff r v) where
+  ordering = Diff . ordering
+  sel = Diff sel

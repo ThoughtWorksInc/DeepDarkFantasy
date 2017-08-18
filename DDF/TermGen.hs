@@ -69,28 +69,6 @@ instance SubL c Fix => Fix (Term c) where
   fix = mkT @Fix fix
   runFix = mkT @Fix runFix
 
-type instance SubLC c Lang = (
-  SubL c Fix,
-  SubL c Int,
-  SubL c Float,
-  SubL c Double,
-  SubL c Bimap,
-  SubL c IO,
-  SubL c Sum,
-  SubL c Dual,
-  SubL c DiffWrapper,
-  SubL c FreeVector,
-  SubL c VTF.VectorTF)
-
-instance SubL c Lang => Lang (Term c) where
-  state = mkT @Lang state
-  writer = mkT @Lang writer
-  exfalso = mkT @Lang exfalso
-  runState = mkT @Lang runState
-  runWriter = mkT @Lang runWriter
-  float2Double = mkT @Lang float2Double
-  double2Float = mkT @Lang double2Float
-
 type instance SubLC c FreeVector = SubL c DBI
 
 instance SubL c FreeVector => FreeVector (Term c) where
@@ -109,7 +87,6 @@ instance SubL c Char => Char (Term c) where
   char x = mkT @Char (char x)
 
 type instance SubLC c Bimap = (SubL c Int, SubL c Map.Map)
-
 instance SubL c Bimap => Bimap (Term c) where
   size = mkT @Bimap size
   empty = mkT @Bimap empty
@@ -123,7 +100,6 @@ instance SubL c Bimap => Bimap (Term c) where
   singleton = mkT @Bimap singleton
 
 type instance SubLC c Float = SubL c DBI
-
 instance SubL c Float => Float (Term c) where
   float x = mkT @Float (float x) 
   floatExp = mkT @Float floatExp
@@ -133,7 +109,6 @@ instance SubL c Float => Float (Term c) where
   floatDivide = mkT @Float floatDivide
 
 type instance SubLC c Double = SubL c Bool
-
 instance SubL c Double => Double (Term c) where
   doubleEq = mkT @Double doubleEq
   double x = mkT @Double (double x)
@@ -178,14 +153,12 @@ instance SubL c IO => Monad (Term c) M.IO where
   bind = mkT @IO bind
 
 type instance SubLC c List = SubL c Y
-
 instance SubL c List => List (Term c) where
   nil = mkT @List nil
   cons = mkT @List cons
   listMatch = mkT @List listMatch
 
 type instance SubLC c Prod = SubL c DBI
-
 instance SubL c Prod => Prod (Term c) where
   zro = mkT @Prod zro
   fst = mkT @Prod fst
@@ -197,7 +170,6 @@ instance SubL c Y => Y (Term c) where
   y = mkT @Y y
 
 type instance SubLC c Map.Map = (SubL c Prod, SubL c Option)
-
 instance SubL c Map.Map => Map.Map (Term c) where
   empty = mkT @Map.Map Map.empty
   alter = mkT @Map.Map Map.alter
@@ -207,7 +179,6 @@ instance SubL c Map.Map => Map.Map (Term c) where
   unionWith = mkT @Map.Map Map.unionWith
 
 type instance SubLC c VTF.VectorTF = SubL c Double
-
 instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
   zero = mkT @VTF.VectorTF VTF.zero
   plus = mkT @VTF.VectorTF VTF.plus
@@ -216,11 +187,15 @@ instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
   vtfMatch = mkT @VTF.VectorTF VTF.vtfMatch
 
 type instance SubLC c Option = SubL c DBI
-
 instance SubL c Option => Option (Term c) where
   just = mkT @Option just
   nothing = mkT @Option nothing
   optionMatch = mkT @Option optionMatch
+
+type instance SubLC c Ordering = SubL c DBI
+instance SubL c Ordering => Ordering (Term c) where
+  sel = mkT @Ordering sel
+  ordering x = mkT @Ordering (ordering x)
 
 genInstance :: Q [Dec]
 genInstance =
@@ -245,7 +220,8 @@ genInstance =
     ''Y,
     ''Dual,
     ''DiffWrapper,
-    ''FreeVector]
+    ''FreeVector,
+    ''Ordering]
     where
       gen n = M.return $
         InstanceD
@@ -253,3 +229,26 @@ genInstance =
           []
           (AppT (AppT (ConT ''SubL) (ConT ''Lang)) (ConT n))
           [ValD (VarP 'sub) (NormalB (AppE (ConE 'Sub) (ConE 'Dict))) []]
+
+type instance SubLC c Lang = (
+  SubL c Fix,
+  SubL c Int,
+  SubL c Float,
+  SubL c Double,
+  SubL c Bimap,
+  SubL c IO,
+  SubL c Sum,
+  SubL c Dual,
+  SubL c DiffWrapper,
+  SubL c FreeVector,
+  SubL c VTF.VectorTF,
+  SubL c Ordering)
+
+instance SubL c Lang => Lang (Term c) where
+  state = mkT @Lang state
+  writer = mkT @Lang writer
+  exfalso = mkT @Lang exfalso
+  runState = mkT @Lang runState
+  runWriter = mkT @Lang runWriter
+  float2Double = mkT @Lang float2Double
+  double2Float = mkT @Lang double2Float

@@ -7,3 +7,4 @@ dist/
 .stack-work/
 *.exe
 *~
+*.tix

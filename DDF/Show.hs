@@ -172,3 +172,7 @@ instance Lang Show where
   double2Float = name "double2Float"
   state = name "state"
   runState = name "runState"
+
+instance Ordering Show where
+  ordering = name . show
+  sel = name "sel"

@@ -187,6 +187,10 @@ instance (Prod r, FreeVector r) => FreeVector (ImpW r) where
   freeVector = NoImpW freeVector
   runFreeVector = NoImpW runFreeVector
 
+instance (Prod r, Ordering r) => Ordering (ImpW r) where
+  sel = NoImpW sel
+  ordering = NoImpW . ordering
+
 instance Lang r => Lang (ImpW r) where
   exfalso = NoImpW exfalso
   writer = NoImpW writer
