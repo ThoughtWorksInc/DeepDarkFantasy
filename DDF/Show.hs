@@ -6,6 +6,7 @@ import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
+import qualified DDF.Meta.VectorTF as M.VTF
 
 data Name = Prefix M.String | Infix M.String
 
@@ -117,6 +118,11 @@ instance Sum Show where
   right = name "right"
   sumMatch = name "sumMatch"
 
+type instance ObjOrdC Show = ObjOrdTrivial
+
+instance ObjOrd Show M.Int where
+  cmp = name "cmp"
+
 instance Int Show where
   int = name . show
   pred = name "pred"
@@ -143,6 +149,12 @@ instance Applicative Show x where
 instance Monad Show x where
   join = name "join"
   bind = name "bind"
+
+instance ObjOrd Show (M.VTF.VectorTF a b) where
+  cmp = name "cmp"
+
+instance ObjOrd2 Show M.VTF.VectorTF (ObjOrd Show) (ObjOrd Show) where
+  objOrd2 _ _ _ _ = Dict
 
 instance VTF.VectorTF Show where
   zero = name "VTF.zero"

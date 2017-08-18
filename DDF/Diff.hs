@@ -10,7 +10,8 @@
   MultiParamTypeClasses,
   TypeOperators,
   DataKinds,
-  FlexibleInstances
+  FlexibleInstances,
+  UndecidableSuperClasses
 #-}
 
 module DDF.Diff where
@@ -25,6 +26,11 @@ import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
 import qualified Data.Functor.Foldable as M
 import qualified DDF.Meta.FreeVector as M
+import qualified DDF.Meta.VectorTF as M.VTF
+
+class ObjOrd r (DiffType v x) => ObjOrdCDiff r v x
+instance ObjOrd r (DiffType v x) => ObjOrdCDiff r v x
+type instance ObjOrdC (Diff r v) = ObjOrdCDiff r v
 
 type instance DiffType v (l -> r) = DiffType v l -> DiffType v r
 instance DBI r => DBI (Diff r v) where
@@ -97,12 +103,12 @@ type instance DiffType v (M.Map k val) = M.Map (DiffType v k) (DiffType v val)
 instance Map.Map r => Map.Map (Diff r v) where
   empty = Diff Map.empty
   singleton = Diff Map.singleton
-  lookup :: forall h k a. Map.Ord k => Diff r v h (M.Map k a -> k -> Maybe a)
-  lookup = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.lookup)
-  alter :: forall h k a. Map.Ord k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  lookup :: forall h k a. MetaOrd k => Diff r v h (M.Map k a -> k -> Maybe a)
+  lookup = withDict (diffOrd (Proxy :: Proxy (v, k))) (Diff Map.lookup)
+  alter :: forall h k a. MetaOrd k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   alter = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.alter)
   mapMap = Diff Map.mapMap
-  unionWith :: forall h k a. Map.Ord k => Diff r v h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWith :: forall h k a. MetaOrd k => Diff r v h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
   unionWith = withDict (Map.diffOrd (Proxy :: Proxy (v, k))) (Diff Map.unionWith)
 
 type instance DiffType v (M.Bimap a b) = M.Bimap (DiffType v a) (DiffType v b)
@@ -110,17 +116,17 @@ instance Bimap r => Bimap (Diff r v) where
   size = Diff size
   toMapL = Diff toMapL
   toMapR = Diff toMapR
-  lookupL :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h (M.Bimap a b -> a -> Maybe b)
+  lookupL :: forall h a b. (MetaOrd a, MetaOrd b) => Diff r v h (M.Bimap a b -> a -> Maybe b)
   lookupL = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff lookupL))
-  lookupR :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h (M.Bimap a b -> b -> Maybe a)
+  lookupR :: forall h a b. (MetaOrd a, MetaOrd b) => Diff r v h (M.Bimap a b -> b -> Maybe a)
   lookupR = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff lookupR))
   empty = Diff empty
   singleton = Diff singleton
-  insert :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((a, b) -> M.Bimap a b -> M.Bimap a b)
+  insert :: forall h a b. (MetaOrd a, MetaOrd b) => Diff r v h ((a, b) -> M.Bimap a b -> M.Bimap a b)
   insert = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff insert))
-  updateL :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
+  updateL :: forall h a b. (MetaOrd a, MetaOrd b) => Diff r v h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
   updateL = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff updateL))
-  updateR :: forall h a b. (Map.Ord a, Map.Ord b) => Diff r v h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
+  updateR :: forall h a b. (MetaOrd a, MetaOrd b) => Diff r v h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
   updateR = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) (withDict (Map.diffOrd (Proxy :: Proxy (v, b))) (Diff updateR))
 
 type instance DiffType v () = ()
@@ -132,6 +138,9 @@ instance Sum r => Sum (Diff r v) where
   left = Diff left
   right = Diff right
   sumMatch = Diff sumMatch
+
+instance Int r => ObjOrd (Diff r v) M.Int where
+  cmp = Diff cmp
 
 instance Int r => Int (Diff r v) where
   int = Diff . int
@@ -160,6 +169,19 @@ instance Applicative r M.IO => Applicative (Diff r v) M.IO where
 instance Monad r M.IO => Monad (Diff r v) M.IO where
   bind = Diff bind
   join = Diff join
+
+instance (ObjOrd r (M.VTF.VectorTF (DiffType v a) (DiffType v b)), Ordering r) => ObjOrd (Diff r v) (M.VTF.VectorTF a b) where
+ cmp = Diff cmp
+
+instance (ObjOrd2 r M.VTF.VectorTF (ObjOrd r) (ObjOrd r), Ordering r) =>
+  ObjOrd2 (Diff r v) M.VTF.VectorTF (ObjOrd (Diff r v)) (ObjOrd (Diff r v)) where
+    objOrd2 _ _ (_ :: Proxy a) (_ :: Proxy b) =
+      withDict (objOrd2 @r @M.VTF.VectorTF
+        (Proxy @(ObjOrd r))
+        (Proxy @(ObjOrd r))
+        (Proxy @(DiffType v a))
+        (Proxy @(DiffType v b)))
+        Dict
 
 instance (Vector r v, Lang r) => VTF.VectorTF (Diff r v) where
   zero = Diff VTF.zero
@@ -195,22 +217,23 @@ instance (Vector r v, Lang r) => Lang (Diff r v) where
   state = Diff state
   runState = Diff runState
 
-instance Ord r () where
+instance MetaOrd () where
   diffOrd _ = Dict
 
-instance Ord r a => Ord r [a] where
-  diffOrd p (_ :: Proxy (v, [a])) = withDict (Map.diffOrd p (Proxy :: Proxy (v, a))) Dict
+instance MetaOrd a => MetaOrd [a] where
+  diffOrd (_ :: Proxy (v, [a])) = withDict (Map.diffOrd (Proxy :: Proxy (v, a))) Dict
 
-instance Ord repr l => Ord repr (M.Dual l r) where
-  diffOrd p (_ :: Proxy (v, M.Dual l r)) = withDict (Map.diffOrd p (Proxy :: Proxy (v, l))) Dict
+instance MetaOrd l => MetaOrd (M.Dual l r) where
+  diffOrd (_ :: Proxy (v, M.Dual l r)) = withDict (Map.diffOrd (Proxy :: Proxy (v, l))) Dict
 
-instance Ord r M.Double where
-  diffOrd _ _ = Dict
+instance MetaOrd M.Double where
+  diffOrd _ = Dict
 
-instance Ord r M.Float where
-  diffOrd _ _ = Dict
+instance MetaOrd M.Float where
+  diffOrd _ = Dict
 
 type instance DiffType v M.Ordering = M.Ordering
-instance (Vector r v, Ordering r) => Ordering (Diff r v) where
+
+instance Ordering r => Ordering (Diff r v) where
   ordering = Diff . ordering
   sel = Diff sel

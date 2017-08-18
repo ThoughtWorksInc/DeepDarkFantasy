@@ -4,7 +4,9 @@
   TypeApplications,
   ScopedTypeVariables,
   FlexibleInstances,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  FlexibleContexts,
+  UndecidableInstances
 #-}
 
 module DDF.UnHOAS where
@@ -12,6 +14,8 @@ module DDF.UnHOAS where
 import DDF.Lang
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
+import qualified Prelude as M
+import qualified DDF.Meta.VectorTF as M.VTF
 
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
@@ -86,6 +90,18 @@ instance Sum r => Sum (UnHOAS r) where
   left = UnHOAS left
   right = UnHOAS right
   sumMatch = UnHOAS sumMatch
+
+type instance ObjOrdC (UnHOAS r) = ObjOrd r
+
+instance ObjOrd r M.Int => ObjOrd (UnHOAS r) M.Int where
+  cmp = UnHOAS cmp
+
+instance ObjOrd2 r M.VTF.VectorTF (ObjOrd r) (ObjOrd r) => ObjOrd2 (UnHOAS r) M.VTF.VectorTF (ObjOrd (UnHOAS r)) (ObjOrd (UnHOAS r)) where
+  objOrd2 _ _ _ _ = Dict
+
+instance (ObjOrd r a, ObjOrd r b, ObjOrd r (M.VTF.VectorTF a b), ObjOrd2 r M.VTF.VectorTF (ObjOrd r) (ObjOrd r)) =>
+  ObjOrd (UnHOAS r) (M.VTF.VectorTF a b) where
+    cmp = withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) (UnHOAS cmp)
 
 instance Int r => Int (UnHOAS r) where
   int = UnHOAS . int

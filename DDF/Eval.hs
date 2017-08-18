@@ -3,7 +3,8 @@
   LambdaCase,
   TypeFamilies,
   FlexibleContexts,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  FlexibleInstances
 #-}
 
 module DDF.Eval where
@@ -106,6 +107,10 @@ instance Sum Eval where
                              M.Left x -> l x
                              M.Right x -> r x
 
+type instance ObjOrdC Eval = M.Ord
+instance ObjOrd Eval M.Int where
+  cmp = comb M.compare
+
 instance Int Eval where
   int = comb
   pred = comb ((-) 1)
@@ -134,6 +139,12 @@ instance Monad Eval M.IO where
 
 instance IO Eval where
   putStrLn = comb M.putStrLn
+
+instance (ObjOrd Eval a, ObjOrd Eval b) => ObjOrd Eval (M.VTF.VectorTF a b) where
+  cmp = comb M.compare
+
+instance ObjOrd2 Eval M.VTF.VectorTF (ObjOrd Eval) (ObjOrd Eval) where
+  objOrd2 _ _ _ _ = Dict
 
 instance VTF.VectorTF Eval where
   zero = comb M.VTF.Zero

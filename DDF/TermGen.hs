@@ -14,7 +14,8 @@
   TypeApplications,
   ScopedTypeVariables,
   PartialTypeSignatures,
-  AllowAmbiguousTypes
+  AllowAmbiguousTypes,
+  InstanceSigs
 #-}
 
 module DDF.TermGen (module DDF.TermGen, module DDF.Lang) where
@@ -22,7 +23,7 @@ module DDF.TermGen (module DDF.TermGen, module DDF.Lang) where
 import DDF.Lang
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
-
+import qualified DDF.Meta.VectorTF as M.VTF
 import qualified Prelude as M
 import Language.Haskell.TH
 
@@ -56,7 +57,37 @@ instance SubL c Bool => Bool (Term c) where
   ite = mkT @Bool ite
   bool x = mkT @Bool (bool x)
 
-type instance SubLC c Int = SubL c Bool
+type instance SubLC c Int = SubL c Ordering
+
+type instance ObjOrdC (Term c) = ObjOrdTerm c
+class ObjOrdTerm (c :: (* -> * -> *) -> Constraint) x where
+  objOrdTermDict :: c r => Dict (ObjOrd r x)
+
+instance SubL c Int => ObjOrdTerm c M.Int where
+  objOrdTermDict :: forall r. c r => Dict (ObjOrd r M.Int)
+  objOrdTermDict = Dict \\ sub @c @Int @r
+
+instance (ObjOrdTerm c a, ObjOrdTerm c b, SubL c VTF.VectorTF) => ObjOrdTerm c (M.VTF.VectorTF a b) where
+  objOrdTermDict :: forall r. c r => Dict (ObjOrd r (M.VTF.VectorTF a b))
+  objOrdTermDict =
+    (withDict (objOrdTermDict @c @a @r) $
+    withDict (objOrdTermDict @c @b @r) $
+    withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) Dict) \\
+    sub @c @VTF.VectorTF @r
+
+instance (ObjOrd (Term c) a, ObjOrd (Term c) b, SubL c VTF.VectorTF) => ObjOrd (Term c) (M.VTF.VectorTF a b) where
+  cmp = Term f where
+    f :: forall r h. c r => r h (M.VTF.VectorTF a b -> M.VTF.VectorTF a b -> M.Ordering)
+    f =
+      (withDict (objOrdTermDict @c @a @r) $ withDict (objOrdTermDict @c @b @r) $
+        (withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) cmp)) \\
+      sub @c @VTF.VectorTF @r
+
+instance SubL c VTF.VectorTF => ObjOrd2 (Term c) M.VTF.VectorTF (ObjOrd (Term c)) (ObjOrd (Term c)) where
+  objOrd2 _ _ _ _ = Dict
+
+instance SubL c Int => ObjOrd (Term c) M.Int where
+  cmp = mkT @Int cmp
 
 instance SubL c Int => Int (Term c) where
   pred = mkT @Int pred
@@ -177,7 +208,7 @@ instance SubL c Map.Map => Map.Map (Term c) where
   singleton = mkT @Map.Map Map.singleton
   unionWith = mkT @Map.Map Map.unionWith
 
-type instance SubLC c VTF.VectorTF = SubL c Double
+type instance SubLC c VTF.VectorTF = (SubL c Ordering, SubL c Double)
 instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
   zero = mkT @VTF.VectorTF VTF.zero
   plus = mkT @VTF.VectorTF VTF.plus
@@ -191,7 +222,7 @@ instance SubL c Option => Option (Term c) where
   nothing = mkT @Option nothing
   optionMatch = mkT @Option optionMatch
 
-type instance SubLC c Ordering = SubL c DBI
+type instance SubLC c Ordering = SubL c Bool
 instance SubL c Ordering => Ordering (Term c) where
   sel = mkT @Ordering sel
   ordering x = mkT @Ordering (ordering x)

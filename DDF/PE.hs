@@ -12,7 +12,8 @@
   KindSignatures,
   TypeFamilies,
   TypeApplications,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  FlexibleInstances
 #-}
 
 module DDF.PE where
@@ -300,7 +301,27 @@ type instance K repr h M.Char = M.Char
 instance Char repr => Char (P repr) where
   char x = static (x, char x)
 
+type instance K repr h M.Ordering = M.Ordering
+instance Ordering repr => Ordering (P repr) where
+  ordering x = static (x, ordering x)
+  sel = abs $ abs $ abs $ abs $ f (s (s (s z))) (s (s z)) (s z) z where
+    f :: P repr h a -> P repr h a -> P repr h a -> P repr h M.Ordering -> P repr h a
+    f a _ _ (Known M.LT _ _ _ _) = a
+    f _ b _ (Known M.EQ _ _ _ _) = b
+    f _ _ c (Known M.GT _ _ _ _) = c
+    f a b c (Open x) = Open $ \h -> f (app_open a h) (app_open b h) (app_open c h) (x h)
+    f a b c (Unk x) = Unk $ sel4 (dynamic a) (dynamic b) (dynamic c) x
+
+type instance ObjOrdC (P repr) = ObjOrdTrivial
+
 type instance K repr h M.Int = M.Int
+instance Int repr => ObjOrd (P repr) M.Int where
+  cmp = abs $ abs $ f (s z) z where
+    f :: P repr h M.Int -> P repr h M.Int -> P repr h M.Ordering
+    f (Known l _ _ _ _) (Known r _ _ _ _) = ordering $ M.compare l r
+    f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
+    f l r = Unk $ cmp2 (dynamic l) (dynamic r)
+
 instance Int repr => Int (P repr) where
   int x = static (x, int x)
   pred = abs (f z)

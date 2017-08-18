@@ -2,7 +2,13 @@
   NoImplicitPrelude,
   NoMonomorphismRestriction,
   MultiParamTypeClasses,
-  ConstraintKinds
+  ConstraintKinds,
+  FlexibleInstances,
+  UndecidableInstances,
+  KindSignatures,
+  ConstraintKinds,
+  TypeFamilies,
+  UndecidableSuperClasses
 #-}
 
 module DDF.Ordering (module DDF.Ordering, module DDF.Bool) where
@@ -33,10 +39,15 @@ isEQ1 = app1 isEQ
 isGT = sel3 false false true
 isGT1 = app1 isGT
 
-class Ordering r => ObjOrd r x where
+type family ObjOrdC (r :: * -> * -> *) :: * -> Constraint
+
+class (ObjOrdC r x, Ordering r) => ObjOrd r x where
   cmp :: r h (x -> x -> M.Ordering)
   eq :: r h (x -> x -> M.Bool)
   eq = lam2 $ \l r -> isEQ1 $ cmp2 l r
+
+class M.Ord x => MetaOrd x where
+  diffOrd :: Proxy (v, x) -> Dict (MetaOrd (DiffType v x))
 
 class Ordering r => ObjOrd2 r f ac bc where
   objOrd2 :: (ac a, bc b) => Proxy ac -> Proxy bc -> Proxy a -> Proxy b -> Dict (ObjOrd r (f a b))
@@ -46,6 +57,3 @@ eq2 = app2 eq
 
 cmp1 = app1 cmp
 cmp2 = app2 cmp
-
-class (ObjOrd r x, M.Ord x) => Ord r x where
-  diffOrd :: Proxy r -> Proxy (v, x) -> Dict (Ord r (DiffType v x))

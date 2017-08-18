@@ -144,7 +144,6 @@ instance (Prod r, Sum r) => Sum (ImpW r) where
 instance (Prod r, Int r) => Int (ImpW r) where
   int = NoImpW . int
   pred = NoImpW pred
-  isZero = NoImpW isZero
 
 instance (Prod r, IO r) => IO (ImpW r) where
   putStrLn = NoImpW putStrLn

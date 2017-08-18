@@ -1,7 +1,8 @@
 {-# LANGUAGE
   NoImplicitPrelude,
   NoMonomorphismRestriction,
-  FlexibleContexts
+  FlexibleContexts,
+  UndecidableSuperClasses
 #-}
 
 module DDF.Int (module DDF.Int, module DDF.Ordering) where

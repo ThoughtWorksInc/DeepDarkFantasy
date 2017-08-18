@@ -6,6 +6,7 @@ import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
+import qualified DDF.Meta.VectorTF as M.VTF
 
 newtype Size h x = Size {runSize :: M.Int}
 
@@ -108,6 +109,16 @@ instance Applicative Size x where
 instance Monad Size x where
   bind = one
   join = one
+
+type instance ObjOrdC Size = ObjOrdTrivial
+instance ObjOrd Size M.Int where
+  cmp = one
+
+instance ObjOrd2 Size M.VTF.VectorTF (ObjOrd Size) (ObjOrd Size) where
+  objOrd2 _ _ _ _ = Dict
+
+instance ObjOrd Size (M.VTF.VectorTF a b) where
+  cmp = one
 
 instance VTF.VectorTF Size where
   zero = one
