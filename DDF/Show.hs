@@ -71,7 +71,7 @@ instance Double Show where
   doubleMult = name "mult"
   doubleDivide = name "divide"
   doubleExp = name "exp"
-  doubleEq = name "eq"
+  doubleCmp = name "cmp"
 
 instance Float Show where
   float = name . show
@@ -118,14 +118,10 @@ instance Sum Show where
   right = name "right"
   sumMatch = name "sumMatch"
 
-type instance ObjOrdC Show = ObjOrdTrivial
-
-instance ObjOrd Show M.Int where
-  cmp = name "cmp"
-
 instance Int Show where
   int = name . show
   pred = name "pred"
+  intCmp = name "compare"
 
 instance List Show where
   nil = name "[]"
@@ -138,23 +134,14 @@ instance Y Show where
 
 instance IO Show where
   putStrLn = name "putStrLn"
-
-instance Functor Show x where
-  map = name "map"
-
-instance Applicative Show x where
-  pure = name "pure"
-  ap = name "ap"
-
-instance Monad Show x where
-  join = name "join"
-  bind = name "bind"
+  ioMap = name "map"
+  ioPure = name "pure"
+  ioAP = name "ap"
+  ioBind = name "bind"
+  ioJoin = name "join"
 
 instance ObjOrd Show (M.VTF.VectorTF a b) where
   cmp = name "cmp"
-
-instance ObjOrd2 Show M.VTF.VectorTF (ObjOrd Show) (ObjOrd Show) where
-  objOrd2 _ _ _ _ = Dict
 
 instance VTF.VectorTF Show where
   zero = name "VTF.zero"
@@ -162,6 +149,7 @@ instance VTF.VectorTF Show where
   plus = name "VTF.plus"
   mult = name "VTF.mult"
   vtfMatch = name "VTF.vtfMatch"
+  vtfCmp = name "vtfCompare"
 
 instance DiffWrapper Show where
   diffWrapper = name "diffWrapper"

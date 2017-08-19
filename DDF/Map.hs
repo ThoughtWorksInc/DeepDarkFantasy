@@ -13,6 +13,7 @@ import DDF.Prod
 import qualified Data.Map as M
 import DDF.Option
 import DDF.Ordering
+import DDF.Meta.Diff
 
 class (Prod r, Option r) => Map r where
   empty :: r h (M.Map k a)

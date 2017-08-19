@@ -6,7 +6,6 @@ import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
-import qualified DDF.Meta.VectorTF as M.VTF
 
 newtype Size h x = Size {runSize :: M.Int}
 
@@ -37,7 +36,7 @@ instance Double Size where
   doubleMult = one
   doubleDivide = one
   doubleExp = one
-  doubleEq = one
+  doubleCmp = one
 
 instance Float Size where
   float _ = one
@@ -87,9 +86,15 @@ instance Sum Size where
 instance Int Size where
   int _ = one
   pred = one
+  intCmp = one
 
 instance IO Size where
   putStrLn = one
+  ioJoin = one
+  ioBind = one
+  ioMap = one
+  ioPure = one
+  ioAP = one
 
 instance Y Size where
   y = one
@@ -99,33 +104,13 @@ instance List Size where
   cons = one
   listMatch = one
 
-instance Functor Size x where
-  map = one
-
-instance Applicative Size x where
-  pure = one
-  ap = one
-
-instance Monad Size x where
-  bind = one
-  join = one
-
-type instance ObjOrdC Size = ObjOrdTrivial
-instance ObjOrd Size M.Int where
-  cmp = one
-
-instance ObjOrd2 Size M.VTF.VectorTF (ObjOrd Size) (ObjOrd Size) where
-  objOrd2 _ _ _ _ = Dict
-
-instance ObjOrd Size (M.VTF.VectorTF a b) where
-  cmp = one
-
 instance VTF.VectorTF Size where
   zero = one
   basis = one
   plus = one
   mult = one
   vtfMatch = one
+  vtfCmp = one
 
 instance DiffWrapper Size where
   diffWrapper = one

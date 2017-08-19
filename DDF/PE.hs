@@ -155,11 +155,11 @@ instance Double r => Double (P r) where
       f (Known l _ _ _ _) = double (M.exp l) 
       f (Open x) = Open $ f . x
       f (Unk l) = Unk $ doubleExp1 l
-  doubleEq = abs (abs (f (s z) z)) where
-    f :: P r h M.Double -> P r h M.Double -> P r h M.Bool
-    f (Known l _ _ _ _) (Known r _ _ _ _) = bool (l == r)
+  doubleCmp = abs $ abs $ f (s z) z where
+    f :: P r h M.Double -> P r h M.Double -> P r h M.Ordering
+    f (Known l _ _ _ _) (Known r _ _ _ _) = ordering (M.compare l r)
     f l r | isOpen l || isOpen r = Open (\h -> f (app_open l h) (app_open r h))
-    f l r = Unk (doubleEq2 (dynamic l) (dynamic r))
+    f l r = Unk (cmp2 (dynamic l) (dynamic r))
 
 type instance K repr h M.Float = M.Float
 instance Float r => Float (P r) where
@@ -312,28 +312,26 @@ instance Ordering repr => Ordering (P repr) where
     f a b c (Open x) = Open $ \h -> f (app_open a h) (app_open b h) (app_open c h) (x h)
     f a b c (Unk x) = Unk $ sel4 (dynamic a) (dynamic b) (dynamic c) x
 
-type instance ObjOrdC (P repr) = ObjOrdTrivial
-
 type instance K repr h M.Int = M.Int
 instance Int repr => ObjOrd (P repr) M.Int where
-  cmp = abs $ abs $ f (s z) z where
+  cmp = intCmp
+
+instance Int repr => Int (P repr) where
+  int x = static (x, int x)
+  pred = abs (f z) where
+    f :: P repr h M.Int -> P repr h M.Int
+    f (Known i _ _ _ _) = int $ i - 1
+    f (Open x) = Open $ f . x
+    f (Unk x) = Unk $ pred1 x
+  intCmp = abs $ abs $ f (s z) z where
     f :: P repr h M.Int -> P repr h M.Int -> P repr h M.Ordering
     f (Known l _ _ _ _) (Known r _ _ _ _) = ordering $ M.compare l r
     f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
     f l r = Unk $ cmp2 (dynamic l) (dynamic r)
 
-instance Int repr => Int (P repr) where
-  int x = static (x, int x)
-  pred = abs (f z)
-    where
-      f :: P repr h M.Int -> P repr h M.Int
-      f (Known i _ _ _ _) = int $ i - 1
-      f (Open x) = Open $ f . x
-      f (Unk x) = Unk $ pred1 x
-
 type instance K repr h (M.Dual l r) = (P repr h l, P repr h r)
 instance Dual repr => Dual (P repr) where
-  dual = abs (f z)
+  dual = abs $ f z
     where
       f :: P repr h (a, b) -> P repr h (M.Dual a b)
       f (Known (l, r) _ _ _ _) =
@@ -354,41 +352,31 @@ instance Dual repr => Dual (P repr) where
       f (Open x) = Open $ f . x
       f (Unk x) = Unk $ runDual1 x
 
-type instance K repr h () = ()
-instance Unit repr => Unit (P repr) where
+type instance K r h () = ()
+instance Unit r => Unit (P r) where
   unit = static ((), unit)
 
-type instance K repr h (M.IO a) = P repr h a
-instance IO repr => Functor (P repr) M.IO where
-  map = abs $ abs (f (s z) z)
-    where
-      f :: P repr h (a -> b) -> P repr h (M.IO a) -> P repr h (M.IO b)
-      f l (Known a _ _ _ _) = pure1 $ app l a
-      f l (Open x) = Open $ \h -> f (app_open l h) (x h)
-      f l (Unk x) = Unk $ map2 (dynamic l) x
-
-instance IO repr => Applicative (P repr) M.IO where
-  pure = abs $ f z
-    where
-      f :: P repr h a -> P repr h (M.IO a)
-      f x = know x (pure1 $ dynamic x) (\h -> pure1 $ app_open x h) (pure1 $ s x)
-  ap = abs $ abs $ f (s z) z
-    where
-      f :: P repr h (M.IO (a -> b)) -> P repr h (M.IO a) -> P repr h (M.IO b)
-      f (Known l _ _ _ _) (Known r _ _ _ _) = pure1 $ app l r
-      f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
-      f l r = Unk $ ap2 (dynamic l) (dynamic r)
-
-instance IO repr => Monad (P repr) M.IO where
-  join = abs $ f z
-    where
-      f :: P repr h (M.IO (M.IO a)) -> P repr h (M.IO a)
-      f (Known l _ _ _ _) = l
-      f (Open x) = Open $ f . x
-      f (Unk x) = Unk $ join1 x
-
-instance IO repr => IO (P repr) where
+type instance K r h (M.IO a) = P r h a
+instance IO r => IO (P r) where
   putStrLn = Unk putStrLn
+  ioJoin = abs $ f z where
+    f :: P r h (M.IO (M.IO a)) -> P r h (M.IO a)
+    f (Known l _ _ _ _) = l
+    f (Open x) = Open $ f . x
+    f (Unk x) = Unk $ join1 x
+  ioMap = abs $ abs $ f (s z) z where
+    f :: P r h (a -> b) -> P r h (M.IO a) -> P r h (M.IO b)
+    f l (Known a _ _ _ _) = pure1 $ app l a
+    f l (Open x) = Open $ \h -> f (app_open l h) (x h)
+    f l (Unk x) = Unk $ map2 (dynamic l) x
+  ioPure = abs $ f z where
+    f :: P r h a -> P r h (M.IO a)
+    f x = know x (pure1 $ dynamic x) (\h -> pure1 $ app_open x h) (pure1 $ s x)
+  ioAP = abs $ abs $ f (s z) z where
+    f :: P r h (M.IO (a -> b)) -> P r h (M.IO a) -> P r h (M.IO b)
+    f (Known l _ _ _ _) (Known r _ _ _ _) = pure1 $ app l r
+    f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
+    f l r = Unk $ ap2 (dynamic l) (dynamic r)
 
 data MapPE (repr :: * -> * -> *) h k a :: * where
   EmptyMap :: MapPE repr h k a

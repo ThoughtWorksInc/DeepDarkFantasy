@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module DDF.Util (module DDF.Util, module System.Random) where
+module DDF.Meta.Util (module DDF.Meta.Util, module System.Random) where
 
 import System.Random
 import GHC.Float
@@ -39,3 +39,6 @@ instance (RandRange l, RandRange r) => RandRange (l, r) where
     where
       (llo, lhi) = randRange (lo, hi)
       (rlo, rhi) = randRange (lo, hi)
+
+chainOrd EQ x = x
+chainOrd x _ = x

@@ -18,6 +18,7 @@ import DDF.WithDiff
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 import qualified Prelude as M
+import DDF.Meta.Util
 
 class ProdCon con l r where
   prodCon :: (con l, con r) :- con (l, r)
@@ -94,7 +95,7 @@ instance (Prod r, Double r) => Double (ImpW r) where
   doubleMinus = NoImpW doubleMinus
   doubleMult = NoImpW doubleMult
   doubleDivide = NoImpW doubleDivide
-  doubleEq = NoImpW doubleEq
+  doubleCmp = NoImpW doubleCmp
 
 instance (Prod r, Float r) => Float (ImpW r) where
   float = NoImpW . float
@@ -144,9 +145,15 @@ instance (Prod r, Sum r) => Sum (ImpW r) where
 instance (Prod r, Int r) => Int (ImpW r) where
   int = NoImpW . int
   pred = NoImpW pred
+  intCmp = NoImpW cmp
 
 instance (Prod r, IO r) => IO (ImpW r) where
   putStrLn = NoImpW putStrLn
+  ioMap = NoImpW map
+  ioAP = NoImpW ap
+  ioPure = NoImpW pure
+  ioJoin = NoImpW join
+  ioBind = NoImpW bind
 
 instance (Prod r, List r) => List (ImpW r) where
   nil = NoImpW nil
@@ -156,23 +163,13 @@ instance (Prod r, List r) => List (ImpW r) where
 instance (Prod r, Y r) => Y (ImpW r) where
   y = NoImpW y
 
-instance (Prod r, Functor r x) => Functor (ImpW r) x where
-  map = NoImpW map
-
-instance (Prod r, Applicative r x) => Applicative (ImpW r) x where
-  ap = NoImpW ap
-  pure = NoImpW pure
-
-instance (Prod r, Monad r x) => Monad (ImpW r) x where
-  join = NoImpW join
-  bind = NoImpW bind
-
 instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (ImpW r) where
   zero = NoImpW VTF.zero
   basis = NoImpW VTF.basis
   plus = NoImpW VTF.plus
   mult = NoImpW VTF.mult
   vtfMatch = NoImpW VTF.vtfMatch
+  vtfCmp = NoImpW VTF.vtfCmp
 
 instance (Prod r, DiffWrapper r) => DiffWrapper (ImpW r) where
   diffWrapper = NoImpW diffWrapper

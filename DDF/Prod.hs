@@ -1,10 +1,14 @@
-{-# LANGUAGE NoImplicitPrelude, NoMonomorphismRestriction #-}
+{-# LANGUAGE
+  NoImplicitPrelude,
+  NoMonomorphismRestriction,
+  ScopedTypeVariables
+#-}
 
-module DDF.Prod (module DDF.Prod, module DDF.DBI) where
+module DDF.Prod (module DDF.Prod, module DDF.Ordering) where
 
-import DDF.DBI
+import DDF.Ordering
 
-class DBI r => Prod r where
+class Ordering r => Prod r where
   mkProd :: r h (a -> b -> (a, b))
   zro :: r h ((a, b) -> a)
   fst :: r h ((a, b) -> b)
@@ -14,9 +18,16 @@ class DBI r => Prod r where
   curry = lam3 $ \f a b -> app f (mkProd2 a b)
   uncurry :: r h ((a -> b -> c) -> ((a, b) -> c))
   uncurry = lam2 $ \f p -> app2 f (zro1 p) (fst1 p)
+  prodCmp :: forall h a b. r h (Cmp a -> Cmp b -> Cmp (a, b))
+  prodCmp =
+    lam2 $ \l r ->
+      uncurry1 (lam2 $ \ll lr ->
+        uncurry1 (lam2 $ \rl rr ->
+          chainOrd2 (app2 l ll rl) (app2 r lr rr)))
 
-zro1 = app zro
-fst1 = app fst
-mkProd1 = app mkProd
+zro1 = app1 zro
+fst1 = app1 fst
+mkProd1 = app1 mkProd
 mkProd2 = app2 mkProd
 curry1 = app curry
+uncurry1 = app1 uncurry

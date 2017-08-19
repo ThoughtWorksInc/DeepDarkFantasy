@@ -296,7 +296,6 @@ instance Lang r => Vector r M.Double where
   mult = doubleMult
   divide = doubleDivide
 
-uncurry1 = app uncurry
 optionMatch2 = app2 optionMatch
 optionMatch3 = app3 optionMatch
 writer1 = app writer

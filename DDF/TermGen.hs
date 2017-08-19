@@ -23,7 +23,6 @@ module DDF.TermGen (module DDF.TermGen, module DDF.Lang) where
 import DDF.Lang
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
-import qualified DDF.Meta.VectorTF as M.VTF
 import qualified Prelude as M
 import Language.Haskell.TH
 
@@ -59,39 +58,10 @@ instance SubL c Bool => Bool (Term c) where
 
 type instance SubLC c Int = SubL c Ordering
 
-type instance ObjOrdC (Term c) = ObjOrdTerm c
-class ObjOrdTerm (c :: (* -> * -> *) -> Constraint) x where
-  objOrdTermDict :: c r => Dict (ObjOrd r x)
-
-instance SubL c Int => ObjOrdTerm c M.Int where
-  objOrdTermDict :: forall r. c r => Dict (ObjOrd r M.Int)
-  objOrdTermDict = Dict \\ sub @c @Int @r
-
-instance (ObjOrdTerm c a, ObjOrdTerm c b, SubL c VTF.VectorTF) => ObjOrdTerm c (M.VTF.VectorTF a b) where
-  objOrdTermDict :: forall r. c r => Dict (ObjOrd r (M.VTF.VectorTF a b))
-  objOrdTermDict =
-    (withDict (objOrdTermDict @c @a @r) $
-    withDict (objOrdTermDict @c @b @r) $
-    withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) Dict) \\
-    sub @c @VTF.VectorTF @r
-
-instance (ObjOrd (Term c) a, ObjOrd (Term c) b, SubL c VTF.VectorTF) => ObjOrd (Term c) (M.VTF.VectorTF a b) where
-  cmp = Term f where
-    f :: forall r h. c r => r h (M.VTF.VectorTF a b -> M.VTF.VectorTF a b -> M.Ordering)
-    f =
-      (withDict (objOrdTermDict @c @a @r) $ withDict (objOrdTermDict @c @b @r) $
-        (withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) cmp)) \\
-      sub @c @VTF.VectorTF @r
-
-instance SubL c VTF.VectorTF => ObjOrd2 (Term c) M.VTF.VectorTF (ObjOrd (Term c)) (ObjOrd (Term c)) where
-  objOrd2 _ _ _ _ = Dict
-
-instance SubL c Int => ObjOrd (Term c) M.Int where
-  cmp = mkT @Int cmp
-
 instance SubL c Int => Int (Term c) where
   pred = mkT @Int pred
   int x = mkT @Int (int x)
+  intCmp = mkT @Int cmp
 
 type instance SubLC c Fix = SubL c DBI
 
@@ -138,10 +108,10 @@ instance SubL c Float => Float (Term c) where
   floatMinus = mkT @Float floatMinus
   floatDivide = mkT @Float floatDivide
 
-type instance SubLC c Double = SubL c Bool
+type instance SubLC c Double = SubL c Ordering
 instance SubL c Double => Double (Term c) where
-  doubleEq = mkT @Double doubleEq
   double x = mkT @Double (double x)
+  doubleCmp = mkT @Double doubleCmp
   doubleExp = mkT @Double doubleExp
   doublePlus = mkT @Double doublePlus  
   doubleMult = mkT @Double doubleMult
@@ -170,17 +140,11 @@ type instance SubLC c IO = (SubL c Unit, SubL c Char, SubL c List)
 
 instance SubL c IO => IO (Term c) where
   putStrLn = mkT @IO putStrLn
-
-instance SubL c IO => Functor (Term c) M.IO where
-  map = mkT @IO map
-
-instance SubL c IO => Applicative (Term c) M.IO where
-  ap = mkT @IO ap
-  pure = mkT @IO pure
-
-instance SubL c IO => Monad (Term c) M.IO where
-  join = mkT @IO join
-  bind = mkT @IO bind
+  ioMap = mkT @IO map
+  ioAP = mkT @IO ap
+  ioPure = mkT @IO pure
+  ioJoin = mkT @IO join
+  ioBind = mkT @IO bind
 
 type instance SubLC c List = SubL c Y
 instance SubL c List => List (Term c) where
@@ -188,7 +152,7 @@ instance SubL c List => List (Term c) where
   cons = mkT @List cons
   listMatch = mkT @List listMatch
 
-type instance SubLC c Prod = SubL c DBI
+type instance SubLC c Prod = SubL c Ordering
 instance SubL c Prod => Prod (Term c) where
   zro = mkT @Prod zro
   fst = mkT @Prod fst
@@ -215,6 +179,7 @@ instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
   mult = mkT @VTF.VectorTF VTF.mult
   basis = mkT @VTF.VectorTF VTF.basis
   vtfMatch = mkT @VTF.VectorTF VTF.vtfMatch
+  vtfCmp = mkT @VTF.VectorTF VTF.vtfCmp
 
 type instance SubLC c Option = SubL c DBI
 instance SubL c Option => Option (Term c) where

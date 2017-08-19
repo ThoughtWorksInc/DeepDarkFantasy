@@ -14,8 +14,6 @@ module DDF.UnHOAS where
 import DDF.Lang
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
-import qualified Prelude as M
-import qualified DDF.Meta.VectorTF as M.VTF
 
 newtype UnHOAS repr h x = UnHOAS {runUnHOAS :: repr h x}
 
@@ -44,7 +42,7 @@ instance Double r => Double (UnHOAS r) where
   doubleMult = UnHOAS doubleMult
   doubleDivide = UnHOAS doubleDivide
   doubleExp = UnHOAS doubleExp
-  doubleEq = UnHOAS doubleEq
+  doubleCmp = UnHOAS cmp
 
 instance Float r => Float (UnHOAS r) where
   float = UnHOAS . float
@@ -91,21 +89,10 @@ instance Sum r => Sum (UnHOAS r) where
   right = UnHOAS right
   sumMatch = UnHOAS sumMatch
 
-type instance ObjOrdC (UnHOAS r) = ObjOrd r
-
-instance ObjOrd r M.Int => ObjOrd (UnHOAS r) M.Int where
-  cmp = UnHOAS cmp
-
-instance ObjOrd2 r M.VTF.VectorTF (ObjOrd r) (ObjOrd r) => ObjOrd2 (UnHOAS r) M.VTF.VectorTF (ObjOrd (UnHOAS r)) (ObjOrd (UnHOAS r)) where
-  objOrd2 _ _ _ _ = Dict
-
-instance (ObjOrd r a, ObjOrd r b, ObjOrd r (M.VTF.VectorTF a b), ObjOrd2 r M.VTF.VectorTF (ObjOrd r) (ObjOrd r)) =>
-  ObjOrd (UnHOAS r) (M.VTF.VectorTF a b) where
-    cmp = withDict (objOrd2 @r @M.VTF.VectorTF (Proxy @(ObjOrd r)) (Proxy @(ObjOrd r)) (Proxy @a) (Proxy @b)) (UnHOAS cmp)
-
 instance Int r => Int (UnHOAS r) where
   int = UnHOAS . int
   pred = UnHOAS pred
+  intCmp = UnHOAS cmp
 
 instance Y r => Y (UnHOAS r) where
   y = UnHOAS y
@@ -123,6 +110,11 @@ instance Monad r x => Monad (UnHOAS r) x where
 
 instance IO r => IO (UnHOAS r) where
   putStrLn = UnHOAS putStrLn
+  ioMap = UnHOAS map
+  ioBind = UnHOAS bind
+  ioJoin = UnHOAS join
+  ioPure = UnHOAS pure
+  ioAP = UnHOAS ap
 
 instance List r => List (UnHOAS r) where
   nil = UnHOAS nil
@@ -135,6 +127,7 @@ instance VTF.VectorTF r => VTF.VectorTF (UnHOAS r) where
   plus = UnHOAS VTF.plus
   mult = UnHOAS VTF.mult
   vtfMatch = UnHOAS VTF.vtfMatch
+  vtfCmp = UnHOAS VTF.vtfCmp
 
 instance DiffWrapper r => DiffWrapper (UnHOAS r) where
   diffWrapper = UnHOAS diffWrapper

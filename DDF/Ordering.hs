@@ -14,46 +14,47 @@
 module DDF.Ordering (module DDF.Ordering, module DDF.Bool) where
 
 import DDF.Bool
-import DDF.Meta.Diff
 import qualified Prelude as M
 
-class Bool repr => Ordering repr where
-  sel :: repr h (a -> a -> a -> M.Ordering -> a)
-  ordering :: M.Ordering -> repr h M.Ordering
-  ltOrd :: repr h M.Ordering
+class Bool r => Ordering r where
+  sel :: r h (a -> a -> a -> M.Ordering -> a)
+  ordering :: M.Ordering -> r h M.Ordering
+  ltOrd :: r h M.Ordering
   ltOrd = ordering M.LT
-  eqOrd :: repr h M.Ordering
+  eqOrd :: r h M.Ordering
   eqOrd = ordering M.EQ
-  gtOrd :: repr h M.Ordering
+  gtOrd :: r h M.Ordering
   gtOrd = ordering M.GT
+  isLT :: r h (M.Ordering -> M.Bool)
+  isLT = sel3 true  false false
+  isEQ :: r h (M.Ordering -> M.Bool)
+  isEQ = sel3 false true  false
+  isGT :: r h (M.Ordering -> M.Bool)
+  isGT = sel3 false false true
+  chainOrd :: r h (M.Ordering -> M.Ordering -> M.Ordering)
+  chainOrd = lam2 $ \l r -> sel4 ltOrd r gtOrd l
 
 sel1 = app1 sel
 sel2 = app2 sel
 sel3 = app3 sel
 sel4 = app4 sel
 
-isLT = sel3 true  false false
 isLT1 = app1 isLT
-isEQ = sel3 false true  false
 isEQ1 = app1 isEQ
-isGT = sel3 false false true
 isGT1 = app1 isGT
 
-type family ObjOrdC (r :: * -> * -> *) :: * -> Constraint
+chainOrd1 = app1 chainOrd
+chainOrd2 = app2 chainOrd
 
-class (ObjOrdC r x, Ordering r) => ObjOrd r x where
+class Ordering r => ObjOrd r x where
   cmp :: r h (x -> x -> M.Ordering)
   eq :: r h (x -> x -> M.Bool)
   eq = lam2 $ \l r -> isEQ1 $ cmp2 l r
-
-class M.Ord x => MetaOrd x where
-  diffOrd :: Proxy (v, x) -> Dict (MetaOrd (DiffType v x))
-
-class Ordering r => ObjOrd2 r f ac bc where
-  objOrd2 :: (ac a, bc b) => Proxy ac -> Proxy bc -> Proxy a -> Proxy b -> Dict (ObjOrd r (f a b))
 
 eq1 = app1 eq
 eq2 = app2 eq
 
 cmp1 = app1 cmp
 cmp2 = app2 cmp
+
+type Cmp a = a -> a -> M.Ordering

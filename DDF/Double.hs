@@ -1,14 +1,16 @@
 {-# LANGUAGE
   NoImplicitPrelude,
-  NoMonomorphismRestriction
+  NoMonomorphismRestriction,
+  FlexibleInstances,
+  MultiParamTypeClasses
 #-}
 
-module DDF.Double (module DDF.Double, module DDF.Bool) where
+module DDF.Double (module DDF.Double, module DDF.Ordering) where
 
-import DDF.Bool
+import DDF.Ordering
 import qualified Prelude as M
 
-class Bool r => Double r where
+class Ordering r => Double r where
   double :: M.Double -> r h M.Double
   doubleZero :: r h M.Double
   doubleZero = double 0
@@ -19,7 +21,10 @@ class Bool r => Double r where
   doubleMult :: r h (M.Double -> M.Double -> M.Double)
   doubleDivide :: r h (M.Double -> M.Double -> M.Double)
   doubleExp :: r h (M.Double -> M.Double)
-  doubleEq :: r h (M.Double -> M.Double -> M.Bool)
+  doubleCmp :: r h (M.Double -> M.Double -> M.Ordering)
+
+instance Double r => ObjOrd r M.Double where
+  cmp = doubleCmp
 
 doublePlus1 = app doublePlus
 doublePlus2 = app2 doublePlus
@@ -27,4 +32,3 @@ doubleMinus2 = app2 doubleMinus
 doubleMult2 = app2 doubleMult
 doubleDivide2 = app2 doubleDivide
 doubleExp1 = app doubleExp
-doubleEq2 = app2 doubleEq

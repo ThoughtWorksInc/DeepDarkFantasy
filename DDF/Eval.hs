@@ -9,7 +9,7 @@
 
 module DDF.Eval where
 
-import DDF.ImportMeta
+import DDF.Lang
 import qualified Prelude as M
 import qualified Control.Monad.Writer as M (WriterT(WriterT), runWriter)
 import qualified Control.Monad.State as M
@@ -25,7 +25,7 @@ import qualified DDF.VectorTF as VTF
 import qualified DDF.Meta.DiffWrapper as M.DW
 import qualified Data.Functor.Foldable as M
 import qualified DDF.Meta.FreeVector as M
-import DDF.Lang
+import qualified DDF.Meta.Util as M
 
 newtype Eval h x = Eval {runEval :: h -> x}
 
@@ -56,7 +56,7 @@ instance Double Eval where
   doubleMult = comb (*)
   doubleDivide = comb (/)
   doubleExp = comb M.exp
-  doubleEq = comb (==)
+  doubleCmp = comb M.compare
 
 instance Float Eval where
   float = comb
@@ -107,13 +107,10 @@ instance Sum Eval where
                              M.Left x -> l x
                              M.Right x -> r x
 
-type instance ObjOrdC Eval = M.Ord
-instance ObjOrd Eval M.Int where
-  cmp = comb M.compare
-
 instance Int Eval where
   int = comb
   pred = comb ((-) 1)
+  intCmp = comb M.compare
 
 instance Y Eval where
   y = comb loop
@@ -126,36 +123,38 @@ instance List Eval where
                             [] -> l
                             x:xs -> r x xs
 
-instance Functor Eval M.IO where
-  map = comb M.fmap
-
-instance Applicative Eval M.IO where
-  pure = comb M.pure
-  ap = comb M.ap
-
-instance Monad Eval M.IO where
-  join = comb M.join
-  bind = comb (>>=)
-
 instance IO Eval where
   putStrLn = comb M.putStrLn
-
-instance (ObjOrd Eval a, ObjOrd Eval b) => ObjOrd Eval (M.VTF.VectorTF a b) where
-  cmp = comb M.compare
-
-instance ObjOrd2 Eval M.VTF.VectorTF (ObjOrd Eval) (ObjOrd Eval) where
-  objOrd2 _ _ _ _ = Dict
+  ioMap = comb M.fmap
+  ioPure = comb M.pure
+  ioAP = comb M.ap
+  ioBind = comb (>>=)
+  ioJoin = comb M.join
 
 instance VTF.VectorTF Eval where
   zero = comb M.VTF.Zero
   basis = comb M.VTF.Basis
   plus = comb M.VTF.Plus
   mult = comb M.VTF.Mult
-  vtfMatch = comb $ \zr b p m -> \case
-                                 M.VTF.Zero -> zr
-                                 M.VTF.Basis t -> b t
-                                 M.VTF.Plus l r -> p l r
-                                 M.VTF.Mult l r -> m l r
+  vtfMatch =
+      comb $ \zr b p m -> \case
+                          M.VTF.Zero -> zr
+                          M.VTF.Basis t -> b t
+                          M.VTF.Plus l r -> p l r
+                          M.VTF.Mult l r -> m l r
+  vtfCmp =
+      comb $ x where
+        x t f = c where
+          c M.VTF.Zero M.VTF.Zero = M.EQ
+          c M.VTF.Zero _ = M.LT
+          c _ M.VTF.Zero = M.GT
+          c (M.VTF.Basis l) (M.VTF.Basis r) = t l r
+          c (M.VTF.Basis _) _ = M.LT
+          c _ (M.VTF.Basis _) = M.GT
+          c (M.VTF.Plus ll lr) (M.VTF.Plus rl rr) = M.chainOrd (f ll rl) (f lr rr)
+          c (M.VTF.Plus _ _) _ = M.LT
+          c _ (M.VTF.Plus _ _) = M.GT
+          c (M.VTF.Mult ll lr) (M.VTF.Mult rl rr) = M.chainOrd (runEval cmp () ll rl) (f lr rr)
 
 instance DiffWrapper Eval where
   diffWrapper = comb M.DW.DiffWrapper

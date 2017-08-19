@@ -40,7 +40,7 @@ instance (Prod r, Double r) => Double (UnLiftEnv r) where
   doubleMult = unLiftEnv doubleMult
   doubleDivide = unLiftEnv doubleDivide
   doubleExp = unLiftEnv doubleExp
-  doubleEq = unLiftEnv doubleEq
+  doubleCmp = unLiftEnv doubleCmp
 
 instance (Prod r, Char r) => Char (UnLiftEnv r) where
   char = unLiftEnv . char
@@ -90,28 +90,23 @@ instance (Prod r, Sum r) => Sum (UnLiftEnv r) where
 instance (Prod r, Int r) => Int (UnLiftEnv r) where
   int = unLiftEnv . int
   pred = unLiftEnv pred
+  intCmp = unLiftEnv cmp
 
 instance (Prod r, Y r) => Y (UnLiftEnv r) where
   y = unLiftEnv y
 
 instance (Prod r, IO r) => IO (UnLiftEnv r) where
   putStrLn = unLiftEnv putStrLn
+  ioMap = unLiftEnv map
+  ioPure = unLiftEnv pure
+  ioAP = unLiftEnv ap
+  ioBind = unLiftEnv bind
+  ioJoin = unLiftEnv join
 
 instance (Unit r, Prod r, List r) => List (UnLiftEnv r) where
   nil = unLiftEnv nil
   cons = unLiftEnv cons
   listMatch = unLiftEnv listMatch
-
-instance (Prod r, Functor r m) => Functor (UnLiftEnv r) m where
-  map = unLiftEnv map
-
-instance (Prod r, Applicative r m) => Applicative (UnLiftEnv r) m where
-  pure = unLiftEnv pure
-  ap = unLiftEnv ap
-
-instance (Prod r, Monad r m) => Monad (UnLiftEnv r) m where
-  bind = unLiftEnv bind
-  join = unLiftEnv join
 
 instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (UnLiftEnv r) where
   zero = unLiftEnv VTF.zero
@@ -119,6 +114,7 @@ instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (UnLiftEnv r) where
   plus = unLiftEnv VTF.plus
   mult = unLiftEnv VTF.mult
   vtfMatch = unLiftEnv VTF.vtfMatch
+  vtfCmp = unLiftEnv VTF.vtfCmp
 
 instance (Prod r, DiffWrapper r) => DiffWrapper (UnLiftEnv r) where
   diffWrapper = unLiftEnv diffWrapper

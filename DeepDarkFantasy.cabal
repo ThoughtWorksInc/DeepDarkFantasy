@@ -43,6 +43,7 @@ library
                    DDF.Meta.DiffWrapper
                    DDF.Meta.Dual
                    DDF.Meta.FreeVector
+                   DDF.Meta.Util
                    DDF.Meta.VectorTF
                    DDF.Option
                    DDF.Ordering
@@ -59,7 +60,6 @@ library
                    DDF.UnHOAS
                    DDF.Unit
                    DDF.UnLiftEnv
-                   DDF.Util
                    DDF.Vector
                    DDF.VectorTF
                    DDF.WithDiff

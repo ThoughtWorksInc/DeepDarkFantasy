@@ -17,7 +17,7 @@
 
 > module DDF.Sam.Poly where
 > import Control.Monad (when)
-> import DDF.Util
+> import DDF.Meta.Util
 > import DDF.Lang
 > import DDF.Show
 > import DDF.Diff ()

@@ -13,6 +13,7 @@ import DDF.Int
 import qualified Data.Bimap as M
 import qualified Prelude as M
 import qualified Data.Map as M
+import DDF.Meta.Diff
 
 class (Int r, Map.Map r) => Bimap r where
   size :: r h (M.Bimap a b -> M.Int)

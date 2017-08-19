@@ -15,7 +15,7 @@ You should already read DDF.Poly before this.
 > import System.Random
 > import Control.Monad (when)
 > import Data.Constraint
-> import DDF.Util
+> import DDF.Meta.Util
 > import DDF.Lang
 > import DDF.Show
 > import DDF.Eval ()
