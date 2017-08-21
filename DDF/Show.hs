@@ -6,7 +6,8 @@ import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
-import qualified DDF.Meta.VectorTF as M.VTF
+
+type instance OrdC Show = NoOrdC
 
 data Name = Prefix M.String | Infix M.String
 
@@ -109,6 +110,7 @@ instance Bimap Show where
 instance Dual Show where
   dual = name "dual"
   runDual = name "runDual"
+  dualNextOrd = Sub Dict
 
 instance Unit Show where
   unit = name "unit"
@@ -140,9 +142,6 @@ instance IO Show where
   ioBind = name "bind"
   ioJoin = name "join"
 
-instance ObjOrd Show (M.VTF.VectorTF a b) where
-  cmp = name "cmp"
-
 instance VTF.VectorTF Show where
   zero = name "VTF.zero"
   basis = name "VTF.basis"
@@ -150,6 +149,7 @@ instance VTF.VectorTF Show where
   mult = name "VTF.mult"
   vtfMatch = name "VTF.vtfMatch"
   vtfCmp = name "vtfCompare"
+  vtfNextOrd = Sub Dict
 
 instance DiffWrapper Show where
   diffWrapper = name "diffWrapper"

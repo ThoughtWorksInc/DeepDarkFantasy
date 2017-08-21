@@ -19,6 +19,7 @@ import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 import qualified Prelude as M
 import DDF.Meta.Util
+import DDF.Vector
 
 class ProdCon con l r where
   prodCon :: (con l, con r) :- con (l, r)

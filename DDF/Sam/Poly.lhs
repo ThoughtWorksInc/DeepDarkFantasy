@@ -26,9 +26,9 @@
 > import qualified Prelude as M
 > import qualified DDF.Meta.Dual as M
 > import DDF.Eval
+> import DDF.Vector
 
-Importing files and opening language extension...
-So, our goal is to find x, where x * x + 2 * x + 3 = 27.
+Our goal is to find x, where x * x + 2 * x + 3 = 27.
 To do so, we try to minimize their difference squared (l2 norm).
 
 > poly :: forall repr h. Lang repr => repr h (M.Double -> M.Double)

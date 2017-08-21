@@ -7,6 +7,8 @@ import qualified Prelude as M
 import qualified DDF.Map as Map
 import qualified DDF.VectorTF as VTF
 
+type instance OrdC Size = NoOrdC
+
 newtype Size h x = Size {runSize :: M.Int}
 
 one = Size 1
@@ -62,6 +64,7 @@ instance Prod Size where
 instance Dual Size where
   dual = one
   runDual = one
+  dualNextOrd = Sub Dict
 
 instance Bimap Size where
   updateL = one
@@ -111,6 +114,7 @@ instance VTF.VectorTF Size where
   mult = one
   vtfMatch = one
   vtfCmp = one
+  vtfNextOrd = Sub Dict
 
 instance DiffWrapper Size where
   diffWrapper = one

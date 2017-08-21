@@ -31,6 +31,8 @@ newtype Eval h x = Eval {runEval :: h -> x}
 
 comb = Eval . M.const
 
+type instance OrdC Eval = NoOrdC
+
 instance DBI Eval where
   z = Eval M.fst
   s (Eval a) = Eval $ a . M.snd
@@ -96,6 +98,7 @@ instance Bimap Eval where
 instance Dual Eval where
   dual = comb M.Dual
   runDual = comb M.runDual
+  dualNextOrd = Sub Dict
 
 instance Unit Eval where
   unit = comb ()
@@ -155,6 +158,7 @@ instance VTF.VectorTF Eval where
           c (M.VTF.Plus _ _) _ = M.LT
           c _ (M.VTF.Plus _ _) = M.GT
           c (M.VTF.Mult ll lr) (M.VTF.Mult rl rr) = M.chainOrd (runEval cmp () ll rl) (f lr rr)
+  vtfNextOrd = Sub Dict
 
 instance DiffWrapper Eval where
   diffWrapper = comb M.DW.DiffWrapper

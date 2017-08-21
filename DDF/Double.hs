@@ -2,7 +2,9 @@
   NoImplicitPrelude,
   NoMonomorphismRestriction,
   FlexibleInstances,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  UndecidableInstances,
+  UndecidableSuperClasses
 #-}
 
 module DDF.Double (module DDF.Double, module DDF.Ordering) where
@@ -10,7 +12,7 @@ module DDF.Double (module DDF.Double, module DDF.Ordering) where
 import DDF.Ordering
 import qualified Prelude as M
 
-class Ordering r => Double r where
+class (OrdC r M.Double, Ordering r) => Double r where
   double :: M.Double -> r h M.Double
   doubleZero :: r h M.Double
   doubleZero = double 0
@@ -23,8 +25,9 @@ class Ordering r => Double r where
   doubleExp :: r h (M.Double -> M.Double)
   doubleCmp :: r h (M.Double -> M.Double -> M.Ordering)
 
-instance Double r => ObjOrd r M.Double where
+instance Double r => Ord r M.Double where
   cmp = doubleCmp
+  nextOrd _ = Dict
 
 doublePlus1 = app doublePlus
 doublePlus2 = app2 doublePlus

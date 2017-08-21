@@ -1,6 +1,11 @@
 {-# LANGUAGE
   NoImplicitPrelude,
-  NoMonomorphismRestriction
+  NoMonomorphismRestriction,
+  FlexibleInstances,
+  MultiParamTypeClasses,
+  TypeOperators,
+  TypeApplications,
+  ScopedTypeVariables
 #-}
 
 module DDF.Dual (module DDF.Dual, module DDF.Prod) where
@@ -17,9 +22,16 @@ class Prod r => Dual r where
   dualOrig = zro `com2` runDual
   dualDiff :: r h (M.Dual x y -> y)
   dualDiff = fst `com2` runDual
+  dualCmp :: r h (Cmp x -> Cmp (M.Dual x y))
+  dualCmp = cmpMap1 dualOrig
+  dualNextOrd :: Ord r x :- OrdC r (M.Dual x y)
 
 dual1 = app dual
 mkDual2 = app2 mkDual
 dualOrig1 = app dualOrig
 dualDiff1 = app dualDiff
 runDual1 = app1 runDual
+
+instance (Ord r x, Dual r) => Ord r (M.Dual x y) where
+  cmp = app dualCmp cmp
+  nextOrd _ = Dict \\ dualNextOrd @r @x @y

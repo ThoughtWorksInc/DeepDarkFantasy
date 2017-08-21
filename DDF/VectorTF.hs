@@ -1,11 +1,19 @@
 {-# LANGUAGE
   NoImplicitPrelude,
   NoMonomorphismRestriction,
-  FlexibleContexts
+  FlexibleContexts,
+  UndecidableSuperClasses,
+  UndecidableInstances,
+  FlexibleInstances,
+  MultiParamTypeClasses,
+  TypeOperators,
+  TypeApplications,
+  ScopedTypeVariables
 #-}
 
 module DDF.VectorTF where
 
+import DDF.ImportMeta
 import qualified DDF.Double as Double
 import qualified DDF.Meta.VectorTF as M
 import qualified Prelude as M
@@ -18,6 +26,11 @@ class Double.Double r => VectorTF r where
   mult :: r h (M.Double -> f -> M.VectorTF t f)
   vtfMatch :: r h (a -> (t -> a) -> (f -> f -> a) -> (M.Double -> f -> a) -> M.VectorTF t f -> a)
   vtfCmp :: r h (Ord.Cmp t -> Ord.Cmp f -> Ord.Cmp (M.VectorTF t f))
+  vtfNextOrd :: (Ord.Ord r t, Ord.Ord r f) :- (Ord.OrdC r (M.VectorTF t f))
+
+instance (Ord.Ord r t, Ord.Ord r f, VectorTF r) => Ord.Ord r (M.VectorTF t f) where
+  cmp = Double.app2 vtfCmp Ord.cmp Ord.cmp
+  nextOrd _ = Ord.Dict \\ vtfNextOrd @r @t @f
 
 vtfMatch4 = Double.app4 vtfMatch
 vtfMatch5 = Double.app5 vtfMatch

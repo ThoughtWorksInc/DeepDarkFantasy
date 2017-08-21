@@ -4,7 +4,8 @@
   FlexibleContexts,
   UndecidableSuperClasses,
   FlexibleInstances,
-  MultiParamTypeClasses
+  MultiParamTypeClasses,
+  UndecidableInstances
 #-}
 
 module DDF.Int (module DDF.Int, module DDF.Ordering) where
@@ -12,12 +13,13 @@ module DDF.Int (module DDF.Int, module DDF.Ordering) where
 import DDF.Ordering
 import qualified Prelude as M
 
-class Ordering r => Int r where
+class (OrdC r M.Int, Ordering r) => Int r where
   int :: M.Int -> r h M.Int
   pred :: r h (M.Int -> M.Int)
   intCmp :: r h (M.Int -> M.Int -> M.Ordering)
 
-instance Int r => ObjOrd r M.Int where
+instance Int r => Ord r M.Int where
   cmp = intCmp
+  nextOrd _ = Dict
 
 pred1 = app pred

@@ -10,19 +10,18 @@
 module DDF.Map (module DDF.Map, module DDF.Prod, module DDF.Option, module DDF.Ordering) where
 
 import DDF.Prod
-import qualified Data.Map as M
 import DDF.Option
 import DDF.Ordering
-import DDF.Meta.Diff
+import qualified Data.Map as M
 
 class (Prod r, Option r) => Map r where
   empty :: r h (M.Map k a)
   singleton :: r h (k -> a -> M.Map k a)
-  lookup :: MetaOrd k => r h (M.Map k a -> k -> Maybe a)
-  alter :: MetaOrd k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  lookup :: Ord r k => r h (M.Map k a -> k -> Maybe a)
+  alter :: Ord r k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   mapMap :: r h ((a -> b) -> M.Map k a -> M.Map k b)
-  unionWith :: MetaOrd k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-  insert :: MetaOrd k => r h (k -> a -> M.Map k a -> M.Map k a)
+  unionWith :: Ord r k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  insert :: Ord r k => r h (k -> a -> M.Map k a -> M.Map k a)
   insert = lam2 $ \k a -> alter2 (const1 (just1 a)) k
 
 lookup2 = app2 lookup

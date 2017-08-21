@@ -73,9 +73,9 @@ class (Ordering r, Char r, Double r, Float r, Bimap r, Dual r, Unit r, Sum r, In
   runState :: r h (State x y -> (x -> (y, x)))
   iterate :: r h ((x -> x) -> x -> [x])
   iterate = lam $ \f -> y1 $ lam2 $ \fi x -> cons2 x (app fi (app f x))
-  buildFreeVector :: MetaOrd b => r h (FreeVectorBuilder b -> M.FreeVector b M.Double)
+  buildFreeVector :: Ord r b => r h (FreeVectorBuilder b -> M.FreeVector b M.Double)
   buildFreeVector = lam $ \fb -> freeVector1 $ lam $ \b -> optionMatch3 (double 0) id (Map.lookup2 fb b)
-  toSVTFBuilder :: forall h b. MetaOrd b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
+  toSVTFBuilder :: forall h b. Ord r b => r h (M.VTF.VectorTF b M.Int -> SVTFBuilder b)
   toSVTFBuilder =
     lam $ \x -> state1 $ lam $ \m ->
       optionMatch3
@@ -228,14 +228,14 @@ instance Lang r => Vector r (M.FreeVector b M.Double) where
   mult = lam2 $ \d l -> freeVector1 $ lam $ \x -> d `mult2` runFreeVector2 l x
   divide = lam2 $ \l d -> freeVector1 $ lam $ \x -> runFreeVector2 l x `divide2` d
 
-instance (MetaOrd b, Lang r) => Monoid r (FreeVectorBuilder b) where
+instance (Ord r b, Lang r) => Monoid r (FreeVectorBuilder b) where
   zero = Map.empty
   plus = Map.unionWith1 plus
 
-instance (MetaOrd b, Lang r) => Group r (FreeVectorBuilder b) where
+instance (Ord r b, Lang r) => Group r (FreeVectorBuilder b) where
   invert = Map.mapMap1 invert
 
-instance (MetaOrd b, Lang r) => Vector r (FreeVectorBuilder b) where
+instance (Ord r b, Lang r) => Vector r (FreeVectorBuilder b) where
   type Basis (FreeVectorBuilder b) = b
   toFreeVector = buildFreeVector
   mult = Map.mapMap `com2` mult
@@ -245,22 +245,22 @@ instance Lang r => Monoid r (M.Fix (M.VTF.VectorTF b)) where
   zero = fix1 VTF.zero
   plus = lam2 $ \l r -> fix1 $ l `VTF.plus2` r
 
-instance (MetaOrd b, Lang r) => Group r (M.Fix (M.VTF.VectorTF b)) where
+instance (Ord r b, Lang r) => Group r (M.Fix (M.VTF.VectorTF b)) where
   invert = mult1 (double (-1))
 
-instance (MetaOrd b, Lang r) => Vector r (M.Fix (M.VTF.VectorTF b)) where
+instance (Ord r b, Lang r) => Vector r (M.Fix (M.VTF.VectorTF b)) where
   type Basis (M.Fix (M.VTF.VectorTF b)) = b
   toFreeVector = buildFreeVector `com2` vtfCata1 (VTF.vtfMatch4 zero (flip2 Map.singleton (double 1)) plus mult)
   mult = lam $ \d -> fix `com2` VTF.mult1 d
 
-instance (MetaOrd b, Lang r) => Monoid r (SVTFBuilder b) where
+instance (Ord r b, Lang r) => Monoid r (SVTFBuilder b) where
   zero = toSVTFBuilder1 VTF.zero
   plus = lam2 $ \l r -> l `bind2` (lam $ \lid -> r `bind2` (lam $ \rid -> toSVTFBuilder1 (VTF.plus2 lid rid)))
 
-instance (MetaOrd b, Lang r) => Group r (SVTFBuilder b) where
+instance (Ord r b, Lang r) => Group r (SVTFBuilder b) where
   invert = mult1 (double (-1))
 
-instance (MetaOrd b, Lang r) => Vector r (SVTFBuilder b) where
+instance (Ord r b, Lang r) => Vector r (SVTFBuilder b) where
   type Basis (SVTFBuilder b) = b
   toFreeVector =
     buildFreeVector `com2` flip2 id Map.empty `com2`
@@ -276,12 +276,7 @@ instance (MetaOrd b, Lang r) => Vector r (SVTFBuilder b) where
   mult = lam2 $ \d x -> x `bind2` (lam $ \xid -> toSVTFBuilder1 (VTF.mult2 d xid))
 
 type instance DiffType v (M.VTF.VectorTF t f) = M.VTF.VectorTF (DiffType v t) (DiffType v f)
-instance (MetaOrd t, MetaOrd f) => MetaOrd (M.VTF.VectorTF t f) where
-  diffOrd (_ :: Proxy (v, _)) = withDict (diffOrd $ Proxy @(v, t)) $ withDict (diffOrd $ Proxy @(v, f)) Dict
-
 type instance DiffType v M.Int = M.Int
-instance MetaOrd M.Int where
-  diffOrd _ = Dict
 
 instance Double r => Monoid r M.Double where
   zero = doubleZero
