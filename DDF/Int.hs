@@ -20,6 +20,6 @@ class (OrdC r M.Int, Ordering r) => Int r where
 
 instance Int r => Ord r M.Int where
   cmp = intCmp
-  nextOrd _ = Dict
+  getOrdC _ = Dict
 
 pred1 = app pred

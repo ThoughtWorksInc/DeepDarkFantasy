@@ -54,7 +54,7 @@ class (Ordering r, M.Ord x) => Ord r x where
   cmp :: r h (x -> x -> M.Ordering)
   eq :: r h (x -> x -> M.Bool)
   eq = lam2 $ \l r -> isEQ1 $ cmp2 l r
-  nextOrd :: Proxy r -> Dict (OrdC r x)
+  getOrdC :: Proxy r -> Dict (OrdC r x)
 
 eq1 = app1 eq
 eq2 = app2 eq

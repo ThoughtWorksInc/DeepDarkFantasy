@@ -24,7 +24,7 @@ class Prod r => Dual r where
   dualDiff = fst `com2` runDual
   dualCmp :: r h (Cmp x -> Cmp (M.Dual x y))
   dualCmp = cmpMap1 dualOrig
-  dualNextOrd :: Ord r x :- OrdC r (M.Dual x y)
+  dualGetOrdC :: Ord r x :- OrdC r (M.Dual x y)
 
 dual1 = app dual
 mkDual2 = app2 mkDual
@@ -34,4 +34,4 @@ runDual1 = app1 runDual
 
 instance (Ord r x, Dual r) => Ord r (M.Dual x y) where
   cmp = app dualCmp cmp
-  nextOrd _ = Dict \\ dualNextOrd @r @x @y
+  getOrdC _ = Dict \\ dualGetOrdC @r @x @y

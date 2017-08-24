@@ -27,7 +27,7 @@ class (OrdC r M.Double, Ordering r) => Double r where
 
 instance Double r => Ord r M.Double where
   cmp = doubleCmp
-  nextOrd _ = Dict
+  getOrdC _ = Dict
 
 doublePlus1 = app doublePlus
 doublePlus2 = app2 doublePlus
