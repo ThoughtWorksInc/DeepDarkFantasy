@@ -230,7 +230,7 @@ instance Lang r => Vector r (M.FreeVector b M.Double) where
 
 instance (Ord r b, Lang r) => Monoid r (FreeVectorBuilder b) where
   zero = Map.empty
-  plus = Map.unionWith1 plus
+  plus = Map.unionWithKey1 (const1 plus)
 
 instance (Ord r b, Lang r) => Group r (FreeVectorBuilder b) where
   invert = Map.mapMap1 invert

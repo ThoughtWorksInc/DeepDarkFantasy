@@ -222,11 +222,10 @@ type instance SubLC c Map.Map = (SubL c Prod, SubL c Option)
 instance SubL c Map.Map => Map.Map (Term c) where
   empty = mkT @Map.Map Map.empty
   mapMap = mkT @Map.Map Map.mapMap
-  singleton = mkT @Map.Map Map.singleton
   alter' :: forall h k a. OrdWC (Term c) k => Term c h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   alter' = mkT1 @Map.Map @k Map.alter
-  unionWith' :: forall h k a. OrdWC (Term c) k => Term c h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-  unionWith' = mkT1 @Map.Map @k Map.unionWith
+  unionWithKey' :: forall h k a. OrdWC (Term c) k => Term c h ((k -> a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWithKey' = mkT1 @Map.Map @k Map.unionWithKey
   lookup' :: forall h k a. OrdWC (Term c) k => Term c h (M.Map k a -> k -> Maybe a)
   lookup' = mkT1 @Map.Map @k Map.lookup
 

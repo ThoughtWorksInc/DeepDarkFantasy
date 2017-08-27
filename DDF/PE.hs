@@ -22,10 +22,8 @@ module DDF.PE where
 import DDF.Lang
 import qualified Prelude as M
 import qualified DDF.Meta.Dual as M
---import qualified DDF.Map as Map
---import qualified Data.Map as M
 
-type instance OrdC (P repr) = NoOrdC
+type instance OrdC (P repr) = Ord repr
 
 data P repr h a where
   Open   :: (forall hout. EnvT repr h hout -> P repr hout a) -> P repr h a
@@ -351,7 +349,8 @@ instance Dual repr => Dual (P repr) where
           (mkProd2 (s l) (s r))
       f (Open x) = Open $ f . x
       f (Unk x) = Unk $ runDual1 x
-  dualGetOrdC = Sub Dict
+  dualGetOrdC :: forall x y. Ord (P repr) x :- OrdC (P repr) (M.Dual x y)
+  dualGetOrdC = Sub (withDict (getOrdC @(P repr) @x Proxy) Dict)
 
 type instance K r h () = ()
 instance Unit r => Unit (P r) where
@@ -378,25 +377,6 @@ instance IO r => IO (P r) where
     f (Known l _ _ _ _) (Known r _ _ _ _) = pure1 $ app l r
     f l r | isOpen l || isOpen r = Open $ \h -> f (app_open l h) (app_open r h)
     f l r = Unk $ ap2 (dynamic l) (dynamic r)
-
-data MapPE (repr :: * -> * -> *) h k a :: * where
-  EmptyMap :: MapPE repr h k a
-  SingletonMap :: P repr h k -> P repr h a -> MapPE repr h k a
-
-{-type instance K repr h (M.Map k a) = MapPE repr h k a
-instance Map.Map repr => Map.Map (P repr) where
-  empty = static (EmptyMap, Map.empty)
-  singleton = abs $ abs $ f (s z) z where
-    f :: P repr h k -> P repr h a -> P repr h (M.Map k a)
-    f k a =
-      know (SingletonMap k a)
-        (Map.singleton2 (dynamic k) (dynamic a))
-        (\h -> f (app_open k h) (app_open a h))
-        (f (s k) (s a))
-  lookup = abs $ abs $ f (s z) z where
-    f :: P repr h (M.Map k a) -> P repr h k -> P repr h (Maybe a)
-    f (Known EmptyMap _ _ _ _) _ = nothing
-    f (Known (SingletonMap k a) _ _ _ _) r = ite3 (just1 a) nothing _-}
 
 pe :: DBI repr => P repr () a -> repr () a
 pe = dynamic

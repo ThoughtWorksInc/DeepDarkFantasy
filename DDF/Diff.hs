@@ -106,11 +106,11 @@ instance Option r => Option (Diff r v) where
 type instance DiffType v (M.Map k val) = M.Map (DiffType v k) (DiffType v val)
 instance Map.Map r => Map.Map (Diff r v) where
   empty = Diff Map.empty
-  singleton = Diff Map.singleton
+  singleton' = Diff Map.singleton
   mapMap = Diff Map.mapMap
   lookup' = Diff Map.lookup
   alter' = Diff Map.alter
-  unionWith' = Diff Map.unionWith
+  unionWithKey' = Diff Map.unionWithKey
 
 type instance DiffType v (M.Bimap a b) = M.Bimap (DiffType v a) (DiffType v b)
 instance Bimap r => Bimap (Diff r v) where

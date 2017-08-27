@@ -54,7 +54,7 @@ instance Map.Map Size where
   empty = one
   singleton = one
   lookup' = one
-  unionWith' = one
+  unionWithKey' = one
 
 instance Prod Size where
   mkProd = one

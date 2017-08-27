@@ -81,7 +81,7 @@ instance Map.Map Eval where
   lookup' = flip1 $ comb M.Map.lookup
   alter' = comb M.Map.alter
   mapMap = comb M.fmap
-  unionWith' = comb M.Map.unionWith
+  unionWithKey' = comb M.Map.unionWithKey
 
 instance Bimap Eval where
   size = comb M.Bimap.size

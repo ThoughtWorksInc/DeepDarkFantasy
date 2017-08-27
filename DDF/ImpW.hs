@@ -116,11 +116,11 @@ instance (Prod r, Option r) => Option (ImpW r) where
 
 instance Map.Map r => Map.Map (ImpW r) where
   empty = NoImpW Map.empty
-  singleton = NoImpW Map.singleton
+  singleton' = NoImpW Map.singleton
   lookup' = NoImpW Map.lookup
   alter' = NoImpW Map.alter
   mapMap = NoImpW Map.mapMap
-  unionWith' = NoImpW Map.unionWith
+  unionWithKey' = NoImpW Map.unionWithKey
 
 instance Bimap r => Bimap (ImpW r) where
   size = NoImpW size
