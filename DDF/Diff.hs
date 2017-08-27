@@ -61,8 +61,8 @@ type instance DiffType v (M.Dual l r) = M.Dual (DiffType v l) (DiffType v r)
 instance Dual r => Dual (Diff r v) where
   dual = Diff $ dual
   runDual = Diff $ runDual
-  dualNextOrd :: forall x y. Ord (Diff r v) x :- OrdC (Diff r v) (M.Dual x y)
-  dualNextOrd = Sub (withDict (nextOrd @(Diff r v) @x Proxy) Dict)
+  dualGetOrdC :: forall x y. Ord (Diff r v) x :- OrdC (Diff r v) (M.Dual x y)
+  dualGetOrdC = Sub (withDict (getOrdC @(Diff r v) @x Proxy) Dict)
 
 type instance DiffType v M.Double = M.Dual M.Double v
 instance (Vector r v, Lang r) => Double (Diff r v) where
@@ -107,31 +107,23 @@ type instance DiffType v (M.Map k val) = M.Map (DiffType v k) (DiffType v val)
 instance Map.Map r => Map.Map (Diff r v) where
   empty = Diff Map.empty
   singleton = Diff Map.singleton
-  lookup :: forall h k a. Ord (Diff r v) k => Diff r v h (M.Map k a -> k -> Maybe a)
-  lookup = withDict (nextOrd @(Diff r v) @k Proxy) (Diff Map.lookup)
-  alter :: forall h k a. Ord (Diff r v) k => Diff r v h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = withDict (nextOrd @(Diff r v) @k Proxy) (Diff Map.alter)
   mapMap = Diff Map.mapMap
-  unionWith :: forall h k a. Ord (Diff r v) k => Diff r v h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-  unionWith = withDict (nextOrd @(Diff r v) @k Proxy) (Diff Map.unionWith)
+  lookup' = Diff Map.lookup
+  alter' = Diff Map.alter
+  unionWith' = Diff Map.unionWith
 
 type instance DiffType v (M.Bimap a b) = M.Bimap (DiffType v a) (DiffType v b)
 instance Bimap r => Bimap (Diff r v) where
   size = Diff size
   toMapL = Diff toMapL
   toMapR = Diff toMapR
-  lookupL :: forall h a b. (Ord (Diff r v) a, Ord (Diff r v) b) => Diff r v h (M.Bimap a b -> a -> Maybe b)
-  lookupL = withDict (nextOrd @(Diff r v) @a Proxy) (withDict (nextOrd @(Diff r v) @b Proxy) (Diff lookupL))
-  lookupR :: forall h a b. (Ord (Diff r v) a, Ord (Diff r v) b) => Diff r v h (M.Bimap a b -> b -> Maybe a)
-  lookupR = withDict (nextOrd @(Diff r v) @a Proxy) (withDict (nextOrd @(Diff r v) @b Proxy) (Diff lookupR))
   empty = Diff empty
   singleton = Diff singleton
-  insert :: forall h a b. (Ord (Diff r v) a, Ord (Diff r v) b) => Diff r v h ((a, b) -> M.Bimap a b -> M.Bimap a b)
-  insert = withDict (nextOrd @(Diff r v) @a Proxy) (withDict (nextOrd @(Diff r v) @b Proxy) (Diff insert))
-  updateL :: forall h a b. (Ord (Diff r v) a, Ord (Diff r v) b) => Diff r v h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
-  updateL = withDict (nextOrd @(Diff r v) @a Proxy) (withDict (nextOrd @(Diff r v) @b Proxy) (Diff updateL))
-  updateR :: forall h a b. (Ord (Diff r v) a, Ord (Diff r v) b) => Diff r v h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
-  updateR = withDict (nextOrd @(Diff r v) @a Proxy) (withDict (nextOrd @(Diff r v) @b Proxy) (Diff updateR))
+  lookupL' = Diff lookupL
+  lookupR' = Diff lookupR
+  insert' = Diff insert
+  updateL' = Diff updateL
+  updateR' = Diff updateR
 
 type instance DiffType v () = ()
 instance Unit r => Unit (Diff r v) where
@@ -173,8 +165,8 @@ instance (Vector r v, Lang r) => VTF.VectorTF (Diff r v) where
   mult = Diff $ VTF.mult `com2` dualOrig
   vtfMatch = Diff $ lam4 $ \ze b p m -> VTF.vtfMatch4 ze b p $ lam $ \x -> app m (mkDual2 x zero)
   vtfCmp = Diff VTF.vtfCmp
-  vtfNextOrd :: forall t f. (Ord (Diff r v) t, Ord (Diff r v) f) :- OrdC (Diff r v) (M.VTF.VectorTF t f)
-  vtfNextOrd = Sub (withDict (nextOrd @(Diff r v) @t Proxy) (withDict (nextOrd @(Diff r v) @f Proxy) Dict))
+  vtfGetOrdC :: forall t f. (Ord (Diff r v) t, Ord (Diff r v) f) :- OrdC (Diff r v) (M.VTF.VectorTF t f)
+  vtfGetOrdC = Sub (withDict (getOrdC @(Diff r v) @t Proxy) (withDict (getOrdC @(Diff r v) @f Proxy) Dict))
 
 type instance DiffType v (M.DW.DiffWrapper a x) = M.DW.DiffWrapper (v ': a) x
 instance DiffWrapper r => DiffWrapper (Diff r v) where

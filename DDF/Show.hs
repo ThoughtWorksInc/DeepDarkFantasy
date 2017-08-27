@@ -90,27 +90,27 @@ instance Option Show where
 instance Map.Map Show where
   empty = name "Map.empty"
   singleton = name "Map.singleton"
-  lookup = name "Map.lookup"
-  alter = name "Map.alter"
+  lookup' = name "Map.lookup"
+  alter' = name "Map.alter"
   mapMap = name "Map.mapMap"
-  unionWith = name "Map.unionWith"
+  unionWith' = name "Map.unionWith"
 
 instance Bimap Show where
   size = name "size"
-  lookupL = name "lookupL"
-  lookupR = name "lookupR"
+  lookupL' = name "lookupL"
+  lookupR' = name "lookupR"
   toMapL = name "toMapL"
   toMapR = name "toMapR"
-  updateL = name "updateL"
-  updateR = name "updateR"
+  updateL' = name "updateL"
+  updateR' = name "updateR"
   empty = name "empty"
   singleton = name "singleton"
-  insert = name "insert"
+  insert' = name "insert"
 
 instance Dual Show where
   dual = name "dual"
   runDual = name "runDual"
-  dualNextOrd = Sub Dict
+  dualGetOrdC = Sub Dict
 
 instance Unit Show where
   unit = name "unit"
@@ -149,7 +149,7 @@ instance VTF.VectorTF Show where
   mult = name "VTF.mult"
   vtfMatch = name "VTF.vtfMatch"
   vtfCmp = name "vtfCompare"
-  vtfNextOrd = Sub Dict
+  vtfGetOrdC = Sub Dict
 
 instance DiffWrapper Show where
   diffWrapper = name "diffWrapper"

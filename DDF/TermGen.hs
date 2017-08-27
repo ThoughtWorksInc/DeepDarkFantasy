@@ -66,6 +66,24 @@ mkT f = Term k
     k :: forall repr. l repr => repr h s
     k = f @repr \\ sub @l @r @repr
 
+mkT1 :: forall r a l h s. (SubL l r, OrdWC (Term l) a) =>
+  (forall (repr :: * -> * -> *). (l repr, r repr, Ord repr a) => repr h s) ->
+  Term l h s
+
+mkT1 f = Term k
+  where
+    k :: forall repr. l repr => repr h s
+    k = withDict (termOrdDict @l @a @repr) (f @repr \\ sub @l @r @repr)
+
+mkT2 :: forall r a b l h s. (SubL l r, OrdWC (Term l) a, OrdWC (Term l) b) =>
+  (forall (repr :: * -> * -> *). (l repr, r repr, Ord repr a, Ord repr b) => repr h s) ->
+  Term l h s
+
+mkT2 f = Term k
+  where
+    k :: forall repr. l repr => repr h s
+    k = withDict (termOrdDict @l @a @repr) $ withDict (termOrdDict @l @b @repr) (f @repr \\ sub @l @r @repr)
+
 type instance SubLC c DBI = ()
 
 instance SubL c DBI => DBI (Term c) where
@@ -111,7 +129,7 @@ instance SubL c Char => Char (Term c) where
   char x = mkT @Char (char x)
 
 termOrd :: forall c a r. (Ord (Term c) a, c r) => Dict (Ord r a)
-termOrd = withDict (nextOrd @(Term c) @a Proxy) (termOrdDict @c @a @r)
+termOrd = withDict (getOrdC @(Term c) @a Proxy) (termOrdDict @c @a @r)
 
 termOrd2 :: forall c a b r. (Ord (Term c) a, Ord (Term c) b, c r) => Dict (Ord r a, Ord r b)
 termOrd2 = withDict (termOrd @c @a @r) $ withDict (termOrd @c @b @r) Dict
@@ -123,26 +141,16 @@ instance SubL c Bimap => Bimap (Term c) where
   toMapL = mkT @Bimap toMapL
   toMapR = mkT @Bimap toMapR
   singleton = mkT @Bimap singleton
-  lookupL :: forall h a b. (Ord (Term c) a, Ord (Term c) b) => Term c h (M.Bimap a b -> a -> Maybe b)
-  lookupL = Term k where
-    k :: forall r. c r => r h (M.Bimap a b -> a -> Maybe b)
-    k = withDict (termOrd2 @c @a @b @r) (lookupL \\ sub @c @Bimap @r)
-  lookupR :: forall h a b. (Ord (Term c) a, Ord (Term c) b) => Term c h (M.Bimap a b -> b -> Maybe a)
-  lookupR = Term k where
-    k :: forall r. c r => r h (M.Bimap a b -> b -> Maybe a)
-    k = withDict (termOrd2 @c @a @b @r) (lookupR \\ sub @c @Bimap @r)
-  insert :: forall h a b. (Ord (Term c) a, Ord (Term c) b) => Term c h ((a, b) -> M.Bimap a b -> M.Bimap a b)
-  insert = Term k where
-    k :: forall r. c r => r h ((a, b) -> M.Bimap a b -> M.Bimap a b)
-    k = withDict (termOrd2 @c @a @b @r) (insert \\ sub @c @Bimap @r)
-  updateL :: forall h a b. (Ord (Term c) a, Ord (Term c) b) => Term c h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
-  updateL = Term k where
-    k :: forall r. c r => r h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
-    k = withDict (termOrd2 @c @a @b @r) (updateL \\ sub @c @Bimap @r)
-  updateR :: forall h a b. (Ord (Term c) a, Ord (Term c) b) => Term c h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
-  updateR = Term k where
-    k :: forall r. c r => r h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
-    k = withDict (termOrd2 @c @a @b @r) (updateR \\ sub @c @Bimap @r)
+  lookupL' :: forall h a b. (OrdWC (Term c) a, OrdWC (Term c) b) => Term c h (M.Bimap a b -> a -> Maybe b)
+  lookupL' = mkT2 @Bimap @a @b lookupL
+  lookupR' :: forall h a b. (OrdWC (Term c) a, OrdWC (Term c) b) => Term c h (M.Bimap a b -> b -> Maybe a)
+  lookupR' = mkT2 @Bimap @a @b lookupR
+  updateL' :: forall h a b. (OrdWC (Term c) a, OrdWC (Term c) b) => Term c h ((b -> Maybe b) -> a -> M.Bimap a b -> M.Bimap a b)
+  updateL' = mkT2 @Bimap @a @b updateL
+  updateR' :: forall h a b. (OrdWC (Term c) a, OrdWC (Term c) b) => Term c h ((a -> Maybe a) -> b -> M.Bimap a b -> M.Bimap a b)
+  updateR' = mkT2 @Bimap @a @b updateR
+  insert' :: forall h a b. (OrdWC (Term c) a, OrdWC (Term c) b) => Term c h ((a, b) -> M.Bimap a b -> M.Bimap a b)
+  insert' = mkT2 @Bimap @a @b insert
 
 type instance SubLC c Float = SubL c DBI
 instance SubL c Float => Float (Term c) where
@@ -168,8 +176,8 @@ type instance SubLC c Dual = SubL c Prod
 instance SubL c Dual => Dual (Term c) where
   dual = mkT @Dual dual
   runDual = mkT @Dual runDual
-  dualNextOrd :: forall x y. Ord (Term c) x :- TermOrd c (M.Dual x y)
-  dualNextOrd = Sub (withDict (nextOrd @(Term c) @x Proxy) Dict)
+  dualGetOrdC :: forall x y. Ord (Term c) x :- TermOrd c (M.Dual x y)
+  dualGetOrdC = Sub (withDict (getOrdC @(Term c) @x Proxy) Dict)
 
 type instance SubLC c Unit = SubL c DBI
 
@@ -215,18 +223,12 @@ instance SubL c Map.Map => Map.Map (Term c) where
   empty = mkT @Map.Map Map.empty
   mapMap = mkT @Map.Map Map.mapMap
   singleton = mkT @Map.Map Map.singleton
-  lookup :: forall h k a. Ord (Term c) k => Term c h (M.Map k a -> k -> Maybe a)
-  lookup = Term k where
-    k :: forall r. c r => r h (M.Map k a -> k -> Maybe a)
-    k = withDict (termOrd @c @k @r) Map.lookup \\ sub @c @Map.Map @r
-  alter :: forall h k a. Ord (Term c) k => Term c h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = Term k where
-    k :: forall r. c r => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-    k = withDict (termOrd @c @k @r) Map.alter \\ sub @c @Map.Map @r
-  unionWith :: forall h k a. Ord (Term c) k => Term c h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-  unionWith = Term k where
-    k :: forall r. c r => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-    k = withDict (termOrd @c @k @r) Map.unionWith \\ sub @c @Map.Map @r
+  alter' :: forall h k a. OrdWC (Term c) k => Term c h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter' = mkT1 @Map.Map @k Map.alter
+  unionWith' :: forall h k a. OrdWC (Term c) k => Term c h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWith' = mkT1 @Map.Map @k Map.unionWith
+  lookup' :: forall h k a. OrdWC (Term c) k => Term c h (M.Map k a -> k -> Maybe a)
+  lookup' = mkT1 @Map.Map @k Map.lookup
 
 type instance SubLC c VTF.VectorTF = (SubL c Ordering, SubL c Double)
 instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
@@ -236,9 +238,9 @@ instance SubL c VTF.VectorTF => VTF.VectorTF (Term c) where
   basis = mkT @VTF.VectorTF VTF.basis
   vtfMatch = mkT @VTF.VectorTF VTF.vtfMatch
   vtfCmp = mkT @VTF.VectorTF VTF.vtfCmp
-  vtfNextOrd :: forall t f. (Ord (Term c) t, Ord (Term c) f) :- TermOrd c (M.VTF.VectorTF t f)
-  vtfNextOrd = Sub (withDict (nextOrd @(Term c) @t Proxy) $ withDict (nextOrd @(Term c) @f Proxy) Dict)
-
+  vtfGetOrdC :: forall t f. (Ord (Term c) t, Ord (Term c) f) :- TermOrd c (M.VTF.VectorTF t f)
+  vtfGetOrdC = Sub (withDict (getOrdC @(Term c) @t Proxy) $ withDict (getOrdC @(Term c) @f Proxy) Dict)
+  
 type instance SubLC c Option = SubL c DBI
 instance SubL c Option => Option (Term c) where
   just = mkT @Option just

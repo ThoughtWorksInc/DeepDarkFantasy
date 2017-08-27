@@ -351,8 +351,7 @@ instance Dual repr => Dual (P repr) where
           (mkProd2 (s l) (s r))
       f (Open x) = Open $ f . x
       f (Unk x) = Unk $ runDual1 x
-  dualNextOrd :: Ord (P repr) x :- NoOrdC (M.Dual x y)
-  dualNextOrd = Sub Dict
+  dualGetOrdC = Sub Dict
 
 type instance K r h () = ()
 instance Unit r => Unit (P r) where

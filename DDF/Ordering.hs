@@ -56,6 +56,9 @@ class (Ordering r, M.Ord x) => Ord r x where
   eq = lam2 $ \l r -> isEQ1 $ cmp2 l r
   getOrdC :: Proxy r -> Dict (OrdC r x)
 
+class (Ord r x, OrdC r x) => OrdWC r x
+instance (Ord r x, OrdC r x) => OrdWC r x
+
 eq1 = app1 eq
 eq2 = app2 eq
 

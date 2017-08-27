@@ -78,27 +78,27 @@ instance Option Eval where
 instance Map.Map Eval where
   empty = comb M.Map.empty
   singleton = comb M.Map.singleton
-  lookup = flip1 $ comb M.Map.lookup
-  alter = comb M.Map.alter
+  lookup' = flip1 $ comb M.Map.lookup
+  alter' = comb M.Map.alter
   mapMap = comb M.fmap
-  unionWith = comb M.Map.unionWith
+  unionWith' = comb M.Map.unionWith
 
 instance Bimap Eval where
   size = comb M.Bimap.size
-  lookupL = flip1 $ comb M.Bimap.lookup
-  lookupR = flip1 $ comb M.Bimap.lookupR
+  lookupL' = flip1 $ comb M.Bimap.lookup
+  lookupR' = flip1 $ comb M.Bimap.lookupR
   toMapL = comb M.Bimap.toMap
   toMapR = comb M.Bimap.toMapR
   empty = comb M.Bimap.empty
   singleton = comb $ \(a, b) -> M.Bimap.singleton a b
-  insert = comb $ \(a, b) -> M.Bimap.insert a b
-  updateL = comb M.Bimap.update
-  updateR = comb M.Bimap.updateR
+  insert' = comb $ \(a, b) -> M.Bimap.insert a b
+  updateL' = comb M.Bimap.update
+  updateR' = comb M.Bimap.updateR
 
 instance Dual Eval where
   dual = comb M.Dual
   runDual = comb M.runDual
-  dualNextOrd = Sub Dict
+  dualGetOrdC = Sub Dict
 
 instance Unit Eval where
   unit = comb ()
@@ -158,7 +158,7 @@ instance VTF.VectorTF Eval where
           c (M.VTF.Plus _ _) _ = M.LT
           c _ (M.VTF.Plus _ _) = M.GT
           c (M.VTF.Mult ll lr) (M.VTF.Mult rl rr) = M.chainOrd (runEval cmp () ll rl) (f lr rr)
-  vtfNextOrd = Sub Dict
+  vtfGetOrdC = Sub Dict
 
 instance DiffWrapper Eval where
   diffWrapper = comb M.DW.DiffWrapper

@@ -19,14 +19,14 @@ class (Prod r, Option r) => Map r where
   singleton :: r h (k -> a -> M.Map k a)
   lookup :: forall h k a. Ord r k => r h (M.Map k a -> k -> Maybe a)
   lookup = withDict (getOrdC @r @k Proxy) lookup'
-  lookup' :: (Ord r k, OrdC r k) => r h (M.Map k a -> k -> Maybe a)
-  alter :: Ord r k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
-  alter = alter'
-  alter' :: (Ord r k, OrdC r k) => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  lookup' :: OrdWC r k => r h (M.Map k a -> k -> Maybe a)
+  alter :: forall h k a. Ord r k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
+  alter = withDict (getOrdC @r @k Proxy) alter'
+  alter' :: OrdWC r k => r h ((Maybe a -> Maybe a) -> k -> M.Map k a -> M.Map k a)
   mapMap :: r h ((a -> b) -> M.Map k a -> M.Map k b)
-  unionWith :: Ord r k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
-  unionWith = unionWith'
-  unionWith' :: (Ord r k, OrdC r k) => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWith :: forall h k a. Ord r k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
+  unionWith = withDict (getOrdC @r @k Proxy) unionWith'
+  unionWith' :: OrdWC r k => r h ((a -> a -> a) -> M.Map k a -> M.Map k a -> M.Map k a)
   insert :: Ord r k => r h (k -> a -> M.Map k a -> M.Map k a)
   insert = lam2 $ \k a -> alter2 (const1 (just1 a)) k
 

@@ -50,11 +50,11 @@ instance Float Size where
 
 instance Map.Map Size where
   mapMap = one
-  alter = one
+  alter' = one
   empty = one
   singleton = one
-  lookup = one
-  unionWith = one
+  lookup' = one
+  unionWith' = one
 
 instance Prod Size where
   mkProd = one
@@ -64,16 +64,16 @@ instance Prod Size where
 instance Dual Size where
   dual = one
   runDual = one
-  dualNextOrd = Sub Dict
+  dualGetOrdC = Sub Dict
 
 instance Bimap Size where
-  updateL = one
-  updateR = one
+  updateL' = one
+  updateR' = one
   singleton = one
   empty = one
-  insert = one
-  lookupL = one
-  lookupR = one
+  insert' = one
+  lookupL' = one
+  lookupR' = one
   size = one
   toMapL = one
   toMapR = one
@@ -114,7 +114,7 @@ instance VTF.VectorTF Size where
   mult = one
   vtfMatch = one
   vtfCmp = one
-  vtfNextOrd = Sub Dict
+  vtfGetOrdC = Sub Dict
 
 instance DiffWrapper Size where
   diffWrapper = one

@@ -20,6 +20,9 @@ import qualified DDF.VectorTF as VTF
 import qualified Prelude as M
 import DDF.Meta.Util
 import DDF.Vector
+import DDF.Meta.VectorTF as M.VTF
+
+type instance OrdC (ImpW r) = Ord r
 
 class ProdCon con l r where
   prodCon :: (con l, con r) :- con (l, r)
@@ -114,26 +117,27 @@ instance (Prod r, Option r) => Option (ImpW r) where
 instance Map.Map r => Map.Map (ImpW r) where
   empty = NoImpW Map.empty
   singleton = NoImpW Map.singleton
-  lookup = NoImpW Map.lookup
-  alter = NoImpW Map.alter
+  lookup' = NoImpW Map.lookup
+  alter' = NoImpW Map.alter
   mapMap = NoImpW Map.mapMap
-  unionWith = NoImpW Map.unionWith
+  unionWith' = NoImpW Map.unionWith
 
 instance Bimap r => Bimap (ImpW r) where
   size = NoImpW size
-  lookupL = NoImpW lookupL
-  lookupR = NoImpW lookupR
+  lookupL' = NoImpW lookupL
+  lookupR' = NoImpW lookupR
   singleton = NoImpW singleton
   empty = NoImpW empty
-  insert = NoImpW insert
+  insert' = NoImpW insert
   toMapL = NoImpW toMapL
   toMapR = NoImpW toMapR
-  updateL = NoImpW updateL
-  updateR = NoImpW updateR
+  updateL' = NoImpW updateL
+  updateR' = NoImpW updateR
 
 instance Dual r => Dual (ImpW r) where
   dual = NoImpW dual
   runDual = NoImpW runDual
+  dualGetOrdC = Sub (getOrdC @(ImpW r) Proxy)
 
 instance (Prod r, Unit r) => Unit (ImpW r) where
   unit = NoImpW unit
@@ -171,6 +175,8 @@ instance (Prod r, VTF.VectorTF r) => VTF.VectorTF (ImpW r) where
   mult = NoImpW VTF.mult
   vtfMatch = NoImpW VTF.vtfMatch
   vtfCmp = NoImpW VTF.vtfCmp
+  vtfGetOrdC :: forall t f. (Ord (ImpW r) t, Ord (ImpW r) f) :- Ord r (M.VTF.VectorTF t f)
+  vtfGetOrdC = Sub (withDict (getOrdC @(ImpW r) @t Proxy) $ withDict (getOrdC @(ImpW r) @f Proxy) Dict)
 
 instance (Prod r, DiffWrapper r) => DiffWrapper (ImpW r) where
   diffWrapper = NoImpW diffWrapper
