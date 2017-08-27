@@ -2,7 +2,9 @@
   NoImplicitPrelude,
   NoMonomorphismRestriction,
   RankNTypes,
-  FlexibleInstances
+  FlexibleInstances,
+  AllowAmbiguousTypes,
+  TypeApplications
 #-}
 
 module Main where
@@ -38,13 +40,13 @@ optimized x y = quickCheck (runSize x > runSize y)
 
 main :: M.IO ()
 main = do
-  test (doublePlus2 (double 1.0) (double 1.0)) (>)
-  test (doublePlus1 (double 1.0)) n
-  test (abs (doublePlus2 z (double 1.0))) n
-  test (doublePlus1 (double 1.0)) n
-  test (abs (doublePlus2 z (double 0.0))) (>)
-  test (doubleExp1 (double 1.0)) (>)
-  test (abs (doubleExp1 z)) n
-  test (abs $ abs $ (app2 (s doublePlus) z (s z))) n
+  test @M.Double (doublePlus2 (double 1.0) (double 1.0)) (>)
+  test @(M.Double -> M.Double) (doublePlus1 (double 1.0)) n
+  test @(M.Double -> M.Double) (abs (doublePlus2 z (double 1.0))) n
+  test @(M.Double -> M.Double) (doublePlus1 (double 0.0)) (>)
+  test @(M.Double -> M.Double) (abs (doublePlus2 z (double 0.0))) (>)
+  test @M.Double (doubleExp1 (double 1.0)) (>)
+  test @(M.Double -> M.Double) (abs (doubleExp1 z)) n
+  test @(M.Double -> M.Double -> M.Double) (abs $ abs $ (app2 (s doublePlus) z (s z))) n
   where
     n _ _ = M.True
