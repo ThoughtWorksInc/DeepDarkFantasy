@@ -1,3 +1,5 @@
+#DEPRECATED.
+
 # DeepDarkFantasy
 
 [![Hackage](https://img.shields.io/hackage/v/DeepDarkFantasy.svg)](http://hackage.haskell.org/package/DeepDarkFantasy)
